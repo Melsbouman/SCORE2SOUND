@@ -1,0 +1,2 @@
+# Shellscripts moeten LF houden, anders werken ze niet in Bash.
+*.sh text eol=lf

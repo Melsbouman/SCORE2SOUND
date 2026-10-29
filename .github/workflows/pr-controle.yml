@@ -1,0 +1,29 @@
+name: PR-controle
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  controle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Regels uit de werkwijze
+        # De grootte-grens geldt alleen voor taken van agents; een eigen PR mag groter zijn.
+        run: node hermes/regels-controle.mjs --basis "origin/${{ github.base_ref }}" --maxregels ${{ startsWith(github.head_ref, 'agent/') && '150' || '100000' }}
+      # Zodra de stack van SCORE2SOUND vastligt: zet hier de installatie van de dependencies
+      # (bijvoorbeeld pip install -r requirements.txt). npm ci doet hermes/tests.sh zelf.
+      - name: Tests
+        run: bash hermes/tests.sh
