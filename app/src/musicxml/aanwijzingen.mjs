@@ -98,14 +98,16 @@ export function leesNotaties(noteKnoop) {
     versiering: null,
     overbinding: { begin: false, eind: false },
   };
-  const notations = kind(noteKnoop, 'notations');
-  const articulations = notations && kind(notations, 'articulations');
-  if (articulations) {
-    for (const articulatie of kinderen(articulations)) {
-      resultaat.articulaties.push(articulatie.naam === 'strong-accent' ? 'marcato' : articulatie.naam);
+  const notationsKnopen = kinderen(noteKnoop, 'notations');
+  for (const notations of notationsKnopen) {
+    const articulations = kind(notations, 'articulations');
+    if (articulations) {
+      const toegestaan = ['staccato', 'accent', 'tenuto', 'staccatissimo'];
+      for (const articulatie of kinderen(articulations)) {
+        if (toegestaan.includes(articulatie.naam)) resultaat.articulaties.push(articulatie.naam);
+        if (articulatie.naam === 'strong-accent') resultaat.articulaties.push('marcato');
+      }
     }
-  }
-  if (notations) {
     for (const slur of kinderen(notations, 'slur')) {
       if (slur.attr.type === 'start') resultaat.legato.begin = true;
       if (slur.attr.type === 'stop') resultaat.legato.eind = true;
@@ -118,7 +120,10 @@ export function leesNotaties(noteKnoop) {
       if (ornament === 'turn') resultaat.versiering = 'dubbelslag';
     }
   }
-  const bindingen = [...kinderen(noteKnoop, 'tie'), ...(notations ? kinderen(notations, 'tied') : [])];
+  const bindingen = [
+    ...kinderen(noteKnoop, 'tie'),
+    ...notationsKnopen.flatMap((notations) => kinderen(notations, 'tied')),
+  ];
   for (const binding of bindingen) {
     if (binding.attr.type === 'start') resultaat.overbinding.begin = true;
     if (binding.attr.type === 'stop') resultaat.overbinding.eind = true;
