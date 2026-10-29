@@ -1,5 +1,4 @@
 // Uploaden: een MusicXML-bestand kiezen of slepen, naar de API sturen en het resultaat in app zetten.
-// Wordt gebouwd in pakket 8 van werkpakketten/plannen/2026-10-29-score2sound-app.md.
 export function start(app) {
   const vlak = document.getElementById('upload');
   const kop = document.createElement('h2');
@@ -8,21 +7,23 @@ export function start(app) {
   const uitleg = document.createElement('p');
   uitleg.textContent = 'Sleep een MusicXML-bestand hierheen of kies een bestand. PDF en foto’s volgen later.';
 
-  const label = document.createElement('label');
-  label.className = 'knop knop--hoofd';
-  label.append(document.createTextNode('Kies een bestand'));
+  const knop = document.createElement('button');
+  knop.type = 'button';
+  knop.className = 'knop knop--hoofd';
+  knop.textContent = 'Kies een bestand';
 
   const invoer = document.createElement('input');
   invoer.type = 'file';
   invoer.accept = '.musicxml,.xml';
   invoer.hidden = true;
-  label.append(invoer);
 
   const status = document.createElement('p');
   status.className = 'zacht';
   status.setAttribute('role', 'status');
 
-  vlak.replaceChildren(kop, uitleg, label, status);
+  vlak.replaceChildren(kop, uitleg, knop, invoer, status);
+
+  knop.addEventListener('click', () => invoer.click());
 
   async function openBestand(bestand) {
     if (!bestand) return;
@@ -63,7 +64,11 @@ export function start(app) {
     status.textContent = `Geopend: ${bestand.name}`;
   }
 
-  invoer.addEventListener('change', () => openBestand(invoer.files[0]));
+  invoer.addEventListener('change', () => {
+    const bestand = invoer.files[0];
+    invoer.value = '';
+    openBestand(bestand);
+  });
 
   vlak.addEventListener('dragover', (gebeurtenis) => {
     gebeurtenis.preventDefault();
