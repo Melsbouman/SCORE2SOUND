@@ -407,10 +407,14 @@ SAMEN="klaar #$ISSUE in $DUUR s"
 if [ "${AIFLOW_AUTOMERGE:-exact}" = "exact" ] && [ "${EXACT%%,*}" = "ja" ] && [ -z "$EXTRA" ] && ! echo "$REGELS" | grep -q '^Let op:'; then
   status_zet bezig "#$ISSUE $TITEL" 0.95 "pr wacht op de Action"
   # Even wachten tot GitHub de Action heeft aangemeld, dan wachten tot hij klaar is.
-  sleep "${AIFLOW_ACTION_WACHT:-20}"
-  if timeout 900 "$GH" pr checks "$PRURL" -R "$R" --watch --fail-fast -i 15 >/dev/null 2>&1; then
+  # AIFLOW_ACTION=uit: niet op de Action wachten (bijvoorbeeld als GitHub Actions niet kan draaien); het script
+  # heeft dezelfde regelcontrole en tests dan al zelf gedraaid.
+  if [ "${AIFLOW_ACTION:-aan}" = "uit" ]; then ACTION_OK=0
+  else sleep "${AIFLOW_ACTION_WACHT:-20}"; timeout 900 "$GH" pr checks "$PRURL" -R "$R" --watch --fail-fast -i 15 >/dev/null 2>&1; ACTION_OK=$?
+  fi
+  if [ "$ACTION_OK" -eq 0 ]; then
     if "$GH" pr merge "$PRURL" -R "$R" --merge --delete-branch >/dev/null 2>&1; then
-      "$GH" issue close "$ISSUE" -R "$R" --comment "Automatisch gemerged door het script: precies zoals verwacht, regelcontrole, tests en Action groen." >/dev/null 2>&1
+      "$GH" issue close "$ISSUE" -R "$R" --comment "Automatisch gemerged door het script: precies zoals verwacht, regelcontrole en tests groen${AIFLOW_ACTION:+ (Action: $AIFLOW_ACTION)}." >/dev/null 2>&1
       SAMEN="klaar en automatisch gemerged #$ISSUE in $DUUR s"
     else
       log "automatisch mergen lukte niet; de PR wacht op Claude"

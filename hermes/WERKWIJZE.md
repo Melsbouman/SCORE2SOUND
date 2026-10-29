@@ -109,6 +109,7 @@ Start de scripts vanuit je eigen werkmap (`C:\SCORE2SOUND`); ze werken in de apa
 | `AIFLOW_STATUS` | `~/.aiflow-status` | map voor de statusbestanden (de mod leest deze) |
 | `AIFLOW_HERSTEL` | `2` | hoeveel herstelrondes het script een agent geeft na een fout |
 | `AIFLOW_AUTOMERGE` | `exact` | `exact`: het script merget PR's die precies `## Verwacht` zijn en groen; `uit`: Claude beslist altijd |
+| `AIFLOW_ACTION` | `aan` | `uit`: bij automatisch mergen niet op de GitHub Action wachten (als Actions niet kan draaien); de eigen controles van het script tellen dan |
 
 De prefix `AIFLOW_` en de map `~/.aiflow-status` komen uit de bron van deze werkwijze. Ze blijven zo, zodat scripts en mod op elkaar blijven passen.
 
