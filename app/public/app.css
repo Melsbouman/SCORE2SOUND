@@ -1,0 +1,6 @@
+/* Basisopmaak. De echte vormgeving komt in pakket 3. */
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, sans-serif; color: #1d1d1f; background: #fafaf8; }
+.kop { padding: 16px 24px; border-bottom: 1px solid #e4e4e0; }
+.kop h1 { margin: 0; font-size: 20px; }
+.werkvlak { padding: 24px; display: grid; gap: 16px; }

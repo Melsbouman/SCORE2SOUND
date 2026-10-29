@@ -4,12 +4,14 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 
-// Projectregels: vul deze in zodra de opbouw van SCORE2SOUND vastligt.
+// Projectregels van SCORE2SOUND.
 // Mappen met code die in de browser draait. Daarin zijn inline scripts en externe bronnen (CDN) een fout.
 // Leeg = deze controle staat uit.
-const FRONTEND_MAPPEN = [];
+const FRONTEND_MAPPEN = ['app/public/'];
 // Bestanden waarin een nieuwe regel een nieuwe dependency kan zijn.
 const DEPENDENCY_BESTANDEN = /(^|\/)(package\.json|requirements[^/]*\.txt|pyproject\.toml)$/;
+// Bibliotheken waar Mels akkoord op gaf (plan van 29 oktober 2026). Een nieuwe komt hier pas na zijn akkoord bij.
+const TOEGESTANE_DEPENDENCIES = new Set(['fast-xml-parser', 'spessasynth_lib', 'verovio']);
 
 const args = process.argv.slice(2);
 const optie = (naam, standaard) => {
@@ -64,6 +66,27 @@ for (const regel of diff.split(NIEUWE_REGEL)) {
 }
 if (toegevoegd + verwijderd > maxRegels) fout('diff', `te groot: ${toegevoegd} regels erbij en ${verwijderd} eraf (maximaal ${maxRegels})`);
 
+// Nieuwe pakketten in een package.json: vergelijk de dependency-lijsten van de oude en de nieuwe versie.
+// Zonder bestanden (--stdin) valt hij terug op de toegevoegde regels die op een versie lijken.
+function nieuwePakketten(bestand, regels) {
+  const SOORTEN = ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies'];
+  const namen = (tekst) => new Set(SOORTEN.flatMap((s) => Object.keys(JSON.parse(tekst)[s] ?? {})));
+  if (args.includes('--stdin')) return regels.filter((r) => /^\s*"[^"]+":\s*"[\^~]?\d/.test(r) && !/^\s*"version"/.test(r));
+  let oud = new Set();
+  try {
+    oud = namen(execFileSync('git', ['show', `${basis}:${bestand}`], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }));
+  } catch {
+    // Nieuw bestand: alles is nieuw.
+  }
+  let nu;
+  try {
+    nu = namen(readFileSync(bestand, 'utf8'));
+  } catch {
+    return ['package.json is geen geldige JSON'];
+  }
+  return [...nu].filter((n) => !oud.has(n) && !TOEGESTANE_DEPENDENCIES.has(n));
+}
+
 const magVeranderen = (bestand) => !toegestaan.length || toegestaan.some((t) => bestand === t || bestand.startsWith(t.endsWith('/') ? t : `${t}/`));
 
 for (const bestand of verwijderdeBestanden) {
@@ -112,9 +135,7 @@ for (const [bestand, regels] of bestanden) {
     if (frontend && /@import\s+url\(["']?https?:/i.test(r)) fout(bestand, 'externe CSS-import');
   });
   if (DEPENDENCY_BESTANDEN.test(bestand)) {
-    const nieuw = bestand.endsWith('package.json')
-      ? regels.filter((r) => /^\s*"[^"]+":\s*"[\^~]?\d/.test(r))
-      : regels.filter((r) => /^\s*"?[A-Za-z0-9_.-]+\s*([=<>~!]=|>|<|"|$)/.test(r) && !/^\s*(#|\[)/.test(r));
+    const nieuw = bestand.endsWith('package.json') ? nieuwePakketten(bestand, regels) : regels.filter((r) => /^\s*"?[A-Za-z0-9_.-]+\s*([=<>~!]=|>|<|"|$)/.test(r) && !/^\s*(#|\[)/.test(r));
     if (nieuw.length) fout(bestand, `mogelijk nieuwe dependency: ${nieuw.map((r) => r.trim()).join(' ')}`);
   }
 }

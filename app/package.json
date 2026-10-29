@@ -1,0 +1,17 @@
+{
+  "name": "score2sound",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Van bladmuziek naar hoorbare, bewerkbare muziek",
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "fast-xml-parser": "5.11.2",
+    "spessasynth_lib": "4.4.1",
+    "verovio": "6.3.0"
+  }
+}
