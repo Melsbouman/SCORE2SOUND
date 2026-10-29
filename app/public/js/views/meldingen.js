@@ -1,5 +1,4 @@
 // Meldingen tonen: welke maat, wat er mis is, en naar die maat springen.
-// Wordt gebouwd in pakket 12 van werkpakketten/plannen/2026-10-29-score2sound-app.md.
 export function start(app) {
   const vlak = document.getElementById('meldingen');
 
@@ -12,6 +11,7 @@ export function start(app) {
 
     const kop = document.createElement('h2');
     const lijst = document.createElement('ul');
+    lijst.className = 'meldingen__lijst';
     if (meldingen.length === 0) {
       kop.textContent = 'Meldingen';
       const uitleg = document.createElement('p');
