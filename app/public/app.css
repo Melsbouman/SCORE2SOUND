@@ -1,6 +1,117 @@
-/* Basisopmaak. De echte vormgeving komt in pakket 3. */
+:root {
+  --kleur-achtergrond: #f7f6f2;
+  --kleur-vlak: #ffffff;
+  --kleur-tekst: #1d1d1f;
+  --kleur-zacht: #5f5f5a;
+  --kleur-lijn: #e2e0d8;
+  --kleur-accent: #2f5d8a;
+  --kleur-accent-zacht: #e6eef6;
+  --kleur-fout: #b3261e;
+  --kleur-waarschuwing: #8a5a00;
+  --ruimte-1: 4px;
+  --ruimte-2: 8px;
+  --ruimte-3: 16px;
+  --ruimte-4: 24px;
+  --ruimte-5: 40px;
+  --hoek: 10px;
+  --schaduw: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --letter: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --kleur-achtergrond: #17191c;
+    --kleur-vlak: #222529;
+    --kleur-tekst: #f2f2ef;
+    --kleur-zacht: #b7b8b2;
+    --kleur-lijn: #41454a;
+    --kleur-accent: #9ac3ed;
+    --kleur-accent-zacht: #29394a;
+    --kleur-fout: #ffb4ab;
+    --kleur-waarschuwing: #f4c76b;
+    --schaduw: 0 1px 2px rgba(0, 0, 0, 0.25);
+  }
+}
+
 * { box-sizing: border-box; }
-body { margin: 0; font-family: system-ui, sans-serif; color: #1d1d1f; background: #fafaf8; }
-.kop { padding: 16px 24px; border-bottom: 1px solid #e4e4e0; }
+body {
+  margin: 0;
+  font-family: var(--letter);
+  font-size: 16px;
+  color: var(--kleur-tekst);
+  background: var(--kleur-achtergrond);
+}
+.kop { padding: var(--ruimte-3) var(--ruimte-4); border-bottom: 1px solid var(--kleur-lijn); }
 .kop h1 { margin: 0; font-size: 20px; }
-.werkvlak { padding: 24px; display: grid; gap: 16px; }
+.kop p { margin: var(--ruimte-1) 0 0; color: var(--kleur-zacht); }
+.werkvlak {
+  padding: var(--ruimte-4);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "upload"
+    "projecten"
+    "weergave"
+    "speler"
+    "mixer"
+    "meldingen"
+    "export";
+  gap: var(--ruimte-3);
+}
+.werkvlak section {
+  min-width: 0;
+  padding: var(--ruimte-4);
+  background: var(--kleur-vlak);
+  border: 1px solid var(--kleur-lijn);
+  border-radius: var(--hoek);
+  box-shadow: var(--schaduw);
+}
+.werkvlak section:empty { display: none; }
+#upload { grid-area: upload; }
+#projecten { grid-area: projecten; }
+#weergave { grid-area: weergave; }
+#speler { grid-area: speler; }
+#mixer { grid-area: mixer; }
+#meldingen { grid-area: meldingen; }
+#export { grid-area: export; }
+#upload {
+  border: 2px dashed var(--kleur-accent);
+  background: var(--kleur-accent-zacht);
+}
+#upload h2 { margin: 0 0 var(--ruimte-2); font-size: 20px; }
+#upload p { margin: 0; }
+
+.knop {
+  padding: var(--ruimte-2) var(--ruimte-3);
+  color: var(--kleur-tekst);
+  background: var(--kleur-vlak);
+  border: 1px solid var(--kleur-lijn);
+  border-radius: var(--hoek);
+  font: inherit;
+  cursor: pointer;
+}
+.knop--hoofd { color: #ffffff; background: var(--kleur-accent); border-color: var(--kleur-accent); }
+.zacht { color: var(--kleur-zacht); font-size: 0.875em; }
+.melding--fout,
+.melding--waarschuwing {
+  padding: var(--ruimte-2) var(--ruimte-3);
+  background: var(--kleur-accent-zacht);
+  border-left: 3px solid;
+  border-radius: 0 var(--hoek) var(--hoek) 0;
+}
+.melding--fout { color: var(--kleur-fout); border-left-color: var(--kleur-fout); }
+.melding--waarschuwing { color: var(--kleur-waarschuwing); border-left-color: var(--kleur-waarschuwing); }
+:focus-visible { outline: 3px solid var(--kleur-accent); outline-offset: 2px; }
+
+@media (min-width: 1000px) {
+  .werkvlak {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    grid-template-areas:
+      "upload upload"
+      "projecten projecten"
+      "weergave speler"
+      "weergave mixer"
+      "weergave meldingen"
+      "weergave export";
+  }
+}
