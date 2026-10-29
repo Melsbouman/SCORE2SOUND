@@ -5,11 +5,12 @@ import * as weergave from './weergave.js';
 import * as speler from './speler.js';
 import * as meldingen from './views/meldingen.js';
 import * as mixer from './views/mixer.js';
+import * as bewerken from './views/bewerken.js';
 import * as exporteren from './views/export.js';
 import * as projecten from './views/projecten.js';
 
 const app = maakApp();
-const schermen = { upload, weergave, speler, meldingen, mixer, exporteren, projecten };
+const schermen = { upload, weergave, speler, meldingen, mixer, bewerken, exporteren, projecten };
 
 for (const [naam, scherm] of Object.entries(schermen)) {
   try {
