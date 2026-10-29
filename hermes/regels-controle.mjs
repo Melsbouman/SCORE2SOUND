@@ -1,5 +1,5 @@
 // Controleert de harde regels uit werkpakketten/00-werkwijze.md op een diff.
-// Gebruik: node hermes/regels-controle.mjs [--basis main] [--toegestaan "pad1,pad2"] [--maxregels 150] [--stdin]
+// Gebruik: node hermes/regels-controle.mjs [--basis main] [--toegestaan "pad1,pad2"] [--maxregels 300] [--stdin]
 // Zonder --stdin leest het script `git diff <basis>...HEAD`. Exitcode 1 bij een overtreding.
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
@@ -19,7 +19,7 @@ const optie = (naam, standaard) => {
   return i >= 0 && args[i + 1] ? args[i + 1] : standaard;
 };
 const basis = optie('--basis', 'main');
-const maxRegels = Number(optie('--maxregels', '150'));
+const maxRegels = Number(optie('--maxregels', '300'));
 const toegestaan = optie('--toegestaan', '').split(',').map((s) => s.trim()).filter(Boolean);
 
 const diff = args.includes('--stdin')

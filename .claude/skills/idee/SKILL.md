@@ -25,7 +25,7 @@ Schrijf `werkpakketten/plannen/<jjjj-mm-dd>-<korte-naam>.md` met:
 Toon het plan kort aan Mels (de tabel en de keuzes) en wacht op akkoord. Past Mels iets aan, werk dan het plan bij.
 
 ## 3. Verdelen
-Elk pakket is klein: één doel, de exacte bestanden, controleerbare criteria, liefst minder dan 150 regels. Wie wat krijgt:
+Elk pakket is klein: één doel, de exacte bestanden, controleerbare criteria, liefst minder dan 300 regels, de test meegeteld. Wie wat krijgt:
 
 | Uitvoerder | Krijgt | Label |
 |---|---|---|

@@ -133,10 +133,10 @@ Het script zet altijd precies één van de eerste vijf labels op een issue: het 
 1. **Bestanden:** het script draait elke wijziging buiten `## Bestanden` terug en meldt dat in de PR.
 2. **Verwacht:** met `## Verwacht` vergelijkt het script de toegevoegde regels letterlijk (label `agent-exact`).
 3. **Regelcontrole** (`regels-controle.mjs`), op de diff na de commit:
-   - fout: bestand buiten de lijst, syntaxfout (JavaScript, JSON, Python), diff groter dan 150 regels, verdwenen regeleinde, iets wat op een sleutel of token lijkt, een `.env`-bestand, een nieuwe dependency in `package.json`, `requirements*.txt` of `pyproject.toml`, en in `FRONTEND_MAPPEN` een inline script of externe bron;
+   - fout: bestand buiten de lijst, syntaxfout (JavaScript, JSON, Python), diff groter dan 300 regels (een pakket met zijn test erbij), verdwenen regeleinde, iets wat op een sleutel of token lijkt, een `.env`-bestand, een nieuwe dependency in `package.json`, `requirements*.txt` of `pyproject.toml`, en in `FRONTEND_MAPPEN` een inline script of externe bron;
    - waarschuwing: een testbestand gewijzigd, een bestand verwijderd.
 4. **Tests** (`tests.sh`): per projectmap `npm test` of `python -m pytest`, beoordeeld op de exitcode. Zolang er nog geen tests zijn, is dat geen fout.
-5. **GitHub Action `PR-controle`:** dezelfde regelcontrole en tests op elke PR naar `main`, als tweede verdedigingslinie. De grens van 150 regels geldt alleen voor branches `agent/*`.
+5. **GitHub Action `PR-controle`:** dezelfde regelcontrole en tests op elke PR naar `main`, als tweede verdedigingslinie. De grens van 300 regels geldt alleen voor branches `agent/*`.
 6. **Herstelrondes:** faalt 3, 4 of de vergelijking met `## Verwacht`, dan krijgt dezelfde agent de foutmelding en zijn huidige wijziging terug en herstelt hij het zelf, hooguit twee keer. Pas daarna wordt de taak `agent-vast`.
 7. **Automatisch mergen:** is de wijziging precies `## Verwacht`, niets teruggedraaid, geen waarschuwing en de Action groen, dan merget het script zelf. Claude schreef die inhoud al in de taak.
 8. **Claude:** begint met `bash hermes/review.sh` en beoordeelt alleen wat overblijft, en alleen wat een script niet kan: of het doet wat de taak bedoelt. Claude doet de controles van het script niet opnieuw.
