@@ -139,3 +139,21 @@ body {
 .meldingen__lijst { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--ruimte-2); }
 .meldingen__lijst button { display: block; width: 100%; text-align: left; font: inherit; cursor: pointer; }
 .meldingen__lijst button .zacht { display: block; margin-top: var(--ruimte-1); }
+
+/* Mixer */
+.mixer__rij { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "naam dempen solo" "schuif schuif schuif"; align-items: center; gap: var(--ruimte-2); padding: var(--ruimte-2) 0; border-bottom: 1px solid var(--kleur-lijn); }
+.mixer__rij:last-child { border-bottom: 0; }
+.mixer__rij input[type="range"] { grid-area: schuif; width: 100%; accent-color: var(--kleur-accent); }
+.mixer__rij .knop[aria-pressed="true"] { color: var(--kleur-op-accent); background: var(--kleur-accent); border-color: var(--kleur-accent); }
+
+/* Projecten */
+#projecten h2 { margin: 0 0 var(--ruimte-3); font-size: 18px; }
+#projecten form { display: flex; flex-wrap: wrap; align-items: end; gap: var(--ruimte-2); margin-bottom: var(--ruimte-3); }
+#projecten label { display: grid; gap: var(--ruimte-1); flex: 1 1 100%; }
+#projecten input[type="text"] { padding: var(--ruimte-2); font: inherit; color: var(--kleur-tekst); background: var(--kleur-vlak); border: 1px solid var(--kleur-lijn); border-radius: var(--hoek); }
+.projecten__lijst { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--ruimte-2); }
+.projecten__lijst button { display: block; width: 100%; text-align: left; }
+.projecten__lijst .zacht { display: block; margin-top: var(--ruimte-1); }
+
+/* Export */
+#export .knop { margin: 0 var(--ruimte-2) var(--ruimte-2) 0; }
