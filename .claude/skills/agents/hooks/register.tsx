@@ -2,7 +2,8 @@ import type { Register } from 'claude-code'
 
 import type { Bench, ClaudeStatus, Extern, Geschied, Klaar, Lokaal, Runner, Sub, Taak } from '../types'
 
-const PANE = 'agents'
+// Een eigen naam, zodat dit paneel niet botst met andere mods die een paneel 'agents' openen.
+const PANE = 'score2sound-agents'
 const HERMES = 'C:/Users/mels1/AppData/Local/hermes/bin/hermes.exe'
 const GH = 'C:/Program Files/GitHub CLI/gh.exe'
 const REPO = 'Melsbouman/SCORE2SOUND'
@@ -575,7 +576,7 @@ export const register: Register = on => {
 
   on('session.start', async ($, e, next) => {
     await $.command.register({ name: 'agents-paneel', description: 'Open het Agents-paneel' })
-    void $.ui.open({ id: PANE, title: 'Agents' })
+    void $.ui.open({ id: PANE, title: 'Agents SCORE2SOUND', columns: 56 })
 
     // Verborgen afgeronde taken blijven bewaard tussen sessies.
     const opgeslagen = await $.store.get('verborgen')
@@ -699,7 +700,7 @@ export const register: Register = on => {
   })
 
   on('command.run', { command: 'agents-paneel' }, async $ => {
-    await $.ui.open({ id: PANE, title: 'Agents' })
+    await $.ui.open({ id: PANE, title: 'Agents SCORE2SOUND', columns: 56 })
     return { text: 'Agents-paneel geopend.' }
   })
 
