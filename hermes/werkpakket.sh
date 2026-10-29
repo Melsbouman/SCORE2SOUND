@@ -335,9 +335,10 @@ $REGELS"
 $(echo "$TESTS" | tail -c 3000)"
   fi
   # Wijkt de wijziging af van ## Verwacht, dan is dat een herstelpunt zolang er rondes over zijn; daarna mag hij door
-  # (zonder agent-exact), zodat Claude kan kijken of de afwijking klopt.
+  # (zonder agent-exact), zodat Claude kan kijken of de afwijking klopt. Bij een afgekeurde PR gelden de opmerkingen
+  # van Claude, die kunnen van ## Verwacht afwijken; dan is een afwijking geen herstelpunt.
   VERWACHT_FOUT=""
-  if [ -z "$FOUT" ] && [ "${EXACT%%,*}" = "nee" ]; then
+  if [ -z "$FOUT" ] && [ "${EXACT%%,*}" = "nee" ] && [ "$MODUS" = "nieuw" ]; then
     VERWACHT_FOUT="De wijziging komt niet precies overeen met ## Verwacht. Voeg precies deze regels toe en verwijder of verander niets anders:
 $(cat "$WERK/verwacht.txt")
 Wat je nu hebt toegevoegd:
@@ -370,7 +371,7 @@ TESTSTAND=$(echo "$TESTS" | grep '^\[' | tr '\n' ' ')
 
 # 5. Pushen, PR en labels, allemaal door het script.
 status_zet bezig "#$ISSUE $TITEL" 0.85 "pr openen"
-git push -q -u $PUSHVLAG origin "$BRANCH" || vast "$ISSUE" "push mislukt"
+git push -q -u $PUSHVLAG origin "$BRANCH" 2> "$WERK/push.err" || vast "$ISSUE" "push mislukt: $(grep -v '^remote:' "$WERK/push.err" | tr '\n' ' ')"
 DUUR=$(( $(date +%s) - START ))
 {
   echo "Hoort bij #$ISSUE"
