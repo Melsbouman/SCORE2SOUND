@@ -371,7 +371,13 @@ TESTSTAND=$(echo "$TESTS" | grep '^\[' | tr '\n' ' ')
 
 # 5. Pushen, PR en labels, allemaal door het script.
 status_zet bezig "#$ISSUE $TITEL" 0.85 "pr openen"
-git push -q -u $PUSHVLAG origin "$BRANCH" 2> "$WERK/push.err" || vast "$ISSUE" "push mislukt: $(grep -v '^remote:' "$WERK/push.err" | tr '\n' ' ')"
+# GitHub weigert een push soms even (remote rejected); dan nog twee keer proberen, met een pauze.
+for poging in 1 2 3; do
+  git push -q -u $PUSHVLAG origin "$BRANCH" 2> "$WERK/push.err" && break
+  [ "$poging" = "3" ] && vast "$ISSUE" "push mislukt: $(grep -v '^remote:' "$WERK/push.err" | tr '\n' ' ')"
+  log "push mislukt (poging $poging), over $((poging * 15)) s opnieuw"
+  sleep $((poging * 15))
+done
 DUUR=$(( $(date +%s) - START ))
 {
   echo "Hoort bij #$ISSUE"
