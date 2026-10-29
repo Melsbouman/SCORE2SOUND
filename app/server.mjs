@@ -17,6 +17,9 @@ const MAPPEN = [
   ['/src/midi/', join(HIER, 'src', 'midi')],
   ['/vendor/verovio/', join(HIER, 'node_modules', 'verovio', 'dist')],
   ['/vendor/spessasynth/', join(HIER, 'node_modules', 'spessasynth_lib', 'dist')],
+  ['/vendor/spessasynth-core/', join(HIER, 'node_modules', 'spessasynth_core', 'dist')],
+  ['/vendor/fflate/', join(HIER, 'node_modules', 'fflate', 'esm')],
+  ['/vendor/stb-vorbis/', join(HIER, 'node_modules', 'stb-vorbis', 'dist')],
   ['/', join(HIER, 'public')],
 ];
 
@@ -27,6 +30,19 @@ const API = [
   ['/api/importeer', './src/server/importeer.mjs'],
   ['/api/projecten', './src/server/projecten.mjs'],
 ];
+
+// Bibliotheken importeren elkaar met een kale naam ("spessasynth_core"); een browser zonder bouwstap begrijpt dat niet.
+// Bij het leveren van /vendor/-scripts zet de server die namen om naar de paden hierboven.
+const KALE_NAMEN = {
+  spessasynth_core: '/vendor/spessasynth-core/index.js',
+  fflate: '/vendor/fflate/browser.js',
+  'stb-vorbis': '/vendor/stb-vorbis/index.js',
+};
+
+function zetNamenOm(tekst) {
+  return tekst.replace(/(\bfrom\s*|\bimport\s*\(\s*)(["'])([^"'./][^"']*)\2/g, (geheel, voor, quote, naam) =>
+    KALE_NAMEN[naam] ? `${voor}${quote}${KALE_NAMEN[naam]}${quote}` : geheel);
+}
 
 const SOORTEN = {
   '.html': 'text/html; charset=utf-8',
@@ -87,7 +103,8 @@ async function bestand(antwoord, url) {
   // Nooit buiten de map: ../ in de URL levert een 404 op, geen bestand van elders.
   if (volledig !== map && !volledig.startsWith(map + sep)) return stuur(antwoord, 404, { fout: 'Niet gevonden.' });
   try {
-    const inhoud = await readFile(volledig);
+    let inhoud = await readFile(volledig);
+    if (voorvoegsel.startsWith('/vendor/') && ['.js', '.mjs'].includes(extname(volledig))) inhoud = zetNamenOm(inhoud.toString('utf8'));
     stuur(antwoord, 200, inhoud, SOORTEN[extname(volledig)] ?? 'application/octet-stream');
   } catch {
     stuur(antwoord, 404, { fout: 'Niet gevonden.' });

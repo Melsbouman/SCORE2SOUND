@@ -12,3 +12,6 @@ venv/
 
 # Het overdrachtspakket waar deze werkwijze uit komt: naslag, hoort niet in de repo
 overdracht-workflow/
+
+# Klankbank voor de speler (groot, apart te downloaden)
+app/public/klankbank/
