@@ -15,3 +15,6 @@ overdracht-workflow/
 
 # Klankbank voor de speler (groot, apart te downloaden)
 app/public/klankbank/
+
+# Bewaarde projecten op de eigen computer
+app/projecten/
