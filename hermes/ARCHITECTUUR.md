@@ -52,7 +52,7 @@ Een abonnement in een app is niet vanzelf toegang voor een script. Per bron:
 | Uitvoerder | Account | Hoe het script hem aanroept | Stand (29 oktober 2026) |
 |---|---|---|---|
 | **Codex-programma** (`agent-codex`, ook voor taken zonder label) | ChatGPT Plus van Mels | `node .../@openai/codex/bin/codex.js exec --ephemeral --json -s workspace-write --disable shell_tool --disable unified_exec -o laatste.txt - < prompt` | werkt: ingelogd met ChatGPT, proef met één regel in 28 s |
-| **Copilot-programma** (`agent-copilot`) | GitHub Copilot via studentenabonnement | `node .../@github/copilot/npm-loader.js -p <prompt> --no-ask-user --allow-tool=write --deny-tool=shell` met `GH_TOKEN` uit `gh` | geïnstalleerd, wacht op goedkeuring van het abonnement |
+| **Copilot-programma** (`agent-copilot`) | GitHub Copilot via studentenabonnement | `node .../@github/copilot/npm-loader.js -p <prompt> --no-ask-user --allow-tool=write --deny-tool=shell` met `GH_TOKEN` uit `gh` | werkt: proef met één regel in 26 s |
 | **Hermes** (`agent-hermes`, en de laatste reserve) | OpenRouter, 13 euro tegoed | `hermes -t terminal,file --provider openrouter -m <model> -z <prompt>` | geïnstalleerd, OpenRouter-sleutel ingesteld door Mels |
 
 Modellen via OpenRouter (prijzen gecontroleerd op 29 oktober 2026, per miljoen tokens erin en eruit):
@@ -69,7 +69,7 @@ Doet een uitvoerder niets (limiet op, abonnement nog niet actief, model faalt), 
 - Copilot, dan Codex, dan Hermes met Haiku;
 - Hermes met het gratis model, dan Hermes met Haiku.
 
-Zolang het Copilot-abonnement niet actief is, doet Codex de Copilot-taken dus vanzelf.
+Raakt de limiet van Codex of Copilot op, dan doet de ander het werk dus vanzelf.
 
 ### Waarom Codex en Copilot zonder shell
 Een klein model dat tests mag draaien, gaat dat ook doen, en blijft opnieuw proberen. Dat kostte in de bron 254 seconden voor één regel. Zonder shell kan de agent alleen bestanden lezen en schrijven; het script draait daarna de controles. Bij Codex zijn daarvoor de functies `shell_tool` en `unified_exec` uitgezet; bestanden bewerken loopt via de eigen bewerkfunctie van Codex. De sandbox `workspace-write` houdt het schrijven binnen de kloon. Hermes heeft geen aparte schakelaar voor alleen bestanden; daar beperkt `-t terminal,file` de gereedschappen, en het script vangt de rest op.
@@ -220,9 +220,17 @@ Een echte ronde op GitHub, met `werkpakketten.sh --alle`:
 
 De drie wachtrijen liepen tegelijk; Copilot had geen taken. Herstelrondes, terugdraaien en automatisch mergen zijn lokaal getest met nep-agents (zie de PR van deze werkwijze).
 
+Tweede ronde, met automatisch mergen en alle drie de uitvoerders tegelijk:
+| Taak | Uitvoerder | Tijd tot PR | Tokens (erin, eruit) | Uitkomst |
+|---|---|---|---|---|
+| nieuw bestand, met `## Verwacht` | Codex | 34 s | 33k, 0,2k | precies zoals verwacht, Action groen, door het script gemerged |
+| nieuw bestand, met `## Verwacht` | Copilot (studentenaccount) | 26 s | 54k, 0,2k | precies zoals verwacht, Action groen, door het script gemerged |
+| nieuw bestand, met `## Verwacht` | Hermes, gratis model | 38 s | 11k, 0,4k | precies zoals verwacht, Action groen, door het script gemerged |
+| taak zonder `## Bestanden` | Hermes | 6 s | 0 | `agent-vast` met de reden; de wachtrij van Hermes stopte, de andere liepen door |
+
+Claude hoefde niets na te kijken: `review.sh` meldde alleen de vastgelopen taak.
+
 ## 14. Wat nog niet getest is
-- Het Copilot-programma op het account van Mels (wacht op het abonnement).
 - Herstelrondes en de reserveketen met een echt model (lokaal wel getest).
-- Automatisch mergen op GitHub: de beveiliging van Claude Code staat niet toe dat Claude zonder review merget, ook niet via het script. Start Mels de runner zelf, of komt er een toestemmingsregel, dan werkt het.
 - De paneel-mod in deze repo.
 - Fase 2b (Kanban).

@@ -34,7 +34,7 @@ Elk pakket is klein: één doel, de exacte bestanden, controleerbare criteria, l
 | Hermes | kleine achtergrondtaken: teksten, documentatie, configuratie, mechanische wijzigingen, altijd met `--verwacht` | `agent-hermes` |
 | Claude zelf | opzet en architectuur, lastige stukken, alles wat niet in een kleine taak past | geen issue |
 
-- Verdeel het werk over Codex en Copilot, zodat ze tegelijk werken en hun limieten gespreid worden. Is het Copilot-abonnement nog niet actief, dan neemt Codex de Copilot-taken vanzelf over.
+- Verdeel het werk over Codex en Copilot, zodat ze tegelijk werken en hun limieten gespreid worden. Raakt de limiet van een van beide op, dan neemt de ander het vanzelf over.
 - Pakketten die dezelfde bestanden raken, komen in verschillende golven. Het script laat ze ook zelf op elkaar wachten.
 - Schrijf precieze tekst en code in de taak wanneer dat kan, met `--verwacht`. Dat maakt het resultaat betrouwbaarder, en zulke PR's merget het script zelf, zodat Claude ze niet hoeft na te kijken.
 

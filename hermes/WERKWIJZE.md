@@ -58,7 +58,7 @@ Wat `werkpakket.sh` doet, in volgorde:
 7. Pusht, opent de PR (of plaatst een comment bij een afgekeurde PR) met de echte uitkomsten, en zet `agent-review`.
 8. Is de wijziging precies `## Verwacht`, is er niets teruggedraaid, geeft de regelcontrole geen waarschuwing en is de Action groen, dan merget het script de PR en sluit het issue (`AIFLOW_AUTOMERGE=uit` zet dat uit).
 
-Doet de agent niets (limiet op, abonnement nog niet actief), dan neemt een reserve het over: Codex en Copilot vangen elkaar op, en als laatste Hermes met `anthropic/claude-haiku-5.5` via OpenRouter. Een Hermes-taak gaat na het gratis model naar Haiku.
+Doet de agent niets (limiet op, model faalt), dan neemt een reserve het over: Codex en Copilot vangen elkaar op, en als laatste Hermes met `anthropic/claude-haiku-5.5` via OpenRouter. Een Hermes-taak gaat na het gratis model naar Haiku.
 
 ## 5. Labels op een issue
 | Label | Betekenis |
