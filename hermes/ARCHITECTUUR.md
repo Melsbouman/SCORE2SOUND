@@ -205,12 +205,24 @@ Uit de bron:
 Nieuw voor deze opzet:
 15. Codex leest `AGENTS.md` zelf in. De route via het script staat daarom bovenaan in `AGENTS.md`: alleen bestanden bewerken, niets draaien.
 16. Draai het runner-script niet vanuit een kloon van de agent: het script zet de kloon terug op `origin/main` en zou dan zijn eigen bestand overschrijven terwijl het draait. Start het vanuit `C:\SCORE2SOUND`.
-17. ChatGPT Plus heeft een gebruikslimiet per paar uur. Doet Codex daardoor niets, dan neemt de reserve (Hermes met Haiku) het over.
+17. ChatGPT Plus heeft een gebruikslimiet per paar uur. Doet Codex daardoor niets, dan neemt de reserve (Copilot, daarna Hermes met Haiku) het over.
+18. GitHub Actions op een privérepo kan stoppen door een betalingsinstelling ("recent account payments have failed"). De repo is daarom openbaar. Als Actions niet draait, zet `AIFLOW_ACTION=uit`; het script draait dezelfde controles zelf.
+19. Codex leest veel context in (rond 130k tokens voor een taak van één regel, grotendeels uit de cache). Dat telt mee voor de limiet van ChatGPT Plus; houd taken klein en precies.
 
-## 13. Wat nog niet getest is
-- Een volledige ronde met een echt issue, PR en herstelronde in deze repo.
+## 13. Gemeten op 29 oktober 2026
+Een echte ronde op GitHub, met `werkpakketten.sh --alle`:
+| Taak | Uitvoerder | Tijd | Tokens (erin, eruit) | Uitkomst |
+|---|---|---|---|---|
+| regel in README, met `## Verwacht` | Codex (ChatGPT Plus) | 69 s | 134k, 1,6k | PR, precies zoals verwacht, Action groen |
+| regel in een ander bestand, met `## Verwacht` | Hermes, `cohere/north-mini-code:free` | 42 s | 17k, 0,5k | PR, precies zoals verwacht, Action groen |
+| taak zonder `## Bestanden` | Codex | 6 s | 0 | `agent-vast` met de reden, niets gepusht |
+| afgekeurde PR, één punt | Codex | 22 s | 35k, 0,2k | punt verwerkt, comment op de PR, terug naar `agent-review` |
+
+De drie wachtrijen liepen tegelijk; Copilot had geen taken. Herstelrondes, terugdraaien en automatisch mergen zijn lokaal getest met nep-agents (zie de PR van deze werkwijze).
+
+## 14. Wat nog niet getest is
 - Het Copilot-programma op het account van Mels (wacht op het abonnement).
-- Hermes met OpenRouter in een echte taak (de sleutel staat erin, nog niet gebruikt door het script).
+- Herstelrondes en de reserveketen met een echt model (lokaal wel getest).
+- Automatisch mergen op GitHub: de beveiliging van Claude Code staat niet toe dat Claude zonder review merget, ook niet via het script. Start Mels de runner zelf, of komt er een toestemmingsregel, dan werkt het.
 - De paneel-mod in deze repo.
-- De wachtrijen per uitvoerder op GitHub (lokaal getest met een nep-`gh`).
 - Fase 2b (Kanban).
