@@ -101,6 +101,16 @@ export function start(app) {
   function volg() {
     if (!geluid || geluid.seq.paused) return;
     let t = geluid.seq.currentTime;
+    // Aan het einde van het stuk: terug naar de beginstand, tenzij een passage herhaald wordt.
+    // Direct na play() is de duur soms nog 0; pas een bekende duur telt als einde.
+    const duur = geluid.seq.duration;
+    if (!herhaal.checked && duur > 0 && t >= duur - 0.05) {
+      pauze();
+      geluid.seq.currentTime = 0;
+      speelMaat = null;
+      app.meld('speel-maat', { maat: null });
+      return;
+    }
     if (herhaal.checked) {
       const begin = geldigeMaat(van);
       const eind = geldigeMaat(tot) + 1;
