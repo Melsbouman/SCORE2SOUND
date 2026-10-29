@@ -40,6 +40,20 @@ test('de server levert de app, de bibliotheken en de lege API-paden', async (t) 
   assert.equal((await vraag(poort, 'GET', '/api/projecten/abc')).status, 501);
 });
 
+test('bibliotheken voor de browser hebben geen kale imports meer', async (t) => {
+  const server = maakServer();
+  await new Promise((ok) => server.listen(0, '127.0.0.1', ok));
+  t.after(() => server.close());
+  const poort = server.address().port;
+  for (const pad of ['/vendor/spessasynth/index.js', '/vendor/spessasynth-core/index.js']) {
+    const { status, tekst } = await vraag(poort, 'GET', pad);
+    assert.equal(status, 200, pad);
+    assert.doesNotMatch(tekst, /from\s*["'](spessasynth_core|fflate|stb-vorbis)["']/, pad);
+  }
+  assert.equal((await vraag(poort, 'GET', '/vendor/fflate/browser.js')).status, 200);
+  assert.equal((await vraag(poort, 'GET', '/vendor/stb-vorbis/index.js')).status, 200);
+});
+
 test('de server geeft geen bestanden buiten de toegestane mappen', async (t) => {
   const server = maakServer();
   await new Promise((ok) => server.listen(0, '127.0.0.1', ok));

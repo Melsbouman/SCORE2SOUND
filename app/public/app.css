@@ -125,3 +125,12 @@ body {
       "weergave export";
   }
 }
+
+/* Speler */
+#speler h2, #meldingen h2, #mixer h2, #export h2 { margin: 0 0 var(--ruimte-3); font-size: 18px; }
+.speler__knoppen { display: flex; flex-wrap: wrap; gap: var(--ruimte-2); margin-bottom: var(--ruimte-3); }
+.speler__veld { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ruimte-2); margin: var(--ruimte-2) 0; }
+.speler__veld input[type="range"] { flex: 1 1 140px; accent-color: var(--kleur-accent); }
+.speler__veld input[type="number"] { width: 5em; padding: var(--ruimte-1) var(--ruimte-2); font: inherit; color: var(--kleur-tekst); background: var(--kleur-vlak); border: 1px solid var(--kleur-lijn); border-radius: var(--hoek); }
+.speler__passage { margin: var(--ruimte-3) 0 0; padding: var(--ruimte-2) var(--ruimte-3); border: 1px solid var(--kleur-lijn); border-radius: var(--hoek); }
+.speler__passage legend { padding: 0 var(--ruimte-1); color: var(--kleur-zacht); }
