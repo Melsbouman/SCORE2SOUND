@@ -134,3 +134,8 @@ body {
 .speler__veld input[type="number"] { width: 5em; padding: var(--ruimte-1) var(--ruimte-2); font: inherit; color: var(--kleur-tekst); background: var(--kleur-vlak); border: 1px solid var(--kleur-lijn); border-radius: var(--hoek); }
 .speler__passage { margin: var(--ruimte-3) 0 0; padding: var(--ruimte-2) var(--ruimte-3); border: 1px solid var(--kleur-lijn); border-radius: var(--hoek); }
 .speler__passage legend { padding: 0 var(--ruimte-1); color: var(--kleur-zacht); }
+
+/* Meldingen */
+.meldingen__lijst { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--ruimte-2); }
+.meldingen__lijst button { display: block; width: 100%; text-align: left; font: inherit; cursor: pointer; }
+.meldingen__lijst button .zacht { display: block; margin-top: var(--ruimte-1); }

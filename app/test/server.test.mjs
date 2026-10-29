@@ -35,9 +35,10 @@ test('de server levert de app, de bibliotheken en de lege API-paden', async (t) 
   const verovio = await vraag(poort, 'GET', '/vendor/verovio/verovio-toolkit-wasm.js');
   assert.equal(verovio.status, 200);
 
-  assert.equal((await vraag(poort, 'POST', '/api/importeer')).status, 501);
-  assert.equal((await vraag(poort, 'GET', '/api/projecten')).status, 501);
-  assert.equal((await vraag(poort, 'GET', '/api/projecten/abc')).status, 501);
+  // De API-paden bestaan (geen 404); wat ze antwoorden, testen de eigen tests van de API.
+  for (const [methode, pad] of [['POST', '/api/importeer'], ['GET', '/api/projecten'], ['GET', '/api/projecten/abc']]) {
+    assert.notEqual((await vraag(poort, methode, pad)).status, 404, `${methode} ${pad}`);
+  }
 });
 
 test('bibliotheken voor de browser hebben geen kale imports meer', async (t) => {
