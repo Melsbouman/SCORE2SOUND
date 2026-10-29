@@ -1,0 +1,1 @@
+{ "name": "agents", "version": "0.2.0", "description": "Paneel Agents: wie er nu werkt (Claude, het Codex-programma, het Copilot-programma, Hermes, subagents) en de taken per fase", "types": "./types/index.d.ts" }
