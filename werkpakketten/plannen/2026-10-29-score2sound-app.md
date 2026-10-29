@@ -1,6 +1,6 @@
 # Plan: de SCORE2SOUND-app
 
-Stand: fase 1 af in de nacht van 29 op 30 oktober 2026 (akkoord van Mels op 29 oktober). Alle pakketten 0 tot en met 19 gemerged; zie het nachtrapport in `werkpakketten/nacht/`. Volgende: fase 3 (partijen en transponeren) kan zonder Audiveris; fase 2 wacht op de installatie van Audiveris.
+Stand: fase 1 af in de nacht van 29 op 30 oktober 2026 (akkoord van Mels op 29 oktober). Alle pakketten 0 tot en met 19 gemerged; zie het nachtrapport in `werkpakketten/nacht/`. Fase 3 grotendeels af (alleen het scherm voor samenvoegen ontbreekt). Fase 2 wacht op de installatie van Audiveris; het geluid van de speler wacht op een klankbank.
 
 ## Idee
 SCORE2SOUND maakt van bladmuziek (PDF, scan of foto) digitale muziek waarmee je verder kunt: bekijken naast het origineel, corrigeren waar de herkenning twijfelt, afspelen per partij met tempo, herhalen en een mixer, partijen eruit halen of samenvoegen, transponeren naar een ander instrument, fouten laten signaleren, en bewaren en exporteren als MusicXML, MIDI, PDF of audio. Voor muzikanten, docenten, dirigenten en ensembles.
