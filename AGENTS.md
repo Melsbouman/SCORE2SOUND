@@ -24,8 +24,9 @@ Je voert één taak uit, meestal een GitHub-issue. Claude maakt de plannen en co
 ## Project
 SCORE2SOUND is een web-app die bladmuziek omzet naar bewerkbare, hoorbare muziek. Het plan staat in `werkpakketten/plannen/2026-10-29-score2sound-app.md`.
 - Alles staat in `app/`: Node 24, JavaScript-modules (`.mjs` op de server, `.js` in de browser), geen framework en geen bouwstap.
-- `app/src/` bevat de logica: `model/` (rekenwerk), `musicxml/`, `controle/`, `midi/`, `project/`, en `server/` (API-afhandeling). Alles behalve `server/` en `musicxml/lezen.mjs` draait ook in de browser: gebruik daar geen Node-modules zoals `node:fs`.
+- `app/src/` bevat de logica: `model/` (rekenwerk), `musicxml/`, `controle/`, `midi/`, `project/`, en `server/` (API-afhandeling). Alles behalve `server/`, `musicxml/xml.mjs` en `musicxml/lezen.mjs` draait ook in de browser: gebruik daar geen Node-modules zoals `node:fs`.
 - `app/public/` is de browserkant: `index.html`, `app.css`, `js/main.js` start elk scherm, `js/app.js` is de gedeelde stand. Elk scherm exporteert `start(app)` en tekent alleen in zijn eigen `<section id="...">`.
+- MusicXML lees je met de hulp in `app/src/musicxml/xml.mjs` (`leesXml`, `kind`, `kinderen`, `tekst`, `getal`), niet rechtstreeks met fast-xml-parser.
 - **Het muziekmodel in `docs/model.md` is het contract.** Tijd in tikken (480 per kwartnoot), genoteerde toonhoogte, meldingen in vaste vorm. Wijk er niet van af.
 - Tests in `app/test/*.test.mjs` met `node:test` en `node:assert/strict`; testvoorbeelden in `app/test/voorbeelden/`. Staat een test in je taak, neem hem dan letterlijk over.
 - Bibliotheken: alleen `verovio`, `fast-xml-parser` en `spessasynth_lib`. Geen andere.

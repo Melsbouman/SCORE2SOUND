@@ -59,12 +59,12 @@ Pakket 0 zet elk later bestand alvast klaar als lege module, en koppelt alles aa
 | 2 | Duur: deelwaarden, maatsoort naar verwachte maatlengte | `app/src/model/duur.mjs` | Codex | 0 | 1 |
 | 3 | Basispagina: kop, uploadvlak, lege stand | `app/public/index.html`, `app/public/app.css` | Copilot | 0 | 1 |
 | 4 | Woordenlijst van de muziektermen in de app | `docs/woordenlijst.md` | Hermes | 0 | 1 |
-| 5 | MusicXML lezen: partijen, maten, noten, rusten, stemmen | `app/src/musicxml/lezen.mjs` | Codex | 1, 2 | 2 |
+| 5 | MusicXML lezen: partijen, maten, noten, rusten, stemmen | `app/src/musicxml/lezen.mjs` | Codex | 1, 2 | 3 |
 | 6 | MusicXML lezen: sleutel, voortekens, maatsoort, tempo, dynamiek, articulatie | `app/src/musicxml/aanwijzingen.mjs` | Codex | 1, 2 | 2 |
-| 7 | Controle maatduur: maten met een onverwachte duur | `app/src/controle/maatduur.mjs` | Codex | 2 | 2 |
+| 7 | Controle maatduur: maten met een onverwachte duur | `app/src/controle/maatduur.mjs` | Copilot | 2 | 2 |
 | 8 | Uploaden in de browser en het resultaat tonen | `app/public/js/upload.js` | Copilot | 3 | 2 |
-| 9 | API: MusicXML ontvangen, model en meldingen teruggeven | `app/src/server/importeer.mjs` | Codex | 5, 6, 7 | 3 |
-| 10 | MIDI schrijven: een spoor per partij, tempo, volume | `app/src/midi/schrijven.mjs` | Codex | 1, 2 | 3 |
+| 9 | API: MusicXML ontvangen, model en meldingen teruggeven | `app/src/server/importeer.mjs` | Codex | 5, 6, 7 | 4 |
+| 10 | MIDI schrijven: een spoor per partij, tempo, volume | `app/src/midi/schrijven.mjs` | Codex | 1, 2 | 2 |
 | 11 | Notatie tekenen met Verovio | `app/public/js/weergave.js` | Claude (lastige koppeling, daarna kleine taken voor Copilot) | 3 | 3 |
 | 12 | Meldingen tonen: welke maat, wat er mis is, springen naar de maat | `app/public/js/views/meldingen.js` | Copilot | 7, 8 | 3 |
 | 13 | Speler: afspelen, pauze, tempo, passage herhalen | `app/public/js/speler.js` | Claude (koppeling met spessasynth), daarna Copilot | 10, 11 | 4 |
@@ -74,6 +74,8 @@ Pakket 0 zet elk later bestand alvast klaar als lege module, en koppelt alles aa
 | 17 | Export-knoppen MusicXML en MIDI | `app/public/js/views/export.js` | Copilot | 10, 15 | 5 |
 | 18 | Projectenlijst: bewaarde projecten openen | `app/public/js/views/projecten.js` | Copilot | 16 | 5 |
 | 19 | Eindcontrole fase 1 en gebruikersuitleg | `README.md`, plan bijwerken | Claude | alles | 5 |
+
+Pakket 0b (Claude, golf 1): `app/src/musicxml/xml.mjs`, een kleine XML-hulp die de volgorde van elementen bewaart, met tests. Pakket 5 en 6 bouwen erop. Daardoor komt 6 (aanwijzingen) in golf 2 en 5 (lezen, gebruikt 6) in golf 3.
 
 Pakketten groter dan 150 regels knip ik bij het klaarzetten verder op (bijvoorbeeld 5 in "partijen en maten" en "noten en stemmen").
 
