@@ -12,11 +12,11 @@ Claude pakt hier werk uit als een nachtplan af is en de eindtijd nog niet bereik
 - [ ] De speler volgt nog geen herhalingen, dynamiek en articulatie (fase 4). (Claude)
 
 ## Wacht op Mels
-- [ ] Akkoord om een klankbank te downloaden voor de speler, bijvoorbeeld MuseScore_General.sf3 (MIT, ongeveer 38 MB), naar `app/public/klankbank/standaard.sf3`.
 - [ ] Audiveris installeren voor fase 2 (herkenning van PDF en foto).
 - [ ] Branch protection op `main` aanzetten (PR verplicht, later ook de check `controle`).
 
 ## Klaar
+- [x] Klankbank MuseScore_General.sf3 gedownload met akkoord van Mels; de speler speelt af en de maten lopen mee (30 oktober 2026).
 - [x] Fase 3 zonder Audiveris: instrumentenlijst, transponeren met bereikmeldingen, partijen uitnemen en samenvoegen, scherm Partijen bewerken (nacht van 29 op 30 oktober 2026). (Claude)
 - [x] Projectuitleg verwerkt en fase 1 van de app gebouwd (nacht van 29 op 30 oktober 2026). (Claude)
 - [x] Copilot werkt op het account van Mels; een taak met `--voor copilot` is door Copilot zelf gedaan (29 oktober 2026).

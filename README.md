@@ -20,7 +20,12 @@ npm start
 ```
 Open daarna http://localhost:5175.
 
-Voor het afspelen is een General MIDI-klankbank nodig in `app/public/klankbank/standaard.sf3` (niet in git, omdat hij groot is). Zonder klankbank werkt alles behalve het geluid, en de speler zegt dat.
+Voor het afspelen is een General MIDI-klankbank nodig in `app/public/klankbank/standaard.sf3` (niet in git, omdat hij groot is). Wij gebruiken MuseScore_General.sf3 (MIT-licentie, ongeveer 40 MB):
+```bash
+mkdir -p app/public/klankbank
+curl -L -o app/public/klankbank/standaard.sf3 https://ftp.osuosl.org/pub/musescore/soundfont/MuseScore_General/MuseScore_General.sf3
+```
+Zonder klankbank werkt alles behalve het geluid, en de speler zegt dat.
 
 ## Testen
 ```bash
