@@ -39,7 +39,9 @@ function maakSpoor(events) {
 
 function maatDuur(maat) {
   if (!maat.opmaat) return maatLengte(maat.maatsoort);
-  return maat.elementen.reduce((einde, element) => Math.max(einde, element.start + element.duur), 0);
+  return maat.elementen
+    .filter((element) => element.soort === 'noot' || element.soort === 'rust')
+    .reduce((einde, element) => Math.max(einde, element.start + element.duur), 0);
 }
 
 function maatBeginnen(partituur) {
