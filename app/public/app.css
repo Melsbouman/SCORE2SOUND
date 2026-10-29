@@ -56,6 +56,7 @@ body {
     "weergave"
     "speler"
     "mixer"
+    "bewerken"
     "meldingen"
     "export";
   gap: var(--ruimte-3);
@@ -74,6 +75,7 @@ body {
 #weergave { grid-area: weergave; }
 #speler { grid-area: speler; }
 #mixer { grid-area: mixer; }
+#bewerken { grid-area: bewerken; }
 #meldingen { grid-area: meldingen; }
 #export { grid-area: export; }
 #upload {
@@ -121,13 +123,14 @@ body {
       "projecten projecten"
       "weergave speler"
       "weergave mixer"
+      "weergave bewerken"
       "weergave meldingen"
       "weergave export";
   }
 }
 
 /* Speler */
-#speler h2, #meldingen h2, #mixer h2, #export h2 { margin: 0 0 var(--ruimte-3); font-size: 18px; }
+#speler h2, #meldingen h2, #mixer h2, #bewerken h2, #export h2 { margin: 0 0 var(--ruimte-3); font-size: 18px; }
 .speler__knoppen { display: flex; flex-wrap: wrap; gap: var(--ruimte-2); margin-bottom: var(--ruimte-3); }
 .speler__veld { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ruimte-2); margin: var(--ruimte-2) 0; }
 .speler__veld input[type="range"] { flex: 1 1 140px; accent-color: var(--kleur-accent); }
