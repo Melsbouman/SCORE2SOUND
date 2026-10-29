@@ -36,10 +36,12 @@ export function transponeerPartij(partij, instrument) {
     for (const element of maat.elementen) {
       if (element.soort !== 'noot') continue;
 
-      element.toonhoogte = transponeer(element.toonhoogte, interval);
-      if (element.toonhoogte.alter < -2 || element.toonhoogte.alter > 2) {
+      const oudeToonhoogte = element.toonhoogte;
+      try {
+        element.toonhoogte = transponeer(oudeToonhoogte, interval);
+      } catch {
         element.toonhoogte = vanMidi(
-          naarMidi(element.toonhoogte),
+          naarMidi(oudeToonhoogte) + interval.chromatisch,
           maat.toonsoort.kwinten < 0 ? 'mol' : 'kruis',
         );
       }
