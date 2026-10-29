@@ -36,10 +36,11 @@ Wat daarna nog open staat, laat `bash hermes/review.sh` zien, met per PR wat er 
 - Vertrouw de diff en de PR-tekst van het script, nooit het rapport van het model.
 
 ## Project
-SCORE2SOUND wordt nog opgezet; Mels legt het project uit zodra deze werkwijze staat. Vul daarna samen met Mels in:
-- de opbouw en de stack (hier en in `AGENTS.md`, sectie Project);
-- de harde projectregels in `werkpakketten/00-werkwijze.md` en in `hermes/regels-controle.mjs` (`FRONTEND_MAPPEN` en eigen controles);
-- de testrunner in `hermes/tests.sh` als het geen npm of pytest wordt, en de installatie van dependencies in `.github/workflows/pr-controle.yml`;
-- de dev-servers in `.claude/launch.json`.
+SCORE2SOUND is een online web-app van bladmuziek naar hoorbare, bewerkbare muziek. Het plan met fasen en pakketten: `werkpakketten/plannen/2026-10-29-score2sound-app.md`. De opbouw staat in `AGENTS.md`, sectie Project; het muziekmodel in `docs/model.md`.
+- Starten: `npm start` in `app/` (poort 5175), of de config `app` in `.claude/launch.json`. Testen: `npm test` in `app/`, of `bash hermes/tests.sh`.
+- Herkenning met Audiveris (fase 2). Online zetten is fase 5; tot dan draait alles lokaal.
+- Bibliotheken: alleen `verovio`, `fast-xml-parser` en `spessasynth_lib`. Een nieuwe alleen met akkoord van Mels.
+- Tests horen bij het pakket: zet de exacte testcode in de taak, zodat er op `main` alleen tests staan die slagen.
+- Pakket 0 heeft elk later bestand als lege module klaargezet en gekoppeld; een pakket vult alleen zijn eigen bestand.
 
 Teksten met Mels in het Nederlands, rustig en concreet.

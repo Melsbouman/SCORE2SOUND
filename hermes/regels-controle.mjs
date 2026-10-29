@@ -4,10 +4,10 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 
-// Projectregels: vul deze in zodra de opbouw van SCORE2SOUND vastligt.
+// Projectregels van SCORE2SOUND.
 // Mappen met code die in de browser draait. Daarin zijn inline scripts en externe bronnen (CDN) een fout.
 // Leeg = deze controle staat uit.
-const FRONTEND_MAPPEN = [];
+const FRONTEND_MAPPEN = ['app/public/'];
 // Bestanden waarin een nieuwe regel een nieuwe dependency kan zijn.
 const DEPENDENCY_BESTANDEN = /(^|\/)(package\.json|requirements[^/]*\.txt|pyproject\.toml)$/;
 

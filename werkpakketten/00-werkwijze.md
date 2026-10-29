@@ -3,7 +3,7 @@
 Je voert één werkpakket uit voor SCORE2SOUND. De keuzes zijn al gemaakt door Claude en Mels en staan in je taak. **Je kiest niets zelf.** Staat iets niet in je taak, of klopt de taak niet met de code, stop dan en meld het in je rapport. Gok niet.
 
 ## Het project
-SCORE2SOUND wordt nog opgezet. Zodra de opbouw vastligt, staan hier de mappen, wat waar hoort en welke onderdelen je niet aanraakt.
+SCORE2SOUND is een web-app in `app/` (Node 24, JavaScript-modules, geen framework). De opbouw staat in `AGENTS.md`, sectie Project; het muziekmodel, het contract tussen alle onderdelen, in `docs/model.md`.
 
 ## Harde regels
 1. **Werk alleen in de bestanden die je taak als jouw bestanden noemt.** Andere agents werken tegelijk in andere bestanden.
@@ -14,7 +14,12 @@ SCORE2SOUND wordt nog opgezet. Zodra de opbouw vastligt, staan hier de mappen, w
 6. **Regeleinde:** laat het regeleinde aan het einde van elk bestand staan.
 
 ## Projectregels
-Komen hier zodra de stack van SCORE2SOUND gekozen is (bijvoorbeeld: welke mappen frontend zijn, of CDN's mogen, hoe invoer wordt gecontroleerd).
+1. **Het model volgen:** tijd in tikken (480 per kwartnoot), genoteerde toonhoogte `{ stap, alter, octaaf }`, meldingen in de vorm uit `docs/model.md`.
+2. **Browser en server gescheiden:** code in `app/src/` (behalve `server/` en `musicxml/lezen.mjs`) draait ook in de browser en gebruikt geen Node-modules.
+3. **Laat staan:** `app/server.mjs`, `app/public/js/main.js`, `app/public/js/app.js` en de `id`'s van de vlakken in `index.html`, tenzij de taak ze noemt.
+4. **Geen inline scripts en geen externe bronnen** in `app/public/`: de app stuurt een strikte Content-Security-Policy mee.
+5. **Invoer is niet te vertrouwen:** een geüpload bestand kan kapot of kwaadaardig zijn. Geef dan een nette melding, geen crash, en schrijf nooit buiten de map die de taak noemt.
+6. **Een scherm tekent alleen in zijn eigen vlak** (`<section id="...">`) en praat met de rest via `app` uit `js/app.js`.
 
 ## Verplichte zelfcontrole (alleen handmatig, zonder runner-script)
 Draai vanuit de hoofdmap van de repo en zet de uitkomst in je rapport:
