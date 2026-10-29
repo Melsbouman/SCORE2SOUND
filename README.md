@@ -6,5 +6,4 @@ Het project zelf volgt nog. Deze repo heeft al een werkwijze met agents: Claude 
 - Werkwijze per stap: `hermes/WERKWIJZE.md`
 - Afspraken voor Claude: `CLAUDE.md`
 - Afspraken voor agents: `AGENTS.md`
-
 Test van de agent-workflow.
