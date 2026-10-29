@@ -208,6 +208,7 @@ Nieuw voor deze opzet:
 17. ChatGPT Plus heeft een gebruikslimiet per paar uur. Doet Codex daardoor niets, dan neemt de reserve (Copilot, daarna Hermes met Haiku) het over.
 18. GitHub Actions op een privérepo kan stoppen door een betalingsinstelling ("recent account payments have failed"). De repo is daarom openbaar. Als Actions niet draait, zet `AIFLOW_ACTION=uit`; het script draait dezelfde controles zelf.
 19. Codex leest veel context in (rond 130k tokens voor een taak van één regel, grotendeels uit de cache). Dat telt mee voor de limiet van ChatGPT Plus; houd taken klein en precies.
+20. GitHub weigert een push soms even (`remote rejected ... (failed)`), ook als alles klopt. De runner probeert een push daarom drie keer, met 15 en 30 seconden pauze. Lukt het toch niet, dan staat de branch er vaak al wel: push hem opnieuw en open de PR met de hand.
 
 ## 13. Gemeten op 29 oktober 2026
 Een echte ronde op GitHub, met `werkpakketten.sh --alle`:
