@@ -17,3 +17,29 @@ export const INSTRUMENTEN = [
   { id: 'altviool', naam: 'Altviool', midiProgramma: 41, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'C', lijn: 3 }, bereik: { laag: 48, hoog: 88 } },
   { id: 'cello', naam: 'Cello', midiProgramma: 42, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'F', lijn: 4 }, bereik: { laag: 36, hoog: 76 } },
 ];
+
+// Herkent een instrument aan een partijnaam uit een partituur. De volgorde telt: de eerste die past, wint.
+const NAMEN = [
+  [/bugel|flugel|flug\./, 'bugel'],
+  [/sax.*alt|alt.*sax/, 'altsaxofoon'],
+  [/sax.*ten|ten.*sax/, 'tenorsaxofoon'],
+  [/trombone|\btrb\b|\btbn\b/, 'trombone'],
+  [/trompet|trumpet|cornet|kornet|\bcts?\b/, 'trompet'],
+  [/althoorn|alto horn|tenor horn/, 'althoorn'],
+  [/hoorn in f|horn in f/, 'hoorn'],
+  [/\bhorn\b|\bhn\b|\bhoorn\b/, 'althoorn'],
+  [/bariton|euph/, 'bariton'],
+  [/tuba|\bbass\b|\bbas\b|\bbasses\b/, 'tuba'],
+  [/klarinet|clarinet/, 'klarinet'],
+  [/fluit|flute/, 'dwarsfluit'],
+  [/hobo|oboe/, 'hobo'],
+  [/altviool|viola/, 'altviool'],
+  [/viool|violin/, 'viool'],
+  [/cello/, 'cello'],
+];
+
+export function instrumentBijNaam(naam) {
+  const schoon = naam.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const regel = NAMEN.find(([patroon]) => patroon.test(schoon));
+  return regel ? INSTRUMENTEN.find((instrument) => instrument.id === regel[1]) : null;
+}
