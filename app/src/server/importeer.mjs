@@ -1,5 +1,6 @@
 import { leesMusicXML } from '../musicxml/lezen.mjs';
 import { controleerMaatduur } from '../controle/maatduur.mjs';
+import { leesZip } from './zip.mjs';
 
 async function importeerOngecomprimeerd(verzoek) {
   if (verzoek.methode !== 'POST') {
@@ -29,8 +30,6 @@ async function importeerOngecomprimeerd(verzoek) {
     return { status: 422, body: { fout: fout.message } };
   }
 }
-import { leesZip } from './zip.mjs';
-
 export default async function importeer(verzoek) {
   const body = verzoek.body;
   if (!Buffer.isBuffer(body) || body.length < 4 || body.readUInt32LE(0) !== 0x04034b50) {
