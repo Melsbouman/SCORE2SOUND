@@ -2,7 +2,7 @@
 // Wordt gebouwd in fase 3 van werkpakketten/plannen/2026-10-29-score2sound-app.md.
 import { INSTRUMENTEN } from '/src/model/instrumenten.mjs';
 import { transponeerPartij } from '/src/model/transponeren.mjs';
-import { partijUitnemen } from '/src/model/partijen.mjs';
+import { partijUitnemen, voegSamen } from '/src/model/partijen.mjs';
 
 export function start(app) {
   const vlak = document.getElementById('bewerken');
@@ -105,6 +105,52 @@ export function start(app) {
     });
     knoppen.append(omzetten, uitnemen);
     vlak.append(knoppen);
+
+    const bestandLabel = document.createElement('label');
+    const bestandTekst = document.createElement('span');
+    const bestandInvoer = document.createElement('input');
+    bestandTekst.textContent = 'Partijen toevoegen uit een ander bestand ';
+    bestandInvoer.type = 'file';
+    bestandInvoer.accept = '.musicxml,.xml,.mxl';
+    bestandLabel.append(bestandTekst, bestandInvoer);
+    bestandInvoer.addEventListener('change', async () => {
+      const bestand = bestandInvoer.files[0];
+      if (!bestand) return;
+
+      let antwoord;
+      try {
+        antwoord = await fetch('/api/importeer', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/vnd.recordare.musicxml+xml' },
+          body: bestand,
+        });
+      } catch {
+        toonStatus('De server is niet bereikbaar. Probeer het opnieuw.');
+        bestandInvoer.value = '';
+        return;
+      }
+
+      const resultaat = await antwoord.json();
+      if (!antwoord.ok) {
+        toonStatus(`Dat lukte niet: ${resultaat.fout}`);
+      } else {
+        const samengevoegd = voegSamen([app.stand.partituur, resultaat.partituur]);
+        const aantal = resultaat.partituur.partijen.length;
+        const status = `${aantal} partijen toegevoegd uit ${bestand.name}.${
+          samengevoegd.meldingen.length
+            ? ` Let op: ${samengevoegd.meldingen.length} meldingen, zie Meldingen.`
+            : ''
+        }`;
+        toonStatus(status);
+        app.zet({
+          partituur: samengevoegd.partituur,
+          meldingen: [...app.stand.meldingen, ...samengevoegd.meldingen],
+          project: null,
+        });
+      }
+      bestandInvoer.value = '';
+    });
+    vlak.append(bestandLabel);
 
     statusVeld = document.createElement('p');
     statusVeld.className = 'zacht';
