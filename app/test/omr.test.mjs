@@ -106,3 +106,12 @@ test('voegPaginasSamen laat de partituur staan als er niets samen te voegen valt
   const omr = leesZip(await voorbeeld('herkenning.omr'));
   assert.equal(voegPaginasSamen(partituur, omr.get('book.xml').toString('utf8'), bladenUitOmr(omr, [1])), partituur);
 });
+
+test('koppelOmr rekent rusten om: de hoogste waarde van Audiveris telt als zeker', async () => {
+  const { uit } = await gekoppeld();
+  const rust = uit.partituur.partijen[1].maten[1].elementen.find((e) => e.soort === 'rust');
+  assert.equal(rust.zekerheid, 0.978); // ctx-grade 0,782 van de 0,8
+  assert.equal(rust.plek.blad, 1);
+  const { uit: laag } = await gekoppeld((xml) => xml.replace(/(<rest [^>]*ctx-grade=")[\d.]+/, '$10.4'));
+  assert.equal(laag.partituur.partijen[1].maten[1].elementen.find((e) => e.soort === 'rust').zekerheid, 0.5);
+});
