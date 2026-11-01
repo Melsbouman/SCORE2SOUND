@@ -1,5 +1,6 @@
 import { naarMidi } from '../model/toonhoogte.mjs';
 import { maatLengte } from '../model/duur.mjs';
+import { uitgevouwen } from '../model/maten.mjs';
 
 const tekstEncoder = new TextEncoder();
 
@@ -140,10 +141,11 @@ function partijSpoor(partij, partijIndex, beginnen, volume) {
 }
 
 export function schrijfMidi(partituur, { volume = {} } = {}) {
-  const beginnen = maatBeginnen(partituur);
-  const sporen = [dirigentenSpoor(partituur, beginnen)];
-  for (let index = 0; index < partituur.partijen.length; index += 1) {
-    sporen.push(partijSpoor(partituur.partijen[index], index, beginnen, volume));
+  const gespeeld = uitgevouwen(partituur); // herhalingen klinken echt twee keer
+  const beginnen = maatBeginnen(gespeeld);
+  const sporen = [dirigentenSpoor(gespeeld, beginnen)];
+  for (let index = 0; index < gespeeld.partijen.length; index += 1) {
+    sporen.push(partijSpoor(gespeeld.partijen[index], index, beginnen, volume));
   }
   return Uint8Array.from([
     ...blok('MThd', [...getal16(1), ...getal16(sporen.length), ...getal16(480)]),

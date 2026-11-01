@@ -45,7 +45,8 @@ function tijdlijn(partituur) {
 
 export function start(app) {
   const vlak = document.getElementById('speler');
-  let tijden = [];
+  let tijden = []; // begin van elke gespeelde maat in seconden; herhaalde maten staan er meer keer in
+  let volgorde = []; // welke maat op elke plek in tijden klinkt
   let geladen = false;
   let speelMaat = null;
   let lus = 0;
@@ -61,8 +62,8 @@ export function start(app) {
   const stop = knop('Naar het begin');
   const tempo = Object.assign(document.createElement('input'), { type: 'range', min: 25, max: 150, step: 5, value: 100 });
   const tempoTekst = document.createElement('span');
-  const van = Object.assign(document.createElement('input'), { type: 'number', min: 1, value: 1, inputMode: 'numeric' });
-  const tot = Object.assign(document.createElement('input'), { type: 'number', min: 1, value: 1, inputMode: 'numeric' });
+  const van = Object.assign(document.createElement('input'), { type: 'text', value: '1', inputMode: 'numeric', size: 4 });
+  const tot = Object.assign(document.createElement('input'), { type: 'text', value: '1', inputMode: 'numeric', size: 4 });
   const herhaal = Object.assign(document.createElement('input'), { type: 'checkbox' });
   const status = Object.assign(document.createElement('p'), { className: 'zacht' });
   status.setAttribute('role', 'status');
@@ -86,7 +87,9 @@ export function start(app) {
     while (i + 1 < tijden.length && tijden[i + 1] <= seconden + 1e-6) i++;
     return i;
   };
-  const geldigeMaat = (invoer) => Math.min(Math.max(1, Number(invoer.value) || 1), Math.max(1, tijden.length)) - 1;
+  const maten = () => app.stand.partituur?.partijen[0]?.maten ?? [];
+  const geldigeMaat = (invoer) => maatIndexVanNummer(maten(), invoer.value);
+  const eersteKeer = (maat) => Math.max(0, volgorde.indexOf(maat));
 
   function pasMixerToe() {
     if (!geluid || !app.stand.partituur) return;
@@ -115,8 +118,8 @@ export function start(app) {
       return;
     }
     if (herhaal.checked) {
-      const begin = geldigeMaat(van);
-      const eind = geldigeMaat(tot) + 1;
+      const begin = eersteKeer(geldigeMaat(van));
+      const eind = volgorde.lastIndexOf(geldigeMaat(tot)) + 1;
       const eindSec = eind < tijden.length ? tijden[eind] : geluid.seq.duration;
       if (t >= eindSec || t < tijden[begin] - 0.05) {
         geluid.seq.currentTime = tijden[begin];
@@ -126,7 +129,7 @@ export function start(app) {
     const nu = maatIndex(t);
     if (nu !== speelMaat) {
       speelMaat = nu;
-      app.meld('speel-maat', { maat: nu });
+      app.meld('speel-maat', { maat: volgorde[nu] });
     }
     lus = requestAnimationFrame(volg);
   }
@@ -148,7 +151,7 @@ export function start(app) {
       await geluid.context.resume();
       if (!geladen) await laad();
       geluid.seq.playbackRate = Number(tempo.value) / 100;
-      if (herhaal.checked) geluid.seq.currentTime = tijden[geldigeMaat(van)];
+      if (herhaal.checked) geluid.seq.currentTime = tijden[eersteKeer(geldigeMaat(van))];
       geluid.seq.play();
       pasMixerToe();
       speel.textContent = 'Pauze';
@@ -188,20 +191,20 @@ export function start(app) {
     pauze();
     geladen = false;
     speelMaat = null;
-    tijden = partituur ? tijdlijn(partituur) : [];
-    van.max = tot.max = String(Math.max(1, tijden.length));
-    van.value = '1';
-    tot.value = String(Math.max(1, tijden.length));
+    tijden = partituur ? tijdlijn(uitgevouwen(partituur)) : [];
+    volgorde = speelVolgorde(maten());
+    van.value = maten()[0]?.nummer ?? '1';
+    tot.value = maten().at(-1)?.nummer ?? '1';
     status.textContent = '';
     teken();
   });
   app.op('mixer', pasMixerToe);
   app.op('naar-maat', (doel) => {
     if (doel?.maat === null || doel?.maat === undefined || !tijden.length) return;
-    van.value = String(doel.maat + 1);
-    if (geluid && geladen) geluid.seq.currentTime = tijden[doel.maat];
+    van.value = maten()[doel.maat]?.nummer ?? van.value;
+    if (geluid && geladen) geluid.seq.currentTime = tijden[eersteKeer(doel.maat)];
   });
   teken();
 }
-import { maatIndexVanNummer } from '/src/model/maten.mjs';
+import { maatIndexVanNummer, speelVolgorde, uitgevouwen } from '/src/model/maten.mjs';
 
