@@ -1,7 +1,7 @@
 import { leesMusicXML } from '../musicxml/lezen.mjs';
 import { controleerMaatduur } from '../controle/maatduur.mjs';
 
-export default async function importeer(verzoek) {
+async function importeerOngecomprimeerd(verzoek) {
   if (verzoek.methode !== 'POST') {
     return { status: 405, body: { fout: 'Gebruik POST om een bestand te importeren.' } };
   }
@@ -25,6 +25,33 @@ export default async function importeer(verzoek) {
     const xml = verzoek.body.toString('utf8').replace(/^\uFEFF/, '');
     const partituur = leesMusicXML(xml);
     return { status: 200, body: { partituur, meldingen: controleerMaatduur(partituur) } };
+  } catch (fout) {
+    return { status: 422, body: { fout: fout.message } };
+  }
+}
+import { leesZip } from './zip.mjs';
+
+export default async function importeer(verzoek) {
+  const body = verzoek.body;
+  if (!Buffer.isBuffer(body) || body.length < 4 || body.readUInt32LE(0) !== 0x04034b50) {
+    return importeerOngecomprimeerd(verzoek);
+  }
+
+  try {
+    const gelezen = await leesZip(body);
+    const bestanden = gelezen instanceof Map ? gelezen : new Map(Object.entries(gelezen));
+    let pad;
+    if (bestanden.has('META-INF/container.xml')) {
+      const container = Buffer.from(bestanden.get('META-INF/container.xml')).toString('utf8');
+      pad = container.match(/full-path="([^"]+)"/)?.[1];
+    } else {
+      pad = [...bestanden.keys()].find((naam) =>
+        !naam.startsWith('META-INF/') && (naam.endsWith('.xml') || naam.endsWith('.musicxml')));
+    }
+    if (!pad || !bestanden.has(pad)) {
+      return { status: 422, body: { fout: 'In dit .mxl-bestand staat geen MusicXML.' } };
+    }
+    return importeerOngecomprimeerd({ ...verzoek, body: Buffer.from(bestanden.get(pad)) });
   } catch (fout) {
     return { status: 422, body: { fout: fout.message } };
   }
