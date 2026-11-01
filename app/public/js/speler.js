@@ -203,3 +203,5 @@ export function start(app) {
   });
   teken();
 }
+import { maatIndexVanNummer } from '/src/model/maten.mjs';
+
