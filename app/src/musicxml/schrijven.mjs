@@ -82,7 +82,7 @@ function schrijfNotations(element) {
   return inhoud ? tag('notations', inhoud) : '';
 }
 
-function schrijfNoot(element, meerdereBalken) {
+function schrijfNoot(element, meerdereBalken, partij, maat, weergave) {
   const info = duurInfo(element.duur);
   let inhoud = element.akkoord ? leeg('chord') : '';
   if (element.soort === 'rust') inhoud += leeg('rest', element.heleMaat ? { measure: 'yes' } : {});
@@ -99,10 +99,14 @@ function schrijfNoot(element, meerdereBalken) {
   if (info.triool) inhoud += tag('time-modification', tag('actual-notes', 3) + tag('normal-notes', 2));
   if (meerdereBalken) inhoud += tag('staff', element.notenbalk);
   inhoud += schrijfNotations(element);
-  return tag('note', inhoud);
+  const attributen = weergave ? {
+    id: `n-${partij.id}-${maat.index}-${maat.elementen.indexOf(element)}`,
+    color: element.zekerheid < 0.8 ? '#C0392B' : null,
+  } : {};
+  return tag('note', inhoud, attributen);
 }
 
-function schrijfStemmen(maat) {
+function schrijfStemmen(maat, partij, weergave) {
   const elementen = maat.elementen.filter((element) => element.soort === 'noot' || element.soort === 'rust');
   const stemmen = [...new Set(elementen.map((element) => element.stem))].sort((a, b) => a - b);
   const balken = Math.max(1, ...maat.sleutels.map((sleutel) => sleutel.notenbalk || 1));
@@ -111,7 +115,7 @@ function schrijfStemmen(maat) {
     let positie = 0;
     for (const element of elementen.filter((item) => item.stem === stem).sort((a, b) => a.start - b.start || Number(a.akkoord) - Number(b.akkoord))) {
       if (!element.akkoord && element.start > positie) xml += tag('forward', tag('duration', element.start - positie));
-      xml += schrijfNoot(element, balken > 1);
+      xml += schrijfNoot(element, balken > 1, partij, maat, weergave);
       if (!element.akkoord) positie = Math.max(positie, element.start + element.duur);
     }
     if (index < stemmen.length - 1 && positie > 0) xml += tag('backup', tag('duration', positie));
@@ -119,18 +123,18 @@ function schrijfStemmen(maat) {
   return xml;
 }
 
-function schrijfMaat(maat, vorige, instrument) {
+function schrijfMaat(maat, vorige, instrument, partij, weergave) {
   let inhoud = schrijfAttributes(maat, vorige, instrument);
   const aanwijzingen = maat.elementen.filter((element) => element.soort === 'aanwijzing');
   if (maat.tempo != null && !aanwijzingen.some((item) => item.type === 'tempo')) aanwijzingen.unshift({ start: 0, type: 'tempo', waarde: maat.tempo });
   inhoud += aanwijzingen.map(schrijfAanwijzing).join('');
   if (maat.herhaling?.begin) inhoud += tag('barline', leeg('repeat', { direction: 'forward' }), { location: 'left' });
-  inhoud += schrijfStemmen(maat);
+  inhoud += schrijfStemmen(maat, partij, weergave);
   if (maat.herhaling?.eind) inhoud += tag('barline', leeg('repeat', { direction: 'backward', times: maat.herhaling.keer }), { location: 'right' });
   return tag('measure', inhoud, { number: maat.nummer, ...(maat.opmaat ? { implicit: 'yes' } : {}) });
 }
 
-export function naarMusicXML(partituur) {
+export function naarMusicXML(partituur, opties = {}) {
   let hoofd = '';
   if (partituur.titel) hoofd += tag('work', tag('work-title', esc(partituur.titel)));
   if (partituur.componist) hoofd += tag('identification', tag('creator', esc(partituur.componist), { type: 'composer' }));
@@ -140,6 +144,6 @@ export function naarMusicXML(partituur) {
     inhoud += tag('midi-instrument', tag('midi-program', partij.instrument.midiProgramma + 1), { id: `${partij.id}-I1` });
     return tag('score-part', inhoud, { id: partij.id });
   }).join(''));
-  hoofd += partituur.partijen.map((partij) => tag('part', partij.maten.map((maat, index) => schrijfMaat(maat, partij.maten[index - 1], partij.instrument)).join(''), { id: partij.id })).join('');
+  hoofd += partituur.partijen.map((partij) => tag('part', partij.maten.map((maat, index) => schrijfMaat(maat, partij.maten[index - 1], partij.instrument, partij, opties.weergave)).join(''), { id: partij.id })).join('');
   return `<?xml version="1.0" encoding="UTF-8"?>${tag('score-partwise', hoofd, { version: '4.0' })}`;
 }
