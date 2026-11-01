@@ -78,6 +78,7 @@ export function voegSamen(partituren) {
       titel: eerstePartituur.titel,
       componist: eerstePartituur.componist,
       partijen,
+      ...(eerstePartituur.bron ? { bron: eerstePartituur.bron } : {}),
     },
     meldingen,
   };

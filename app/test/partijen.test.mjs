@@ -48,3 +48,11 @@ test('voegSamen: meldt een verschil in het aantal maten en in de maatsoort', () 
 test('voegSamen: zonder partituren is een fout', () => {
   assert.throws(() => voegSamen([]), /geen partituren/);
 });
+
+test('voegSamen houdt de bron van de eerste partituur vast, zodat het origineel blijft', () => {
+  const partij = { id: 'P1', naam: 'A', afkorting: '', instrument: { midiProgramma: 0, transpositie: { chromatisch: 0, diatonisch: 0 } }, maten: [] };
+  const bron = { herkenning: 'a1b2c3d4e5f6', bladen: [] };
+  const uit = voegSamen([{ versie: 1, titel: '', componist: '', partijen: [partij], bron }, { versie: 1, titel: '', componist: '', partijen: [partij] }]);
+  assert.deepEqual(uit.partituur.bron, bron);
+  assert.equal(voegSamen([{ versie: 1, titel: '', componist: '', partijen: [partij] }]).partituur.bron, undefined);
+});
