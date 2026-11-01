@@ -202,3 +202,13 @@ body {
 
 /* Export */
 #export .knop { margin: 0 var(--ruimte-2) var(--ruimte-2) 0; }
+
+@media print {
+  .kop, #upload, #projecten, #origineel, #corrigeren, #speler, #mixer, #bewerken, #meldingen, #export { display: none !important; }
+  body { background: #ffffff; }
+  .werkvlak, .werkvlak.met-origineel { display: block; padding: 0; }
+  #weergave { border: 0; padding: 0; box-shadow: none; background: #ffffff; }
+  .bladmuziek { padding: 0; overflow: visible; }
+  .bladmuziek__pagina { break-inside: avoid; }
+  .bladmuziek g.note[color] { fill: #000000; color: #000000; }
+}

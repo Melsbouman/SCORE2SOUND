@@ -36,9 +36,16 @@ export function start(app) {
     midiKnop.className = 'knop'
     midiKnop.textContent = 'MIDI downloaden'
 
+    const printKnop = document.createElement('button')
+    printKnop.type = 'button'
+    printKnop.className = 'knop'
+    printKnop.textContent = 'PDF of afdrukken'
+
     const status = document.createElement('p')
     status.className = 'zacht'
     status.setAttribute('role', 'status')
+
+    printKnop.addEventListener('click', () => window.print())
 
     musicXmlKnop.addEventListener('click', async () => {
       try {
@@ -72,6 +79,6 @@ export function start(app) {
       }
     })
 
-    vlak.append(kop, musicXmlKnop, midiKnop, status)
+    vlak.append(kop, musicXmlKnop, midiKnop, printKnop, status)
   })
 }
