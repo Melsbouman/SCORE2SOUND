@@ -54,6 +54,7 @@ body {
     "upload"
     "projecten"
     "weergave"
+    "corrigeren"
     "speler"
     "mixer"
     "bewerken"
@@ -73,11 +74,27 @@ body {
 #upload { grid-area: upload; }
 #projecten { grid-area: projecten; }
 #weergave { grid-area: weergave; }
+#corrigeren { grid-area: corrigeren; }
+#origineel { grid-area: origineel; display: none; }
 #speler { grid-area: speler; }
 #mixer { grid-area: mixer; }
 #bewerken { grid-area: bewerken; }
 #meldingen { grid-area: meldingen; }
 #export { grid-area: export; }
+.met-origineel #origineel { display: block; }
+.werkvlak.met-origineel {
+  grid-template-areas:
+    "upload"
+    "projecten"
+    "weergave"
+    "origineel"
+    "corrigeren"
+    "speler"
+    "mixer"
+    "bewerken"
+    "meldingen"
+    "export";
+}
 #upload {
   border: 2px dashed var(--kleur-accent);
   background: var(--kleur-accent-zacht);
@@ -86,6 +103,18 @@ body {
 #upload p { margin: 0; }
 #upload.sleept { background: var(--kleur-vlak); border-style: solid; }
 #upload label.knop { display: inline-block; margin-top: var(--ruimte-3); }
+#upload progress { display: block; width: 100%; margin-top: var(--ruimte-2); }
+#upload input[type="text"] { font: inherit; margin-left: var(--ruimte-2); max-width: 10em; }
+
+.origineel__knoppen { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ruimte-2); margin-bottom: var(--ruimte-2); }
+.origineel__blad { overflow: auto; max-height: 85vh; background: #ffffff; border-radius: var(--hoek); }
+.origineel__papier { position: relative; }
+.origineel__papier img { display: block; width: 100%; height: auto; }
+.origineel__plek { position: absolute; border: 2px solid #c0392b; border-radius: 4px; background: rgba(192, 57, 43, 0.15); pointer-events: none; }
+#origineel h2, #corrigeren h2 { margin: 0 0 var(--ruimte-3); font-size: 18px; }
+.bladmuziek g.note, .bladmuziek g.rest { cursor: pointer; }
+.bladmuziek g.gekozen { fill: #2f5d8a; color: #2f5d8a; }
+.corrigeren__knoppen { display: flex; flex-wrap: wrap; gap: var(--ruimte-2); margin: var(--ruimte-2) 0; }
 
 /* Bladmuziek: altijd zwart op wit, als papier, ook in de donkere variant. */
 .bladmuziek { background: #ffffff; color: #000000; border-radius: var(--hoek); padding: var(--ruimte-2); overflow-x: auto; }
@@ -122,10 +151,23 @@ body {
       "upload upload"
       "projecten projecten"
       "weergave speler"
+      "weergave corrigeren"
       "weergave mixer"
       "weergave bewerken"
       "weergave meldingen"
       "weergave export";
+  }
+  .werkvlak.met-origineel {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 300px;
+    grid-template-areas:
+      "upload upload upload"
+      "projecten projecten projecten"
+      "weergave origineel speler"
+      "weergave origineel corrigeren"
+      "weergave origineel mixer"
+      "weergave origineel bewerken"
+      "weergave origineel meldingen"
+      "weergave origineel export";
   }
 }
 
