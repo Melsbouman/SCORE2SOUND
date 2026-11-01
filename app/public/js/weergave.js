@@ -19,13 +19,14 @@ function toolkit() {
 
 async function naarMusicXML(partituur) {
   const { naarMusicXML: omzetten } = await import('/src/musicxml/schrijven.mjs');
-  return omzetten(partituur);
+  return omzetten(partituur, { weergave: true });
 }
 
 export function start(app) {
   const vlak = document.getElementById('weergave');
   let huidige = null; // de laatst getekende MusicXML
   let tekenNummer = 0;
+  let gekozen = null;
 
   function status(tekst) {
     vlak.replaceChildren();
@@ -59,7 +60,22 @@ export function start(app) {
       blad.append(document.importNode(svg, true));
     }
     vlak.replaceChildren(blad);
+    markeerGekozen(false);
   }
+
+  function markeerGekozen(tonen) {
+    for (const element of vlak.querySelectorAll('.gekozen')) element.classList.remove('gekozen');
+    if (!gekozen) return;
+    const element = vlak.querySelector(`[id="${gekozen}"]`);
+    if (!element) return;
+    element.classList.add('gekozen');
+    if (tonen) element.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  }
+
+  vlak.addEventListener('click', (gebeurtenis) => {
+    const doel = gebeurtenis.target.closest('g.note, g.rest, g.mRest');
+    if (doel?.id.startsWith('n-')) app.meld('kies-noot', { id: doel.id });
+  });
 
   // De maten in volgorde; Verovio tekent elke maat als <g class="measure">, over alle partijen heen.
   const maten = () => [...vlak.querySelectorAll('g.measure')];
@@ -88,6 +104,10 @@ export function start(app) {
   app.op('musicxml', (tekst) => teken(tekst));
   app.op('naar-maat', (doel) => markeer(doel?.maat, 'gemarkeerd', true));
   app.op('speel-maat', (doel) => markeer(doel?.maat ?? null, 'speelt', false));
+  app.op('kies-noot', (keuze) => {
+    gekozen = keuze?.id ?? null;
+    markeerGekozen(true);
+  });
 
   // Opnieuw tekenen als de breedte echt verandert, zodat de regels passen.
   let vorigeBreedte = vlak.clientWidth;
