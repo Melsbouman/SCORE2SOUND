@@ -48,7 +48,10 @@ for m in $MAPPEN; do
     if [ -f "$m/package-lock.json" ] && [ ! -d "$m/node_modules" ]; then
       (cd "$m" && npm ci --silent >/dev/null 2>&1) || { echo "[$m] npm ci mislukt"; fout=1; continue; }
     fi
-    UIT=$(cd "$m" && npm test 2>&1); code=$?
+    # Een test die blijft hangen, mag de wachtrij niet tegenhouden.
+    UIT=$(cd "$m" && timeout -k 10 "${AIFLOW_TESTTIJD:-300}" npm test 2>&1); code=$?
+    if [ "$code" -ge 124 ]; then UIT="De tests bleven hangen en zijn na ${AIFLOW_TESTTIJD:-300} seconden gestopt.
+$UIT"; fi
     gedraaid=1
     # De samenvattingsregel van de testrunner, als die er is (node --test, vitest, jest).
     SAMEN=$(echo "$UIT" | grep -E '^ℹ (tests|pass|fail) |Tests:|Test Files|passed|failed' | tail -3 | tr -s ' \n' ' ')
