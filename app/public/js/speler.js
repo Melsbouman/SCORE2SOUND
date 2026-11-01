@@ -129,7 +129,7 @@ export function start(app) {
   }
 
   async function laad() {
-    const { schrijfMidi } = await import('/src/midi/schrijven.mjs');
+    const { kanaalVan, schrijfMidi } = await import('/src/midi/schrijven.mjs');
     const midi = schrijfMidi(app.stand.partituur);
     geluid.seq.loadNewSongList([{ binary: midi.buffer.slice(midi.byteOffset, midi.byteOffset + midi.byteLength), fileName: 'partituur.mid' }]);
     geluid.seq.pause();

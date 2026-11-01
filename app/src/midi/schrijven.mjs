@@ -82,10 +82,11 @@ function dirigentenSpoor(partituur, beginnen) {
 }
 
 function partijSpoor(partij, partijIndex, beginnen, volume) {
-  const kanaal = partijIndex >= 9 ? partijIndex + 1 : partijIndex;
+  const { poort, kanaal } = kanaalVan(partijIndex);
   const naam = [...tekstEncoder.encode(partij.naam)];
   const events = [
     { tik: 0, volgorde: 0, bytes: [0xff, 0x03, ...vlq(naam.length), ...naam] },
+    ...(poort > 0 ? [{ tik: 0, volgorde: 0, bytes: [0xff, 0x21, 1, poort] }] : []),
     { tik: 0, volgorde: 1, bytes: [0xc0 | kanaal, partij.instrument.midiProgramma] },
     { tik: 0, volgorde: 2, bytes: [0xb0 | kanaal, 7, volume[partij.id] ?? 100] },
   ];
@@ -130,3 +131,8 @@ export function schrijfMidi(partituur, { volume = {} } = {}) {
     ...sporen.flat(),
   ]);
 }
+export function kanaalVan(partijIndex) {
+  const plek = partijIndex % 15;
+  return { poort: Math.floor(partijIndex / 15), kanaal: plek >= 9 ? plek + 1 : plek };
+}
+
