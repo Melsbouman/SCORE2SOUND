@@ -54,6 +54,7 @@ test('leesBladen splitst book.xml in goede en mislukte bladen', () => {
 test('leesFoutmelding vertaalt bekende logregels', () => {
   assert.match(leesFoutmelding('or the picture resolution is too low (try 300 DPI).'), /300 dpi/);
   assert.match(leesFoutmelding('StepException: No regularly spaced lines found'), /geen notenbalken/);
+  assert.match(leesFoutmelding('StepException: No system found'), /geen notenbalken/);
   assert.match(leesFoutmelding('iets anders'), /niet herkend/);
 });
 

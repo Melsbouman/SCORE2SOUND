@@ -52,7 +52,7 @@ Wat `werkpakket.sh` doet, in volgorde:
 1. Kiest de taak uit zijn wachtrij: eerst `agent-terug` (afgekeurde PR), anders het oudste `agent-ready`, en sla taken over die bestanden delen met lopend werk. Stopt als de wachtrij al een `agent-bezig` heeft.
 2. Zet de eigen kloon schoon, maakt de branch `agent/<nummer>-<naam>` en zet `agent-bezig`.
 3. Roept de agent aan, met alleen de rechten om bestanden te schrijven (geen shell, geen git).
-4. Kijkt zelf welke bestanden echt zijn gewijzigd, draait wijzigingen buiten de lijst terug en vergelijkt met `## Verwacht`.
+4. Kijkt zelf welke bestanden echt zijn gewijzigd, draait wijzigingen buiten de lijst terug, controleert dat elk genoemd bestand bestaat en vergelijkt met `## Verwacht`.
 5. Commit, draait `regels-controle.mjs` (met syntaxcontrole) en `tests.sh`, en vergelijkt met `## Verwacht`.
 6. Faalt iets, dan krijgt dezelfde agent de foutmelding en zijn huidige wijziging terug als herstelronde (`AIFLOW_HERSTEL`, standaard 2). Faalt het daarna nog, dan `agent-vast` met de reden als comment en er wordt niet gepusht. Een afwijking van `## Verwacht` mag na de laatste ronde wel door, zonder `agent-exact`.
 7. Pusht, opent de PR (of plaatst een comment bij een afgekeurde PR) met de echte uitkomsten, en zet `agent-review`.

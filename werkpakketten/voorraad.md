@@ -4,18 +4,20 @@ Claude pakt hier werk uit als een nachtplan af is en de eindtijd nog niet bereik
 
 ## Open
 - [ ] Scherm om twee bestanden samen te voegen tot één ensemblepartituur (de logica staat in `app/src/model/partijen.mjs`). (Claude)
-- [ ] Een wachtrij stopt na een vastgelopen taak; laat hem doorgaan met de volgende taak. (Claude)
 - [ ] Notatie op een telefoon groter tekenen: bij 375 px is Verovio op schaal 50 erg klein; de schaal laten meegroeien met de breedte. (Claude)
-- [ ] Gecomprimeerde MusicXML (.mxl, een zip) kunnen openen. (Claude)
 - [ ] De speler gebruikt maatindex 1, 2, 3; met een opmaat wijkt dat af van de maatnummers op het blad. Maatnummers uit de partituur tonen. (Claude)
 - [ ] Verovio is 7 MB; voor de online versie (fase 5) gecomprimeerd leveren en cachen. (Claude)
 - [ ] De speler volgt nog geen herhalingen, dynamiek en articulatie (fase 4). (Claude)
+- [ ] Ondersteboven gescande pagina's herkennen: bij *Perihelion* staan pagina's op hun kop. (Claude)
+- [ ] Een pagina die vastloopt in Audiveris kost nu ongeveer 6 minuten; sneller opgeven of de pagina apart proberen. (Claude)
+- [ ] Oude herkenningen in `app/herkenning/` opruimen (uiterlijk in fase 5). (Claude)
 
 ## Wacht op Mels
-- [ ] Audiveris installeren voor fase 2 (herkenning van PDF en foto).
 - [ ] Branch protection op `main` aanzetten (PR verplicht, later ook de check `controle`).
 
 ## Klaar
+- [x] Wachtrij gaat door na een vastgelopen taak; het script merkt ontbrekende bestanden uit de taak op (1 november 2026). (Claude)
+- [x] Gecomprimeerde MusicXML (.mxl) openen en Audiveris geïnstalleerd (1 november 2026).
 - [x] Klankbank MuseScore_General.sf3 gedownload met akkoord van Mels; de speler speelt af en de maten lopen mee (30 oktober 2026).
 - [x] Fase 3 zonder Audiveris: instrumentenlijst, transponeren met bereikmeldingen, partijen uitnemen en samenvoegen, scherm Partijen bewerken (nacht van 29 op 30 oktober 2026). (Claude)
 - [x] Projectuitleg verwerkt en fase 1 van de app gebouwd (nacht van 29 op 30 oktober 2026). (Claude)

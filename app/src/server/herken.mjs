@@ -9,7 +9,7 @@ import {
   audiverisPad, draai, exporteerArgumenten, leesBladen, leesFoutmelding, leesVoortgang, stapTekst, transcribeerArgumenten, voortgangProcent,
 } from './audiveris.mjs';
 import { leesZip } from './zip.mjs';
-import { bladenUitOmr, koppelOmr } from './omr.mjs';
+import { bladenUitOmr, koppelOmr, voegPaginasSamen } from './omr.mjs';
 import { leesMusicXML } from '../musicxml/lezen.mjs';
 import { controleerMaatduur } from '../controle/maatduur.mjs';
 import { instrumentBijNaam } from '../model/instrumenten.mjs';
@@ -91,7 +91,8 @@ export function maakHerken({ map, draaier }) {
     }
     // book.xml noemt alle pagina's van de PDF; alleen de gevraagde tellen mee.
     const gevraagd = (nummer) => !taak.gevraagd || taak.gevraagd.includes(nummer);
-    const uitBoek = leesBladen(bestanden.get('book.xml').toString('utf8'));
+    const boek = bestanden.get('book.xml').toString('utf8');
+    const uitBoek = leesBladen(boek);
     const goed = uitBoek.goed.filter(gevraagd);
     const mislukt = uitBoek.mislukt.filter(gevraagd);
     if (goed.length === 0) throw new Error(leesFoutmelding(log));
@@ -105,7 +106,8 @@ export function maakHerken({ map, draaier }) {
     const partituur = await leesUitvoer(taak.uitmap);
     if (!partituur) throw new Error('De bladmuziek is niet herkend.');
 
-    const uit = koppelOmr(partituur, bladen.filter((blad) => goed.includes(blad.nummer)));
+    const bladenGoed = bladen.filter((blad) => goed.includes(blad.nummer));
+    const uit = koppelOmr(voegPaginasSamen(partituur, boek, bladenGoed), bladenGoed);
     uit.partituur.bron = {
       herkenning: taak.id,
       bladen: bladen.map(({ nummer, breedte, hoogte }) => ({ nummer, breedte, hoogte })),
