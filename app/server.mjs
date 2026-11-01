@@ -6,7 +6,7 @@ import { dirname, extname, join, normalize, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const HIER = dirname(fileURLToPath(import.meta.url));
-const MAX_UPLOAD = 25 * 1024 * 1024;
+const MAX_UPLOAD = 100 * 1024 * 1024; // een gescande partituur is al snel 50 MB
 
 // Wat de browser mag ophalen, met het begin van de URL. De eerste die past wint.
 // Uit src/ alleen de modules die ook in de browser draaien; src/server/ blijft op de server.
@@ -28,6 +28,7 @@ const MAPPEN = [
 // `rest` is wat er na het pad komt, bijvoorbeeld het id in /api/projecten/<id>.
 const API = [
   ['/api/importeer', './src/server/importeer.mjs'],
+  ['/api/herken', './src/server/herken.mjs'],
   ['/api/projecten', './src/server/projecten.mjs'],
 ];
 
@@ -74,7 +75,7 @@ async function leesBody(verzoek) {
   let lengte = 0;
   for await (const deel of verzoek) {
     lengte += deel.length;
-    if (lengte > MAX_UPLOAD) throw Object.assign(new Error('Het bestand is te groot (maximaal 25 MB).'), { status: 413 });
+    if (lengte > MAX_UPLOAD) throw Object.assign(new Error('Het bestand is te groot (maximaal 100 MB).'), { status: 413 });
     delen.push(deel);
   }
   return Buffer.concat(delen);

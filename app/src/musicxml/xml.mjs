@@ -20,8 +20,8 @@ function omzetten(item) {
   return { naam, attr: item[':@'] ?? {}, kinderen: kinderen.filter((k) => k.naam !== '#text'), tekst };
 }
 
-// Leest MusicXML-tekst en geeft de knoop <score-partwise>. Gooit een Error met een tekst voor de gebruiker.
-export function leesXml(tekst) {
+// Leest willekeurige XML (ook de bladen uit een .omr) en geeft de wortelknoop.
+export function leesXmlBoom(tekst) {
   if (typeof tekst !== 'string' || tekst.trim() === '') throw new Error('Het bestand is leeg.');
   // Eigen entiteiten in een DOCTYPE kunnen een bestand opblazen; MusicXML heeft ze niet nodig.
   if (/<!ENTITY/i.test(tekst)) throw new Error('Dit bestand bevat XML-constructies die niet zijn toegestaan.');
@@ -29,6 +29,12 @@ export function leesXml(tekst) {
   if (geldig !== true) throw new Error(`Dit is geen geldige MusicXML: ${geldig.err?.msg ?? 'onbekende fout'} (regel ${geldig.err?.line ?? '?'}).`);
   const wortel = parser.parse(tekst).map(omzetten).find((k) => !k.naam.startsWith('?') && k.naam !== '#text');
   if (!wortel) throw new Error('Dit is geen geldige MusicXML: er staat geen muziek in.');
+  return wortel;
+}
+
+// Leest MusicXML-tekst en geeft de knoop <score-partwise>. Gooit een Error met een tekst voor de gebruiker.
+export function leesXml(tekst) {
+  const wortel = leesXmlBoom(tekst);
   if (wortel.naam === 'score-timewise') throw new Error('Deze MusicXML is per maat opgeslagen (timewise). Sla hem op als partwise en probeer het opnieuw.');
   if (wortel.naam !== 'score-partwise') throw new Error(`Dit is geen MusicXML-partituur (het bestand begint met <${wortel.naam}>).`);
   return wortel;

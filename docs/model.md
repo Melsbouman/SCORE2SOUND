@@ -24,6 +24,16 @@ Het model bewaart de **genoteerde** toonhoogte, zoals op het blad. De **klinkend
   titel: 'Mars',                 // '' als onbekend
   componist: '',                 // '' als onbekend
   partijen: [Partij, ...],
+  bron: Bron,                    // alleen na herkenning, anders ontbreekt het veld
+}
+```
+
+### Bron
+Na herkenning verwijst de partituur naar de pagina's waar hij vandaan komt. Zo vindt ook een bewaard project het origineel terug.
+```js
+{
+  herkenning: 'a1b2c3d4e5f6',    // id van de herkenning: de server geeft pagina's op /api/herken/<id>/blad/<nummer>
+  bladen: [{ nummer: 2, breedte: 2545, hoogte: 3504 }, ...],   // alle pagina's in volgorde, maten in pixels
 }
 ```
 
@@ -69,6 +79,11 @@ Elk element heeft:
 - `soort`: `'noot'`, `'rust'` of `'aanwijzing'`;
 - `start`: tikken vanaf het begin van de maat;
 - `zekerheid`: 0 tot 1. Uit een MusicXML-bestand is dat 1; de herkenning geeft lagere waarden waar hij twijfelt. De app toont alles onder 0,8 als onzeker.
+
+Een herkende noot of rust heeft ook een `plek`, de plaats op het origineel in pixels van die pagina. Het veld ontbreekt als de plaats onbekend is:
+```js
+plek: { blad: 2, x: 637, y: 979, breedte: 16, hoogte: 14 }
+```
 
 ### Noot
 ```js
