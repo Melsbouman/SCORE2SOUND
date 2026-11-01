@@ -22,7 +22,10 @@ async function maakGeluid() {
 }
 
 // Kanaal per partij, zoals in schrijfMidi: kanaal 9 (slagwerk) wordt overgeslagen.
-const kanaal = (index) => (index < 9 ? index : index + 1);
+import { kanaalVan } from '/src/midi/schrijven.mjs';
+
+// Kanaal per partij, zoals in schrijfMidi: elke poort heeft 16 kanalen en kanaal 9 (slagwerk) wordt overgeslagen.
+const kanaal = (index) => { const plek = kanaalVan(index); return plek.poort * 16 + plek.kanaal; };
 
 // Begin van elke maat in seconden, uit de maatlengtes en tempo's van de eerste partij.
 function tijdlijn(partituur) {
@@ -129,7 +132,7 @@ export function start(app) {
   }
 
   async function laad() {
-    const { kanaalVan, schrijfMidi } = await import('/src/midi/schrijven.mjs');
+    const { schrijfMidi } = await import('/src/midi/schrijven.mjs');
     const midi = schrijfMidi(app.stand.partituur);
     geluid.seq.loadNewSongList([{ binary: midi.buffer.slice(midi.byteOffset, midi.byteOffset + midi.byteLength), fileName: 'partituur.mid' }]);
     geluid.seq.pause();
