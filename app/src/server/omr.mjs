@@ -1,4 +1,113 @@
-// Haalt zekerheid, plek en pagina's uit een .omr-bestand. Wordt gevuld in pakket 27 van fase 2.
-export function koppelOmr() {
-  throw new Error('Nog niet gebouwd.');
+// Haalt zekerheid, plek en pagina's uit een .omr-bestand van Audiveris (een zip met per blad xml en een afbeelding).
+// De MusicXML kent geen zekerheid; daarom koppelen we elke notenkop aan een noot, per maat, notenbalk en lijnpositie.
+import { leesXmlBoom, kind, kinderen } from '../musicxml/xml.mjs';
+
+const STAPPEN = 'CDEFGAB';
+const REFERENTIE = { G: ['G', 4], F: ['F', 3], C: ['C', 4] };
+const MARGE = 8; // pixels naast een maatstreep die nog bij de maat horen
+
+const index = (stap, octaaf) => octaaf * 7 + STAPPEN.indexOf(stap);
+
+// Lijnpositie zoals Audiveris hem telt: 0 is de middelste lijn, omhoog is negatief.
+export function lijnPositie(toonhoogte, sleutel) {
+  const [stap, octaaf] = REFERENTIE[sleutel.teken] ?? REFERENTIE.G;
+  const midden = index(stap, octaaf) + (sleutel.octaafVerschuiving ?? 0) * 7 + (3 - sleutel.lijn) * 2;
+  return midden - index(toonhoogte.stap, toonhoogte.octaaf);
+}
+
+// Per gevraagd nummer het blad uit de bestanden van leesZip; de glyph-index is groot en niet nodig.
+export function bladenUitOmr(bestanden, nummers) {
+  const bladen = [];
+  for (const nummer of nummers) {
+    const inhoud = bestanden.get(`sheet#${nummer}/sheet#${nummer}.xml`);
+    if (!inhoud) continue;
+    const xml = inhoud.toString('utf8').replace(/<glyph-index>[\s\S]*<\/glyph-index>/, '');
+    const plaatje = xml.match(/<picture\s+width="(\d+)"\s+height="(\d+)"/);
+    bladen.push({
+      nummer,
+      xml,
+      png: bestanden.get(`sheet#${nummer}/BINARY.png`) ?? null,
+      breedte: Number(plaatje?.[1] ?? 0),
+      hoogte: Number(plaatje?.[2] ?? 0),
+    });
+  }
+  return bladen;
+}
+
+function leesSymbool(knoop) {
+  const vak = kind(knoop, 'bounds').attr;
+  const [x, y, breedte, hoogte] = [vak.x, vak.y, vak.w, vak.h].map(Number);
+  return {
+    staff: Number(knoop.attr.staff),
+    pitch: Number(knoop.attr.pitch),
+    zekerheid: Number(knoop.attr['ctx-grade'] ?? knoop.attr.grade),
+    x, y, breedte, hoogte,
+    gebruikt: false,
+  };
+}
+
+function neemLinkste(symbolen, past) {
+  const kandidaten = symbolen.filter((s) => !s.gebruikt && past(s)).sort((a, b) => a.x - b.x);
+  if (kandidaten[0]) kandidaten[0].gebruikt = true;
+  return kandidaten[0] ?? null;
+}
+
+function koppelMaat(maat, balken, stack, koppen, rusten, nummer) {
+  const links = Number(stack.attr.left) - MARGE;
+  const rechts = Number(stack.attr.right) + MARGE;
+  const inStack = (s) => s.x + s.breedte / 2 >= links && s.x + s.breedte / 2 <= rechts;
+  const zet = (element, symbool) => {
+    element.zekerheid = symbool.zekerheid;
+    element.plek = { blad: nummer, x: symbool.x, y: symbool.y, breedte: symbool.breedte, hoogte: symbool.hoogte };
+  };
+  let nietGekoppeld = 0;
+  for (const element of maat.elementen) {
+    const staff = balken[(element.notenbalk ?? 1) - 1];
+    if (element.soort === 'noot') {
+      const sleutel = maat.sleutels.find((s) => s.notenbalk === element.notenbalk) ?? maat.sleutels[0];
+      const positie = lijnPositie(element.toonhoogte, sleutel);
+      const kop = neemLinkste(koppen, (s) => s.staff === staff && s.pitch === positie && inStack(s));
+      if (kop) zet(element, kop);
+      else {
+        element.zekerheid = 0.5;
+        nietGekoppeld += 1;
+      }
+    } else if (element.soort === 'rust') {
+      const rust = neemLinkste(rusten, (s) => s.staff === staff && inStack(s));
+      if (rust) zet(element, rust);
+    }
+  }
+  return nietGekoppeld;
+}
+
+export function koppelOmr(partituur, bladen) {
+  const uit = structuredClone(partituur);
+  uit.bron = { herkenning: null, bladen: bladen.map(({ nummer, breedte, hoogte }) => ({ nummer, breedte, hoogte })) };
+  const overgeslagen = [];
+  let nietGekoppeld = 0;
+  let maatStart = 0;
+
+  for (const blad of bladen) {
+    for (const system of kinderen(kind(leesXmlBoom(blad.xml), 'page'), 'system')) {
+      const stacks = kinderen(system, 'stack');
+      const delen = kinderen(system, 'part');
+      if (delen.length !== uit.partijen.length) {
+        if (!overgeslagen.includes(blad.nummer)) overgeslagen.push(blad.nummer);
+        maatStart += stacks.length;
+        continue;
+      }
+      const inters = kind(kind(system, 'sig'), 'inters');
+      const koppen = kinderen(inters, 'head').map(leesSymbool);
+      const rusten = kinderen(inters, 'rest').map(leesSymbool);
+      delen.forEach((deel, partijIndex) => {
+        const balken = kinderen(deel, 'staff').map((staff) => Number(staff.attr.id));
+        stacks.forEach((stack, stackIndex) => {
+          const maat = uit.partijen[partijIndex].maten[maatStart + stackIndex];
+          if (maat) nietGekoppeld += koppelMaat(maat, balken, stack, koppen, rusten, blad.nummer);
+        });
+      });
+      maatStart += stacks.length;
+    }
+  }
+  return { partituur: uit, nietGekoppeld, overgeslagen };
 }
