@@ -6,6 +6,7 @@ import { instrumentBijNaam } from '../model/instrumenten.mjs';
 const STAPPEN = 'CDEFGAB';
 const REFERENTIE = { G: ['G', 4], F: ['F', 3], C: ['C', 4] };
 const MARGE = 8; // pixels naast een maatstreep die nog bij de maat horen
+const RUST_MAX = 0.8; // Audiveris geeft een rust hooguit deze waarde; zonder omrekenen zou elke rust onzeker lijken
 
 const index = (stap, octaaf) => octaaf * 7 + STAPPEN.indexOf(stap);
 
@@ -108,7 +109,10 @@ function koppelMaat(maat, balken, stack, koppen, rusten, nummer) {
       }
     } else if (element.soort === 'rust') {
       const rust = neemLinkste(rusten, (s) => s.staff === staff && inStack(s));
-      if (rust) zet(element, rust);
+      if (rust) {
+        zet(element, rust);
+        element.zekerheid = Math.min(1, Math.round((rust.zekerheid / RUST_MAX) * 1000) / 1000);
+      }
     }
   }
   return nietGekoppeld;
