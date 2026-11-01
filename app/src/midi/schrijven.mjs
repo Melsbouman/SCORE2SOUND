@@ -91,30 +91,49 @@ function partijSpoor(partij, partijIndex, beginnen, volume) {
     { tik: 0, volgorde: 2, bytes: [0xb0 | kanaal, 7, volume[partij.id] ?? 100] },
   ];
   const noten = [];
+  let sterkte = 80;
   const overbonden = new Map();
 
   for (let maatIndex = 0; maatIndex < partij.maten.length; maatIndex += 1) {
     const maat = partij.maten[maatIndex];
     const maatBegin = beginnen[maatIndex];
+    const eenmalig = new Map();
     for (const element of maat.elementen) {
+      if (element.soort !== 'aanwijzing' || element.type !== 'dynamiek') continue;
+      if (element.waarde in EENMALIG) eenmalig.set(element.start, EENMALIG[element.waarde]);
+    }
+    for (const element of maat.elementen) {
+      if (element.soort === 'aanwijzing' && element.type === 'dynamiek' && element.waarde in STERKTE) {
+        sterkte = STERKTE[element.waarde];
+        continue;
+      }
       if (element.soort !== 'noot') continue;
       const toets = naarMidi(element.toonhoogte) + partij.instrument.transpositie.chromatisch;
       const begin = maatBegin + element.start;
-      const einde = begin + element.duur;
+      const klinkendeDuur = element.articulaties.includes('staccatissimo')
+        ? Math.floor(element.duur / 4)
+        : element.articulaties.includes('staccato')
+          ? Math.floor(element.duur / 2)
+          : element.duur;
+      const einde = begin + klinkendeDuur;
       if (element.overbinding.eind && overbonden.has(toets)) {
         const vorige = overbonden.get(toets);
         vorige.einde = Math.max(vorige.einde, einde);
         if (!element.overbinding.begin) overbonden.delete(toets);
         continue;
       }
-      const noot = { begin, einde, toets };
+      let kracht = eenmalig.get(element.start) ?? sterkte;
+      if (element.articulaties.includes('accent')) kracht += 15;
+      if (element.articulaties.includes('marcato')) kracht += 25;
+      kracht = Math.min(kracht, 127);
+      const noot = { begin, einde, toets, kracht };
       noten.push(noot);
       if (element.overbinding.begin) overbonden.set(toets, noot);
     }
   }
 
   for (const noot of noten) {
-    events.push({ tik: noot.begin, volgorde: 4, bytes: [0x90 | kanaal, noot.toets, 80] });
+    events.push({ tik: noot.begin, volgorde: 4, bytes: [0x90 | kanaal, noot.toets, noot.kracht] });
     events.push({ tik: noot.einde, volgorde: 3, bytes: [0x80 | kanaal, noot.toets, 0] });
   }
   return maakSpoor(events);
@@ -135,4 +154,7 @@ export function kanaalVan(partijIndex) {
   const plek = partijIndex % 15;
   return { poort: Math.floor(partijIndex / 15), kanaal: plek >= 9 ? plek + 1 : plek };
 }
+
+const STERKTE = { ppp: 30, pp: 40, p: 55, mp: 68, mf: 80, f: 95, ff: 110, fff: 120 };
+const EENMALIG = { sf: 105, sfz: 110, fp: 90 };
 
