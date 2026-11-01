@@ -1,6 +1,6 @@
 # Plan: fase 2, herkenning van PDF, scan en foto
 
-Stand: in uitvoering; Mels wil dat er niet op akkoord gewacht wordt (30 oktober 2026). Hoort bij `werkpakketten/plannen/2026-10-29-score2sound-app.md`.
+Stand: af op 1 november 2026, zie `werkpakketten/nacht/rapport-2026-11-01.md`. Pakket 29, 27 en de speler heeft Claude zelf gedaan. Hoort bij `werkpakketten/plannen/2026-10-29-score2sound-app.md`.
 
 ## Idee
 Je uploadt een PDF, scan of foto. De server laat Audiveris de noten herkennen en de partituur staat daarna in de app, net als een geopend MusicXML-bestand. Je ziet het origineel naast de digitale versie, onzekere noten springen eruit, en je corrigeert ze en luistert meteen opnieuw.
@@ -14,7 +14,7 @@ Getest op 30 oktober met Audiveris 5.11 en twee eigen partituren van Mels (allee
 - **Tijdslimiet:** standaard stopt Audiveris een stap na 120 seconden, en een drukke pagina haalde dat niet altijd. Een limiet van 900 seconden duurde bij de hangende pagina 24 minuten. Dus `org.audiveris.omr.Main.sheetStepTimeOut=240`.
 - **Geen tekstherkenning:** Audiveris heeft geen taalbestand (`No installed OCR languages`). Partijen heten daardoor `Voice` en titel en tempoteksten ontbreken. De noten komen wel goed door.
 - **Stemming ontbreekt:** Audiveris weet niet dat een bugel in Bes staat. Met partijnamen kan de app dat zelf afleiden.
-- **Grenzen:** een te klein beeld wordt geweigerd ("too low interline", "try 300 DPI"). Bij *Perihelion* (93 pagina's) staan pagina's ondersteboven en is de eerste pagina's interline te klein; daar kun je pagina's kiezen, maar rechtzetten valt buiten dit plan.
+- **Grenzen:** een te klein beeld wordt geweigerd ("too low interline", "try 300 DPI"). Bij *Perihelion* (93 pagina's) staan pagina's ondersteboven; daar kun je pagina's kiezen, maar rechtzetten valt buiten dit plan.
 
 ## Keuzes
 Besloten door Claude, op grond van de proef:

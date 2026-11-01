@@ -1,6 +1,6 @@
 # Nachtplan 1 op 2 november 2026
 
-Eindtijd 07:00, eindcontrole vanaf 06:15. Mels wil dat er niet op akkoord gewacht wordt. Startcommit van de nacht: de stand van `main` om 21:00, na PR #83.
+Eindtijd 07:00, eindcontrole vanaf 06:15; klaar om 22:15, zie `rapport-2026-11-01.md`. Mels wil dat er niet op akkoord gewacht wordt. Startcommit van de nacht: de stand van `main` om 21:00, na PR #83.
 
 ## Doel voor de ochtend
 Een PDF uploaden geeft met voortgang een partituur in de app, met het origineel ernaast. Onzekere noten zijn rood, je kunt ze aanklikken, corrigeren en opnieuw beluisteren. Getest met een echte fanfarepartituur, met tests, en alles op `main`.

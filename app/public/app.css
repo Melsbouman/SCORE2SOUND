@@ -103,6 +103,7 @@ body {
 #upload p { margin: 0; }
 #upload.sleept { background: var(--kleur-vlak); border-style: solid; }
 #upload label.knop { display: inline-block; margin-top: var(--ruimte-3); }
+#upload label:not(.knop) { display: block; margin-top: var(--ruimte-2); }
 #upload progress { display: block; width: 100%; margin-top: var(--ruimte-2); }
 #upload input[type="text"] { font: inherit; margin-left: var(--ruimte-2); max-width: 10em; }
 
