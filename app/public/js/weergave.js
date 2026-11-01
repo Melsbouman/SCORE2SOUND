@@ -1,7 +1,7 @@
 // Notatie tekenen met Verovio in #weergave.
 // Tekent opnieuw bij een nieuwe partituur (via naarMusicXML uit /src/musicxml/schrijven.mjs) of bij app.meld('musicxml', tekst).
 // Luistert naar 'naar-maat' ({ maat }: markeert en toont die maat) en 'speel-maat' ({ maat } of null: de maat die nu klinkt).
-const SCHAAL = 50;
+const schaalVoor = (breedte) => (breedte < 500 ? 70 : 50); // op een telefoon zijn de noten anders te klein.
 
 let toolkitBelofte = null;
 
@@ -50,7 +50,8 @@ export function start(app) {
     }
     if (nummer !== tekenNummer) return; // er kwam intussen een nieuwere partituur
     const breedte = Math.max(320, vlak.clientWidth - 48);
-    tk.setOptions({ scale: SCHAAL, pageWidth: Math.round((breedte * 100) / SCHAAL), adjustPageHeight: true, breaks: 'auto', footer: 'none', header: 'none' });
+    const schaal = schaalVoor(breedte);
+    tk.setOptions({ scale: schaal, pageWidth: Math.round((breedte * 100) / schaal), adjustPageHeight: true, breaks: 'auto', footer: 'none', header: 'none' });
     if (!tk.loadData(musicxml)) return status('Deze partituur kon niet worden getekend.');
     const blad = document.createElement('div');
     blad.className = 'bladmuziek';
