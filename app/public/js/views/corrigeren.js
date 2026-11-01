@@ -98,7 +98,7 @@ export function start(app) {
   function teken() {
     const partituur = app.stand.partituur;
     const element = partituur && gekozen ? zoekElement(partituur, gekozen) : null;
-    if (!partituur || (!partituur.partijen.some((partij) => partij.bron) && !element)) {
+    if (!partituur || (!partituur.bron && !element)) {
       vlak.replaceChildren();
       return;
     }
@@ -128,7 +128,7 @@ export function start(app) {
     const naam = element.soort === 'rust'
       ? 'rust'
       : `${element.toonhoogte.stap}${element.toonhoogte.alter === -1
-        ? 'es'
+        ? (element.toonhoogte.stap === 'E' || element.toonhoogte.stap === 'A' ? 's' : 'es')
         : element.toonhoogte.alter === 1
           ? 'is'
           : ''} ${element.toonhoogte.octaaf}`;
