@@ -23,4 +23,7 @@ De muziektermen in SCORE2SOUND, met de term uit MusicXML. Gebruik in teksten van
 | stemming | transposition | waarin een instrument klinkt, zoals in Bes of in Es |
 | genoteerd | written | de noot zoals hij op het blad staat |
 | klinkend | sounding | de noot zoals hij werkelijk klinkt |
+| herkenning | (geen) | bladmuziek van een PDF, scan of foto omzetten naar noten |
+| origineel | (geen) | de pagina waar de herkenning van uitging |
+| onzekere noot | (geen) | een noot waar de herkenning aan twijfelt; de app kleurt hem rood |
 | melding | (geen) | wat de app laat zien als er iets niet lijkt te kloppen |
