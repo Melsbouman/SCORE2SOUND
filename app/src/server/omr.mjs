@@ -1,6 +1,7 @@
 // Haalt zekerheid, plek en pagina's uit een .omr-bestand van Audiveris (een zip met per blad xml en een afbeelding).
 // De MusicXML kent geen zekerheid; daarom koppelen we elke notenkop aan een noot, per maat, notenbalk en lijnpositie.
 import { leesXmlBoom, kind, kinderen } from '../musicxml/xml.mjs';
+import { instrumentBijNaam } from '../model/instrumenten.mjs';
 
 const STAPPEN = 'CDEFGAB';
 const REFERENTIE = { G: ['G', 4], F: ['F', 3], C: ['C', 4] };
@@ -32,6 +33,39 @@ export function bladenUitOmr(bestanden, nummers) {
     });
   }
   return bladen;
+}
+
+// Audiveris maakt een nieuwe partij zodra hij de naam op een pagina anders leest, en vult de rest met rusten.
+// book.xml zegt per pagina welke notenbalk bij welke partij hoort; daarmee zetten we de partijen weer op één lijn.
+export function voegPaginasSamen(partituur, bookXml, bladen) {
+  const boek = leesXmlBoom(bookXml);
+  const systemen = bladen.flatMap((blad) => {
+    const sheet = kinderen(boek, 'sheet').find((s) => Number(s.attr.number) === blad.nummer);
+    const inBlad = kinderen(kind(leesXmlBoom(blad.xml), 'page'), 'system');
+    return kinderen(sheet, 'page').flatMap((pagina) => kinderen(pagina, 'system')).map((system, index) => ({
+      delen: kinderen(system, 'part').map((deel) => ({ partij: `P${deel.attr['logical-id']}`, naam: deel.attr.name ?? '' })),
+      maten: kinderen(inBlad[index], 'stack').length,
+    }));
+  });
+  const aantal = systemen[0]?.delen.length ?? 0;
+  const zoek = (id) => partituur.partijen.find((partij) => partij.id === id);
+  const klopt = aantal > 0 && aantal < partituur.partijen.length
+    && systemen.every((system) => system.delen.length === aantal && system.delen.every((deel) => zoek(deel.partij)));
+  if (!klopt) return partituur;
+
+  const partijen = Array.from({ length: aantal }, (_, index) => {
+    const namen = systemen.map((system) => system.delen[index].naam).filter(Boolean);
+    const maten = [];
+    let start = 0;
+    for (const system of systemen) {
+      const stuk = zoek(system.delen[index].partij).maten.slice(start, start + system.maten);
+      for (const maat of stuk) maten.push({ ...maat, index: maten.length });
+      start += system.maten;
+    }
+    const eerste = zoek(systemen[0].delen[index].partij);
+    return { ...eerste, id: `P${index + 1}`, naam: namen.find(instrumentBijNaam) ?? namen[0] ?? eerste.naam, maten };
+  });
+  return { ...partituur, partijen };
 }
 
 function leesSymbool(knoop) {

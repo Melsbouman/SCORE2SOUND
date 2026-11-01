@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { leesMusicXML } from '../src/musicxml/lezen.mjs';
 import { leesZip } from '../src/server/zip.mjs';
-import { koppelOmr, lijnPositie, bladenUitOmr } from '../src/server/omr.mjs';
+import { koppelOmr, lijnPositie, bladenUitOmr, voegPaginasSamen } from '../src/server/omr.mjs';
 
 const voorbeeld = async (naam) => readFile(new URL(`./voorbeelden/${naam}`, import.meta.url));
 const noten = (partituur) => partituur.partijen.flatMap((p) => p.maten.flatMap((m) => m.elementen)).filter((e) => e.soort === 'noot');
@@ -84,4 +84,25 @@ test('koppelOmr slaat een blad met een ander aantal notenbalken over en meldt da
   const uit = koppelOmr(partituur, bladen);
   assert.deepEqual(uit.overgeslagen, [1]);
   assert.ok(noten(uit.partituur).every((n) => n.zekerheid === 1));
+});
+
+test('voegPaginasSamen zet partijen die per pagina anders heten weer op een lijn', () => {
+  const maten = (noot) => [0, 1, 2, 3].map((index) => ({ index, nummer: String(index + 1), elementen: noot.includes(index) ? [{ soort: 'noot' }] : [] }));
+  const partij = (id, naam, noot) => ({ id, naam, instrument: {}, maten: maten(noot) });
+  const partituur = { partijen: [partij('P1', 'Hoorn', [0]), partij('P2', 'Voice', [1]), partij('P3', 'Fliigelhom 1', [2]), partij('P4', 'Tuba', [3])] };
+  const bookXml = `<book>
+    <sheet number="2"><page><system><part name="Hoorn" logical-id="1"/><part logical-id="2"/></system></page></sheet>
+    <sheet number="3"><page><system><part name="Fliigelhom 1" logical-id="3"/><part name="Tuba" logical-id="4"/></system></page></sheet>
+  </book>`;
+  const blad = (nummer) => ({ nummer, xml: '<sheet><page><system><stack/><stack/></system></page></sheet>' });
+  const uit = voegPaginasSamen(partituur, bookXml, [blad(2), blad(3)]);
+  assert.deepEqual(uit.partijen.map((p) => [p.id, p.naam]), [['P1', 'Hoorn'], ['P2', 'Tuba']]);
+  assert.deepEqual(uit.partijen.map((p) => p.maten.map((m) => m.elementen.length)), [[1, 0, 1, 0], [0, 1, 0, 1]]);
+  assert.deepEqual(uit.partijen[0].maten.map((m) => m.index), [0, 1, 2, 3]);
+});
+
+test('voegPaginasSamen laat de partituur staan als er niets samen te voegen valt', async () => {
+  const partituur = leesMusicXML((await voorbeeld('herkenning.xml')).toString('utf8'));
+  const omr = leesZip(await voorbeeld('herkenning.omr'));
+  assert.equal(voegPaginasSamen(partituur, omr.get('book.xml').toString('utf8'), bladenUitOmr(omr, [1])), partituur);
 });

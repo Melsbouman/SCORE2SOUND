@@ -329,6 +329,10 @@ while :; do
   fi
   REGELS=$(node hermes/regels-controle.mjs --basis main --toegestaan "$TOEGESTAAN" 2>&1) || FOUT="De regelcontrole keurde de wijziging af:
 $REGELS"
+  # Elk bestand onder ## Bestanden hoort er na de taak te zijn; zo valt een overgeslagen test op.
+  ONTBREEKT=""
+  for t in $(echo "$TOEGESTAAN" | tr ',' ' '); do [ -e "$t" ] || ONTBREEKT="$ONTBREEKT $t"; done
+  if [ -z "$FOUT" ] && [ -n "$ONTBREEKT" ]; then FOUT="Deze bestanden uit ## Bestanden ontbreken:$ONTBREEKT. Maak ze precies zoals de taak vraagt."; fi
   if [ -z "$FOUT" ]; then
     # Tests van de projectmappen waarin de bestanden uit het issue staan (zie hermes/tests.sh).
     TESTS=$(bash hermes/tests.sh $(echo "$TOEGESTAAN" | tr ',' ' ') 2>&1) || FOUT="De tests falen:

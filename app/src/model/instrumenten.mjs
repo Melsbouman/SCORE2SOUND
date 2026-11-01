@@ -20,14 +20,15 @@ export const INSTRUMENTEN = [
 
 // Herkent een instrument aan een partijnaam uit een partituur. De volgorde telt: de eerste die past, wint.
 const NAMEN = [
-  [/bugel|flugel|flug\./, 'bugel'],
+  [/sax.*(bar|sop)|\beb\b.*(cornet|kornet)|es.*(cornet|kornet)/, null], // staan niet in de lijst; dus niet raden
+  [/bugel|flugel|fliigel|iigelho|flug\./, 'bugel'],
   [/sax.*alt|alt.*sax/, 'altsaxofoon'],
   [/sax.*ten|ten.*sax/, 'tenorsaxofoon'],
   [/trombone|\btrb\b|\btbn\b/, 'trombone'],
   [/trompet|trumpet|cornet|kornet|\bcts?\b/, 'trompet'],
   [/althoorn|alto horn|tenor horn/, 'althoorn'],
   [/hoorn in f|horn in f/, 'hoorn'],
-  [/\bhorn\b|\bhn\b|\bhoorn\b/, 'althoorn'],
+  [/\bhorn\b|\bhom\b|\bhn\b|\bhoorn\b/, 'althoorn'],
   [/bariton|euph/, 'bariton'],
   [/tuba|\bbass\b|\bbas\b|\bbasses\b/, 'tuba'],
   [/klarinet|clarinet/, 'klarinet'],
@@ -41,5 +42,5 @@ const NAMEN = [
 export function instrumentBijNaam(naam) {
   const schoon = naam.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   const regel = NAMEN.find(([patroon]) => patroon.test(schoon));
-  return regel ? INSTRUMENTEN.find((instrument) => instrument.id === regel[1]) : null;
+  return INSTRUMENTEN.find((instrument) => instrument.id === regel?.[1]) ?? null;
 }

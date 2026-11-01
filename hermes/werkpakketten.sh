@@ -1,5 +1,6 @@
 #!/bin/bash
-# Pakt achter elkaar alle taken op (agent-terug eerst, dan agent-ready) tot er niets meer is of een taak vastloopt.
+# Pakt achter elkaar alle taken op (agent-terug eerst, dan agent-ready) tot er niets meer is. Een vastgelopen taak
+# krijgt agent-vast en de wachtrij gaat door; na drie mislukte taken achter elkaar stopt hij.
 # Handig om direct na het klaarzetten van issues te starten, zonder te wachten op de volgende ronde.
 #
 # Gebruik:
@@ -9,7 +10,7 @@
 #
 # Met --alle werkt elke uitvoerder in een eigen kloon (<kloon>-codex, -copilot, -hermes) en pakt hij alleen de
 # taken met zijn label (agent-codex, agent-copilot, agent-hermes; zonder label: codex). Taken die een bestand delen
-# met een lopende taak of een open PR wachten tot die klaar is. Een vastgelopen taak stopt alleen die wachtrij.
+# met een lopende taak of een open PR wachten tot die klaar is. Een vastgelopen taak houdt de andere wachtrijen niet op.
 # In parallelle modus krijgt elke werker zijn eigen kloon naast de gewone kloon (<kloon>-werker-1, -2, ...).
 export PYTHONUTF8=1
 DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -44,6 +45,8 @@ if [ "${1:-}" = "--parallel" ]; then N="${2:-2}"; fi
 aantal=0
 if [ "$N" -le 1 ]; then
   pogingen=0
+  vastgelopen=0
+  achterElkaar=0
   while true; do
     bash "$SCRIPT"
     code=$?
@@ -57,10 +60,16 @@ def wie(n): return next((u for u in ('codex','copilot','hermes') if 'agent-'+u i
 issues=[{l['name'] for l in i['labels']} for i in json.load(sys.stdin)]
 print(sum(1 for n in issues if n & {'agent-ready','agent-terug'} and (not alleen or wie(n)==alleen)))" 2>/dev/null)
       if [ "${over:-0}" != "0" ] && [ "$pogingen" -lt 3 ]; then pogingen=$((pogingen + 1)); sleep 20; continue; fi
-      echo "klaar: $aantal taak/taken afgerond"; exit 0
+      echo "klaar: $aantal taak/taken afgerond, $vastgelopen vastgelopen"; [ "$vastgelopen" -eq 0 ]; exit $?
     fi
     pogingen=0
-    if [ "$code" -ne 0 ]; then echo "gestopt: een taak liep vast (exitcode $code) na $aantal afgeronde taak/taken"; exit "$code"; fi
+    if [ "$code" -ne 0 ]; then
+      vastgelopen=$((vastgelopen + 1)); achterElkaar=$((achterElkaar + 1))
+      echo "een taak liep vast (exitcode $code), de wachtrij gaat door"
+      if [ "$achterElkaar" -ge 3 ]; then echo "gestopt: drie taken achter elkaar liepen vast, na $aantal afgeronde taak/taken"; exit "$code"; fi
+      continue
+    fi
+    achterElkaar=0
     aantal=$((aantal + 1))
   done
 fi
