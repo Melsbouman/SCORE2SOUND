@@ -36,7 +36,7 @@ test('de server levert de app, de bibliotheken en de lege API-paden', async (t) 
   assert.equal(verovio.status, 200);
 
   // De API-paden bestaan (geen 404); wat ze antwoorden, testen de eigen tests van de API.
-  for (const [methode, pad] of [['POST', '/api/importeer'], ['GET', '/api/projecten'], ['GET', '/api/projecten/abc']]) {
+  for (const [methode, pad] of [['POST', '/api/importeer'], ['POST', '/api/herken'], ['GET', '/api/projecten'], ['GET', '/api/projecten/abc']]) {
     assert.notEqual((await vraag(poort, methode, pad)).status, 404, `${methode} ${pad}`);
   }
 });

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { leesXml, kind, kinderen, tekst, getal } from '../src/musicxml/xml.mjs';
+import { leesXml, leesXmlBoom, kind, kinderen, tekst, getal } from '../src/musicxml/xml.mjs';
 
 const voorbeeld = (naam) => readFile(new URL(`./voorbeelden/${naam}`, import.meta.url), 'utf8');
 
@@ -34,4 +34,11 @@ test('leesXml geeft een begrijpelijke fout bij verkeerde invoer', () => {
   assert.throws(() => leesXml('<html><body/></html>'), /geen MusicXML-partituur/);
   assert.throws(() => leesXml('<score-timewise version="4.0"/>'), /timewise/);
   assert.throws(() => leesXml('<!DOCTYPE x [<!ENTITY a "aaaa">]><score-partwise>&a;</score-partwise>'), /niet zijn toegestaan/);
+});
+
+test('leesXmlBoom leest ook XML die geen MusicXML is', () => {
+  const wortel = leesXmlBoom('<sheet><page id="1"/></sheet>');
+  assert.equal(wortel.naam, 'sheet');
+  assert.equal(kind(wortel, 'page').attr.id, '1');
+  assert.throws(() => leesXml('<sheet/>'), /geen MusicXML-partituur/);
 });

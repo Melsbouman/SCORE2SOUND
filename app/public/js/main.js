@@ -8,9 +8,11 @@ import * as mixer from './views/mixer.js';
 import * as bewerken from './views/bewerken.js';
 import * as exporteren from './views/export.js';
 import * as projecten from './views/projecten.js';
+import * as origineel from './views/origineel.js';
+import * as corrigeren from './views/corrigeren.js';
 
 const app = maakApp();
-const schermen = { upload, weergave, speler, meldingen, mixer, bewerken, exporteren, projecten };
+const schermen = { upload, weergave, speler, meldingen, mixer, bewerken, exporteren, projecten, origineel, corrigeren };
 
 for (const [naam, scherm] of Object.entries(schermen)) {
   try {
