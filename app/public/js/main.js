@@ -11,6 +11,7 @@ import * as exporteren from './views/export.js';
 import * as projecten from './views/projecten.js';
 import * as origineel from './views/origineel.js';
 import * as corrigeren from './views/corrigeren.js';
+import * as onzeker from './views/onzeker.js';
 import * as versies from './views/versies.js';
 import * as inloggen from './views/inloggen.js';
 import * as sneltoetsen from './views/sneltoetsen.js';
@@ -56,7 +57,7 @@ window.addEventListener('error', toonAlgemeneFoutmelding);
 window.addEventListener('unhandledrejection', toonAlgemeneFoutmelding);
 
 const app = maakApp();
-const schermen = { inloggen, upload, editor, weergave, slepen, speler, meldingen, mixer, bewerken, exporteren, projecten, origineel, corrigeren, versies, sneltoetsen };
+const schermen = { inloggen, upload, editor, weergave, slepen, speler, meldingen, mixer, bewerken, exporteren, projecten, origineel, corrigeren, onzeker, versies, sneltoetsen };
 
 for (const [naam, scherm] of Object.entries(schermen)) {
   try {

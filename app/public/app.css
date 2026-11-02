@@ -56,6 +56,7 @@ body {
     "hulp"
     "projecten"
     "editor"
+    "onzeker"
     "weergave"
     "corrigeren"
     "speler"
@@ -85,6 +86,10 @@ body {
 main:has(#weergave g.measure) #hulp { display: none; }
 #projecten { grid-area: projecten; }
 #editor { grid-area: editor; padding: 0; border: 0; background: transparent; box-shadow: none; }
+#onzeker { grid-area: onzeker; display: flex; flex-wrap: wrap; align-items: center; gap: var(--ruimte-2); padding: var(--ruimte-2) var(--ruimte-3); }
+.onzeker__status { flex: 1 1 12em; margin: 0; color: var(--kleur-zacht); }
+.onzeker__knoppen { display: flex; flex-wrap: wrap; gap: var(--ruimte-1); }
+.onzeker__knoppen .knop { padding: 6px 8px; font-size: 0.875rem; }
 #weergave { grid-area: weergave; }
 #corrigeren { grid-area: corrigeren; }
 #origineel { grid-area: origineel; display: none; }
@@ -265,6 +270,7 @@ main:has(#weergave g.measure) #hulp { display: none; }
       "hulp hulp"
       "projecten projecten"
       "editor editor"
+      "onzeker onzeker"
       "weergave speler"
       "weergave corrigeren"
       "weergave mixer"
@@ -280,6 +286,7 @@ main:has(#weergave g.measure) #hulp { display: none; }
       "upload upload upload"
       "projecten projecten projecten"
       "editor editor editor"
+      "onzeker onzeker onzeker"
       "weergave origineel speler"
       "weergave origineel corrigeren"
       "weergave origineel mixer"
