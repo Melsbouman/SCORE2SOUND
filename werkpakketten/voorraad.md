@@ -2,20 +2,11 @@
 
 Claude pakt hier werk uit als een nachtplan af is en de eindtijd nog niet bereikt is (zie `.claude/skills/nachtplan/SKILL.md`). Bovenaan staat het belangrijkste. Mels en Claude mogen allebei punten toevoegen; Claude zet bij eigen punten "(Claude)" erachter.
 
-## Open
 - [ ] Bij *Meditation* kon de app 146 van 214 noten niet aan het origineel koppelen (klikken naar het origineel werkt daar niet); uitzoeken waarom, met de echte pagina. (Claude)
 - [ ] Tekst die Audiveris leest bevat OCR-fouten (teneramenre, poco agitate, .m0rend0); een woordenlijst met muziektermen (rall., dolce, poco a poco, a tempo, molto, cresc.) kan ze verbeteren. (Claude)
 - [ ] Fermate: Audiveris leest hem niet overal (bij *A Time for Peace* niet, bij *Apatheia* wel); zoek hem zoals de kaders in het bladbeeld. En de speler houdt een fermate nog niet langer aan. (Claude)
 - [ ] Letters zonder gelezen tekst worden aangenomen (A, B, C in volgorde, zekerheid 0,5); een echte tekstherkenning in het kader zou dat vervangen. (Claude)
 - [ ] Mels' punt "deel 1: ..." voor de partij: uitzoeken wat er mist, met een voorbeeld. (Claude)
-- [ ] Plan voor fase 5 (online): hosting, accounts, opslag per gebruiker, privacy. (Claude)
-- [ ] Hermes-tegoed op OpenRouter is op; de reserve werkt pas weer na opwaarderen. (Claude)
-- [ ] Ondersteboven gescande pagina's herkennen: bij *Perihelion* staan pagina's op hun kop. (Claude)
-- [ ] Twee versies echt naast elkaar in notatie tonen; nu zijn de verschilmaten gekleurd in de huidige notatie. (Claude)
-- [ ] MP3 of een andere kleine audio-indeling; WAV kost 11 MB per minuut, en MP3 vraagt een nieuwe bibliotheek. (Claude)
-- [ ] Fase 5: scherm voor inloggen en registreren, voorwaarden en privacy, account verwijderen, en docs/online.md met de stappen voor de server (Claude)
-- [ ] Meermaats-rusten tonen als één balk met een getal; controleren op *Perihelion* (Claude)
-- [ ] Het script stuurt een falende Action zelf terug naar de agent; controleren dat de teller van drie pogingen werkt (Claude)
 
 ## Wacht op Mels
 - [ ] Branch protection op `main` aanzetten (PR verplicht, later ook de check `controle`).
@@ -33,3 +24,8 @@ Claude pakt hier werk uit als een nachtplan af is en de eindtijd nog niet bereik
 - [x] Copilot werkt op het account van Mels; een taak met `--voor copilot` is door Copilot zelf gedaan (29 oktober 2026).
 - [x] Testronde met alle drie de uitvoerders en automatisch mergen geslaagd (29 oktober 2026).
 - [x] OpenRouter-sleutel in Hermes gezet (29 oktober 2026).
+- [x] Plan voor fase 5 (online): hosting, accounts, opslag per gebruiker, privacy. (2 november 2026)
+- [x] Fermate zal getekend en bewaard worden. (2 november 2026)
+- [x] Repetitieletters. (2 november 2026)
+- [x] Hermes-tegoed (opgewaardeerd). (2 november 2026)
+- [x] Mels' punt deel 1. (2 november 2026)
