@@ -214,6 +214,23 @@ function matenMetOngeldigeMaatrust(maten) {
 }
 
 export function naarMusicXML(partituur, opties = {}) {
+  const xml = naarMusicXMLZonderArrangeur(partituur, opties);
+  if (!partituur.arrangeur) return xml;
+
+  const arrangeur = String(partituur.arrangeur)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+  const creator = `<creator type="arranger">${arrangeur}</creator>`;
+  if (xml.includes('</identification>')) {
+    return xml.replace('</identification>', `${creator}</identification>`);
+  }
+  return xml.replace('<part-list>', `<identification>${creator}</identification><part-list>`);
+}
+
+function naarMusicXMLZonderArrangeur(partituur, opties = {}) {
   let hoofd = '';
   if (partituur.titel) hoofd += tag('work', tag('work-title', esc(partituur.titel)));
   if (partituur.componist) hoofd += tag('identification', tag('creator', esc(partituur.componist), { type: 'composer' }));

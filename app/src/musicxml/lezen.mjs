@@ -6,7 +6,7 @@ import { naarTikken, maatLengte } from '../model/duur.mjs';
 
 const LEGE_ATTRIBUTEN = { naam: 'attributes', attr: {}, kinderen: [], tekst: '' };
 
-export function leesMusicXML(xmlTekst) {
+function leesMusicXMLZonderArrangeur(xmlTekst) {
   const wortel = leesXml(xmlTekst);
   const delen = kinderen(kind(wortel, 'part-list'), 'score-part');
   if (delen.length === 0) throw new Error('Deze MusicXML heeft geen partijen.');
@@ -17,6 +17,22 @@ export function leesMusicXML(xmlTekst) {
     componist: componist ? componist.tekst : '',
     partijen: delen.map((deel) => leesPartij(deel, kinderen(wortel, 'part').find((p) => p.attr.id === deel.attr.id))),
   };
+}
+
+export function leesMusicXML(xmlTekst) {
+  const partituur = leesMusicXMLZonderArrangeur(xmlTekst);
+  const gevonden = xmlTekst.match(/<creator\b[^>]*\btype=["']arranger["'][^>]*>([\s\S]*?)<\/creator>/i);
+  if (!gevonden) return partituur;
+
+  const arrangeur = gevonden[1]
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .trim();
+  if (arrangeur) partituur.arrangeur = arrangeur;
+  return partituur;
 }
 
 function leesPartij(deel, part) {
