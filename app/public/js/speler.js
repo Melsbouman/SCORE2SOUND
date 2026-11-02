@@ -53,15 +53,17 @@ export function start(app) {
   let luisterNaar = null; // een bewaarde versie die klinkt in plaats van de huidige partituur
 
   const knop = (tekst, klasse = 'knop') => Object.assign(document.createElement('button'), { type: 'button', className: klasse, textContent: tekst });
-  const veld = (label, invoer) => {
+  const veld = (label, ...invoeren) => {
     const l = document.createElement('label');
     l.className = 'speler__veld';
-    l.append(label, invoer);
+    l.append(label, ...invoeren);
     return l;
   };
   const speel = knop('Afspelen', 'knop knop--hoofd');
   const stop = knop('Naar het begin');
   const tempo = Object.assign(document.createElement('input'), { type: 'range', min: 25, max: 150, step: 5, value: 100 });
+  const tempoPercentage = Object.assign(document.createElement('input'), { type: 'number', min: 10, max: 300, step: 1, value: 100 });
+  tempoPercentage.setAttribute('aria-label', 'Tempo in procenten');
   const tempoTekst = document.createElement('span');
   const van = Object.assign(document.createElement('input'), { type: 'text', value: '1', inputMode: 'numeric', size: 4 });
   const tot = Object.assign(document.createElement('input'), { type: 'text', value: '1', inputMode: 'numeric', size: 4 });
@@ -79,8 +81,26 @@ export function start(app) {
     const passage = document.createElement('fieldset');
     passage.className = 'speler__passage';
     passage.append(Object.assign(document.createElement('legend'), { textContent: 'Passage herhalen' }), veld('Van maat ', van), veld('tot en met maat ', tot), veld(herhaal, document.createTextNode(' Herhalen')));
-    vlak.replaceChildren(kop, knoppen, veld('Tempo ', tempo), tempoTekst, passage, status);
-    tempoTekst.textContent = ` ${tempo.value}%`;
+    vlak.replaceChildren(kop, knoppen, veld('Tempo ', tempo, tempoPercentage), tempoTekst, passage, status);
+    werkTempoTekstBij();
+  }
+
+  const begintempo = () => app.stand.partituur?.partijen[0]?.maten[0]?.tempo ?? 120;
+  function werkTempoTekstBij() {
+    const percentage = Number(tempoPercentage.value);
+    tempoTekst.textContent = ` ${percentage}% (${Math.round(begintempo() * percentage / 100)} bpm)`;
+  }
+
+  function pasTempoToe(percentage) {
+    if (!Number.isFinite(percentage) || percentage < 10 || percentage > 300) return;
+    if (percentage < 25 || percentage > 150) {
+      tempo.min = 10;
+      tempo.max = 300;
+    }
+    tempo.value = String(percentage);
+    tempoPercentage.value = String(percentage);
+    werkTempoTekstBij();
+    if (geluid) geluid.seq.playbackRate = percentage / 100;
   }
 
   const maatIndex = (seconden) => {
@@ -151,7 +171,7 @@ export function start(app) {
       }
       await geluid.context.resume();
       if (!geladen) await laad();
-      geluid.seq.playbackRate = Number(tempo.value) / 100;
+      geluid.seq.playbackRate = Number(tempoPercentage.value) / 100;
       if (herhaal.checked) geluid.seq.currentTime = tijden[eersteKeer(geldigeMaat(van))];
       geluid.seq.play();
       pasMixerToe();
@@ -184,9 +204,9 @@ export function start(app) {
     app.meld('speel-maat', { maat: null });
   });
   tempo.addEventListener('input', () => {
-    tempoTekst.textContent = ` ${tempo.value}%`;
-    if (geluid) geluid.seq.playbackRate = Number(tempo.value) / 100;
+    pasTempoToe(Number(tempo.value));
   });
+  tempoPercentage.addEventListener('input', () => pasTempoToe(Number(tempoPercentage.value)));
 
   app.op('partituur', (partituur) => {
     pauze();
