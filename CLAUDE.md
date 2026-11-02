@@ -26,6 +26,10 @@ Het script staat tussen Claude en de agents en filtert de fouten eruit, voordat 
 - het merget zelf als de wijziging precies `## Verwacht` is en alles groen is.
 
 Wat daarna nog open staat, laat `bash hermes/review.sh` zien, met per PR wat er nodig is. Begin daar altijd mee.
+- **Controles draait het script, niet Claude.** Elke taak krijgt tests of een `--controle`-opdracht. Is dat groen, dan merget het script zelf; Claude leest die diff niet.
+- **Claude leest een diff alleen als een controle faalt**, of bij code die geen test of controle kan dekken. Geen hele PR-teksten of logs: alleen de foutregel.
+- **Wacht op het seintje van een achtergrondtaak**, zonder wekker en zonder tussentijds kijken. Eén browsercontrole per golf, niet per taak.
+- **Een nieuwe chat per fase of nacht:** een lange chat is het duurst. Schrijf de stand in het plan en begin daarna opnieuw.
 - **Doe de controles van het script niet opnieuw.** Draai geen tests en geen regelcontrole, tel geen bestanden na, lees niet het hele project en niet de volledige PR-tekst. De PR-tekst bevat de echte uitkomsten.
 - Lees alleen de diff (`gh pr diff <nr>`) als het overzicht dat zegt, en kijk dan alleen naar wat een script niet kan beoordelen: doet het wat de taak bedoelt, klopt de logica, past het bij de rest.
 - "Precies zoals de taak": mergen zonder de diff te lezen; de inhoud heb je zelf in de taak geschreven.
