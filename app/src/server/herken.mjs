@@ -16,6 +16,7 @@ import { kinderen, leesXml, tekst } from '../musicxml/xml.mjs';
 import { controleerMaatduur } from '../controle/maatduur.mjs';
 import { vulLegeMaten, markeerFouteMaten } from '../controle/nabewerken.mjs';
 import { INSTRUMENTEN, instrumentBijNaam } from '../model/instrumenten.mjs';
+import { maakLimiet } from './limiet.mjs';
 
 const GELDIG_ID = /^[a-f0-9]{12}$/;
 const PAGINAS = /^\d+(-\d+)?( \d+(-\d+)?)*$/;
@@ -159,6 +160,10 @@ import { verbeterTekst } from '../model/muziektermen.mjs';
 
 export function maakHerken({ map, draaier }) {
   const taken = new Map();
+  const herkenningenPerUur = maakLimiet({
+    max: Number(process.env.SCORE2SOUND_HERKENNINGEN_PER_UUR ?? 10),
+    venster: 3600000,
+  });
   let rij = Promise.resolve();
 
   function voortgang(taak) {
@@ -275,6 +280,9 @@ export function maakHerken({ map, draaier }) {
     const eigenaar = gebruiker || null;
     if (eigenaar && [...taken.values()].some((taak) => taak.gebruiker === eigenaar && (taak.stand === 'wacht' || taak.stand === 'bezig'))) {
       return { status: 429, body: { fout: 'Er loopt al een herkenning van jou. Wacht tot die klaar is.' } };
+    }
+    if (eigenaar && !herkenningenPerUur(eigenaar)) {
+      return { status: 429, body: { fout: 'Je hebt dit uur al 10 herkenningen gestart. Probeer het later opnieuw.' } };
     }
 
     const id = randomBytes(6).toString('hex');
