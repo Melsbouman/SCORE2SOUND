@@ -15,6 +15,7 @@ Claude pakt hier werk uit als een nachtplan af is en de eindtijd nog niet bereik
 - [ ] Branch protection op `main` aanzetten (PR verplicht, later ook de check `controle`).
 
 ## Klaar
+- [x] Fase 4 en 5 en de editor (3 november 2026, nacht): audio-export (WAV), Verovio ingepakt, versies, tweede ronde voor vastgelopen pagina's, regelindeling en meermaats-rusten, tempo per maat, letters in kaders, partijnaam uit de kop en samenvoegen van gesplitste partijen, voorslagen, volta's, sprongen (D.C., D.S.), rallentando en wiggen in het afspelen, accounts met uitnodigingscode, projecten en herkenningen per gebruiker, container met Docker, de editor (knoppenbalk, slepen, extra bewerkfuncties), een hartslag en automatische terugloop in het script (Claude)
 - [x] Notatie zoals het blad: waardestrepen, triolen, fermates en repetitieletters in kaders (2 november 2026); tweede ronde voor vastgelopen pagina's gemerged. (Claude)
 - [x] Audio-export als WAV, Verovio ingepakt en onthouden in de browser, herkenningen opruimen, tweede ronde voor een vastgelopen pagina, versies bewaren, vergelijken en om en om beluisteren (2 november 2026). (Claude)
 - [x] Partijen hernoemen, instrumentenlijst aangevuld, lege maten en twijfelmaten, meldingen inklapbaar, notatie zoomen en meer maten per regel, toetsenbord bij corrigeren, startscherm, opmaak, controles door het script (2 november 2026). (Claude)
