@@ -16,6 +16,8 @@ export function start(app) {
   let gekozen = null; // id van de versie die vergeleken wordt
   let luistert = false; // true als de gekozen versie klinkt in plaats van de huidige
   let status = '';
+  let verwijderBevestiging = null;
+  let verwijderTimer = null;
 
   const versies = () => app.stand.versies ?? [];
   const gekozenVersie = () => versies().find((versie) => versie.id === gekozen) ?? null;
@@ -47,6 +49,42 @@ export function start(app) {
     app.zet({ partituur, meldingen: controleerMaatduur(partituur) });
     status = `${versie.naam} staat weer in beeld. De vorige stand is bewaard als versie.`;
     kies(null);
+  }
+
+  function hernoem(versie) {
+    const invoer = window.prompt('Nieuwe naam voor deze versie (maximaal 80 tekens):', versie.naam);
+    if (invoer === null) return;
+    const naam = invoer.trim();
+    if (!naam || naam.length > 80) {
+      window.alert('De naam mag niet leeg zijn en mag hooguit 80 tekens bevatten.');
+      return;
+    }
+    app.zet({ versies: versies().map((item) => item.id === versie.id ? { ...item, naam } : item) });
+  }
+
+  function verwijder(versie) {
+    if (verwijderBevestiging === versie.id) {
+      clearTimeout(verwijderTimer);
+      verwijderBevestiging = null;
+      verwijderTimer = null;
+      if (gekozen === versie.id) {
+        if (luistert) app.meld('luister-versie', null);
+        luistert = false;
+        gekozen = null;
+      }
+      app.zet({ versies: versies().filter((item) => item.id !== versie.id) });
+      meldVerschil();
+      teken();
+      return;
+    }
+    clearTimeout(verwijderTimer);
+    verwijderBevestiging = versie.id;
+    verwijderTimer = setTimeout(() => {
+      verwijderBevestiging = null;
+      verwijderTimer = null;
+      teken();
+    }, 3000);
+    teken();
   }
 
   function regel(partij) {
@@ -113,6 +151,8 @@ export function start(app) {
       knoppen.append(
         knop(gekozen === versie.id ? 'Sluiten' : 'Vergelijken', () => kies(gekozen === versie.id ? null : versie.id)),
         knop('Terugzetten', () => zetTerug(versie)),
+        knop('Naam wijzigen', () => hernoem(versie)),
+        knop(verwijderBevestiging === versie.id ? 'Zeker weten?' : 'Verwijderen', () => verwijder(versie)),
       );
       rij.append(titel, knoppen);
       if (gekozen === versie.id) rij.append(vergelijking(versie));
