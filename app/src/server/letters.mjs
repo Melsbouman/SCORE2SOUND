@@ -93,6 +93,14 @@ export function voegLettersToe(partituur, bladen) {
       meldingen.push(`Op pagina ${blad.nummer} konden de letters niet worden gezocht.`);
     }
     const eerder = systemen.map((s) => s.stacks.length);
+    if (letters.length > 0) {
+      const aantalMaten = eerder.reduce((a, b) => a + b, 0);
+      for (const partij of uit.partijen) {
+        for (const maat of partij.maten.slice(maatStart, maatStart + aantalMaten)) {
+          maat.elementen = maat.elementen.filter((element) => element.type !== 'letter');
+        }
+      }
+    }
     for (const letter of letters) {
       const begin = maatStart + eerder.slice(0, letter.systeem).reduce((a, b) => a + b, 0) + letter.stack;
       for (const partij of uit.partijen) {

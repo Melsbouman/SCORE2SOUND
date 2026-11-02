@@ -109,6 +109,36 @@ test('de letters komen als aanwijzing aan het begin van de maat, in elke partij'
   assert.match(meldingen[0], /pagina 2.*letter A.*aangenomen/);
 });
 
+test('kaders vervangen de Audiveris-letters op het blad in elke partij', () => {
+  const maten = () => [
+    { index: 0, elementen: [{ soort: 'aanwijzing', start: 0, type: 'letter', waarde: 'I B' }] },
+    { index: 1, elementen: [{ soort: 'aanwijzing', start: 0, type: 'letter', waarde: 'E' }] },
+    { index: 2, elementen: [] },
+  ];
+  const partituur = { partijen: [{ id: 'P1', maten: maten() }, { id: 'P2', maten: maten() }] };
+  const { partituur: uit } = voegLettersToe(partituur, [{ nummer: 1, xml: blad(), png }]);
+  for (const partij of uit.partijen) {
+    assert.deepEqual(partij.maten.map((maat) => maat.elementen.filter((element) => element.type === 'letter').map((element) => element.waarde)), [
+      [],
+      ['A'],
+      ['B'],
+    ]);
+  }
+});
+
+test('een blad zonder kaders behoudt de Audiveris-letters', () => {
+  const zonderKaders = maakPng(1000, 400, (vul) => {
+    for (const y of [300, 318, 336, 354, 372]) vul(100, y, 880, 2);
+  });
+  const partituur = { partijen: [{ id: 'P1', maten: [
+    { index: 0, elementen: [{ soort: 'aanwijzing', start: 0, type: 'letter', waarde: 'E' }] },
+    { index: 1, elementen: [] },
+    { index: 2, elementen: [] },
+  ] }] };
+  const { partituur: uit } = voegLettersToe(partituur, [{ nummer: 1, xml: blad(), png: zonderKaders }]);
+  assert.equal(uit.partijen[0].maten[0].elementen[0].waarde, 'E');
+});
+
 test('maten van eerdere bladen schuiven de letters op', () => {
   const partituur = { partijen: [{ id: 'P1', maten: Array.from({ length: 6 }, (_, index) => ({ index, elementen: [] })) }] };
   const { partituur: uit } = voegLettersToe(partituur, [{ nummer: 1, xml: blad(), png: null }, { nummer: 2, xml: blad(), png }]);
