@@ -14,7 +14,7 @@ import { leesMusicXML } from '../musicxml/lezen.mjs';
 import { kinderen, leesXml, tekst } from '../musicxml/xml.mjs';
 import { controleerMaatduur } from '../controle/maatduur.mjs';
 import { vulLegeMaten, markeerFouteMaten } from '../controle/nabewerken.mjs';
-import { instrumentBijNaam } from '../model/instrumenten.mjs';
+import { INSTRUMENTEN, instrumentBijNaam } from '../model/instrumenten.mjs';
 
 const GELDIG_ID = /^[a-f0-9]{12}$/;
 const PAGINAS = /^\d+(-\d+)?( \d+(-\d+)?)*$/;
@@ -53,15 +53,74 @@ function herstelOcr(waarde) {
   return waarde.replace(/[\p{L}\d]+/gu, (woord) => /\p{L}/u.test(woord) ? woord.replace(/[I1]/g, 'l') : woord);
 }
 
+const INSTRUMENT_ALIASEN = [
+  'soprano sax', 'sax soprano', 'sax sop', 'sop sax', 'soprano saxophone', 'saxophone soprano',
+  'baritone sax', 'sax baritone', 'sax bar', 'bar sax', 'baritone saxophone', 'saxophone baritone',
+  'eb cornet', 'es cornet', 'eb comet', 'es comet', 'eb kornet', 'es kornet',
+  'bugel', 'flugel', 'fliigel', 'iigelho', 'flug.', 'flugelhorn',
+  'alto sax', 'sax alto', 'sax alt', 'tenor sax', 'sax tenor', 'sax ten',
+  'alto saxophone', 'saxophone alto', 'tenor saxophone', 'saxophone tenor',
+  'trb', 'tbn', 'trumpet', 'cornet', 'comet', 'kornet', 'cts', 'ct',
+  'alto horn', 'tenor horn', 'horn in f', 'hoorn in f', 'horn', 'hom', 'hn',
+  'euph', 'bass', 'bas', 'basses', 'clarinet', 'flute', 'oboe', 'viola', 'violin',
+];
+
+const instrumentTermen = [...INSTRUMENTEN.map(({ naam }) => naam), ...INSTRUMENT_ALIASEN]
+  .flatMap((naam) => {
+    const instrument = instrumentBijNaam(naam);
+    if (!instrument) return [];
+    return naam.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^\p{L}]+/gu, ' ').trim().split(/\s+/)
+      .filter((woord) => woord.length >= 4)
+      .map((woord) => ({ woord, instrument }));
+  });
+
+function afstandLevenshtein(eerste, tweede) {
+  const a = Array.from(eerste);
+  const b = Array.from(tweede);
+  let vorige = Array.from({ length: b.length + 1 }, (_, index) => index);
+  for (let i = 1; i <= a.length; i++) {
+    const huidige = [i];
+    for (let j = 1; j <= b.length; j++) {
+      huidige[j] = Math.min(
+        huidige[j - 1] + 1,
+        vorige[j] + 1,
+        vorige[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1),
+      );
+    }
+    vorige = huidige;
+  }
+  return vorige[b.length];
+}
+
+function instrumentInKop(waarde) {
+  const direct = instrumentBijNaam(waarde);
+  if (direct) return direct;
+
+  const woorden = herstelOcr(waarde).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/\d+/g, ' ').replace(/[^\p{L}]+/gu, ' ').trim().split(/\s+/);
+  for (const woord of woorden) {
+    if (woord.length < 4) continue;
+    for (const term of instrumentTermen) {
+      if (term.woord.startsWith(woord)) return term.instrument;
+      const maximum = Math.max(woord.length, term.woord.length) <= 6 ? 1 : 2;
+      if (afstandLevenshtein(woord, term.woord) <= maximum) return term.instrument;
+    }
+  }
+  return null;
+}
+
 function maakNetjes(partituur, naam, creditWoorden) {
   if (!partituur.titel && naam) partituur.titel = basename(naam, extname(naam));
   partituur.partijen.forEach((partij, index) => {
     if (!partij.naam || partij.naam === 'Voice') {
-      const gevonden = creditWoorden.map(herstelOcr).find((waarde) => instrumentBijNaam(waarde));
+      const gevonden = creditWoorden.map((waarde) => {
+        const hersteld = herstelOcr(waarde);
+        return { waarde: hersteld, instrument: instrumentInKop(hersteld) };
+      }).find(({ instrument }) => instrument);
       if (gevonden) {
-        partij.naam = gevonden;
-        const instrument = instrumentBijNaam(gevonden);
-        Object.assign(partij.instrument, { midiProgramma: instrument.midiProgramma, transpositie: instrument.transpositie });
+        partij.naam = gevonden.waarde;
+        Object.assign(partij.instrument, { midiProgramma: gevonden.instrument.midiProgramma, transpositie: gevonden.instrument.transpositie });
       } else {
         partij.naam = `Partij ${index + 1}`; // zonder tekst op het blad noemt Audiveris elke partij Voice
       }
