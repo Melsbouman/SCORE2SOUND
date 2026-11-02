@@ -148,7 +148,34 @@ main:has(#weergave g.measure) #hulp { display: none; }
 .corrigeren__knoppen { display: flex; flex-wrap: wrap; gap: var(--ruimte-2); margin: var(--ruimte-2) 0; }
 
 /* Bladmuziek: altijd zwart op wit, als papier, ook in de donkere variant. */
-.bladmuziek { background: #ffffff; color: #000000; border-radius: var(--hoek); padding: var(--ruimte-2); overflow-x: auto; }
+.bladmuziek { background: #ffffff; color: #000000; border-radius: var(--hoek); padding: var(--ruimte-3); overflow-x: auto; box-shadow: var(--schaduw); }
+.bladmuziek__titelblok {
+  max-width: 100%;
+  margin-bottom: var(--ruimte-4);
+  padding-bottom: var(--ruimte-3);
+  border-bottom: 1px solid #d8d8d8;
+  color: #000000;
+  font-family: Georgia, 'Times New Roman', serif;
+  text-align: center;
+}
+.bladmuziek__titelblok h1 {
+  max-width: 100%;
+  margin: 0;
+  font-size: clamp(1.35rem, 5vw, 2rem);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.bladmuziek__ondertitel { margin: var(--ruimte-1) 0 0; font-size: 1.1rem; overflow-wrap: anywhere; }
+.bladmuziek__details {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--ruimte-1) var(--ruimte-3);
+  margin-top: var(--ruimte-3);
+  text-align: left;
+}
+.bladmuziek__details span { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+.bladmuziek__details span:last-child { margin-left: auto; text-align: right; }
 .bladmuziek__pagina { display: block; max-width: none; height: auto; }
 .bladmuziek g.measure.gemarkeerd { fill: #b3261e; color: #b3261e; }
 .bladmuziek g.measure.speelt { fill: #2f5d8a; color: #2f5d8a; }
