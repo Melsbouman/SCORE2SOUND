@@ -12,6 +12,7 @@ import { leesZip } from './zip.mjs';
 import { bladenUitOmr, koppelOmr, voegPaginasSamen } from './omr.mjs';
 import { leesMusicXML } from '../musicxml/lezen.mjs';
 import { controleerMaatduur } from '../controle/maatduur.mjs';
+import { vulLegeMaten, markeerFouteMaten } from '../controle/nabewerken.mjs';
 import { instrumentBijNaam } from '../model/instrumenten.mjs';
 
 const GELDIG_ID = /^[a-f0-9]{12}$/;
@@ -113,11 +114,15 @@ export function maakHerken({ map, draaier }) {
       bladen: bladen.map(({ nummer, breedte, hoogte }) => ({ nummer, breedte, hoogte })),
     };
     maakNetjes(uit.partituur, taak.naam);
-    const meldingen = [
+  const gevuld = vulLegeMaten(uit.partituur);
+  const maatMeldingen = controleerMaatduur(gevuld);
+  const nagekeken = markeerFouteMaten(gevuld, maatMeldingen);
+  uit.partituur = nagekeken;
+  const meldingen = [
       ...mislukt.map((nummer) => herkenMelding(`Pagina ${nummer} is overgeslagen: daar kon de app geen muziek lezen.`)),
       ...uit.overgeslagen.map((nummer) => herkenMelding(`Op pagina ${nummer} is de zekerheid per noot onbekend.`)),
       ...(uit.nietGekoppeld > 0 ? [herkenMelding(`${uit.nietGekoppeld} noten konden niet aan het origineel worden gekoppeld.`)] : []),
-      ...controleerMaatduur(uit.partituur),
+    ...maatMeldingen,
     ];
     Object.assign(taak, { stand: 'klaar', tekst: 'Klaar', procent: 100, partituur: uit.partituur, meldingen });
   }
