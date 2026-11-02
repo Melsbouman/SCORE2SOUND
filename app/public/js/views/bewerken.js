@@ -1,8 +1,10 @@
 // Partijen bewerken: een partij transponeren naar een ander instrument, of een losse partij maken.
 // Wordt gebouwd in fase 3 van werkpakketten/plannen/2026-10-29-score2sound-app.md.
 import { INSTRUMENTEN } from '/src/model/instrumenten.mjs';
+import { sorteerPartijen } from '/src/model/partituurvolgorde.mjs';
 import { transponeerPartij } from '/src/model/transponeren.mjs';
 import { hernoemPartij, partijUitnemen, voegSamen } from '/src/model/partijen.mjs';
+import { controleerMaatduur } from '/src/controle/maatduur.mjs';
 
 export function start(app) {
   const vlak = document.getElementById('bewerken');
@@ -68,6 +70,28 @@ export function start(app) {
     vlak.append(naamLabel, hernoem);
 
     const knoppen = document.createElement('div');
+    const sorteer = document.createElement('button');
+    sorteer.type = 'button';
+    sorteer.className = 'knop';
+    sorteer.textContent = 'Sorteer in partituurvolgorde';
+    sorteer.addEventListener('click', () => {
+      try {
+        const huidige = app.stand.partituur;
+        const idsVoor = huidige.partijen.map((partij) => partij.id);
+        const nieuw = sorteerPartijen(huidige);
+        const idsNa = nieuw.partijen.map((partij) => partij.id);
+        const gewijzigd =
+          idsVoor.length !== idsNa.length || idsVoor.some((id, index) => id !== idsNa[index]);
+        toonStatus(
+          gewijzigd
+            ? 'De partijen staan nu in partituurvolgorde.'
+            : 'De partijen stonden al in de goede volgorde.',
+        );
+        app.zet({ partituur: nieuw, meldingen: controleerMaatduur(nieuw) });
+      } catch (fout) {
+        toonStatus(`Dat lukte niet: ${fout.message}`);
+      }
+    });
     const omzetten = document.createElement('button');
     omzetten.type = 'button';
     omzetten.className = 'knop';
@@ -125,7 +149,7 @@ export function start(app) {
         toonStatus(`Dat lukte niet: ${fout.message}`);
       }
     });
-    knoppen.append(omzetten, uitnemen);
+    knoppen.append(sorteer, omzetten, uitnemen);
     vlak.append(knoppen);
 
     const bestandLabel = document.createElement('label');
