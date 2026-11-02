@@ -73,13 +73,23 @@ function dirigentenSpoor(partituur, beginnen) {
   }
   for (let index = 0; index < maten.length; index += 1) {
     const tempo = maten[index].tempo;
-    if (tempo == null) continue;
-    const microseconden = Math.round(60000000 / tempo);
-    events.push({
-      tik: beginnen[index],
-      volgorde: 1,
-      bytes: [0xff, 0x51, 3, (microseconden >>> 16) & 0xff, (microseconden >>> 8) & 0xff, microseconden & 0xff],
-    });
+    if (tempo != null) {
+      const microseconden = Math.round(60000000 / tempo);
+      events.push({
+        tik: beginnen[index],
+        volgorde: 1,
+        bytes: [0xff, 0x51, 3, (microseconden >>> 16) & 0xff, (microseconden >>> 8) & 0xff, microseconden & 0xff],
+      });
+    }
+    for (const aanwijzing of maten[index].elementen ?? []) {
+      if (aanwijzing.soort !== 'aanwijzing' || aanwijzing.type !== 'tempo' || !(aanwijzing.start > 0)) continue;
+      const microseconden = Math.round(60000000 / aanwijzing.waarde);
+      events.push({
+        tik: beginnen[index] + aanwijzing.start,
+        volgorde: 1,
+        bytes: [0xff, 0x51, 3, (microseconden >>> 16) & 0xff, (microseconden >>> 8) & 0xff, microseconden & 0xff],
+      });
+    }
   }
   for (const verloop of tempoOverlopen) {
     let tempoVoor = 120;
