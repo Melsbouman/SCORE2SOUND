@@ -130,5 +130,8 @@ De prefix `AIFLOW_` en de map `~/.aiflow-status` komen uit de bron van deze werk
 
 ## 10. Nachtplan
 Een nachtplan loopt tot een eindtijd (standaard 07:00, eindcontrole 45 minuten eerder). Is het plan af, dan pakt Claude het volgende punt uit `werkpakketten/voorraad.md`. Start, lus, verboden en eindcontrole staan in de skill `.claude/skills/nachtplan/SKILL.md`.
+
+**Genoeg taken.** De hartslag houdt de wachtrij gevuld: zijn er minder dan `AIFLOW_MIN_TAKEN` (standaard 6) open taken, dan maakt Claude er zelf bij, zonder goedkeuring van Mels, en start de wachtrijen opnieuw. Alleen werk dat geld, een server of accounts van Mels vraagt blijft liggen.
+
 Een taak doorloopt maximaal drie fasen: eerst werkt de aangewezen uitvoerder eraan; loopt die vast, dan wordt de taak automatisch overgezet naar de andere uitvoerder; loopt de taak ook na die overzetting vast, dan krijgt Codex één laatste poging met de foutmeldingen van beide eerdere pogingen en de vrijheid om zelf een andere aanpak te bedenken, waarna een nieuwe mislukking als `agent-vast` voor Claude blijft staan.
 
