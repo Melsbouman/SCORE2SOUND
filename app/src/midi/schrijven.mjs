@@ -127,6 +127,60 @@ function dirigentenSpoor(partituur, beginnen) {
   return maakSpoor(events);
 }
 
+function wiggenVoor(partij, beginnen) {
+  const dynamieken = [];
+  const wigAanwijzingen = [];
+  let volgorde = 0;
+  for (let maatIndex = 0; maatIndex < partij.maten.length; maatIndex += 1) {
+    for (const element of partij.maten[maatIndex].elementen) {
+      const aanwijzing = { ...element, tik: beginnen[maatIndex] + element.start, volgorde };
+      if (element.soort === 'aanwijzing' && element.type === 'dynamiek' && element.waarde in STERKTE) {
+        dynamieken.push(aanwijzing);
+      }
+      if (element.soort === 'aanwijzing' &&
+          (element.type === 'crescendo' || element.type === 'decrescendo') &&
+          (element.waarde === 'begin' || element.waarde === 'eind')) {
+        wigAanwijzingen.push(aanwijzing);
+      }
+      volgorde += 1;
+    }
+  }
+
+  const opTik = (a, b) => a.tik - b.tik || a.volgorde - b.volgorde;
+  dynamieken.sort(opTik);
+  wigAanwijzingen.sort(opTik);
+  const openWiggen = new Map();
+  const wiggen = [];
+  for (const aanwijzing of wigAanwijzingen) {
+    if (aanwijzing.waarde === 'begin') {
+      const open = openWiggen.get(aanwijzing.type) ?? [];
+      open.push(aanwijzing);
+      openWiggen.set(aanwijzing.type, open);
+      continue;
+    }
+    const open = openWiggen.get(aanwijzing.type);
+    const begin = open?.pop();
+    if (!begin || aanwijzing.tik < begin.tik) continue;
+
+    const dynamiekErvoor = dynamieken
+      .filter((dynamiek) => dynamiek.tik < begin.tik ||
+        (dynamiek.tik === begin.tik && dynamiek.volgorde < begin.volgorde))
+      .at(-1);
+    const startSterkte = dynamiekErvoor ? STERKTE[dynamiekErvoor.waarde] : 80;
+    const dynamiekErna = dynamieken.find((dynamiek) => dynamiek.tik > aanwijzing.tik ||
+      (dynamiek.tik === aanwijzing.tik && dynamiek.volgorde > aanwijzing.volgorde));
+    const richting = aanwijzing.type === 'crescendo' ? 20 : -20;
+    const eindSterkte = dynamiekErna ? STERKTE[dynamiekErna.waarde] : startSterkte + richting;
+    wiggen.push({
+      begin: begin.tik,
+      eind: aanwijzing.tik,
+      startSterkte,
+      eindSterkte: Math.max(20, Math.min(120, eindSterkte)),
+    });
+  }
+  return wiggen;
+}
+
 function partijSpoor(partij, partijIndex, beginnen, volume) {
   const { poort, kanaal } = kanaalVan(partijIndex);
   const naam = [...tekstEncoder.encode(partij.naam)];
@@ -137,6 +191,7 @@ function partijSpoor(partij, partijIndex, beginnen, volume) {
     { tik: 0, volgorde: 2, bytes: [0xb0 | kanaal, 7, volume[partij.id] ?? 100] },
   ];
   const noten = [];
+  const wiggen = wiggenVoor(partij, beginnen);
   let sterkte = 80;
   const overbonden = new Map();
 
@@ -169,6 +224,12 @@ function partijSpoor(partij, partijIndex, beginnen, volume) {
         continue;
       }
       let kracht = eenmalig.get(element.start) ?? sterkte;
+      const wig = wiggen.find((item) => begin >= item.begin && begin <= item.eind);
+      if (wig) {
+        const verloop = wig.eind === wig.begin ? 1 : (begin - wig.begin) / (wig.eind - wig.begin);
+        kracht = Math.round(wig.startSterkte + (wig.eindSterkte - wig.startSterkte) * verloop);
+        kracht = Math.max(20, Math.min(120, kracht));
+      }
       if (element.articulaties.includes('accent')) kracht += 15;
       if (element.articulaties.includes('marcato')) kracht += 25;
       kracht = Math.min(kracht, 127);
