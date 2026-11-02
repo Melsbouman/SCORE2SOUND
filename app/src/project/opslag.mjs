@@ -40,13 +40,18 @@ export function maakOpslag(map) {
       .map(({ id, naam, aangemaakt, bijgewerkt }) => ({ id, naam, aangemaakt, bijgewerkt }));
   }
 
-  async function bewaar({ id, naam, partituur }) {
+  async function bewaar({ id, naam, partituur, versies }) {
     if (!partituur || !Array.isArray(partituur.partijen)) {
       throw new Error('Er is geen partituur om te bewaren.');
     }
 
     const nu = new Date().toISOString();
     let aangemaakt = nu;
+    let eerdereVersies = [];
+    if (id) {
+      const eerder = await open(id);
+      eerdereVersies = eerder.versies ?? [];
+    }
     if (id === undefined) {
       id = randomBytes(6).toString('hex');
     } else {
@@ -59,6 +64,7 @@ export function maakOpslag(map) {
       aangemaakt,
       bijgewerkt: nu,
       partituur,
+      versies: Array.isArray(versies) ? versies : eerdereVersies,
     };
     await mkdir(map, { recursive: true });
     await writeFile(bestand(id), `${JSON.stringify(project, null, 2)}\n`, 'utf8');
