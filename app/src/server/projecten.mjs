@@ -1,6 +1,7 @@
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { maakOpslag } from '../project/opslag.mjs';
+import { magBewaren } from './kwota.mjs';
 
 const standaardMap = fileURLToPath(new URL('../../projecten/', import.meta.url));
 
@@ -20,6 +21,18 @@ export default async function projecten(verzoek) {
         gegevens = JSON.parse(verzoek.body.toString());
       } catch {
         return { status: 400, body: { fout: 'De gegevens zijn geen geldige JSON.' } };
+      }
+      if (verzoek.gebruiker) {
+        const { toegestaan } = await magBewaren({
+          map: join(projectenMap, verzoek.gebruiker),
+          nieuweGrootte: verzoek.body.length,
+          max: process.env.SCORE2SOUND_KWOTA === undefined
+            ? undefined
+            : Number(process.env.SCORE2SOUND_KWOTA),
+        });
+        if (!toegestaan) {
+          return { status: 413, body: { fout: 'Je opslag is vol. Verwijder een project en probeer het opnieuw.' } };
+        }
       }
       return { status: 200, body: await opslag.bewaar(gegevens) };
     }
