@@ -19,6 +19,25 @@ import { INSTRUMENTEN, instrumentBijNaam } from '../model/instrumenten.mjs';
 const GELDIG_ID = /^[a-f0-9]{12}$/;
 const PAGINAS = /^\d+(-\d+)?( \d+(-\d+)?)*$/;
 
+function meerDanVeertigPaginas(paginas) {
+  const bereiken = paginas.split(' ').map((deel) => {
+    const [eerste, laatste = eerste] = deel.split('-').map(BigInt);
+    return eerste <= laatste ? [eerste, laatste] : [laatste, eerste];
+  }).sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
+  let totaal = 0n;
+  let [begin, einde] = bereiken[0];
+  for (const [volgendBegin, volgendEinde] of bereiken.slice(1)) {
+    if (volgendBegin <= einde + 1n) {
+      if (volgendEinde > einde) einde = volgendEinde;
+      continue;
+    }
+    totaal += einde - begin + 1n;
+    if (totaal > 40n) return true;
+    [begin, einde] = [volgendBegin, volgendEinde];
+  }
+  return totaal + einde - begin + 1n > 40n;
+}
+
 export const echteDraaier = {
   transcribeer: ({ invoer, uitmap, paginas, opRegel }) => draai({ exe: audiverisPad(), argumenten: transcribeerArgumenten({ invoer, uitmap, paginas, limiet: 120 }), opRegel }),
   herstel: ({ omr, uitmap, bladen, opRegel }) => draai({ exe: audiverisPad(), argumenten: hervatArgumenten({ omr, uitmap, bladen }), opRegel }),
@@ -238,20 +257,30 @@ export function maakHerken({ map, draaier }) {
     }
   }
 
-  async function start({ body, query }) {
+  async function start({ body, query, gebruiker }) {
     if (!body || body.length === 0) return { status: 400, body: { fout: 'Het bestand is leeg.' } };
     const soort = soortVan(body);
     if (!soort) return { status: 415, body: { fout: 'Kies een PDF, PNG of JPG.' } };
     const paginas = (query.paginas ?? '').trim();
     if (paginas && !PAGINAS.test(paginas)) return { status: 400, body: { fout: 'Schrijf de pagina\'s als 1-4 7.' } };
+    if (paginas && meerDanVeertigPaginas(paginas)) return { status: 400, body: { fout: 'Kies hooguit 40 pagina\'s per keer.' } };
+    const eigenaar = gebruiker || null;
+    if (eigenaar && [...taken.values()].some((taak) => taak.gebruiker === eigenaar && (taak.stand === 'wacht' || taak.stand === 'bezig'))) {
+      return { status: 429, body: { fout: 'Er loopt al een herkenning van jou. Wacht tot die klaar is.' } };
+    }
 
     const id = randomBytes(6).toString('hex');
     const uitmap = join(map, id);
-    await mkdir(uitmap, { recursive: true });
     const invoer = join(uitmap, `invoer.${soort}`); // nooit de naam van de gebruiker als pad
-    await writeFile(invoer, body);
-    const taak = { id, stand: 'wacht', tekst: 'Wacht op zijn beurt', procent: 0, naam: query.naam ?? '', paginas, invoer, uitmap };
+    const taak = { id, gebruiker: eigenaar, stand: 'wacht', tekst: 'Wacht op zijn beurt', procent: 0, naam: query.naam ?? '', paginas, invoer, uitmap };
     taken.set(id, taak);
+    try {
+      await mkdir(uitmap, { recursive: true });
+      await writeFile(invoer, body);
+    } catch (fout) {
+      taken.delete(id);
+      throw fout;
+    }
     rij = rij.then(() => werk(taak));
     return { status: 202, body: { id } };
   }
@@ -274,10 +303,14 @@ export function maakHerken({ map, draaier }) {
     if (methode === 'POST' && !rest) return start(verzoek);
 
     const pagina = rest.match(/^([a-f0-9]{12})\/blad\/(\d+)$/);
-    if (pagina && methode === 'GET') return blad(pagina[1], pagina[2]);
+    if (pagina && methode === 'GET') {
+      const taak = taken.get(pagina[1]);
+      if (!taak || taak.gebruiker !== (verzoek.gebruiker || null)) return { status: 404, body: { fout: 'Onbekende herkenning.' } };
+      return blad(pagina[1], pagina[2]);
+    }
 
     const taak = GELDIG_ID.test(rest) ? taken.get(rest) : null;
-    if (!taak) return { status: 404, body: { fout: 'Onbekende herkenning.' } };
+    if (!taak || taak.gebruiker !== (verzoek.gebruiker || null)) return { status: 404, body: { fout: 'Onbekende herkenning.' } };
     if (methode === 'GET') return stand(taak);
     if (methode === 'DELETE') {
       if (taak.stand === 'wacht' || taak.stand === 'bezig') {
