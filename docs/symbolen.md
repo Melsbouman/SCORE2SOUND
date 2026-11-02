@@ -20,7 +20,7 @@ De twee opgegeven PDF-bestanden konden in deze werkomgeving niet worden geopend.
 | Zestiende rust | Zestiende rust | `<note><rest/><type>16th</type>` | `noten[].rust`, `noten[].duur` | ja | ja | ja |
 | Tweeëndertigste rust | Tweeëndertigste rust | `<note><rest/><type>32nd</type>` | `noten[].rust`, `noten[].duur` | ja | ja | ja |
 | Maatrust | Hele-maatrust | `<rest measure="yes">` | `noten[].rust`, `noten[].duur` | ja | ja | ja |
-|| Meermaats-rust | Meermaats-rust | `<multiple-rest>` | nee | nee | nee | nee |
+||| Meermaats-rust | Meermaats-rust | `<multiple-rest>` | nee | ja | ja | nee |
 || Overbinding | Overbindingsboog | `<tie>`, `<tied>` | `noten[].overbinding` | ja | ja | ja |
 || Legatoboog | Legatoboog | `<slur>` | ja | ja | ja |
 || Fraseboog | Boog over meerdere noten | `<slur>` | ja | ja | ja |
@@ -68,31 +68,31 @@ De twee opgegeven PDF-bestanden konden in deze werkomgeving niet worden geopend.
 || Verticale golf | Arpeggio | `<arpeggiate>` | nee | nee | nee | nee |
 || Schuine strepen | Tremolo | `<tremolo>` | nee | nee | nee | nee |
 || Voorslag met streep | Korte voorslag | `<grace slash="yes">` | nee | nee | nee | nee |
-|| Voorslag zonder streep | Lange voorslag | `<grace>` | nee | nee | nee | nee |
-|| 3 | Triool | `<time-modification>`, `<tuplet>` | nee | nee | nee | nee |
-|| 5 | Kwintool | `<time-modification>`, `<tuplet>` | nee | nee | nee | nee |
-|| 6 | Sextool | `<time-modification>`, `<tuplet>` | nee | nee | nee | nee |
+||| Voorslag zonder streep | Lange voorslag | `<grace>` | nee | nee | nee | nee |
+|||| 3 | Triool | `<time-modification>`, `<tuplet>` | nee | ja | ja | nee |
+|||| 5 | Kwintool | `<time-modification>`, `<tuplet>` | nee | ja | ja | nee |
+||| 6 | Sextool | `<time-modification>`, `<tuplet>` | nee | ja | ja | nee |
 || Gliss. | Glissando | `<glissando>` | nee | nee | nee | nee |
 || Port. | Portamento | `<slide>` | nee | nee | nee | nee |
 || Dubbele maatstreep | Dubbele maatstreep | `<bar-style>light-light</bar-style>` | nee | ja | ja | nee |
 || Dikke slotstreep | Eindmaatstreep | `<bar-style>light-heavy</bar-style>` | nee | ja | ja | nee |
 || :|| | Herhaling einde | `<repeat direction="backward">` | nee | nee | nee | nee |
-|| ||: | Herhaling begin | `<repeat direction="forward">` | nee | nee | nee | nee |
-|| 1. | Eerste volta | `<ending number="1">` | nee | nee | nee | nee |
-|| 2. | Tweede volta | `<ending number="2">` | nee | nee | nee | nee |
+||| ||: | Herhaling begin | `<repeat direction="forward">` | nee | nee | nee | nee |
+||| 1. | Eerste volta | `<ending number="1">` | ja | ja | ja | ja |
+||| 2. | Tweede volta | `<ending number="2">` | ja | ja | ja | ja |
 || Segno | Segno | `<segno>` | nee | nee | nee | nee |
 || Coda | Coda | `<coda>` | nee | nee | nee | nee |
 || D.C. | Da capo | `<sound dacapo="yes">` | nee | nee | nee | nee |
 || D.S. | Dal segno | `<sound dalsegno="…">` | nee | nee | nee | nee |
 || Fine | Fine | `<sound fine="yes">` | nee | nee | nee | nee |
-|| A | Repetitieletter | `<rehearsal>` | nee | nee | nee | nee |
+||| A | Repetitieletter | `<rehearsal>` | nee | ja | ja | nee |
 || % | Herhaal vorige maat | `<measure-repeat>` | nee | nee | nee | nee |
 || // | Herhaal vorige twee maten | `<measure-repeat type="start">` | nee | nee | nee | nee |
 || ♩ = 120 | Metronoomaanduiding | `<metronome>`, `<sound tempo="120">` | `tempo` | ja | ja | ja |
-|| Allegro | Tempoaanduiding als tekst | `<words>`, `<sound tempo="…">` | nee | nee | nee | nee |
-|| rit. | Ritenuto | `<words>` | nee | nee | nee | nee |
-|| accel. | Accelerando | `<words>` | nee | nee | nee | nee |
-|| Ped. | Pedaal indrukken | `<pedal type="start">` | nee | nee | nee | nee |
+||| Allegro | Tempoaanduiding als tekst | `<words>`, `<sound tempo="…">` | nee | nee | nee | nee |
+||| rit. | Ritenuto | `<words>` | nee | ja | ja | ja |
+||| accel. | Accelerando | `<words>` | nee | ja | ja | ja |
+||| Ped. | Pedaal indrukken | `<pedal type="start">` | nee | nee | nee | nee |
 || ✱ | Pedaal loslaten | `<pedal type="stop">` | nee | nee | nee | nee |
 || Komma | Ademhalingsteken | `<breath-mark>` | nee | nee | nee | nee |
 || Caesuur | Caesuur | `<caesura>` | nee | nee | nee | nee |
