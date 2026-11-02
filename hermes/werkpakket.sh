@@ -167,6 +167,15 @@ for r in sys.stdin.buffer.read().decode('utf-8').splitlines():
     if inn and r.strip().startswith('\`\`\`'): blok = not blok; continue
     if inn and blok: out.append(r)
 print(chr(10).join(out))" < "$WERK/body.md" | sed '/^$/d' > "$WERK/verwacht.txt"
+# Optioneel: onder "## Controle" staan in een codeblok de opdrachten die moeten slagen.
+py "
+import sys
+inn=False; blok=False; out=[]
+for r in sys.stdin.buffer.read().decode('utf-8').splitlines():
+    if r.startswith('## '): inn = r.strip()=='## Controle'; blok=False; continue
+    if inn and r.strip().startswith('\`\`\`'): blok = not blok; continue
+    if inn and blok: out.append(r)
+print(chr(10).join(out))" < "$WERK/body.md" | sed '/^$/d' > "$WERK/controle.txt"
 [ -n "$TOEGESTAAN" ] || vast "$ISSUE" "geen bestanden gevonden onder '## Bestanden' in het issue"
 # De uitvoerder van deze taak: het label agent-codex, agent-copilot of agent-hermes.
 GEKOZEN=$(py "
@@ -338,6 +347,19 @@ $REGELS"
     TESTS=$(bash hermes/tests.sh $(echo "$TOEGESTAAN" | tr ',' ' ') 2>&1) || FOUT="De tests falen:
 $(echo "$TESTS" | tail -c 3000)"
   fi
+  CONTROLE_OK=
+  if [ -z "$FOUT" ] && [ -s "$WERK/controle.txt" ]; then
+    CONTROLE_OK=ja
+    while IFS= read -r opdracht; do
+      [ -n "$opdracht" ] || continue
+      if ! UITVOER=$(bash -c "$opdracht" 2>&1); then
+        CONTROLE_OK=
+        FOUT="Deze controle uit de taak faalt: $opdracht
+$(echo "$UITVOER" | tail -c 800)"
+        break
+      fi
+    done < "$WERK/controle.txt"
+  fi
   # Wijkt de wijziging af van ## Verwacht, dan is dat een herstelpunt zolang er rondes over zijn; daarna mag hij door
   # (zonder agent-exact), zodat Claude kan kijken of de afwijking klopt. Bij een afgekeurde PR gelden de opmerkingen
   # van Claude, die kunnen van ## Verwacht afwijken; dan is een afwijking geen herstelpunt.
@@ -414,8 +436,11 @@ zet_labels "$ISSUE" agent-review
 # 6. Automatisch mergen als er niets meer te beoordelen is: de wijziging is precies wat Claude in de taak schreef,
 # geen bestand is teruggedraaid, de regelcontrole geeft geen waarschuwing en de GitHub Action is groen.
 # Uitzetten met AIFLOW_AUTOMERGE=uit; dan beslist Claude over elke PR.
+WAARSCHUWING=$(echo "$REGELS" | grep '^Let op:' | grep -v 'testbestand gewijzigd')
+KLAAR_VOOR_MERGE=
+if { [ "${EXACT%%,*}" = "ja" ] && ! echo "$REGELS" | grep -q '^Let op:'; } || { [ "$CONTROLE_OK" = "ja" ] && [ -z "$WAARSCHUWING" ]; }; then KLAAR_VOOR_MERGE=ja; fi
 SAMEN="klaar #$ISSUE in $DUUR s"
-if [ "${AIFLOW_AUTOMERGE:-exact}" = "exact" ] && [ "${EXACT%%,*}" = "ja" ] && [ -z "$EXTRA" ] && ! echo "$REGELS" | grep -q '^Let op:'; then
+if [ "${AIFLOW_AUTOMERGE:-exact}" = "exact" ] && [ "$KLAAR_VOOR_MERGE" = "ja" ] && [ -z "$EXTRA" ]; then
   status_zet bezig "#$ISSUE $TITEL" 0.95 "pr wacht op de Action"
   # Even wachten tot GitHub de Action heeft aangemeld, dan wachten tot hij klaar is.
   # AIFLOW_ACTION=uit: niet op de Action wachten (bijvoorbeeld als GitHub Actions niet kan draaien); het script
@@ -425,7 +450,7 @@ if [ "${AIFLOW_AUTOMERGE:-exact}" = "exact" ] && [ "${EXACT%%,*}" = "ja" ] && [ 
   fi
   if [ "$ACTION_OK" -eq 0 ]; then
     if "$GH" pr merge "$PRURL" -R "$R" --merge --delete-branch >/dev/null 2>&1; then
-      "$GH" issue close "$ISSUE" -R "$R" --comment "Automatisch gemerged door het script: precies zoals verwacht, regelcontrole en tests groen${AIFLOW_ACTION:+ (Action: $AIFLOW_ACTION)}." >/dev/null 2>&1
+      "$GH" issue close "$ISSUE" -R "$R" --comment "Automatisch gemerged door het script: controles, regelcontrole en tests groen." >/dev/null 2>&1
       SAMEN="klaar en automatisch gemerged #$ISSUE in $DUUR s"
     else
       log "automatisch mergen lukte niet; de PR wacht op Claude"

@@ -6,6 +6,7 @@
 #     --bestand pad/naar/bestand [--bestand pad2] \
 #     --stap "Wat de agent doet" [--stap "..."] \
 #     [--verwacht "regel die precies moet worden toegevoegd"] [--verwacht "..."] \
+#     [--controle "opdracht die moet slagen"] [--controle "..."] \
 #     [--criterium "extra criterium"] [--niet "wat niet mag"] [--bron "verwijzing"]
 #     [--voor codex|copilot|hermes]   wie de taak bouwt (label agent-codex, agent-copilot of agent-hermes);
 #                  zonder --voor: codex. hermes is voor kleine achtergrondtaken, liefst met --verwacht.
@@ -17,7 +18,7 @@ GH="${GH:-/c/Program Files/GitHub CLI/gh.exe}"
 R="${AIFLOW_REPO:-Melsbouman/SCORE2SOUND}"
 TITEL=""; DOEL=""; BRON="Gemaakt met maak-taak.sh"
 VOOR=""
-BESTANDEN=(); STAPPEN=(); VERWACHT=(); CRITERIA=(); NIET=()
+BESTANDEN=(); STAPPEN=(); VERWACHT=(); CONTROLES=(); CRITERIA=(); NIET=()
 while [ $# -gt 0 ]; do
   case "$1" in
     --titel) TITEL="$2"; shift 2 ;;
@@ -25,6 +26,7 @@ while [ $# -gt 0 ]; do
     --bestand) BESTANDEN+=("$2"); shift 2 ;;
     --stap) STAPPEN+=("$2"); shift 2 ;;
     --verwacht) VERWACHT+=("$2"); shift 2 ;;
+    --controle) CONTROLES+=("$2"); shift 2 ;;
     --criterium) CRITERIA+=("$2"); shift 2 ;;
     --niet) NIET+=("$2"); shift 2 ;;
     --bron) BRON="$2"; shift 2 ;;
@@ -47,6 +49,11 @@ TMP="$(mktemp)"
   if [ "${#VERWACHT[@]}" -gt 0 ]; then
     echo "## Verwacht"; echo "De wijziging voegt precies deze regels toe en verwijdert niets:"; echo "$FENCE"
     for v in "${VERWACHT[@]}"; do echo "$v"; done
+    echo "$FENCE"; echo
+  fi
+  if [ "${#CONTROLES[@]}" -gt 0 ]; then
+    echo "## Controle"; echo "Het script voert deze opdrachten uit in de hoofdmap van de repo; elke opdracht moet slagen:"; echo "$FENCE"
+    for c in "${CONTROLES[@]}"; do echo "$c"; done
     echo "$FENCE"; echo
   fi
   echo "## Acceptatiecriteria"
