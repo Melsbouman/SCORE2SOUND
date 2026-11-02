@@ -435,3 +435,19 @@ main:has(#weergave g.measure) #upload label.knop,
 main:has(#weergave g.measure) #upload label:not(.knop) {
   margin-top: 0;
 }
+
+@media (max-width: 600px) {
+  .kop { padding: 8px 12px; }
+  .kop h1 { font-size: 1.2rem; }
+  .kop p { display: none; }
+  .kop .sneltoetsen__open { display: block; }
+
+  main:has(#weergave g.measure) #upload {
+    flex-wrap: nowrap;
+    max-height: 56px;
+    padding: 6px 12px;
+  }
+
+  main:has(#weergave g.measure) #upload label:not(.knop) { display: none; }
+  .lint__paneel { max-height: 160px; }
+}
