@@ -8,7 +8,7 @@ De opzet, de keuzes en de valkuilen staan in `hermes/ARCHITECTUUR.md`.
 1. Mels geeft een idee. Claude werkt het uit tot een plan met kleine taakpakketten (skill `idee`) en zet na akkoord elk pakket als GitHub-issue klaar (`hermes/maak-taak.sh`), met een label voor wie het bouwt.
 2. Een script (`hermes/werkpakket.sh`) pakt de taak op, laat een agent alleen de genoemde bestanden bewerken en doet zelf alles eromheen: controleren, committen, pushen, een PR openen en labels zetten.
 3. Het script filtert de fouten eruit: faalt een controle, dan krijgt de agent de fout terug en herstelt hij het zelf (hooguit twee rondes). Is de wijziging precies wat de taak vroeg en alles groen, dan merget het script zelf.
-4. Claude ziet alleen wat overblijft (`bash hermes/review.sh`) en beoordeelt alleen wat een script niet kan.
+4. `hermes/hartslag.sh` bewaakt de wachtrijen, start een stilgevallen wachtrij opnieuw en meldt in één regel of alles loopt of waar actie nodig is. Claude ziet alleen wat overblijft (`bash hermes/review.sh`) en beoordeelt alleen PR's die het script niet zelf goedkeurt; een PR met een volledig geslaagde `## Controle` kan dus ook zonder `## Verwacht` automatisch worden gemerged.
 
 De hoofdregel: **een agent bewerkt alleen bestanden. Alles wat gecontroleerd moet worden, doet een script of een mens.** Een klein model kan melden dat het klaar is zonder iets gedaan te hebben. Vertrouw dus nooit op het rapport van een agent, maar op de diff.
 
@@ -60,7 +60,7 @@ Wat `werkpakket.sh` doet, in volgorde:
 5. Commit, draait `regels-controle.mjs` (met syntaxcontrole) en `tests.sh`, en vergelijkt met `## Verwacht`.
 6. Faalt iets, dan krijgt dezelfde agent de foutmelding en zijn huidige wijziging terug als herstelronde (`AIFLOW_HERSTEL`, standaard 2). Faalt het daarna nog, dan `agent-vast` met de reden als comment en er wordt niet gepusht. Een afwijking van `## Verwacht` mag na de laatste ronde wel door, zonder `agent-exact`.
 7. Pusht, opent de PR (of plaatst een comment bij een afgekeurde PR) met de echte uitkomsten, en zet `agent-review`.
-8. Is de wijziging precies `## Verwacht`, is er niets teruggedraaid, geeft de regelcontrole geen waarschuwing en is de Action groen, dan merget het script de PR en sluit het issue (`AIFLOW_AUTOMERGE=uit` zet dat uit).
+8. Is de wijziging precies `## Verwacht`, of slagen alle opdrachten uit `## Controle`, en zijn daarnaast tests, regelcontrole en Action groen en is er niets teruggedraaid, dan merget het script de PR en sluit het issue (`AIFLOW_AUTOMERGE=uit` zet dat uit). Een genoemd nieuw testbestand telt daarbij niet als gewijzigd testbestand; alleen een taak zonder `## Controle` en zonder `## Verwacht` blijft voor Claude.
 
 Doet de agent niets (limiet op, model faalt), dan neemt een reserve het over: Codex en Copilot vangen elkaar op, en als laatste Hermes met `anthropic/claude-haiku-5.5` via OpenRouter. Een Hermes-taak gaat na het gratis model naar Haiku.
 

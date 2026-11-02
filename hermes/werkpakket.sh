@@ -436,7 +436,14 @@ zet_labels "$ISSUE" agent-review
 # 6. Automatisch mergen als er niets meer te beoordelen is: de wijziging is precies wat Claude in de taak schreef,
 # geen bestand is teruggedraaid, de regelcontrole geeft geen waarschuwing en de GitHub Action is groen.
 # Uitzetten met AIFLOW_AUTOMERGE=uit; dan beslist Claude over elke PR.
-WAARSCHUWING=$(echo "$REGELS" | grep '^Let op:' | grep -v 'testbestand gewijzigd')
+WAARSCHUWING=$(echo "$REGELS" | grep '^Let op:')
+# Een nieuw testbestand dat onder ## Bestanden staat is onderdeel van de taak en vraagt geen extra beoordeling.
+NIEUWE_TESTS=$(git diff main...HEAD --diff-filter=A --name-only -- $(echo "$TOEGESTAAN" | tr ',' ' '))
+for TESTBESTAND in $NIEUWE_TESTS; do
+  case "$TESTBESTAND" in
+    *test*|*Test*) WAARSCHUWING=$(echo "$WAARSCHUWING" | grep -vF "$TESTBESTAND") ;;
+  esac
+done
 KLAAR_VOOR_MERGE=
 if { [ "${EXACT%%,*}" = "ja" ] && ! echo "$REGELS" | grep -q '^Let op:'; } || { [ "$CONTROLE_OK" = "ja" ] && [ -z "$WAARSCHUWING" ]; }; then KLAAR_VOOR_MERGE=ja; fi
 SAMEN="klaar #$ISSUE in $DUUR s"
