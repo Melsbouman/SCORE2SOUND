@@ -11,9 +11,10 @@ import * as projecten from './views/projecten.js';
 import * as origineel from './views/origineel.js';
 import * as corrigeren from './views/corrigeren.js';
 import * as versies from './views/versies.js';
+import * as inloggen from './views/inloggen.js';
 
 const app = maakApp();
-const schermen = { upload, weergave, speler, meldingen, mixer, bewerken, exporteren, projecten, origineel, corrigeren, versies };
+const schermen = { inloggen, upload, weergave, speler, meldingen, mixer, bewerken, exporteren, projecten, origineel, corrigeren, versies };
 
 for (const [naam, scherm] of Object.entries(schermen)) {
   try {
