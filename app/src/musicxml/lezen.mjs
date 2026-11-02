@@ -1,7 +1,7 @@
 // Leest een MusicXML-bestand (score-partwise) en geeft de partituur in de vorm van docs/model.md.
 // Alleen op de server: de XML-hulp gebruikt fast-xml-parser.
 import { leesXml, kind, kinderen, tekst, getal } from './xml.mjs';
-import { leesAttributen, leesRichting, leesNotaties, leesDetails, leesMaatstreep } from './aanwijzingen.mjs';
+import { leesAttributen, leesMaatrust, leesRichting, leesNotaties, leesDetails, leesMaatstreep } from './aanwijzingen.mjs';
 import { naarTikken, maatLengte } from '../model/duur.mjs';
 
 const LEGE_ATTRIBUTEN = { naam: 'attributes', attr: {}, kinderen: [], tekst: '' };
@@ -23,6 +23,20 @@ function leesPartij(deel, part) {
   // De stand (deelwaarden, maatsoort, toonsoort, sleutels, transpositie) loopt door over de maten.
   const voortgang = { stand: null, wig: 'crescendo', transpositie: null };
   const maten = kinderen(part, 'measure').map((maat, index) => leesMaat(maat, index, voortgang));
+  for (let index = 0; index < maten.length; index += 1) {
+    const maat = maten[index];
+    if (!(maat.maatrust > 1)) continue;
+    const einde = Math.min(maten.length, index + maat.maatrust);
+    const reeks = maten.slice(index, einde);
+    if (reeks.some((deel) => deel.elementen.some((element) => element.soort === 'noot'))) {
+      for (const deel of reeks) {
+        delete deel.maatrust;
+        delete deel.verborgen;
+      }
+      continue;
+    }
+    for (const deel of maten.slice(index + 1, einde)) deel.verborgen = true;
+  }
   return {
     id: deel.attr.id,
     naam: tekst(deel, 'part-name'),
@@ -39,6 +53,7 @@ function leesMaat(maat, index, voortgang) {
   const elementen = [];
   const herhaling = { begin: false, eind: false, keer: 2 };
   let tempo = null;
+  let maatrust = null;
   let cursor = 0; // positie in tikken vanaf het begin van de maat
   let vorigeStart = 0; // start van de vorige noot, voor akkoorden
 
@@ -48,6 +63,7 @@ function leesMaat(maat, index, voortgang) {
   for (const knoop of maat.kinderen) {
     if (knoop.naam === 'attributes') {
       voortgang.stand = leesAttributen(knoop, voortgang.stand);
+      maatrust = leesMaatrust(knoop) ?? maatrust;
       if (!voortgang.transpositie && kind(knoop, 'transpose')) voortgang.transpositie = voortgang.stand.transpositie;
     } else if (knoop.naam === 'backup') {
       cursor -= tikken(knoop).tikken;
@@ -89,6 +105,7 @@ function leesMaat(maat, index, voortgang) {
     tempo,
     herhaling,
     elementen,
+    ...(maatrust !== null ? { maatrust } : {}),
   };
 }
 

@@ -36,7 +36,7 @@ function schrijfAttributes(maat, vorige, instrument) {
   const keyVeranderd = eerste || !gelijk(maat.toonsoort, vorige.toonsoort);
   const timeVeranderd = eerste || !gelijk(maat.maatsoort, vorige.maatsoort);
   const clefVeranderd = eerste || !gelijk(maat.sleutels, vorige.sleutels);
-  if (!eerste && !keyVeranderd && !timeVeranderd && !clefVeranderd) return '';
+  if (!eerste && !keyVeranderd && !timeVeranderd && !clefVeranderd && !maat.maatrust) return '';
   const balken = Math.max(1, ...maat.sleutels.map((sleutel) => sleutel.notenbalk || 1));
   let inhoud = eerste ? tag('divisions', 480) : '';
   if (eerste && balken > 1) inhoud += tag('staves', balken);
@@ -47,6 +47,7 @@ function schrijfAttributes(maat, vorige, instrument) {
   if (eerste && transpositie && (transpositie.diatonisch || transpositie.chromatisch)) {
     inhoud += tag('transpose', tag('diatonic', transpositie.diatonisch) + tag('chromatic', transpositie.chromatisch));
   }
+  if (maat.maatrust) inhoud += tag('measure-style', tag('multiple-rest', maat.maatrust));
   return tag('attributes', inhoud);
 }
 
@@ -119,7 +120,7 @@ function schrijfNotations(element, markering = {}) {
   return inhoud ? tag('notations', inhoud) : '';
 }
 
-function schrijfNoot(element, meerdereBalken, partij, maat, weergave, markering) {
+function schrijfNoot(element, meerdereBalken, partij, maat, weergave, markering, verborgen) {
   const info = duurInfo(element.duur);
   let inhoud = element.akkoord ? leeg('chord') : '';
   if (element.soort === 'rust') inhoud += leeg('rest', element.heleMaat ? { measure: 'yes' } : {});
@@ -144,6 +145,7 @@ function schrijfNoot(element, meerdereBalken, partij, maat, weergave, markering)
     id: `n-${partij.id}-${maat.index}-${maat.elementen.indexOf(element)}`,
     color: element.zekerheid < 0.8 ? '#C0392B' : null,
   } : {};
+  if (verborgen && element.soort === 'rust') attributen['print-object'] = 'no';
   return tag('note', inhoud, attributen);
 }
 
@@ -158,7 +160,7 @@ function schrijfStemmen(maat, partij, weergave) {
     const markeringen = tupletMarkeringen(gesorteerd);
     for (const element of gesorteerd) {
       if (!element.akkoord && element.start > positie) xml += tag('forward', tag('duration', element.start - positie));
-      xml += schrijfNoot(element, balken > 1, partij, maat, weergave, markeringen.get(element));
+      xml += schrijfNoot(element, balken > 1, partij, maat, weergave, markeringen.get(element), maat.verborgen);
       if (!element.akkoord) positie = Math.max(positie, element.start + element.duur);
     }
     if (index < stemmen.length - 1 && positie > 0) xml += tag('backup', tag('duration', positie));
@@ -177,6 +179,19 @@ function schrijfMaat(maat, vorige, instrument, partij, weergave) {
   return tag('measure', inhoud, { number: maat.nummer, ...(maat.opmaat ? { implicit: 'yes' } : {}) });
 }
 
+function matenMetOngeldigeMaatrust(maten) {
+  const ongeldige = new Set();
+  maten.forEach((maat, index) => {
+    if (!(maat.maatrust > 1)) return;
+    const einde = Math.min(maten.length, index + maat.maatrust);
+    const reeks = maten.slice(index, einde);
+    if (reeks.some((deel) => deel.elementen.some((element) => element.soort === 'noot'))) {
+      for (let i = index; i < einde; i += 1) ongeldige.add(i);
+    }
+  });
+  return ongeldige;
+}
+
 export function naarMusicXML(partituur, opties = {}) {
   let hoofd = '';
   if (partituur.titel) hoofd += tag('work', tag('work-title', esc(partituur.titel)));
@@ -187,6 +202,12 @@ export function naarMusicXML(partituur, opties = {}) {
     inhoud += tag('midi-instrument', tag('midi-program', partij.instrument.midiProgramma + 1), { id: `${partij.id}-I1` });
     return tag('score-part', inhoud, { id: partij.id });
   }).join(''));
-  hoofd += partituur.partijen.map((partij) => tag('part', partij.maten.map((maat, index) => schrijfMaat(maat, partij.maten[index - 1], partij.instrument, partij, opties.weergave)).join(''), { id: partij.id })).join('');
+  hoofd += partituur.partijen.map((partij) => {
+    const ongeldigeMaatrusten = matenMetOngeldigeMaatrust(partij.maten);
+    return tag('part', partij.maten.map((maat, index) => {
+      const schrijfbareMaat = ongeldigeMaatrusten.has(index) ? { ...maat, maatrust: undefined, verborgen: false } : maat;
+      return schrijfMaat(schrijfbareMaat, partij.maten[index - 1], partij.instrument, partij, opties.weergave);
+    }).join(''), { id: partij.id });
+  }).join('');
   return `<?xml version="1.0" encoding="UTF-8"?>${tag('score-partwise', hoofd, { version: '4.0' })}`;
 }
