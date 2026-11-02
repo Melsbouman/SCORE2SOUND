@@ -62,11 +62,33 @@ export function start(app) {
     }
   }
 
+  function klopt() {
+    const onzekerIndex = onzekereElementen(app.stand.partituur).indexOf(gekozen);
+    const nieuw = keurGoed(app.stand.partituur, gekozen);
+    pas(nieuw);
+    const resterend = onzekereElementen(nieuw);
+    if (resterend.length === 0) {
+      gekozen = null;
+      app.meld('kies-noot', { id: null });
+    } else {
+      gekozen = resterend[onzekerIndex < 0 ? 0 : onzekerIndex % resterend.length];
+      app.meld('kies-noot', { id: gekozen });
+    }
+    teken();
+  }
+
   function maakKnoppen(knoppen) {
     const rij = document.createElement('div');
     rij.className = 'corrigeren__knoppen';
     for (const knop of knoppen) rij.append(knop);
     return rij;
+  }
+
+  function voegSneltoetsenToe() {
+    const sneltoetsen = document.createElement('p');
+    sneltoetsen.className = 'zacht';
+    sneltoetsen.textContent = 'Sneltoetsen: pijltjes verschuiven, Enter is Klopt, N is de volgende.';
+    vlak.append(sneltoetsen);
   }
 
   function maakDuurSelect(element) {
@@ -118,11 +140,17 @@ export function start(app) {
       maakKnop('Volgende onzekere', () => kiesOnzeker(1)),
     ]));
 
-    if (!element) return;
+    if (!element) {
+      voegSneltoetsenToe();
+      return;
+    }
     const plek = leesId(gekozen);
     const partij = plek && partituur.partijen.find((item) => item.id === plek.partijId);
     const maat = partij?.maten[plek.maatIndex];
-    if (!partij || !maat) return;
+    if (!partij || !maat) {
+      voegSneltoetsenToe();
+      return;
+    }
 
     const omschrijving = document.createElement('p');
     const naam = element.soort === 'rust'
@@ -177,21 +205,35 @@ export function start(app) {
       vlak.append(maakDuurSelect(element));
     }
 
-    const onzekerIndex = onzeker.indexOf(gekozen);
-    vlak.append(maakKnop('Klopt', () => {
-      const nieuw = keurGoed(app.stand.partituur, gekozen);
-      pas(nieuw);
-      const resterend = onzekereElementen(nieuw);
-      if (resterend.length === 0) {
-        gekozen = null;
-        app.meld('kies-noot', { id: null });
-      } else {
-        gekozen = resterend[onzekerIndex < 0 ? 0 : onzekerIndex % resterend.length];
-        app.meld('kies-noot', { id: gekozen });
-      }
-      teken();
-    }));
+    vlak.append(maakKnop('Klopt', klopt));
+    voegSneltoetsenToe();
   }
+
+  document.addEventListener('keydown', (gebeurtenis) => {
+    if (gebeurtenis.target.matches('input, select, textarea')) return;
+    const partituur = app.stand.partituur;
+    if (!partituur) return;
+
+    if (gebeurtenis.key === 'n' || gebeurtenis.key === 'N') {
+      gebeurtenis.preventDefault();
+      kiesOnzeker(1);
+      return;
+    }
+
+    if (!gekozen) return;
+    const element = zoekElement(partituur, gekozen);
+    if (!element) return;
+
+    if (gebeurtenis.key === 'ArrowUp' || gebeurtenis.key === 'ArrowDown') {
+      gebeurtenis.preventDefault();
+      if (element.soort === 'noot') {
+        pas(verschuif(partituur, gekozen, gebeurtenis.key === 'ArrowUp' ? 1 : -1));
+      }
+    } else if (gebeurtenis.key === 'Enter') {
+      gebeurtenis.preventDefault();
+      klopt();
+    }
+  });
 
   app.op('partituur', teken);
   app.op('kies-noot', ({ id }) => {
