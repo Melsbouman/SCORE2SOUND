@@ -56,7 +56,12 @@ function schrijfAanwijzing(aanwijzing) {
   let type = '';
   let sound = '';
   if (aanwijzing.type === 'tempo') {
-    type = tag('metronome', tag('beat-unit', 'quarter') + tag('per-minute', aanwijzing.waarde));
+    const getoond = aanwijzing.getoond;
+    const eenheid = getoond?.eenheid ?? 'quarter';
+    const getal = getoond?.getal ?? aanwijzing.waarde;
+    type = tag('metronome', tag('beat-unit', eenheid)
+      + (getoond?.punt ? leeg('beat-unit-dot') : '')
+      + tag('per-minute', getal));
     sound = leeg('sound', { tempo: aanwijzing.waarde });
   } else if (aanwijzing.type === 'dynamiek') {
     type = tag('dynamics', leeg(aanwijzing.waarde));
@@ -218,4 +223,3 @@ export function naarMusicXML(partituur, opties = {}) {
   return `<?xml version="1.0" encoding="UTF-8"?>${tag('score-partwise', hoofd, { version: '4.0' })}`;
 }
 import { plaatsingVoor, tekstSoort } from "../model/tekstsoort.mjs";
-

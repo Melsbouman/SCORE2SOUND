@@ -125,6 +125,7 @@ Een noot of rust kan ook deze velden hebben, alleen als ze op het blad staan: `b
 - `'dynamiek'`: `waarde` is `ppp` tot `fff`, `sf`, `sfz` of `fp`;
 - `'crescendo'` of `'decrescendo'`: `waarde` is `'begin'` of `'eind'`;
 - `'tempo'`: `waarde` is kwartnoten per minuut (een getal);
+- Een tempo-aanwijzing kan ook `getoond: { eenheid, punt, getal }` hebben. Dit bewaart de oorspronkelijke MusicXML-notatie (`eenheid` is `whole`, `half`, `quarter`, `eighth` of `16th`; `punt` is een boolean; `getal` is het genoteerde getal per die eenheid). `waarde` blijft het tempo in kwartnoten per minuut voor het afspelen.
 - `'tekst'`: `waarde` is de tekst zelf, zoals `'rit.'` of `'a tempo'`.
 
 ## Melding
