@@ -1,5 +1,10 @@
 // Export-knoppen voor MusicXML en MIDI.
 // Wordt gebouwd in pakket 17 van werkpakketten/plannen/2026-10-29-score2sound-app.md.
+const AUDIO_FOUTEN = {
+  klankbank: 'Er is nog geen klankbank. Zet een General MIDI-klankbank in app/public/klankbank/standaard.sf3.',
+  stil: 'Alle partijen staan uit in de mixer. Zet er minstens één aan.',
+}
+
 function bestandsnaam(partituur, extensie) {
   const titel = partituur.titel?.trim() || 'partituur'
   return `${titel.replace(/[^\p{L}\p{N} -]/gu, '-')}.${extensie}`
@@ -41,6 +46,11 @@ export function start(app) {
     printKnop.className = 'knop'
     printKnop.textContent = 'PDF of afdrukken'
 
+    const audioKnop = document.createElement('button')
+    audioKnop.type = 'button'
+    audioKnop.className = 'knop'
+    audioKnop.textContent = 'Audio (WAV) downloaden'
+
     const status = document.createElement('p')
     status.className = 'zacht'
     status.setAttribute('role', 'status')
@@ -79,6 +89,20 @@ export function start(app) {
       }
     })
 
-    vlak.append(kop, musicXmlKnop, midiKnop, printKnop, status)
+    audioKnop.addEventListener('click', async () => {
+      audioKnop.disabled = true
+      status.textContent = 'Het geluid wordt gemaakt. Dit kan even duren.'
+      try {
+        const { maakWav } = await import('../audio-export.js')
+        const naam = bestandsnaam(partituur, 'wav')
+        download(await maakWav(partituur, app.stand.mixer), naam)
+        status.textContent = `Gedownload: ${naam}`
+      } catch (fout) {
+        status.textContent = AUDIO_FOUTEN[fout.soort] ?? 'Exporteren lukte niet. Probeer het opnieuw.'
+      }
+      audioKnop.disabled = false
+    })
+
+    vlak.append(kop, musicXmlKnop, midiKnop, audioKnop, printKnop, status)
   })
 }
