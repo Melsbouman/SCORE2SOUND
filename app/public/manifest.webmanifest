@@ -1,0 +1,18 @@
+{
+  "name": "SCORE2SOUND",
+  "short_name": "SCORE2SOUND",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#14161a",
+  "theme_color": "#14161a",
+  "lang": "nl",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "_comment": "app/server.mjs heeft geen .webmanifest in SOORTEN; de server levert daarom application/octet-stream."
+}
