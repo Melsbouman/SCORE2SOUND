@@ -55,11 +55,61 @@ export function start(app) {
     const vasteRegels = window.innerWidth >= 700 && musicxml.includes('new-system=');
     const schaal = vasteRegels ? 40 : Math.round(schaalVoor(breedte) * zoom);
     const paginaBreedte = vasteRegels ? 2400 : Math.max(Math.round((breedte * 100) / schaal), Math.round((zoom >= 1 ? 1500 : 1500 / zoom)));
-    tk.setOptions({ scale: schaal, pageWidth: paginaBreedte, adjustPageHeight: true, breaks: vasteRegels ? 'encoded' : 'auto', footer: 'none', header: 'none' });
+    tk.setOptions({
+      scale: schaal,
+      pageWidth: paginaBreedte,
+      adjustPageHeight: true,
+      breaks: vasteRegels ? 'encoded' : 'auto',
+      footer: 'none',
+      header: 'none',
+      font: 'Leland',
+      pageMarginLeft: 60,
+      pageMarginRight: 60,
+      pageMarginTop: 40,
+      spacingStaff: 12,
+      spacingSystem: 14,
+      justifyVertically: false,
+    });
     if (!tk.loadData(musicxml)) return status('Deze partituur kon niet worden getekend.');
     const blad = document.createElement('div');
     blad.className = 'bladmuziek';
     if (vasteRegels) blad.style.overflowX = 'auto';
+    const gegevens = app.stand?.partituur ?? {};
+    const titel = typeof gegevens.titel === 'string' ? gegevens.titel.trim() : '';
+    const ondertitel = typeof gegevens.ondertitel === 'string' ? gegevens.ondertitel.trim() : '';
+    const partijnaam = typeof gegevens.partijen?.[0]?.naam === 'string' ? gegevens.partijen[0].naam.trim() : '';
+    const componist = typeof gegevens.componist === 'string' ? gegevens.componist.trim() : '';
+    if (titel || ondertitel || partijnaam || componist) {
+      const titelblok = document.createElement('header');
+      titelblok.className = 'bladmuziek__titelblok';
+      if (titel) {
+        const kop = document.createElement('h1');
+        kop.textContent = titel;
+        titelblok.append(kop);
+      }
+      if (ondertitel) {
+        const kop = document.createElement('p');
+        kop.className = 'bladmuziek__ondertitel';
+        kop.textContent = ondertitel;
+        titelblok.append(kop);
+      }
+      if (partijnaam || componist) {
+        const details = document.createElement('div');
+        details.className = 'bladmuziek__details';
+        if (partijnaam) {
+          const partij = document.createElement('span');
+          partij.textContent = partijnaam;
+          details.append(partij);
+        }
+        if (componist) {
+          const maker = document.createElement('span');
+          maker.textContent = componist;
+          details.append(maker);
+        }
+        titelblok.append(details);
+      }
+      blad.append(titelblok);
+    }
     const knoppen = document.createElement('div');
     knoppen.className = 'origineel__knoppen';
     for (const [label, aanpassen] of [
