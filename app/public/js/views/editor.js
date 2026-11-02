@@ -1,4 +1,5 @@
 import {
+  leesId,
   zoekElement,
   verschuif,
   zetAlter,
@@ -274,10 +275,33 @@ export function start(app) {
   document.addEventListener('keydown', (gebeurtenis) => {
     if (gebeurtenis.target?.closest?.('input, select, textarea, [contenteditable="true"]')) return;
     if (gebeurtenis.key === 'Enter' && gebeurtenis.target?.closest?.('button')) return;
-    const element = gekozen && app.stand.partituur ? zoekElement(app.stand.partituur, gekozen) : null;
+    const partituur = app.stand.partituur;
+    const element = gekozen && partituur ? zoekElement(partituur, gekozen) : null;
+    const toets = gebeurtenis.key;
+    if (toets === 'ArrowLeft' || toets === 'ArrowRight') {
+      if (gebeurtenis.ctrlKey || gebeurtenis.metaKey || (element?.soort !== 'noot' && element?.soort !== 'rust')) return;
+      const gelezen = leesId(gekozen);
+      const partij = gelezen && partituur?.partijen.find((kandidaat) => kandidaat.id === gelezen.partijId);
+      if (!partij) return;
+      const elementen = partij.maten.flatMap((maat, maatIndex) => (
+        maat.elementen.map((item, elementIndex) => ({ item, maatIndex, elementIndex }))
+      ));
+      const huidigeIndex = elementen.findIndex(({ maatIndex, elementIndex }) => (
+        maatIndex === gelezen.maatIndex && elementIndex === gelezen.elementIndex
+      ));
+      const richting = toets === 'ArrowLeft' ? -1 : 1;
+      for (let index = huidigeIndex + richting; index >= 0 && index < elementen.length; index += richting) {
+        const volgende = elementen[index];
+        if (volgende.item.soort !== 'noot' && volgende.item.soort !== 'rust') continue;
+        gebeurtenis.preventDefault();
+        gebeurtenis.stopImmediatePropagation();
+        app.meld('kies-noot', { id: `n-${partij.id}-${volgende.maatIndex}-${volgende.elementIndex}` });
+        return;
+      }
+      return;
+    }
     if (element?.soort !== 'noot') return;
 
-    const toets = gebeurtenis.key;
     let actie = null;
     if (gebeurtenis.ctrlKey || gebeurtenis.metaKey) {
       if (toets.toLowerCase() === 'z') actie = gebeurtenis.shiftKey ? opnieuwMaken : ongedaanMaken;
