@@ -1,4 +1,19 @@
 #!/bin/bash
+
+laatste_poging_na_overzetting() {
+  local issue statusmap
+  statusmap="$HOME/.aiflow-status"
+
+  while read -r issue; do
+    if [[ -f "$statusmap/$issue.overgezet" && ! -f "$statusmap/$issue.laatste" ]]; then
+      gh issue edit "$issue" --remove-label agent-vast --add-label agent-codex --add-label agent-ready
+      gh issue comment "$issue" --body 'Laatste poging. Twee uitvoerders haalden dit niet. Lees de foutmeldingen in de commentaren hierboven, bedenk zelf een andere aanpak en houd je aan de genoemde bestanden.'
+      touch "$statusmap/$issue.laatste"
+    fi
+  done < <(gh issue list --state open --label agent-vast --json number --jq '.[].number')
+}
+
+trap laatste_poging_na_overzetting EXIT
 # Pakt achter elkaar alle taken op (agent-terug eerst, dan agent-ready) tot er niets meer is. Een vastgelopen taak
 # krijgt agent-vast en de wachtrij gaat door; na drie mislukte taken achter elkaar stopt hij.
 # Handig om direct na het klaarzetten van issues te starten, zonder te wachten op de volgende ronde.
