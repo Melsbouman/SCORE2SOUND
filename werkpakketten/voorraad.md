@@ -3,6 +3,9 @@
 Claude pakt hier werk uit als een nachtplan af is en de eindtijd nog niet bereikt is (zie `.claude/skills/nachtplan/SKILL.md`). Bovenaan staat het belangrijkste. Mels en Claude mogen allebei punten toevoegen; Claude zet bij eigen punten "(Claude)" erachter.
 
 ## Open
+- [ ] Fermate: Audiveris leest hem niet overal (bij *A Time for Peace* niet, bij *Apatheia* wel); zoek hem zoals de kaders in het bladbeeld. En de speler houdt een fermate nog niet langer aan. (Claude)
+- [ ] Letters zonder gelezen tekst worden aangenomen (A, B, C in volgorde, zekerheid 0,5); een echte tekstherkenning in het kader zou dat vervangen. (Claude)
+- [ ] Mels' punt "deel 1: ..." voor de partij: uitzoeken wat er mist, met een voorbeeld. (Claude)
 - [ ] Plan voor fase 5 (online): hosting, accounts, opslag per gebruiker, privacy. (Claude)
 - [ ] Hermes-tegoed op OpenRouter is op; de reserve werkt pas weer na opwaarderen. (Claude)
 - [ ] Ondersteboven gescande pagina's herkennen: bij *Perihelion* staan pagina's op hun kop. (Claude)
@@ -13,6 +16,7 @@ Claude pakt hier werk uit als een nachtplan af is en de eindtijd nog niet bereik
 - [ ] Branch protection op `main` aanzetten (PR verplicht, later ook de check `controle`).
 
 ## Klaar
+- [x] Notatie zoals het blad: waardestrepen, triolen, fermates en repetitieletters in kaders (2 november 2026); tweede ronde voor vastgelopen pagina's gemerged. (Claude)
 - [x] Audio-export als WAV, Verovio ingepakt en onthouden in de browser, herkenningen opruimen, tweede ronde voor een vastgelopen pagina, versies bewaren, vergelijken en om en om beluisteren (2 november 2026). (Claude)
 - [x] Partijen hernoemen, instrumentenlijst aangevuld, lege maten en twijfelmaten, meldingen inklapbaar, notatie zoomen en meer maten per regel, toetsenbord bij corrigeren, startscherm, opmaak, controles door het script (2 november 2026). (Claude)
 - [x] Speler: meer dan 15 partijen, dynamiek, articulatie, herhalingen en maatnummers; partijen toevoegen uit een ander bestand; notatie op de telefoon groter; PDF via afdrukken (1 november 2026). (Claude)
