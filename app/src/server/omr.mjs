@@ -87,6 +87,17 @@ function neemLinkste(symbolen, past) {
   return kandidaten[0] ?? null;
 }
 
+function woorden(waarde) {
+  return String(waarde ?? '').toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ').trim().split(/\s+/).filter(Boolean);
+}
+
+function leesTekstplek(woord) {
+  const bounds = kind(woord, 'bounds')?.attr;
+  if (!bounds) return null;
+  const [x, y, breedte, hoogte] = [bounds.x, bounds.y, bounds.w, bounds.h].map(Number);
+  return { waarde: kind(woord, 'value')?.tekst ?? '', x, y, breedte, hoogte };
+}
+
 function koppelMaat(maat, balken, stack, koppen, rusten, nummer) {
   const links = Number(stack.attr.left) - MARGE;
   const rechts = Number(stack.attr.right) + MARGE;
@@ -142,6 +153,7 @@ export function koppelOmr(partituur, bladen) {
       const inters = kind(kind(system, 'sig'), 'inters');
       const koppen = kinderen(inters, 'head').map(leesSymbool);
       const rusten = kinderen(inters, 'rest').map(leesSymbool);
+      const tekstplekken = kinderen(inters, 'word').map(leesTekstplek).filter(Boolean);
       delen.forEach((deel, partijIndex) => {
         const balken = kinderen(deel, 'staff').map((staff) => Number(staff.attr.id));
         const eersteMaat = uit.partijen[partijIndex].maten[maatStart];
@@ -155,6 +167,30 @@ export function koppelOmr(partituur, bladen) {
             const resultaat = koppelMaat(maat, balken, stack, koppen, rusten, blad.nummer);
             nietGekoppeld += resultaat.nietGekoppeld;
             for (const reden of Object.keys(redenen)) redenen[reden] += resultaat.redenen[reden];
+            if (partijIndex === 0) {
+              const links = Number(stack.attr.left) - MARGE;
+              const rechts = Number(stack.attr.right) + MARGE;
+              const inStack = (woord) => woord.x + woord.breedte / 2 >= links && woord.x + woord.breedte / 2 <= rechts;
+              const woordenInMaat = tekstplekken.filter(inStack).sort((a, b) => a.x - b.x);
+              for (const element of maat.elementen) {
+                if (element.soort !== 'aanwijzing' || element.type !== 'tekst') continue;
+                delete element.plek;
+                const aanwijzingWoorden = woorden(element.waarde);
+                const woord = woordenInMaat.find((kandidaat) => {
+                  const woordTokens = woorden(kandidaat.waarde);
+                  return woordTokens.length > 0 && woordTokens.every((token, index) => token === aanwijzingWoorden[index]);
+                });
+                if (woord) {
+                  element.plek = {
+                    blad: blad.nummer,
+                    x: woord.x,
+                    y: woord.y,
+                    breedte: woord.breedte,
+                    hoogte: woord.hoogte,
+                  };
+                }
+              }
+            }
           }
         });
       });
