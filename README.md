@@ -1,7 +1,19 @@
 # SCORE2SOUND
-
+|
 SCORE2SOUND zet bladmuziek om in bewerkbare notatie en hoorbare muziek. Je kunt de noten controleren en corrigeren, partijen beluisteren en je muziek bewaren of exporteren.
-
+|
+## Wat het kan
+|
+- PDF, scan, foto of MusicXML openen en herkennen
+| de notatie naast het origineel met dezelfde regelindeling
+| onzekere noten rood en verbeteren met knoppen, toetsenbord en slepen
+| repetitieletters, tempo per maat, meermaats-rusten, voorslagen en volta's
+| afspelen per partij met mixer, tempo, herhalingen en rallentando
+| versies bewaren en vergelijken
+| partijen bewerken, samenvoegen en transponeren
+| exporteren als MusicXML, MIDI, WAV, PDF en zip met alle partijen
+| accounts met uitnodigingscode voor online gebruik
+|
 ## Nodig
 
 - Node.js 24 of hoger
