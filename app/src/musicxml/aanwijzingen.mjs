@@ -178,9 +178,19 @@ export function leesDetails(noteKnoop) {
 
 export function leesMaatstreep(barlineKnoop) {
   const repeat = kind(barlineKnoop, 'repeat');
+  const ending = kind(barlineKnoop, 'ending');
+  const nummers = ending?.attr.number?.split(',').map((nummer) => Number(nummer.trim()))
+    .filter((nummer) => Number.isInteger(nummer) && nummer > 0) ?? [];
   return {
     begin: repeat?.attr.direction === 'forward',
     eind: repeat?.attr.direction === 'backward',
     keer: repeat?.attr.times === undefined ? 2 : Number(repeat.attr.times),
+    ...(ending ? {
+      volta: {
+        nummers,
+        begin: ending.attr.type === 'start',
+        eind: ending.attr.type === 'stop' || ending.attr.type === 'discontinue',
+      },
+    } : {}),
   };
 }

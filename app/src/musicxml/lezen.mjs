@@ -52,6 +52,7 @@ function leesPartij(deel, part) {
 function leesMaat(maat, index, voortgang) {
   const elementen = [];
   const herhaling = { begin: false, eind: false, keer: 2 };
+  let volta = null;
   let tempo = null;
   let maatrust = null;
   let regelbegin = false;
@@ -78,6 +79,13 @@ function leesMaat(maat, index, voortgang) {
       const streep = leesMaatstreep(knoop);
       if (streep.begin) herhaling.begin = true;
       if (streep.eind) Object.assign(herhaling, { eind: true, keer: streep.keer });
+      if (streep.volta) {
+        volta = {
+          nummers: [...new Set([...(volta?.nummers ?? []), ...streep.volta.nummers])],
+          begin: Boolean(volta?.begin || streep.volta.begin),
+          eind: Boolean(volta?.eind || streep.volta.eind),
+        };
+      }
     } else if (knoop.naam === 'direction') {
       const richting = leesRichting(knoop, cursor, voortgang.wig);
       for (const aanwijzing of richting.aanwijzingen) {
@@ -111,6 +119,7 @@ function leesMaat(maat, index, voortgang) {
     ...(paginabegin ? { paginabegin: true } : {}),
     tempo,
     herhaling,
+    ...(volta ? { volta } : {}),
     elementen,
     ...(maatrust !== null ? { maatrust } : {}),
   };

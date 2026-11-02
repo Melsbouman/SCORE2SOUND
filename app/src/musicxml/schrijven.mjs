@@ -184,9 +184,19 @@ function schrijfMaat(maat, vorige, instrument, partij, weergave) {
   const aanwijzingen = maat.elementen.filter((element) => element.soort === 'aanwijzing');
   if (maat.tempo != null && !aanwijzingen.some((item) => item.type === 'tempo')) aanwijzingen.unshift({ start: 0, type: 'tempo', waarde: maat.tempo });
   inhoud += aanwijzingen.map(schrijfAanwijzing).join('');
-  if (maat.herhaling?.begin) inhoud += tag('barline', leeg('repeat', { direction: 'forward' }), { location: 'left' });
+  if (maat.volta?.begin) {
+    const nummer = maat.volta.nummers.join(',');
+    let streep = leeg('ending', { number: nummer, type: 'start' });
+    if (maat.herhaling?.begin) streep += leeg('repeat', { direction: 'forward' });
+    inhoud += tag('barline', streep, { location: 'left' });
+  } else if (maat.herhaling?.begin) inhoud += tag('barline', leeg('repeat', { direction: 'forward' }), { location: 'left' });
   inhoud += schrijfStemmen(maat, partij, weergave);
-  if (maat.herhaling?.eind) inhoud += tag('barline', leeg('repeat', { direction: 'backward', times: maat.herhaling.keer }), { location: 'right' });
+  if (maat.volta?.eind) {
+    const nummer = maat.volta.nummers.join(',');
+    let streep = leeg('ending', { number: nummer, type: 'stop' });
+    if (maat.herhaling?.eind) streep += leeg('repeat', { direction: 'backward', times: maat.herhaling.keer });
+    inhoud += tag('barline', streep, { location: 'right' });
+  } else if (maat.herhaling?.eind) inhoud += tag('barline', leeg('repeat', { direction: 'backward', times: maat.herhaling.keer }), { location: 'right' });
   return tag('measure', inhoud, { number: maat.nummer, ...(maat.opmaat ? { implicit: 'yes' } : {}) });
 }
 

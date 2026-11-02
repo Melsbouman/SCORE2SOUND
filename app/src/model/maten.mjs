@@ -13,12 +13,34 @@ export function maatIndexVanNummer(maten, tekst) {
 export function speelVolgorde(maten) {
   const volgorde = [];
   let begin = 0;
+  const nummersVoorKeer = (einde) => {
+    let actief = null;
+    for (let plek = begin; plek <= einde; plek += 1) {
+      const volta = maten[plek].volta;
+      if (volta?.begin) actief = volta.nummers;
+      const nummers = volta?.nummers ?? actief;
+      if (plek === einde) return nummers;
+      if (volta?.eind) actief = null;
+    }
+    return null;
+  };
+  const voegHerhalingToe = (einde, keer) => {
+    let actief = null;
+    for (let plek = begin; plek <= einde; plek += 1) {
+      const volta = maten[plek].volta;
+      if (volta?.begin) actief = volta.nummers;
+      const nummers = volta?.nummers ?? actief;
+      if (!nummers || nummers.includes(keer)) volgorde.push(plek);
+      if (volta?.eind) actief = null;
+    }
+  };
   maten.forEach((maat, index) => {
     if (maat.herhaling?.begin) begin = index;
-    volgorde.push(index);
+    const nummers = nummersVoorKeer(index, 1);
+    if (!nummers || nummers.includes(1)) volgorde.push(index);
     if (maat.herhaling?.eind) {
       for (let keer = 1; keer < (maat.herhaling.keer ?? 2); keer += 1) {
-        for (let plek = begin; plek <= index; plek += 1) volgorde.push(plek);
+        voegHerhalingToe(index, keer + 1);
       }
       begin = index + 1;
     }
@@ -33,11 +55,11 @@ export function uitgevouwen(partituur) {
     ...partituur,
     partijen: partituur.partijen.map((partij) => ({
       ...partij,
-      maten: volgorde.filter((index) => partij.maten[index]).map((index, plek) => ({
-        ...partij.maten[index],
-        index: plek,
-        herhaling: { begin: false, eind: false, keer: 2 },
-      })),
+      maten: volgorde.filter((index) => partij.maten[index]).map((index, plek) => {
+        const maat = { ...partij.maten[index], index: plek, herhaling: { begin: false, eind: false, keer: 2 } };
+        delete maat.volta;
+        return maat;
+      }),
     })),
   };
 }
