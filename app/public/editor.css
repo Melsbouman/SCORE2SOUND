@@ -1,3 +1,31 @@
 .bladmuziek g.note:hover, .bladmuziek g.rest:hover { fill: #2f5d8a; color: #2f5d8a; }
 .bladmuziek .maat-markering { fill: rgba(47, 93, 138, 0.12); }
 .bladmuziek g.measure { cursor: pointer; }
+.werkvlak { grid-template-areas: "inloggen" "upload" "hulp" "lint" "weergave"; }
+.werkvlak > .lint {
+  grid-area: lint;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--kleur-lijn);
+  border-radius: 0;
+  box-shadow: none;
+}
+.lint__tabs { display: flex; max-width: 100%; gap: var(--ruimte-2); overflow-x: auto; scrollbar-width: thin; }
+.lint__tab {
+  flex: 0 0 auto;
+  padding: var(--ruimte-2) var(--ruimte-3);
+  color: var(--kleur-zacht);
+  background: transparent;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.lint__tab[aria-selected="true"] { color: var(--kleur-tekst); border-bottom-color: var(--kleur-accent); font-weight: 600; }
+.lint__paneel { display: flex; flex-wrap: wrap; gap: 16px; min-width: 0; padding: var(--ruimte-3) 0; }
+.lint__paneel[hidden] { display: none; }
+.lint__paneel > section { flex: 1 1 auto; min-width: 0; }
