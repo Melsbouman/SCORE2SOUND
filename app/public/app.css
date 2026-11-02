@@ -177,6 +177,9 @@ main:has(#weergave g.measure) #hulp { display: none; }
 }
 .melding--fout { color: var(--kleur-fout); border-left-color: var(--kleur-fout); }
 .melding--waarschuwing { color: var(--kleur-waarschuwing); border-left-color: var(--kleur-waarschuwing); }
+.melding--soort-herkenning { border-left-color: var(--kleur-accent); }
+.melding--soort-maatduur { border-left-color: var(--kleur-waarschuwing); }
+.melding--soort-bereik { border-left-color: var(--kleur-fout); }
 :focus-visible { outline: 3px solid var(--kleur-accent); outline-offset: 2px; }
 
 @media (min-width: 1000px) {
