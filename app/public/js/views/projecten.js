@@ -1,3 +1,5 @@
+import { controleerMaatduur } from '/src/controle/maatduur.mjs';
+
 const nietBereikbaar = 'De server is niet bereikbaar. Probeer het opnieuw.';
 
 async function vraag(url, opties) {
@@ -111,7 +113,7 @@ export function start(app) {
               const geopend = await vraag(`/api/projecten/${encodeURIComponent(project.id)}`);
               app.zet({
                 partituur: geopend.partituur,
-                meldingen: [],
+                meldingen: controleerMaatduur(geopend.partituur),
                 project: { id: geopend.id, naam: geopend.naam }
               });
             } catch (fout) {
