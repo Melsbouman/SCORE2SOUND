@@ -3,11 +3,14 @@
 .bladmuziek g.measure { cursor: pointer; }
 .werkvlak { grid-template-areas: "inloggen" "upload" "hulp" "lint" "weergave"; }
 .werkvlak > .lint {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   grid-area: lint;
   min-width: 0;
   padding: 0;
   overflow: hidden;
-  background: transparent;
+  background: var(--kleur-vlak);
   border: 0;
   border-bottom: 1px solid var(--kleur-lijn);
   border-radius: 0;
@@ -26,6 +29,28 @@
   cursor: pointer;
 }
 .lint__tab[aria-selected="true"] { color: var(--kleur-tekst); border-bottom-color: var(--kleur-accent); font-weight: 600; }
-.lint__paneel { display: flex; flex-wrap: wrap; gap: 16px; min-width: 0; padding: var(--ruimte-3) 0; }
+.lint__paneel {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+  max-height: 190px;
+  overflow: auto;
+  padding: 8px 0;
+}
 .lint__paneel[hidden] { display: none; }
-.lint__paneel > section { flex: 1 1 auto; min-width: 0; }
+.lint__paneel h2, .lint__paneel h3 { display: none; }
+.lint__paneel > section {
+  flex: 0 0 auto;
+  min-width: 0;
+  padding: 0 8px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+.lint__paneel > #speler, .lint__paneel > #tempo, .lint__paneel > #editor { flex: 1 1 auto; }
+.lint__paneel > #export, .lint__paneel > #projecten, .lint__paneel > #titel { flex: 0 0 auto; }
+@media (max-width: 600px) {
+  .werkvlak > .lint { position: static; }
+}
