@@ -60,7 +60,7 @@ export function start(app) {
         const item = document.createElement('li');
         const knop = document.createElement('button');
         knop.type = 'button';
-        knop.className = `knop melding--${melding.ernst}`;
+        knop.className = `knop melding--${melding.ernst} melding--soort-${melding.soort}`;
         knop.append(document.createTextNode(melding.tekst));
 
         if (melding.partij !== null) {
