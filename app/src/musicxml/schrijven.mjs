@@ -217,3 +217,5 @@ export function naarMusicXML(partituur, opties = {}) {
   }).join('');
   return `<?xml version="1.0" encoding="UTF-8"?>${tag('score-partwise', hoofd, { version: '4.0' })}`;
 }
+import { plaatsingVoor, tekstSoort } from "../model/tekstsoort.mjs";
+
