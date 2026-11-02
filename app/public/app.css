@@ -180,6 +180,27 @@ main:has(#weergave g.measure) #hulp { display: none; }
 .melding--soort-herkenning { border-left-color: var(--kleur-accent); }
 .melding--soort-maatduur { border-left-color: var(--kleur-waarschuwing); }
 .melding--soort-bereik { border-left-color: var(--kleur-fout); }
+.algemene-foutmelding {
+  position: sticky;
+  top: 8px;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ruimte-2) var(--ruimte-3);
+  max-width: 1728px;
+  margin: var(--ruimte-2) auto;
+  padding: var(--ruimte-3);
+  color: var(--kleur-fout);
+  background: var(--kleur-vlak);
+  border: 1px solid var(--kleur-lijn);
+  border-left: 3px solid var(--kleur-fout);
+  border-radius: var(--hoek);
+  box-shadow: var(--schaduw);
+}
+.algemene-foutmelding p { flex: 1 1 16em; margin: 0; }
+.algemene-foutmelding__knoppen { display: flex; flex-wrap: wrap; gap: var(--ruimte-2); }
 :focus-visible { outline: 3px solid var(--kleur-accent); outline-offset: 2px; }
 
 @media (min-width: 1000px) {
