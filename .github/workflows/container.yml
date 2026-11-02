@@ -19,6 +19,11 @@ jobs:
       - name: Check container endpoints
         run: |
           docker run --detach --name score2sound-test --publish 5175:5175 score2sound:test
-          trap 'docker rm --force score2sound-test >/dev/null 2>&1 || true' EXIT
           curl --fail --silent --show-error --retry 10 --retry-connrefused --retry-delay 2 --retry-max-time 30 http://localhost:5175/ > /dev/null
           curl --fail --silent --show-error --retry 10 --retry-connrefused --retry-delay 2 --retry-max-time 30 http://localhost:5175/api/projecten > /dev/null
+      - name: Show container logs
+        if: failure()
+        run: docker logs score2sound-test
+      - name: Remove test container
+        if: always()
+        run: docker rm --force score2sound-test >/dev/null 2>&1 || true
