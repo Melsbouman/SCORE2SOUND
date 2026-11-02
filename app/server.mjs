@@ -1,9 +1,11 @@
 // SCORE2SOUND-server: levert de app aan de browser en beantwoordt de API.
 // Starten met `npm start` in app/; daarna draait de app op http://localhost:5175.
 import { createServer } from 'node:http';
-import { readFile } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
 import { dirname, extname, join, normalize, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { promisify } from 'node:util';
+import { brotliCompress, constants, gzip } from 'node:zlib';
 
 const HIER = dirname(fileURLToPath(import.meta.url));
 const MAX_UPLOAD = 100 * 1024 * 1024; // een gescande partituur is al snel 50 MB
@@ -65,9 +67,21 @@ const KOPPEN = {
   'Referrer-Policy': 'no-referrer',
 };
 
-function stuur(antwoord, status, body, soort = 'application/json; charset=utf-8') {
-  antwoord.writeHead(status, { ...KOPPEN, 'Content-Type': soort });
+function stuur(antwoord, status, body, soort = 'application/json; charset=utf-8', extra = {}) {
+  antwoord.writeHead(status, { ...KOPPEN, 'Content-Type': soort, ...extra });
   antwoord.end(typeof body === 'string' || Buffer.isBuffer(body) ? body : JSON.stringify(body));
+}
+
+// Tekst en WebAssembly pakken goed in: Verovio gaat van 7 MB naar ongeveer 2 MB. De klankbank is al ingepakt.
+const INPAKKEN = new Set(['.html', '.css', '.js', '.mjs', '.json', '.svg', '.wasm']);
+const PAKKERS = {
+  br: (inhoud) => promisify(brotliCompress)(inhoud, { params: { [constants.BROTLI_PARAM_QUALITY]: 5 } }),
+  gzip: (inhoud) => promisify(gzip)(inhoud),
+};
+const ingepakt = new Map(); // etag -> ingepakte inhoud, zodat elk bestand maar één keer wordt ingepakt
+
+function kiesPakker(accept = '') {
+  return Object.keys(PAKKERS).find((naam) => new RegExp(`\\b${naam}\\b`).test(accept));
 }
 
 async function leesBody(verzoek) {
@@ -96,7 +110,7 @@ async function api(verzoek, antwoord, url, module) {
   stuur(antwoord, uit.status ?? 200, uit.body ?? {}, uit.soort);
 }
 
-async function bestand(antwoord, url) {
+async function bestand(verzoek, antwoord, url) {
   const [voorvoegsel, map] = MAPPEN.find(([p]) => url.pathname.startsWith(p));
   let relatief = decodeURIComponent(url.pathname.slice(voorvoegsel.length));
   if (relatief === '' || relatief.endsWith('/')) relatief += 'index.html';
@@ -104,9 +118,23 @@ async function bestand(antwoord, url) {
   // Nooit buiten de map: ../ in de URL levert een 404 op, geen bestand van elders.
   if (volledig !== map && !volledig.startsWith(map + sep)) return stuur(antwoord, 404, { fout: 'Niet gevonden.' });
   try {
-    let inhoud = await readFile(volledig);
-    if (voorvoegsel.startsWith('/vendor/') && ['.js', '.mjs'].includes(extname(volledig))) inhoud = zetNamenOm(inhoud.toString('utf8'));
-    stuur(antwoord, 200, inhoud, SOORTEN[extname(volledig)] ?? 'application/octet-stream');
+    const info = await stat(volledig);
+    const pakker = INPAKKEN.has(extname(volledig)) ? kiesPakker(verzoek.headers['accept-encoding']) : undefined;
+    const etag = `"${[info.size, Math.round(info.mtimeMs), pakker].filter(Boolean).join('-')}"`;
+    const extra = { ETag: etag, 'Cache-Control': 'no-cache', ...(pakker ? { 'Content-Encoding': pakker, Vary: 'Accept-Encoding' } : {}) };
+    const soort = SOORTEN[extname(volledig)] ?? 'application/octet-stream';
+    if (verzoek.headers['if-none-match'] === etag) return stuur(antwoord, 304, '', soort, extra);
+
+    let inhoud = ingepakt.get(`${volledig}|${etag}`);
+    if (!inhoud) {
+      inhoud = await readFile(volledig);
+      if (voorvoegsel.startsWith('/vendor/') && ['.js', '.mjs'].includes(extname(volledig))) inhoud = zetNamenOm(inhoud.toString('utf8'));
+      if (pakker) {
+        inhoud = await PAKKERS[pakker](inhoud);
+        ingepakt.set(`${volledig}|${etag}`, inhoud);
+      }
+    }
+    stuur(antwoord, 200, inhoud, soort, extra);
   } catch {
     stuur(antwoord, 404, { fout: 'Niet gevonden.' });
   }
@@ -119,7 +147,7 @@ export function maakServer() {
       const route = API.find(([p]) => url.pathname === p || url.pathname.startsWith(`${p}/`));
       if (route) return await api(verzoek, antwoord, url, route[1]);
       if (verzoek.method !== 'GET' && verzoek.method !== 'HEAD') return stuur(antwoord, 405, { fout: 'Dat kan hier niet.' });
-      return await bestand(antwoord, url);
+      return await bestand(verzoek, antwoord, url);
     } catch (fout) {
       stuur(antwoord, fout.status ?? 500, { fout: fout.status ? fout.message : 'Er ging iets mis op de server.' });
     }
