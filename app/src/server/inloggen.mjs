@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'node:url';
 import { maakAccounts } from './accounts.mjs';
+import { wisGebruikersdata } from './gebruikersdata.mjs';
 
 const standaardMap = fileURLToPath(new URL('../../accounts/', import.meta.url));
 const accounts = maakAccounts({
@@ -37,6 +38,36 @@ export default async function inloggen(verzoek) {
     return {
       status: 200,
       body: { uitgelogd: true },
+      koppen: { 'Set-Cookie': `score2sound=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0${beveiligd}` },
+    };
+  }
+
+  if (verzoek.methode === 'DELETE' && !verzoek.rest) {
+    const gebruiker = await gebruikerVan(token);
+    if (!gebruiker) return { status: 401, body: { fout: 'Log eerst in.' } };
+
+    let gegevens;
+    try {
+      gegevens = JSON.parse(verzoek.body.toString());
+    } catch {
+      return { status: 400, body: { fout: 'De gegevens zijn geen geldige JSON.' } };
+    }
+
+    try {
+      await accounts.logIn({ email: gebruiker.email, wachtwoord: gegevens.wachtwoord });
+    } catch (fout) {
+      if (!['E-mailadres of wachtwoord klopt niet.', 'Probeer het later opnieuw.'].includes(fout.message)) throw fout;
+      return { status: 400, body: { fout: 'Het wachtwoord klopt niet.' } };
+    }
+
+    const projectenMap = process.env.SCORE2SOUND_PROJECTEN || fileURLToPath(new URL('../../projecten/', import.meta.url));
+    const herkenningMap = process.env.SCORE2SOUND_HERKENNING || fileURLToPath(new URL('../../herkenning/', import.meta.url));
+    await wisGebruikersdata({ gebruikerId: gebruiker.id, mappen: [projectenMap, herkenningMap] });
+    await accounts.verwijder(gebruiker.id);
+    const beveiligd = process.env.SCORE2SOUND_HTTPS === 'aan' ? '; Secure' : '';
+    return {
+      status: 200,
+      body: { verwijderd: true },
       koppen: { 'Set-Cookie': `score2sound=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0${beveiligd}` },
     };
   }
