@@ -1,0 +1,45 @@
+name: Nachtelijke controle
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Run tests
+        run: bash hermes/tests.sh
+
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t score2sound:nacht .
+      - name: Check container health endpoint
+        run: |
+          docker run --detach --name score2sound-nacht --publish 5175:5175 score2sound:nacht
+          ready=false
+          for i in $(seq 1 30); do
+            if curl --fail --silent http://localhost:5175/api/gezond > /dev/null; then
+              ready=true
+              break
+            fi
+            sleep 2
+          done
+          test "$ready" = true
+      - name: Show container logs
+        if: failure()
+        run: docker logs score2sound-nacht
+      - name: Remove test container
+        if: always()
+        run: docker rm --force score2sound-nacht >/dev/null 2>&1 || true
