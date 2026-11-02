@@ -1,10 +1,12 @@
 import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 import { maakOpslag } from '../project/opslag.mjs';
 
 const standaardMap = fileURLToPath(new URL('../../projecten/', import.meta.url));
 
 export default async function projecten(verzoek) {
-  const opslag = maakOpslag(process.env.SCORE2SOUND_PROJECTEN || standaardMap);
+  const projectenMap = process.env.SCORE2SOUND_PROJECTEN || standaardMap;
+  const opslag = maakOpslag(verzoek.gebruiker ? join(projectenMap, verzoek.gebruiker) : projectenMap);
 
   try {
     if (verzoek.methode === 'GET' && !verzoek.rest) return { status: 200, body: await opslag.lijst() };
