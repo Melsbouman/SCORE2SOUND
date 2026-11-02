@@ -170,6 +170,12 @@ function schrijfStemmen(maat, partij, weergave) {
 
 function schrijfMaat(maat, vorige, instrument, partij, weergave) {
   let inhoud = schrijfAttributes(maat, vorige, instrument);
+  if (maat.regelbegin || maat.paginabegin) {
+    inhoud += leeg('print', {
+      ...(maat.regelbegin ? { 'new-system': 'yes' } : {}),
+      ...(maat.paginabegin ? { 'new-page': 'yes' } : {}),
+    });
+  }
   const aanwijzingen = maat.elementen.filter((element) => element.soort === 'aanwijzing');
   if (maat.tempo != null && !aanwijzingen.some((item) => item.type === 'tempo')) aanwijzingen.unshift({ start: 0, type: 'tempo', waarde: maat.tempo });
   inhoud += aanwijzingen.map(schrijfAanwijzing).join('');

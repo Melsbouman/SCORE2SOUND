@@ -58,6 +58,8 @@ Een instrument in C heeft `{ chromatisch: 0, diatonisch: 0 }`. Een bugel in Bes:
   nummer: '1',                   // het maatnummer zoals op het blad (tekst: kan '0' of 'X1' zijn)
   index: 0,                      // plek in de partij, vanaf 0
   opmaat: false,                 // true voor een onvolledige eerste maat (MusicXML implicit="yes")
+  regelbegin: true,              // staat op een maat die op het origineel een nieuwe regel begint
+  paginabegin: true,             // staat op de eerste maat van een pagina
   maatsoort: { teller: 4, noemer: 4 },   // geldend in deze maat (ook als hij eerder werd gezet)
   toonsoort: { kwinten: 0, modus: 'majeur' }, // geldend; kwinten -7 tot 7 (min = mollen)
   sleutels: [Sleutel, ...],      // geldend, een per notenbalk

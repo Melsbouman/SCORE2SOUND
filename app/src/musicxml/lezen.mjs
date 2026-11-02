@@ -54,6 +54,8 @@ function leesMaat(maat, index, voortgang) {
   const herhaling = { begin: false, eind: false, keer: 2 };
   let tempo = null;
   let maatrust = null;
+  let regelbegin = false;
+  let paginabegin = false;
   let cursor = 0; // positie in tikken vanaf het begin van de maat
   let vorigeStart = 0; // start van de vorige noot, voor akkoorden
 
@@ -65,6 +67,9 @@ function leesMaat(maat, index, voortgang) {
       voortgang.stand = leesAttributen(knoop, voortgang.stand);
       maatrust = leesMaatrust(knoop) ?? maatrust;
       if (!voortgang.transpositie && kind(knoop, 'transpose')) voortgang.transpositie = voortgang.stand.transpositie;
+    } else if (knoop.naam === 'print') {
+      if (knoop.attr['new-system'] === 'yes') regelbegin = true;
+      if (knoop.attr['new-page'] === 'yes') paginabegin = true;
     } else if (knoop.naam === 'backup') {
       cursor -= tikken(knoop).tikken;
     } else if (knoop.naam === 'forward') {
@@ -102,6 +107,8 @@ function leesMaat(maat, index, voortgang) {
     maatsoort: { ...stand.maatsoort },
     toonsoort: { ...stand.toonsoort },
     sleutels: structuredClone(stand.sleutels),
+    ...(regelbegin ? { regelbegin: true } : {}),
+    ...(paginabegin ? { paginabegin: true } : {}),
     tempo,
     herhaling,
     elementen,
