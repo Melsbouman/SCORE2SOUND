@@ -93,6 +93,15 @@ export function leesRichting(directionKnoop, start, vorigeWig = 'crescendo') {
       if (type === 'crescendo') aanwijzingen.push(aanwijzing(start, 'crescendo', 'begin'));
       if (type === 'diminuendo') aanwijzingen.push(aanwijzing(start, 'decrescendo', 'begin'));
     }
+    const octaveShift = kind(directionType, 'octave-shift');
+    if (octaveShift && ['up', 'down', 'stop'].includes(octaveShift.attr.type)) {
+      const waarde = { up: 'begin-omlaag', down: 'begin-omhoog', stop: 'eind' }[octaveShift.attr.type];
+      aanwijzingen.push({
+        ...aanwijzing(start, 'octaafteken', waarde),
+        grootte: Number(octaveShift.attr.size) === 15 ? 15 : 8,
+        nummer: Number(octaveShift.attr.number ?? 1),
+      });
+    }
     const words = kind(directionType, 'words');
     if (words) {
       const waarde = tekst(words);

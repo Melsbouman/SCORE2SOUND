@@ -16,6 +16,7 @@ MusicXML gebruikt `divisions` per maat of partij; bij het inlezen worden die omg
 - `octaaf`: wetenschappelijke notatie, de centrale C is `C4` (MIDI-nummer 60).
 
 Het model bewaart de **genoteerde** toonhoogte, zoals op het blad. De **klinkende** toonhoogte volgt uit de transpositie van het instrument (zie Partij). Zo blijft een bugelpartij zoals de bugelist hem leest, en klinkt hij toch goed.
+Een octaafteken verandert de genoteerde toonhoogte niet. Binnen het teken heeft een noot `octaafVerschuiving`: `+1` of `-1` voor een octaaf, `+2` of `-2` voor twee octaven; het veld ontbreekt buiten het teken. De klinkende toonhoogte telt deze verschuiving op bij de instrumenttranspositie.
 
 ## Partituur
 ```js
@@ -99,6 +100,7 @@ plek: { blad: 2, x: 637, y: 979, breedte: 16, hoogte: 14 }
   stem: 1,                       // stem binnen de partij, vanaf 1
   notenbalk: 1,                  // notenbalk binnen de partij, vanaf 1
   toonhoogte: { stap: 'C', alter: 0, octaaf: 4 },
+  octaafVerschuiving: 1,        // alleen binnen een octaafteken; +1/+2 hoger, -1/-2 lager
   akkoord: false,                // true: hoort bij de vorige noot (zelfde start)
   overbinding: { begin: false, eind: false },
   articulaties: [],              // 'staccato', 'accent', 'tenuto', 'marcato', 'staccatissimo'
@@ -127,6 +129,7 @@ Een noot of rust kan ook deze velden hebben, alleen als ze op het blad staan: `b
  - \'letter\': een repetitieletter of -getal in een kader, \'waarde\' is de tekst zelf, zoals \'A\' of \'104\'.
 - `'dynamiek'`: `waarde` is `ppp` tot `fff`, `sf`, `sfz` of `fp`;
 - `'crescendo'` of `'decrescendo'`: `waarde` is `'begin'` of `'eind'`;
+- `'octaafteken'`: `waarde` is `'begin-omhoog'`, `'begin-omlaag'` of `'eind'`, met `grootte` (`8` of `15`) en `nummer` (MusicXML-nummer, standaard `1`);
 - `'tempo'`: `waarde` is kwartnoten per minuut (een getal);
 - Een tempo-aanwijzing kan ook `getoond: { eenheid, punt, getal }` hebben. Dit bewaart de oorspronkelijke MusicXML-notatie (`eenheid` is `whole`, `half`, `quarter`, `eighth` of `16th`; `punt` is een boolean; `getal` is het genoteerde getal per die eenheid). `waarde` blijft het tempo in kwartnoten per minuut voor het afspelen.
 - `'tekst'`: `waarde` is de tekst zelf, zoals `'rit.'` of `'a tempo'`.

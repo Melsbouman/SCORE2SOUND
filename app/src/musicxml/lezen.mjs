@@ -39,6 +39,7 @@ function leesPartij(deel, part) {
   // De stand (deelwaarden, maatsoort, toonsoort, sleutels, transpositie) loopt door over de maten.
   const voortgang = { stand: null, wig: 'crescendo', transpositie: null };
   const maten = kinderen(part, 'measure').map((maat, index) => leesMaat(maat, index, voortgang));
+  pasOctaafVerschuivingenToe(maten);
   for (let index = 0; index < maten.length; index += 1) {
     const maat = maten[index];
     if (!(maat.maatrust > 1)) continue;
@@ -63,6 +64,26 @@ function leesPartij(deel, part) {
     },
     maten,
   };
+}
+
+function pasOctaafVerschuivingenToe(maten) {
+  const actief = new Map();
+  for (const maat of maten) {
+    for (const element of maat.elementen) {
+      if (element.soort === 'aanwijzing' && element.type === 'octaafteken') {
+        const nummer = element.nummer ?? 1;
+        if (element.waarde === 'eind') {
+          actief.delete(nummer);
+        } else {
+          const richting = element.waarde === 'begin-omhoog' ? 1 : -1;
+          actief.set(nummer, richting * (element.grootte === 15 ? 2 : 1));
+        }
+      } else if (element.soort === 'noot' && actief.size) {
+        const verschuiving = [...actief.values()].reduce((som, waarde) => som + waarde, 0);
+        if (verschuiving) element.octaafVerschuiving = verschuiving;
+      }
+    }
+  }
 }
 
 function leesMaat(maat, index, voortgang) {
@@ -105,7 +126,9 @@ function leesMaat(maat, index, voortgang) {
         };
       }
     } else if (knoop.naam === 'direction') {
-      const richting = leesRichting(knoop, cursor, voortgang.wig);
+      const offset = kind(knoop, 'offset');
+      const start = cursor + (offset ? naarTikken(getal(knoop, 'offset'), voortgang.stand.deelwaarden).tikken : 0);
+      const richting = leesRichting(knoop, start, voortgang.wig);
       if (richting.sprong) Object.assign(sprong, richting.sprong);
       for (const aanwijzing of richting.aanwijzingen) {
         if (aanwijzing.type === 'crescendo' || aanwijzing.type === 'decrescendo') voortgang.wig = aanwijzing.type;

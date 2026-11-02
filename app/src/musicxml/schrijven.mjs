@@ -68,12 +68,19 @@ function schrijfAanwijzing(aanwijzing) {
   } else if (aanwijzing.type === 'crescendo' || aanwijzing.type === 'decrescendo') {
     const waarde = aanwijzing.waarde === 'eind' ? 'stop' : aanwijzing.type === 'crescendo' ? 'crescendo' : 'diminuendo';
     type = leeg('wedge', { type: waarde });
+  } else if (aanwijzing.type === 'octaafteken') {
+    const waarde = { 'begin-omhoog': 'down', 'begin-omlaag': 'up', eind: 'stop' }[aanwijzing.waarde];
+    type = leeg('octave-shift', {
+      type: waarde,
+      size: aanwijzing.grootte ?? 8,
+      number: aanwijzing.nummer ?? 1,
+    });
   } else if (aanwijzing.type === 'tekst') {
     type = tag('words', esc(aanwijzing.waarde));
   } else if (aanwijzing.type === 'letter') {
     type = tag('rehearsal', esc(aanwijzing.waarde), { enclosure: 'square' });
   }
-  const placement = ['tekst', 'tempo', 'letter'].includes(aanwijzing.type) ? 'above' : 'below';
+  const placement = ['tekst', 'tempo', 'letter', 'octaafteken'].includes(aanwijzing.type) ? 'above' : 'below';
   return tag('direction', tag('direction-type', type) + offset + sound, { placement });
 }
 
