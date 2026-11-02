@@ -87,8 +87,58 @@ export function start() {
       const foutElement = document.createElement('span');
       foutElement.className = 'inloggen__uitlogfout';
       foutElement.setAttribute('role', 'status');
-      gebruiker.append(email, uitloggen, foutElement);
+      const verwijderenKnop = document.createElement('button');
+      verwijderenKnop.className = 'knop';
+      verwijderenKnop.type = 'button';
+      verwijderenKnop.textContent = 'Account verwijderen';
+      verwijderenKnop.setAttribute('aria-expanded', 'false');
+      verwijderenKnop.setAttribute('aria-controls', 'inloggen-account-verwijderen');
+      const verwijderenSectie = document.createElement('div');
+      verwijderenSectie.id = 'inloggen-account-verwijderen';
+      verwijderenSectie.hidden = true;
+      verwijderenSectie.innerHTML = `
+        <p>Let op: als je je account verwijdert, worden je account en al je gegevens definitief verwijderd.</p>
+        <form class="inloggen__formulier">
+          <label>Vul je wachtwoord in om je account te verwijderen
+            <input name="wachtwoord" type="password" autocomplete="current-password" required>
+          </label>
+          <button class="knop" type="submit">Account definitief verwijderen</button>
+          <p class="melding--fout" role="status" aria-live="polite"></p>
+        </form>`;
+      const verwijderenFormulier = verwijderenSectie.querySelector('form');
+      const verwijderenFout = verwijderenSectie.querySelector('[role="status"]');
+      gebruiker.append(email, uitloggen, foutElement, verwijderenKnop, verwijderenSectie);
       kop.append(gebruiker);
+
+      verwijderenKnop.addEventListener('click', () => {
+        verwijderenSectie.hidden = !verwijderenSectie.hidden;
+        verwijderenKnop.setAttribute('aria-expanded', String(!verwijderenSectie.hidden));
+      });
+
+      verwijderenFormulier.addEventListener('submit', async (gebeurtenis) => {
+        gebeurtenis.preventDefault();
+        const knop = verwijderenFormulier.querySelector('[type="submit"]');
+        const formulierGegevens = new FormData(verwijderenFormulier);
+        knop.disabled = true;
+        toonFout(verwijderenFout, '');
+        try {
+          const resultaat = await fetch('/api/account', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ wachtwoord: formulierGegevens.get('wachtwoord') }),
+          });
+          if (!resultaat.ok) {
+            const antwoordJson = await resultaat.json();
+            toonFout(verwijderenFout, antwoordJson.fout || 'Je account kon niet worden verwijderd.');
+            return;
+          }
+          window.location.reload();
+        } catch {
+          toonFout(verwijderenFout, 'Je account kon niet worden verwijderd. Controleer je verbinding en probeer het opnieuw.');
+        } finally {
+          knop.disabled = false;
+        }
+      });
 
       uitloggen.addEventListener('click', async () => {
         uitloggen.disabled = true;
