@@ -10,6 +10,7 @@ import { promisify } from 'node:util';
 
 const scrypt = promisify(scryptCallback);
 const SESSIEDUUR = 30 * 24 * 60 * 60 * 1000;
+const SESSIEOPRUIMPERIODE = 60 * 60 * 1000;
 const POGINGSPERIODE = 15 * 60 * 1000;
 const MAX_POGINGEN = 5;
 
@@ -59,6 +60,29 @@ function gelijkHex(links, rechts) {
 export function maakAccounts({ map, codes, nu = Date.now }) {
   const sessies = new Map();
   const pogingen = new Map();
+  let laatsteSessieOpruiming = null;
+
+  function ruimSessiesOp() {
+    const tijd = nu();
+    laatsteSessieOpruiming = tijd;
+    let verwijderd = 0;
+    for (const [hash, sessie] of sessies) {
+      if (tijd >= sessie.verloopt) {
+        sessies.delete(hash);
+        verwijderd += 1;
+      }
+    }
+    return verwijderd;
+  }
+
+  function ruimSessiesPeriodiekOp() {
+    const tijd = nu();
+    if (
+      laatsteSessieOpruiming !== null
+      && tijd - laatsteSessieOpruiming < SESSIEOPRUIMPERIODE
+    ) return;
+    ruimSessiesOp();
+  }
 
   async function gebruikers() {
     await mkdir(map, { recursive: true });
@@ -76,6 +100,7 @@ export function maakAccounts({ map, codes, nu = Date.now }) {
   }
 
   async function registreer({ email, wachtwoord, code }) {
+    ruimSessiesPeriodiekOp();
     const adres = normaalEmail(email);
     if (!geldigEmail(adres)) throw new Error('Vul een geldig e-mailadres in.');
     if (typeof wachtwoord !== 'string' || wachtwoord.length < 10) {
@@ -105,6 +130,7 @@ export function maakAccounts({ map, codes, nu = Date.now }) {
   }
 
   async function logIn({ email, wachtwoord }) {
+    ruimSessiesPeriodiekOp();
     const adres = normaalEmail(email);
     const tijd = nu();
     const recentePogingen = (pogingen.get(adres) ?? []).filter(
@@ -175,5 +201,5 @@ export function maakAccounts({ map, codes, nu = Date.now }) {
     return true;
   }
 
-  return { registreer, logIn, gebruikerVan, logUit, verwijder };
+  return { registreer, logIn, gebruikerVan, logUit, verwijder, ruimSessiesOp };
 }
