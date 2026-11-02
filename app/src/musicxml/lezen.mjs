@@ -73,6 +73,7 @@ function leesMaat(maat, index, voortgang) {
   let maatrust = null;
   let regelbegin = false;
   let paginabegin = false;
+  const sprong = {};
   let cursor = 0; // positie in tikken vanaf het begin van de maat
   let vorigeStart = 0; // start van de vorige noot, voor akkoorden
 
@@ -95,6 +96,7 @@ function leesMaat(maat, index, voortgang) {
       const streep = leesMaatstreep(knoop);
       if (streep.begin) herhaling.begin = true;
       if (streep.eind) Object.assign(herhaling, { eind: true, keer: streep.keer });
+      if (streep.sprong) Object.assign(sprong, streep.sprong);
       if (streep.volta) {
         volta = {
           nummers: [...new Set([...(volta?.nummers ?? []), ...streep.volta.nummers])],
@@ -104,6 +106,7 @@ function leesMaat(maat, index, voortgang) {
       }
     } else if (knoop.naam === 'direction') {
       const richting = leesRichting(knoop, cursor, voortgang.wig);
+      if (richting.sprong) Object.assign(sprong, richting.sprong);
       for (const aanwijzing of richting.aanwijzingen) {
         if (aanwijzing.type === 'crescendo' || aanwijzing.type === 'decrescendo') voortgang.wig = aanwijzing.type;
         elementen.push(aanwijzing);
@@ -136,6 +139,7 @@ function leesMaat(maat, index, voortgang) {
     ...(paginabegin ? { paginabegin: true } : {}),
     tempo,
     herhaling,
+    ...(Object.keys(sprong).length ? { sprong } : {}),
     ...(volta ? { volta } : {}),
     elementen,
     ...(maatrust !== null ? { maatrust } : {}),

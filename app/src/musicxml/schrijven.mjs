@@ -77,6 +77,22 @@ function schrijfAanwijzing(aanwijzing) {
   return tag('direction', tag('direction-type', type) + offset + sound, { placement });
 }
 
+function schrijfSprongen(sprong = {}) {
+  const richtingen = [
+    ['segno', sprong.segno, leeg('segno')],
+    ['coda', sprong.coda, leeg('coda')],
+    ['dacapo', sprong.daCapo ? 'yes' : null, tag('words', 'D.C. al Fine')],
+    ['dalsegno', sprong.dalSegno, tag('words', 'D.S. al Fine')],
+    ['tocoda', sprong.naarCoda, tag('words', 'To Coda')],
+    ['fine', sprong.fine ? 'yes' : null, tag('words', 'Fine')],
+  ];
+  return richtingen.filter(([, waarde]) => waarde !== null && waarde !== undefined && waarde !== false && waarde !== '')
+    .map(([attribuut, waarde, type]) => {
+      const soundWaarde = ['dacapo', 'fine'].includes(attribuut) ? 'yes' : waarde;
+      return tag('direction', tag('direction-type', type) + leeg('sound', { [attribuut]: soundWaarde }), { placement: 'above' });
+    }).join('');
+}
+
 // Waar een triool begint en eindigt. Staat dat niet in het bestand, dan begint hij bij de eerste noot en eindigt hij bij de laatste.
 function tupletMarkeringen(elementen) {
   const uit = new Map();
@@ -184,6 +200,7 @@ function schrijfMaat(maat, vorige, instrument, partij, weergave) {
   const aanwijzingen = maat.elementen.filter((element) => element.soort === 'aanwijzing');
   if (maat.tempo != null && !aanwijzingen.some((item) => item.type === 'tempo')) aanwijzingen.unshift({ start: 0, type: 'tempo', waarde: maat.tempo });
   inhoud += aanwijzingen.map(schrijfAanwijzing).join('');
+  inhoud += schrijfSprongen(maat.sprong);
   if (maat.volta?.begin) {
     const nummer = maat.volta.nummers.join(',');
     let streep = leeg('ending', { number: nummer, type: 'start' });
