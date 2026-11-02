@@ -28,6 +28,8 @@ export function start(app) {
   const vlak = document.getElementById('projecten');
   let projecten = null;
   let status = '';
+  const verwijderTimers = new Map();
+  const verwijderBevestigingen = new Set();
   let laatstBewaardePartituur = app.stand.project
     ? JSON.stringify(app.stand.partituur)
     : null;
@@ -110,6 +112,7 @@ export function start(app) {
         lijst.className = 'projecten__lijst';
         for (const project of projecten) {
           const knop = document.createElement('button');
+          const verwijderKnop = document.createElement('button');
           const bijgewerkt = document.createElement('span');
           knop.type = 'button';
           knop.className = 'knop';
@@ -135,7 +138,44 @@ export function start(app) {
               teken();
             }
           });
-          lijst.append(knop);
+
+          verwijderKnop.type = 'button';
+          verwijderKnop.className = 'knop';
+          verwijderKnop.textContent = verwijderBevestigingen.has(project.id)
+            ? 'Zeker weten?'
+            : 'Verwijderen';
+          verwijderKnop.addEventListener('click', async () => {
+            if (!verwijderBevestigingen.has(project.id)) {
+              verwijderBevestigingen.add(project.id);
+              verwijderTimers.set(project.id, setTimeout(() => {
+                verwijderBevestigingen.delete(project.id);
+                verwijderTimers.delete(project.id);
+                teken();
+              }, 3000));
+              teken();
+              return;
+            }
+
+            clearTimeout(verwijderTimers.get(project.id));
+            verwijderTimers.delete(project.id);
+            verwijderBevestigingen.delete(project.id);
+            verwijderKnop.disabled = true;
+            try {
+              await vraag(`/api/projecten/${encodeURIComponent(project.id)}`, {
+                method: 'DELETE'
+              });
+              projecten = projecten.filter(item => item.id !== project.id);
+              status = `Verwijderd: ${project.naam}`;
+              if (app.stand.project?.id === project.id) {
+                app.zet({ project: null });
+              }
+              teken();
+            } catch (fout) {
+              status = fout.message || nietBereikbaar;
+              teken();
+            }
+          });
+          lijst.append(knop, verwijderKnop);
         }
         vlak.append(lijst);
       }
