@@ -49,7 +49,7 @@ export function start(app) {
     const printKnop = document.createElement('button')
     printKnop.type = 'button'
     printKnop.className = 'knop'
-    printKnop.textContent = 'PDF of afdrukken'
+    printKnop.textContent = 'PDF downloaden'
 
     const audioKnop = document.createElement('button')
     audioKnop.type = 'button'
@@ -78,7 +78,15 @@ export function start(app) {
     status.className = 'zacht'
     status.setAttribute('role', 'status')
 
-    printKnop.addEventListener('click', () => window.print())
+    printKnop.addEventListener('click', () => {
+      const titel = document.title
+      document.title = app.stand.partituur.titel?.trim() || 'SCORE2SOUND'
+      window.addEventListener('afterprint', () => {
+        document.title = titel
+      }, { once: true })
+      status.textContent = 'Kies in het venster Opslaan als PDF. Op elke pagina staat het watermerk SCORE2SOUND.'
+      window.print()
+    })
 
     partijKeuze.addEventListener('change', () => {
       partijAudioKnop.disabled = !partijKeuze.value
