@@ -51,6 +51,7 @@ body {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
+    "inloggen"
     "upload"
     "projecten"
     "weergave"
@@ -63,6 +64,7 @@ body {
     "export";
   gap: var(--ruimte-3);
 }
+#inloggen { grid-area: inloggen; }
 .werkvlak section {
   min-width: 0;
   padding: var(--ruimte-4);
@@ -83,6 +85,24 @@ body {
 #versies { grid-area: versies; }
 #meldingen { grid-area: meldingen; }
 #export { grid-area: export; }
+.inloggen-niet-ingelogd .werkvlak > section:not(#inloggen) { display: none; }
+.inloggen__formulier { display: grid; gap: var(--ruimte-3); max-width: 32em; }
+.inloggen__formulier label { display: grid; gap: var(--ruimte-1); }
+.inloggen__formulier input {
+  width: 100%;
+  min-width: 0;
+  padding: var(--ruimte-2);
+  font: inherit;
+  color: var(--kleur-tekst);
+  background: var(--kleur-vlak);
+  border: 1px solid var(--kleur-lijn);
+  border-radius: 8px;
+}
+.inloggen__knoppen { display: flex; flex-wrap: wrap; gap: var(--ruimte-2); }
+.inloggen__fout:empty { display: none; }
+.inloggen__gebruiker { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ruimte-2); margin-top: var(--ruimte-2); }
+.inloggen__gebruiker > span:first-child { overflow-wrap: anywhere; }
+.inloggen__uitlogfout { flex-basis: 100%; color: var(--kleur-fout); font-size: 0.875em; }
 .met-origineel #origineel { display: block; }
 .werkvlak.met-origineel {
   grid-template-areas:
@@ -156,6 +176,7 @@ body {
   .werkvlak {
     grid-template-columns: minmax(0, 1fr) 340px;
     grid-template-areas:
+      "inloggen inloggen"
       "upload upload"
       "projecten projecten"
       "weergave speler"
@@ -169,6 +190,7 @@ body {
   .werkvlak.met-origineel {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 300px;
     grid-template-areas:
+      "inloggen inloggen inloggen"
       "upload upload upload"
       "projecten projecten projecten"
       "weergave origineel speler"
