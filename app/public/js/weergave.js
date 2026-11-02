@@ -25,8 +25,11 @@ async function naarMusicXML(partituur) {
 
 export function start(app) {
   const vlak = document.getElementById('weergave');
-  let huidige = null; // de laatst getekende MusicXML
+  let huidige = null; // de laatst aangevraagde MusicXML
+  let laatstGetekend = null;
   let tekenNummer = 0;
+  let tekenTimer = null;
+  let eersteTekeningGestart = false;
   let gekozen = null;
   let gekozenMaat = null;
   let zoom = 1;
@@ -41,9 +44,26 @@ export function start(app) {
     vlak.append(p);
   }
 
-  async function teken(musicxml) {
-    const nummer = ++tekenNummer;
+  function teken(musicxml, { meteen = false, opnieuw = false } = {}) {
     huidige = musicxml;
+    clearTimeout(tekenTimer);
+    tekenTimer = null;
+    tekenNummer++;
+    if (!opnieuw && musicxml === laatstGetekend) {
+      return;
+    }
+    if (meteen || !eersteTekeningGestart) {
+      eersteTekeningGestart = true;
+      return tekenNu(musicxml);
+    }
+    tekenTimer = setTimeout(() => {
+      tekenTimer = null;
+      tekenNu(musicxml);
+    }, 120);
+  }
+
+  async function tekenNu(musicxml) {
+    const nummer = ++tekenNummer;
     if (!vlak.querySelector('.bladmuziek')) status('De partituur wordt getekend…');
     let tk;
     try {
@@ -124,7 +144,7 @@ export function start(app) {
       knop.textContent = label;
       knop.addEventListener('click', () => {
         aanpassen();
-        teken(huidige);
+        teken(huidige, { meteen: true, opnieuw: true });
       });
       knoppen.append(knop);
     }
@@ -136,6 +156,7 @@ export function start(app) {
       blad.append(document.importNode(svg, true));
     }
     vlak.replaceChildren(blad);
+    laatstGetekend = musicxml;
     markeerGekozen(false);
     markeerVerschil();
     markeerMaat(gekozenMaat);
@@ -222,12 +243,17 @@ export function start(app) {
   app.op('partituur', async (partituur) => {
     if (!partituur) {
       huidige = null;
+      laatstGetekend = null;
+      eersteTekeningGestart = false;
+      clearTimeout(tekenTimer);
+      tekenTimer = null;
+      tekenNummer++;
       gekozenMaat = null;
       return vlak.replaceChildren();
     }
     gekozenMaat = null;
     try {
-      await teken(await naarMusicXML(partituur));
+      await teken(await naarMusicXML(partituur), { meteen: true });
     } catch (fout) {
       console.error(fout);
       status('De partituur kon niet worden omgezet om te tekenen.');
@@ -256,6 +282,6 @@ export function start(app) {
     if (!huidige || Math.abs(vlak.clientWidth - vorigeBreedte) < 40) return;
     vorigeBreedte = vlak.clientWidth;
     clearTimeout(wacht);
-    wacht = setTimeout(() => teken(huidige), 250);
+    wacht = setTimeout(() => teken(huidige, { meteen: true, opnieuw: true }), 250);
   }).observe(vlak);
 }
