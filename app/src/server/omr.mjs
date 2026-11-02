@@ -96,6 +96,7 @@ function koppelMaat(maat, balken, stack, koppen, rusten, nummer) {
     element.plek = { blad: nummer, x: symbool.x, y: symbool.y, breedte: symbool.breedte, hoogte: symbool.hoogte };
   };
   let nietGekoppeld = 0;
+  const redenen = { geenKopInMaat: 0, andereToonhoogte: 0, alGebruikt: 0 };
   for (const element of maat.elementen) {
     const staff = balken[(element.notenbalk ?? 1) - 1];
     if (element.soort === 'noot') {
@@ -103,7 +104,13 @@ function koppelMaat(maat, balken, stack, koppen, rusten, nummer) {
       const positie = lijnPositie(element.toonhoogte, sleutel);
       const kop = neemLinkste(koppen, (s) => s.staff === staff && s.pitch === positie && inStack(s));
       if (kop) zet(element, kop);
-      else nietGekoppeld += 1;
+      else {
+        nietGekoppeld += 1;
+        const koppenInMaat = koppen.filter((s) => s.staff === staff && inStack(s));
+        if (koppenInMaat.length === 0) redenen.geenKopInMaat += 1;
+        else if (koppenInMaat.some((s) => s.pitch === positie)) redenen.alGebruikt += 1;
+        else redenen.andereToonhoogte += 1;
+      }
     } else if (element.soort === 'rust') {
       const rust = neemLinkste(rusten, (s) => s.staff === staff && inStack(s));
       if (rust) {
@@ -112,7 +119,7 @@ function koppelMaat(maat, balken, stack, koppen, rusten, nummer) {
       }
     }
   }
-  return nietGekoppeld;
+  return { nietGekoppeld, redenen };
 }
 
 export function koppelOmr(partituur, bladen) {
@@ -120,6 +127,7 @@ export function koppelOmr(partituur, bladen) {
   uit.bron = { herkenning: null, bladen: bladen.map(({ nummer, breedte, hoogte }) => ({ nummer, breedte, hoogte })) };
   const overgeslagen = [];
   let nietGekoppeld = 0;
+  const redenen = { geenKopInMaat: 0, andereToonhoogte: 0, alGebruikt: 0 };
   let maatStart = 0;
 
   for (const blad of bladen) {
@@ -143,11 +151,15 @@ export function koppelOmr(partituur, bladen) {
         }
         stacks.forEach((stack, stackIndex) => {
           const maat = uit.partijen[partijIndex].maten[maatStart + stackIndex];
-          if (maat) nietGekoppeld += koppelMaat(maat, balken, stack, koppen, rusten, blad.nummer);
+          if (maat) {
+            const resultaat = koppelMaat(maat, balken, stack, koppen, rusten, blad.nummer);
+            nietGekoppeld += resultaat.nietGekoppeld;
+            for (const reden of Object.keys(redenen)) redenen[reden] += resultaat.redenen[reden];
+          }
         });
       });
       maatStart += stacks.length;
     }
   }
-  return { partituur: uit, nietGekoppeld, overgeslagen };
+  return { partituur: uit, nietGekoppeld, redenen, overgeslagen };
 }
