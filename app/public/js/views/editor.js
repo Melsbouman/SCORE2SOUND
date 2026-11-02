@@ -6,6 +6,12 @@ import {
   maakRust,
   keurGoed,
 } from '/src/model/corrigeren.mjs';
+import {
+  zetFermate,
+  zetArticulatie,
+  zetOverbinding,
+  verwijderElement,
+} from '/src/model/noten-bewerken.mjs';
 import { controleerMaatduur } from '/src/controle/maatduur.mjs';
 
 const DUUR = { heel: 1920, half: 960, kwart: 480, achtste: 240, zestiende: 120 };
@@ -29,11 +35,18 @@ const PICTOGRAMMEN = {
   goedkeuren: '<path d="m4 12 5 5L20 6"/>',
   ongedaan: '<path d="M9 8 4 12l5 4M4 12h10a6 6 0 0 1 6 6"/>',
   opnieuw: '<path d="m15 8 5 4-5 4m5-4H10a6 6 0 0 0-6 6"/>',
+  fermate: '<path d="M5 15a7 7 0 0 1 14 0M3 16h18"/><circle cx="12" cy="7" r="1.5" fill="currentColor" stroke="none"/>',
+  staccato: '<circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/>',
+  accent: '<path d="m5 7 14 5-14 5"/>',
+  tenuto: '<path d="M5 12h14"/>',
+  overbinding: '<path d="M5 10c3 7 11 7 14 0"/>',
+  verwijderen: '<path d="M5 7h14m-12 0 1 13h8l1-13M9 7V4h6v3m-4 4v5m2-5v5"/>',
 };
 
 export function start(app) {
   const vlak = document.getElementById('editor');
   let gekozen = null;
+  let statusBalk = null;
   let vorigePartituur = app.stand.partituur;
   let bezigMetGeschiedenis = false;
   let projectWerdNetNull = false;
@@ -124,6 +137,59 @@ export function start(app) {
       maakKnop('Goedkeuren', PICTOGRAMMEN.goedkeuren, () => pas(keurGoed(app.stand.partituur, gekozen)), !heeftKeuze),
     ]);
     groep([
+      maakKnop(
+        'Fermate',
+        PICTOGRAMMEN.fermate,
+        () => pas(zetFermate(app.stand.partituur, gekozen, !element.fermate)),
+        !isNoot,
+        Boolean(element?.fermate),
+      ),
+      maakKnop(
+        'Staccato',
+        PICTOGRAMMEN.staccato,
+        () => pas(zetArticulatie(app.stand.partituur, gekozen, 'staccato')),
+        !isNoot,
+        Boolean(element?.articulaties?.includes('staccato')),
+      ),
+      maakKnop(
+        'Accent',
+        PICTOGRAMMEN.accent,
+        () => pas(zetArticulatie(app.stand.partituur, gekozen, 'accent')),
+        !isNoot,
+        Boolean(element?.articulaties?.includes('accent')),
+      ),
+      maakKnop(
+        'Tenuto',
+        PICTOGRAMMEN.tenuto,
+        () => pas(zetArticulatie(app.stand.partituur, gekozen, 'tenuto')),
+        !isNoot,
+        Boolean(element?.articulaties?.includes('tenuto')),
+      ),
+      maakKnop(
+        'Overbinding',
+        PICTOGRAMMEN.overbinding,
+        () => {
+          let nieuwePartituur;
+          try {
+            nieuwePartituur = zetOverbinding(app.stand.partituur, gekozen, !element.overbinding.begin);
+          } catch (fout) {
+            if (!(fout instanceof Error)) throw fout;
+            statusBalk.textContent = fout.message;
+            return;
+          }
+          pas(nieuwePartituur);
+        },
+        !isNoot,
+        Boolean(element?.overbinding?.begin),
+      ),
+      maakKnop(
+        'Verwijderen',
+        PICTOGRAMMEN.verwijderen,
+        () => pas(verwijderElement(app.stand.partituur, gekozen)),
+        !isNoot,
+      ),
+    ]);
+    groep([
       maakKnop('Ongedaan maken', PICTOGRAMMEN.ongedaan, ongedaanMaken, ongedaan.length === 0),
       maakKnop('Opnieuw', PICTOGRAMMEN.opnieuw, opnieuwMaken, opnieuw.length === 0),
     ]);
@@ -132,6 +198,8 @@ export function start(app) {
     status.className = `editor__status${element ? ' editor__status--gekozen' : ''}`;
     status.textContent = element ? 'Noot gekozen' : 'Geen noot gekozen';
     status.setAttribute('aria-live', 'polite');
+    status.setAttribute('role', 'status');
+    statusBalk = status;
     balk.append(status);
     vlak.replaceChildren(balk);
   }
@@ -232,6 +300,28 @@ export function start(app) {
       actie = () => pas(zetDuur(app.stand.partituur, gekozen, nieuweDuur));
     } else if (toets.toLowerCase() === 'r') {
       actie = () => pas(maakRust(app.stand.partituur, gekozen));
+    } else if (toets.toLowerCase() === 's') {
+      actie = () => pas(zetArticulatie(app.stand.partituur, gekozen, 'staccato'));
+    } else if (toets.toLowerCase() === 'a') {
+      actie = () => pas(zetArticulatie(app.stand.partituur, gekozen, 'accent'));
+    } else if (toets.toLowerCase() === 't') {
+      actie = () => pas(zetArticulatie(app.stand.partituur, gekozen, 'tenuto'));
+    } else if (toets.toLowerCase() === 'f') {
+      actie = () => pas(zetFermate(app.stand.partituur, gekozen, !element.fermate));
+    } else if (toets === 'Delete' || toets === 'Backspace') {
+      actie = () => pas(verwijderElement(app.stand.partituur, gekozen));
+    } else if (toets === '~') {
+      actie = () => {
+        let nieuwePartituur;
+        try {
+          nieuwePartituur = zetOverbinding(app.stand.partituur, gekozen, !element.overbinding.begin);
+        } catch (fout) {
+          if (!(fout instanceof Error)) throw fout;
+          statusBalk.textContent = fout.message;
+          return;
+        }
+        pas(nieuwePartituur);
+      };
     } else if (toets === 'Enter') {
       actie = () => pas(keurGoed(app.stand.partituur, gekozen));
     }
