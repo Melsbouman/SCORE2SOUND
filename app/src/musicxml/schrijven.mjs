@@ -67,7 +67,8 @@ function schrijfAanwijzing(aanwijzing) {
   } else if (aanwijzing.type === 'letter') {
     type = tag('rehearsal', esc(aanwijzing.waarde), { enclosure: 'square' });
   }
-  return tag('direction', tag('direction-type', type) + offset + sound);
+  const placement = ['tekst', 'tempo', 'letter'].includes(aanwijzing.type) ? 'above' : 'below';
+  return tag('direction', tag('direction-type', type) + offset + sound, { placement });
 }
 
 // Waar een triool begint en eindigt. Staat dat niet in het bestand, dan begint hij bij de eerste noot en eindigt hij bij de laatste.
