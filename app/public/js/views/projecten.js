@@ -65,7 +65,8 @@ export function start(app) {
             body: JSON.stringify({
               id: app.stand.project?.id,
               naam,
-              partituur: app.stand.partituur
+              partituur: app.stand.partituur,
+              versies: app.stand.versies
             })
           });
           app.zet({ project: { id: project.id, naam: project.naam } });
@@ -114,7 +115,8 @@ export function start(app) {
               app.zet({
                 partituur: geopend.partituur,
                 meldingen: controleerMaatduur(geopend.partituur),
-                project: { id: geopend.id, naam: geopend.naam }
+                project: { id: geopend.id, naam: geopend.naam },
+                versies: geopend.versies ?? []
               });
             } catch (fout) {
               status = fout.message || nietBereikbaar;

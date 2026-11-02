@@ -28,6 +28,7 @@ export function start(app) {
   let tekenNummer = 0;
   let gekozen = null;
   let zoom = 1;
+  let verschil = []; // maten die anders zijn dan in de gekozen versie
 
   function status(tekst) {
     vlak.replaceChildren();
@@ -82,6 +83,7 @@ export function start(app) {
     }
     vlak.replaceChildren(blad);
     markeerGekozen(false);
+    markeerVerschil();
   }
 
   function markeerGekozen(tonen) {
@@ -110,6 +112,11 @@ export function start(app) {
     if (tonen) g.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
   }
 
+  function markeerVerschil() {
+    for (const g of vlak.querySelectorAll('g.measure.verschilt')) g.classList.remove('verschilt');
+    for (const index of verschil) maten()[index]?.classList.add('verschilt');
+  }
+
   app.op('partituur', async (partituur) => {
     if (!partituur) {
       huidige = null;
@@ -124,6 +131,10 @@ export function start(app) {
   });
   app.op('musicxml', (tekst) => teken(tekst));
   app.op('naar-maat', (doel) => markeer(doel?.maat, 'gemarkeerd', true));
+  app.op('verschil-maten', ({ maten: lijst }) => {
+    verschil = lijst;
+    markeerVerschil();
+  });
   app.op('speel-maat', (doel) => markeer(doel?.maat ?? null, 'speelt', false));
   app.op('kies-noot', (keuze) => {
     gekozen = keuze?.id ?? null;

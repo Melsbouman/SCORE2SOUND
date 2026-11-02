@@ -58,6 +58,7 @@ body {
     "speler"
     "mixer"
     "bewerken"
+    "versies"
     "meldingen"
     "export";
   gap: var(--ruimte-3);
@@ -79,6 +80,7 @@ body {
 #speler { grid-area: speler; }
 #mixer { grid-area: mixer; }
 #bewerken { grid-area: bewerken; }
+#versies { grid-area: versies; }
 #meldingen { grid-area: meldingen; }
 #export { grid-area: export; }
 .met-origineel #origineel { display: block; }
@@ -92,6 +94,7 @@ body {
     "speler"
     "mixer"
     "bewerken"
+    "versies"
     "meldingen"
     "export";
 }
@@ -122,6 +125,10 @@ body {
 .bladmuziek__pagina { display: block; max-width: none; height: auto; }
 .bladmuziek g.measure.gemarkeerd { fill: #b3261e; color: #b3261e; }
 .bladmuziek g.measure.speelt { fill: #2f5d8a; color: #2f5d8a; }
+.bladmuziek g.measure.verschilt { fill: #8a5a00; color: #8a5a00; }
+.versies__rij { border-top: 1px solid var(--kleur-lijn); padding-top: var(--ruimte-2); margin-top: var(--ruimte-2); }
+.versies__rij p { margin: 0 0 var(--ruimte-2); }
+.versies__vergelijking ul { list-style: none; margin: var(--ruimte-2) 0; padding: 0; display: grid; gap: var(--ruimte-2); }
 
 .knop {
   padding: var(--ruimte-2) var(--ruimte-3);
@@ -155,6 +162,7 @@ body {
       "weergave corrigeren"
       "weergave mixer"
       "weergave bewerken"
+      "weergave versies"
       "weergave meldingen"
       "weergave export";
   }
@@ -167,6 +175,7 @@ body {
       "weergave origineel corrigeren"
       "weergave origineel mixer"
       "weergave origineel bewerken"
+      "weergave origineel versies"
       "weergave origineel meldingen"
       "weergave origineel export";
   }

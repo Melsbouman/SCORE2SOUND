@@ -50,6 +50,7 @@ export function start(app) {
   let geladen = false;
   let speelMaat = null;
   let lus = 0;
+  let luisterNaar = null; // een bewaarde versie die klinkt in plaats van de huidige partituur
 
   const knop = (tekst, klasse = 'knop') => Object.assign(document.createElement('button'), { type: 'button', className: klasse, textContent: tekst });
   const veld = (label, invoer) => {
@@ -136,7 +137,7 @@ export function start(app) {
 
   async function laad() {
     const { schrijfMidi } = await import('/src/midi/schrijven.mjs');
-    const midi = schrijfMidi(app.stand.partituur);
+    const midi = schrijfMidi(luisterNaar ?? app.stand.partituur);
     geluid.seq.loadNewSongList([{ binary: midi.buffer.slice(midi.byteOffset, midi.byteOffset + midi.byteLength), fileName: 'partituur.mid' }]);
     geluid.seq.pause();
     geladen = true;
@@ -190,6 +191,7 @@ export function start(app) {
   app.op('partituur', (partituur) => {
     pauze();
     geladen = false;
+    luisterNaar = null;
     speelMaat = null;
     tijden = partituur ? tijdlijn(uitgevouwen(partituur)) : [];
     volgorde = speelVolgorde(maten());
@@ -199,6 +201,19 @@ export function start(app) {
     teken();
   });
   app.op('mixer', pasMixerToe);
+  // Om en om luisteren: de andere versie laden en op dezelfde tijd verder gaan.
+  app.op('luister-versie', async (partituur) => {
+    luisterNaar = partituur;
+    if (!geluid || !geladen) return;
+    const tijd = geluid.seq.currentTime;
+    const speelde = !geluid.seq.paused;
+    await laad();
+    geluid.seq.currentTime = tijd;
+    if (speelde) {
+      geluid.seq.play();
+      pasMixerToe();
+    }
+  });
   app.op('naar-maat', (doel) => {
     if (doel?.maat === null || doel?.maat === undefined || !tijden.length) return;
     van.value = maten()[doel.maat]?.nummer ?? van.value;
@@ -207,4 +222,3 @@ export function start(app) {
   teken();
 }
 import { maatIndexVanNummer, speelVolgorde, uitgevouwen } from '/src/model/maten.mjs';
-
