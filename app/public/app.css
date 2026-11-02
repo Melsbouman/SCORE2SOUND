@@ -47,7 +47,7 @@ body {
 .kop h1 { margin: 0; font-size: 20px; }
 .kop p { margin: var(--ruimte-1) 0 0; color: var(--kleur-zacht); }
 .werkvlak {
-  padding: var(--ruimte-4);
+  padding: var(--ruimte-3);
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
@@ -92,7 +92,6 @@ main:has(#weergave g.measure) #hulp { display: none; }
 .onzeker__knoppen .knop { padding: 6px 8px; font-size: 0.875rem; }
 #weergave { grid-area: weergave; }
 #corrigeren { grid-area: corrigeren; }
-#origineel { grid-area: origineel; display: none; }
 #speler { grid-area: speler; }
 #mixer { grid-area: mixer; }
 #bewerken { grid-area: bewerken; }
@@ -117,22 +116,6 @@ main:has(#weergave g.measure) #hulp { display: none; }
 .inloggen__gebruiker { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ruimte-2); margin-top: var(--ruimte-2); }
 .inloggen__gebruiker > span:first-child { overflow-wrap: anywhere; }
 .inloggen__uitlogfout { flex-basis: 100%; color: var(--kleur-fout); font-size: 0.875em; }
-.met-origineel #origineel { display: block; }
-.werkvlak.met-origineel {
-  grid-template-areas:
-    "upload"
-    "projecten"
-    "editor"
-    "weergave"
-    "origineel"
-    "corrigeren"
-    "speler"
-    "mixer"
-    "bewerken"
-    "versies"
-    "meldingen"
-    "export";
-}
 #upload {
   border: 2px dashed var(--kleur-accent);
   background: var(--kleur-accent-zacht);
@@ -150,7 +133,7 @@ main:has(#weergave g.measure) #hulp { display: none; }
 .origineel__papier { position: relative; }
 .origineel__papier img { display: block; width: 100%; height: auto; }
 .origineel__plek { position: absolute; border: 2px solid #c0392b; border-radius: 4px; background: rgba(192, 57, 43, 0.15); pointer-events: none; }
-#origineel h2, #corrigeren h2 { margin: 0 0 var(--ruimte-3); font-size: 18px; }
+#corrigeren h2 { margin: 0 0 var(--ruimte-3); font-size: 18px; }
 .bladmuziek g.note, .bladmuziek g.rest { cursor: pointer; }
 .bladmuziek g.gekozen { fill: #2f5d8a; color: #2f5d8a; }
 .corrigeren__knoppen { display: flex; flex-wrap: wrap; gap: var(--ruimte-2); margin: var(--ruimte-2) 0; }
@@ -179,7 +162,7 @@ main:has(#weergave g.measure) #hulp { display: none; }
 .editor__status--gekozen { color: var(--kleur-accent); font-weight: 600; }
 
 /* Bladmuziek: altijd zwart op wit, als papier, ook in de donkere variant. */
-.bladmuziek { background: #ffffff; color: #000000; border-radius: var(--hoek); padding: var(--ruimte-3); overflow-x: auto; box-shadow: var(--schaduw); }
+.bladmuziek { background: #ffffff; color: #000000; border-radius: var(--hoek); padding: 12px; overflow-x: auto; box-shadow: var(--schaduw); }
 .bladmuziek__titelblok {
   max-width: 100%;
   margin-bottom: var(--ruimte-4);
@@ -281,38 +264,22 @@ main:has(#weergave g.measure) #hulp { display: none; }
 
 @media (min-width: 1000px) {
   .werkvlak {
-    grid-template-columns: minmax(0, 1fr) 340px;
-    grid-template-areas:
-      "inloggen inloggen"
-      "upload upload"
-      "hulp hulp"
-      "projecten projecten"
-      "editor editor"
-      "onzeker onzeker"
-      "weergave speler"
-      "weergave corrigeren"
-      "weergave mixer"
-      "weergave bewerken"
-      "weergave versies"
-      "weergave meldingen"
-      "weergave export";
-  }
-  .werkvlak.met-origineel {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 300px;
+    max-width: 1800px;
+    margin: 0 auto;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-template-areas:
       "inloggen inloggen inloggen"
       "upload upload upload"
+      "hulp hulp hulp"
       "projecten projecten projecten"
       "editor editor editor"
       "onzeker onzeker onzeker"
-      "weergave origineel speler"
-      "weergave origineel corrigeren"
-      "weergave origineel mixer"
-      "weergave origineel bewerken"
-      "weergave origineel versies"
-      "weergave origineel meldingen"
-      "weergave origineel export";
+      "weergave weergave weergave"
+      "corrigeren speler mixer"
+      "bewerken versies meldingen"
+      "export tempo tempo";
   }
+  #tempo { grid-area: tempo; }
 }
 
 /* Speler */
@@ -373,7 +340,7 @@ main:has(#weergave g.measure) #hulp { display: none; }
 .sneltoetsen ul { margin: 0 0 var(--ruimte-3); padding-left: 1.5em; }
 .sneltoetsen li + li { margin-top: var(--ruimte-2); }
 .sneltoetsen kbd { padding: 1px 5px; background: var(--kleur-achtergrond); border: 1px solid var(--kleur-lijn); border-radius: 4px; font: inherit; }
-.werkvlak { max-width: 1760px; margin: 0 auto; }
+.werkvlak { max-width: 1800px; margin: 0 auto; }
 .knop { transition: background-color 120ms ease, border-color 120ms ease; }
 .knop:hover { border-color: var(--kleur-accent); }
 .knop--hoofd:hover { filter: brightness(1.08); }
@@ -391,7 +358,7 @@ select, input[type="text"], input[type="number"] { font: inherit; color: var(--k
 }
 
 @media print {
-  .kop, #upload, #projecten, #editor, #origineel, #corrigeren, #speler, #mixer, #bewerken, #meldingen, #export { display: none !important; }
+  .kop, #upload, #projecten, #editor, #corrigeren, #speler, #mixer, #bewerken, #meldingen, #export { display: none !important; }
   body { background: #ffffff; }
   .werkvlak, .werkvlak.met-origineel { display: block; padding: 0; }
   #weergave { border: 0; padding: 0; box-shadow: none; background: #ffffff; }
