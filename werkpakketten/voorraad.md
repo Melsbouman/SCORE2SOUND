@@ -13,6 +13,9 @@ Claude pakt hier werk uit als een nachtplan af is en de eindtijd nog niet bereik
 - [ ] Ondersteboven gescande pagina's herkennen: bij *Perihelion* staan pagina's op hun kop. (Claude)
 - [ ] Twee versies echt naast elkaar in notatie tonen; nu zijn de verschilmaten gekleurd in de huidige notatie. (Claude)
 - [ ] MP3 of een andere kleine audio-indeling; WAV kost 11 MB per minuut, en MP3 vraagt een nieuwe bibliotheek. (Claude)
+- [ ] Fase 5: scherm voor inloggen en registreren, voorwaarden en privacy, account verwijderen, en docs/online.md met de stappen voor de server (Claude)
+- [ ] Meermaats-rusten tonen als één balk met een getal; controleren op *Perihelion* (Claude)
+- [ ] Het script stuurt een falende Action zelf terug naar de agent; controleren dat de teller van drie pogingen werkt (Claude)
 
 ## Wacht op Mels
 - [ ] Branch protection op `main` aanzetten (PR verplicht, later ook de check `controle`).
