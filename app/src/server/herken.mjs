@@ -154,6 +154,8 @@ function maakNetjes(partituur, naam, creditWoorden) {
 
 const herkenMelding = (tekst) => ({ soort: 'herkenning', ernst: 'waarschuwing', partij: null, maat: null, tekst });
 
+import { verbeterTekst } from '../model/muziektermen.mjs';
+
 export function maakHerken({ map, draaier }) {
   const taken = new Map();
   let rij = Promise.resolve();
@@ -221,6 +223,7 @@ export function maakHerken({ map, draaier }) {
       bladen: bladen.map(({ nummer, breedte, hoogte }) => ({ nummer, breedte, hoogte })),
     };
     maakNetjes(uit.partituur, taak.naam, creditWoorden);
+    verbeterTekstaanwijzingen(uit.partituur);
   const gevuld = vulLegeMaten(uit.partituur);
   const maatMeldingen = controleerMaatduur(gevuld);
   const nagekeken = markeerFouteMaten(gevuld, maatMeldingen);
@@ -332,3 +335,17 @@ export default maakHerken({
 import { rm } from 'node:fs/promises';
 import { voegLettersToe } from './letters.mjs';
 import { ruimTussenbestandenOp } from './opruimen.mjs';
+
+function verbeterTekstaanwijzingen(project) {
+  for (const partij of project.partijen ?? []) {
+    for (const maat of partij.maten ?? []) {
+      for (const aanwijzing of maat.aanwijzingen ?? []) {
+        if (aanwijzing.soort === 'aanwijzing' && aanwijzing.type === 'tekst') {
+          aanwijzing.waarde = verbeterTekst(aanwijzing.waarde);
+        }
+      }
+    }
+  }
+  return project;
+}
+
