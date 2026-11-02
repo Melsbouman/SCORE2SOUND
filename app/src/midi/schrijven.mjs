@@ -209,7 +209,7 @@ function partijSpoor(partij, partijIndex, beginnen, volume) {
         continue;
       }
       if (element.soort !== 'noot' || element.voorslag) continue;
-      const toets = naarMidi(element.toonhoogte) + partij.instrument.transpositie.chromatisch;
+      const toets = naarMidi(element.toonhoogte) + partij.instrument.transpositie.chromatisch + (element.octaafVerschuiving ?? 0) * 12;
       const begin = maatBegin + element.start;
       const klinkendeDuur = element.articulaties.includes('staccatissimo')
         ? Math.floor(element.duur / 4)
