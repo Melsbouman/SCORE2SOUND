@@ -1,0 +1,7 @@
+{$DOMEIN} {
+	request_body {
+		max_size 100MB
+	}
+	encode gzip zstd
+	reverse_proxy app:5175
+}
