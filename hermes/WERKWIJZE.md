@@ -35,6 +35,7 @@ bash hermes/maak-taak.sh --voor codex --titel "Kort en concreet" --doel "Een zin
 
 - **De sectie `## Bestanden` is verplicht.** Het script leest daaruit welke bestanden mogen veranderen, en draait elke wijziging buiten die lijst terug.
 - **`--verwacht`** zet in het issue de regels die de wijziging precies moet toevoegen (en niets verwijderen). Komt de diff overeen, dan krijgt de PR het label `agent-exact` en kun je hem sneller nakijken.
+- **`--controle`** zet in het issue een opdracht die het script na de tests uitvoert, bijvoorbeeld `grep -q kanaalVan app/public/js/speler.js`. Slagen alle controles, de tests en de Action, dan merget het script zelf en leest Claude de diff niet.
 - **`--voor`** zet het label voor de uitvoerder: `agent-codex` (standaard), `agent-copilot` of `agent-hermes`. Een taak voor Hermes gaat eerst naar het gratis model `cohere/north-mini-code:free` en moet klein en mechanisch zijn, altijd met `--verwacht`.
 - **Tests eerst:** een nieuwe functie krijgt eerst een test (door Claude, of als taak met de exacte testcode). De taak voor de code noemt die test in de acceptatiecriteria. Het script draait de tests; een agent draait niets.
 - Geef een agent nooit meer dan nodig is: precieze teksten en code in het issue maken het resultaat veel betrouwbaarder.
