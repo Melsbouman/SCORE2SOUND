@@ -28,6 +28,27 @@ export function start(app) {
   const vlak = document.getElementById('projecten');
   let projecten = null;
   let status = '';
+  let laatstBewaardePartituur = app.stand.project
+    ? JSON.stringify(app.stand.partituur)
+    : null;
+
+  async function bewaar(naam) {
+    const partituur = app.stand.partituur;
+    const partituurJson = JSON.stringify(partituur);
+    const project = await vraag('/api/projecten', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: app.stand.project?.id,
+        naam,
+        partituur,
+        versies: app.stand.versies
+      })
+    });
+    laatstBewaardePartituur = partituurJson;
+    app.zet({ project: { id: project.id, naam: project.naam } });
+    return project;
+  }
 
   function teken() {
     const kop = document.createElement('h2');
@@ -59,17 +80,7 @@ export function start(app) {
         if (!naam) return;
 
         try {
-          const project = await vraag('/api/projecten', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              id: app.stand.project?.id,
-              naam,
-              partituur: app.stand.partituur,
-              versies: app.stand.versies
-            })
-          });
-          app.zet({ project: { id: project.id, naam: project.naam } });
+          const project = await bewaar(naam);
           status = `Bewaard: ${project.naam}`;
           teken();
           await laadProjecten();
@@ -112,6 +123,7 @@ export function start(app) {
           knop.addEventListener('click', async () => {
             try {
               const geopend = await vraag(`/api/projecten/${encodeURIComponent(project.id)}`);
+              laatstBewaardePartituur = JSON.stringify(geopend.partituur);
               app.zet({
                 partituur: geopend.partituur,
                 meldingen: controleerMaatduur(geopend.partituur),
@@ -141,6 +153,20 @@ export function start(app) {
   }
 
   teken();
+  setInterval(async () => {
+    if (!app.stand.project || !app.stand.partituur) return;
+    if (JSON.stringify(app.stand.partituur) === laatstBewaardePartituur) return;
+
+    try {
+      await bewaar(app.stand.project.naam);
+      status = `Automatisch bewaard om ${new Date().toLocaleTimeString('nl-NL', {
+        hour: '2-digit',
+        minute: '2-digit'
+      })}`;
+      teken();
+    } catch {
+    }
+  }, 120000);
   app.op('partituur', teken);
   app.op('project', teken);
   laadProjecten();
