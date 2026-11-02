@@ -11,6 +11,7 @@ import {
 import { leesZip } from './zip.mjs';
 import { bladenUitOmr, koppelOmr, voegPaginasSamen } from './omr.mjs';
 import { leesMusicXML } from '../musicxml/lezen.mjs';
+import { kinderen, leesXml, tekst } from '../musicxml/xml.mjs';
 import { controleerMaatduur } from '../controle/maatduur.mjs';
 import { vulLegeMaten, markeerFouteMaten } from '../controle/nabewerken.mjs';
 import { instrumentBijNaam } from '../model/instrumenten.mjs';
@@ -35,7 +36,9 @@ function soortVan(body) {
 async function leesUitvoer(uitmap) {
   const namen = (await readdir(uitmap)).filter((naam) => /^invoer(\.mvt\d+)?\.xml$/.test(naam)).sort();
   if (namen.length === 0) return null;
-  const delen = await Promise.all(namen.map(async (naam) => leesMusicXML(await readFile(join(uitmap, naam), 'utf8'))));
+  const xmlTeksten = await Promise.all(namen.map((naam) => readFile(join(uitmap, naam), 'utf8')));
+  const delen = xmlTeksten.map((xml) => leesMusicXML(xml));
+  const creditWoorden = xmlTeksten.flatMap((xml) => kinderen(leesXml(xml), 'credit').flatMap((credit) => kinderen(credit, 'credit-words').map((woord) => tekst(woord))));
   const [partituur, ...rest] = delen;
   for (const deel of rest.filter((d) => d.partijen.length === partituur.partijen.length)) {
     deel.partijen.forEach((partij, index) => {
@@ -43,14 +46,25 @@ async function leesUitvoer(uitmap) {
       for (const maat of partij.maten) maten.push({ ...maat, index: maten.length });
     });
   }
-  return partituur;
+  return { partituur, creditWoorden };
 }
 
-function maakNetjes(partituur, naam) {
+function herstelOcr(waarde) {
+  return waarde.replace(/[\p{L}\d]+/gu, (woord) => /\p{L}/u.test(woord) ? woord.replace(/[I1]/g, 'l') : woord);
+}
+
+function maakNetjes(partituur, naam, creditWoorden) {
   if (!partituur.titel && naam) partituur.titel = basename(naam, extname(naam));
   partituur.partijen.forEach((partij, index) => {
     if (!partij.naam || partij.naam === 'Voice') {
-      partij.naam = `Partij ${index + 1}`; // zonder tekst op het blad noemt Audiveris elke partij Voice
+      const gevonden = creditWoorden.map(herstelOcr).find((waarde) => instrumentBijNaam(waarde));
+      if (gevonden) {
+        partij.naam = gevonden;
+        const instrument = instrumentBijNaam(gevonden);
+        Object.assign(partij.instrument, { midiProgramma: instrument.midiProgramma, transpositie: instrument.transpositie });
+      } else {
+        partij.naam = `Partij ${index + 1}`; // zonder tekst op het blad noemt Audiveris elke partij Voice
+      }
       return;
     }
     const instrument = instrumentBijNaam(partij.naam);
@@ -116,8 +130,9 @@ export function maakHerken({ map, draaier }) {
     taak.lopend = draaier.exporteer({ omr, uitmap: taak.uitmap, bladen: goed });
     await taak.lopend.klaar;
     if (taak.stand === 'afgebroken') return;
-    const partituur = await leesUitvoer(taak.uitmap);
-    if (!partituur) throw new Error('De bladmuziek is niet herkend.');
+    const uitvoer = await leesUitvoer(taak.uitmap);
+    if (!uitvoer) throw new Error('De bladmuziek is niet herkend.');
+    const { partituur, creditWoorden } = uitvoer;
 
     const bladenGoed = bladen.filter((blad) => goed.includes(blad.nummer));
     const uit = koppelOmr(voegPaginasSamen(partituur, boek, bladenGoed), bladenGoed);
@@ -125,7 +140,7 @@ export function maakHerken({ map, draaier }) {
       herkenning: taak.id,
       bladen: bladen.map(({ nummer, breedte, hoogte }) => ({ nummer, breedte, hoogte })),
     };
-    maakNetjes(uit.partituur, taak.naam);
+    maakNetjes(uit.partituur, taak.naam, creditWoorden);
   const gevuld = vulLegeMaten(uit.partituur);
   const maatMeldingen = controleerMaatduur(gevuld);
   const nagekeken = markeerFouteMaten(gevuld, maatMeldingen);
