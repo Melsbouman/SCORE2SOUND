@@ -15,6 +15,7 @@ export function start(app) {
   let papier;
   let afbeelding;
   let paginTekst;
+  let paginaNummers;
   let vorigeKnop;
   let volgendeKnop;
   let kleinerKnop;
@@ -56,6 +57,24 @@ export function start(app) {
     volgendeKnop.disabled = paginaIndex >= bron.bladen.length - 1;
     kleinerKnop.disabled = zoom <= 100;
     groterKnop.disabled = zoom >= 400;
+    paginaNummers.style.overflowX = bron.bladen.length > 12 ? 'auto' : 'visible';
+    paginaNummers.replaceChildren(...bron.bladen.map((blad, index) => {
+      const knop = document.createElement('button');
+      knop.type = 'button';
+      knop.className = 'knop';
+      knop.textContent = String(blad.nummer);
+      knop.setAttribute('aria-label', `Pagina ${blad.nummer}`);
+      knop.style.minWidth = '36px';
+      knop.style.minHeight = '36px';
+      knop.style.flex = '0 0 36px';
+      if (index === paginaIndex) knop.setAttribute('aria-current', 'page');
+      knop.addEventListener('click', () => {
+        if (index !== paginaIndex) verwijderMarkering();
+        paginaIndex = index;
+        toonPagina();
+      });
+      return knop;
+    }));
   }
 
   function maakVlak() {
@@ -110,6 +129,11 @@ export function start(app) {
     paginTekst = document.createElement('span');
     knoppen.append(vorigeKnop, volgendeKnop, kleinerKnop, groterKnop, paginTekst);
 
+    paginaNummers = document.createElement('div');
+    paginaNummers.style.display = 'flex';
+    paginaNummers.style.gap = '4px';
+    paginaNummers.style.overflowX = bron.bladen.length > 12 ? 'auto' : 'visible';
+
     const bladVlak = document.createElement('div');
     bladVlak.className = 'origineel__blad';
     papier = document.createElement('div');
@@ -117,7 +141,7 @@ export function start(app) {
     afbeelding = document.createElement('img');
     papier.append(afbeelding);
     bladVlak.append(papier);
-    vlak.replaceChildren(kop, knoppen, bladVlak);
+    vlak.replaceChildren(kop, knoppen, paginaNummers, bladVlak);
   }
 
   function gaNaarBlad(nummer, metMarkering = false, plek = null) {
@@ -158,6 +182,7 @@ export function start(app) {
       papier = null;
       afbeelding = null;
       paginTekst = null;
+      paginaNummers = null;
       vorigeKnop = null;
       volgendeKnop = null;
       kleinerKnop = null;
