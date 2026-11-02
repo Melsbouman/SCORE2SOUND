@@ -6,7 +6,7 @@ import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { basename, extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-  audiverisPad, draai, exporteerArgumenten, leesBladen, leesFoutmelding, leesVoortgang, stapTekst, transcribeerArgumenten, voortgangProcent,
+  audiverisPad, draai, exporteerArgumenten, hervatArgumenten, leesBladen, leesFoutmelding, leesVoortgang, stapTekst, transcribeerArgumenten, vastgelopenBladen, voortgangProcent,
 } from './audiveris.mjs';
 import { leesZip } from './zip.mjs';
 import { bladenUitOmr, koppelOmr, voegPaginasSamen } from './omr.mjs';
@@ -19,7 +19,8 @@ const GELDIG_ID = /^[a-f0-9]{12}$/;
 const PAGINAS = /^\d+(-\d+)?( \d+(-\d+)?)*$/;
 
 export const echteDraaier = {
-  transcribeer: ({ invoer, uitmap, paginas, opRegel }) => draai({ exe: audiverisPad(), argumenten: transcribeerArgumenten({ invoer, uitmap, paginas }), opRegel }),
+  transcribeer: ({ invoer, uitmap, paginas, opRegel }) => draai({ exe: audiverisPad(), argumenten: transcribeerArgumenten({ invoer, uitmap, paginas, limiet: 120 }), opRegel }),
+  herstel: ({ omr, uitmap, bladen, opRegel }) => draai({ exe: audiverisPad(), argumenten: hervatArgumenten({ omr, uitmap, bladen }), opRegel }),
   exporteer: ({ omr, uitmap, bladen }) => draai({ exe: audiverisPad(), argumenten: exporteerArgumenten({ omr, uitmap, bladen }) }),
 };
 
@@ -92,6 +93,17 @@ export function maakHerken({ map, draaier }) {
     }
     // book.xml noemt alle pagina's van de PDF; alleen de gevraagde tellen mee.
     const gevraagd = (nummer) => !taak.gevraagd || taak.gevraagd.includes(nummer);
+    // Een pagina kan vastlopen zonder dat er iets mis is met het blad: een tweede ronde op hetzelfde boek maakt hem meestal af.
+    const vast = vastgelopenBladen(bestanden.get('book.xml').toString('utf8')).filter(gevraagd);
+    if (vast.length > 0) {
+      taak.lopend = draaier.herstel({ omr, uitmap: taak.uitmap, bladen: vast, opRegel: (regel) => {
+        const stand = leesVoortgang(regel);
+        if (stand) taak.tekst = `Pagina ${stand.blad} nog een keer: ${stapTekst(stand.stap)}`;
+      } });
+      await taak.lopend.klaar;
+      if (taak.stand === 'afgebroken') return;
+      bestanden = leesZip(await readFile(omr));
+    }
     const boek = bestanden.get('book.xml').toString('utf8');
     const uitBoek = leesBladen(boek);
     const goed = uitBoek.goed.filter(gevraagd);
@@ -207,4 +219,3 @@ export default maakHerken({
 });
 import { rm } from 'node:fs/promises';
 import { ruimTussenbestandenOp } from './opruimen.mjs';
-

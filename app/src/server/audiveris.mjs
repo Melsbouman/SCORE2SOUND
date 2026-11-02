@@ -31,11 +31,11 @@ export function audiverisPad(env = process.env) {
   return env.AUDIVERIS || 'C:\\Program Files\\Audiveris\\Audiveris.exe';
 }
 
-export function transcribeerArgumenten({ invoer, uitmap, paginas }) {
+export function transcribeerArgumenten({ invoer, uitmap, paginas, limiet = 240 }) {
   const bladen = paginas.trim() ? ['-sheets', ...paginas.trim().split(/\s+/)] : [];
   return [
     '-batch', '-transcribe', '-save', ...bladen,
-    '-constant', 'org.audiveris.omr.Main.sheetStepTimeOut=240',
+    '-constant', `org.audiveris.omr.Main.sheetStepTimeOut=${limiet}`,
     '-output', uitmap, '--', invoer,
   ];
 }
@@ -44,6 +44,15 @@ export function exporteerArgumenten({ omr, uitmap, bladen }) {
   return [
     '-batch', '-export', '-sheets', ...bladen.map(String),
     '-constant', 'org.audiveris.omr.sheet.BookManager.useCompression=false',
+    '-output', uitmap, '--', omr,
+  ];
+}
+
+// Een nieuwe ronde op het bewaarde boek: Audiveris gaat verder bij de stap waar de pagina vastliep.
+export function hervatArgumenten({ omr, uitmap, bladen }) {
+  return [
+    '-batch', '-transcribe', '-force', '-save', '-sheets', ...bladen.map(String),
+    '-constant', 'org.audiveris.omr.Main.sheetStepTimeOut=240',
     '-output', uitmap, '--', omr,
   ];
 }
@@ -72,6 +81,16 @@ export function leesBladen(bookXml) {
     else mislukt.push(nummer);
   }
   return { goed, mislukt };
+}
+
+// Begonnen, niet afgekeurd en toch geen PAGE: de pagina liep vast op de tijdslimiet.
+export function vastgelopenBladen(bookXml) {
+  return kinderen(leesXmlBoom(bookXml), 'sheet')
+    .filter((sheet) => {
+      const stappen = tekst(sheet, 'steps').split(/\s+/);
+      return sheet.attr.invalid !== 'true' && stappen.includes('LOAD') && !stappen.includes('PAGE');
+    })
+    .map((sheet) => Number(sheet.attr.number));
 }
 
 export function leesFoutmelding(log) {
