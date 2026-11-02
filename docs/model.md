@@ -103,6 +103,7 @@ plek: { blad: 2, x: 637, y: 979, breedte: 16, hoogte: 14 }
   articulaties: [],              // 'staccato', 'accent', 'tenuto', 'marcato', 'staccatissimo'
   legato: { begin: false, eind: false },   // legatoboog
   versiering: null,              // 'triller', 'mordent', 'dubbelslag' of null
+  voorslag: { schuin: true },    // alleen bij een voorslag; duur is 0 en de noot wordt niet afgespeeld
   zekerheid: 1,
 }
 ```
