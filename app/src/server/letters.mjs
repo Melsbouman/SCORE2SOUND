@@ -66,12 +66,13 @@ export function lettersVoorBlad({ xml, png }, status = { volgende: 'A' }) {
 
     const erin = woorden.filter((w) => w.x + w.w / 2 >= kader.x && w.x + w.w / 2 <= kader.x + kader.w && w.y + w.h / 2 >= kader.y && w.y + w.h / 2 <= kader.y + kader.h);
     const gelezen = erin.map((w) => w.tekst.replace(/[[\]\s]/g, '')).join('');
-    if (/^[A-Z0-9]{1,4}$/.test(gelezen)) {
-      if (/^[A-Z]$/.test(gelezen)) status.volgende = volgende(gelezen);
-      uit.push({ systeem, stack, waarde: gelezen, zekerheid: 0.9 });
-    } else if (kader.tekens === 1) {
-      uit.push({ systeem, stack, waarde: status.volgende, zekerheid: 0.5 });
+    if (kader.tekens === 1 || kader.w < 60) {
+      const waarde = status.volgende;
+      const zekerheid = gelezen === waarde ? 0.9 : 0.5;
+      uit.push({ systeem, stack, waarde, zekerheid });
       status.volgende = volgende(status.volgende);
+    } else if (/^\d{1,4}$/.test(gelezen)) {
+      uit.push({ systeem, stack, waarde: gelezen, zekerheid: 0.9 });
     }
   }
   return uit;

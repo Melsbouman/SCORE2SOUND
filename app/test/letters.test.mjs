@@ -54,10 +54,28 @@ test('systemen geven de bovenste notenlijn en de maten', () => {
 
 test('een letter in het kader wordt gelezen en de volgende letter volgt het alfabet', () => {
   const woord = '<word value="[B]"><bounds x="505" y="240" w="40" h="30"/></word>';
-  const letters = lettersVoorBlad({ xml: blad(woord), png });
+  const letters = lettersVoorBlad({ xml: blad(woord), png }, { volgende: 'B' });
   assert.deepEqual(letters, [
     { systeem: 0, stack: 1, waarde: 'B', zekerheid: 0.9 },
     { systeem: 0, stack: 2, waarde: 'C', zekerheid: 0.5 },
+  ]);
+});
+
+test('een kader dat als IB wordt gelezen krijgt de volgende letter', () => {
+  const woord = '<word value="IB"><bounds x="505" y="240" w="40" h="30"/></word>';
+  assert.deepEqual(lettersVoorBlad({ xml: blad(woord), png }, { volgende: 'B' }).map((l) => l.waarde), ['B', 'C']);
+});
+
+test('een breed kader accepteert alleen een getal van één tot vier cijfers', () => {
+  const breedPng = maakPng(1000, 400, (vul) => {
+    for (const y of [300, 318, 336, 354, 372]) vul(100, y, 880, 2);
+    kader(vul, 500, 230, 72); vul(522, 245, 4, 22); vul(534, 245, 4, 22); vul(546, 245, 4, 22);
+    kader(vul, 775, 230, 72); vul(797, 245, 4, 22); vul(809, 245, 4, 22);
+  });
+  const woorden = '<word value="104"><bounds x="505" y="240" w="55" h="30"/></word>'
+    + '<word value="AB"><bounds x="780" y="240" w="55" h="30"/></word>';
+  assert.deepEqual(lettersVoorBlad({ xml: blad(woorden), png: breedPng }), [
+    { systeem: 0, stack: 1, waarde: '104', zekerheid: 0.9 },
   ]);
 });
 
