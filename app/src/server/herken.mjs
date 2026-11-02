@@ -9,6 +9,7 @@ import {
   audiverisPad, draai, exporteerArgumenten, hervatArgumenten, leesBladen, leesFoutmelding, leesVoortgang, stapTekst, transcribeerArgumenten, vastgelopenBladen, voortgangProcent,
 } from './audiveris.mjs';
 import { leesZip } from './zip.mjs';
+import { telPdfPaginas } from './pdfpaginas.mjs';
 import { bladenUitOmr, koppelOmr, voegPaginasSamen } from './omr.mjs';
 import { leesMusicXML } from '../musicxml/lezen.mjs';
 import { kinderen, leesXml, tekst } from '../musicxml/xml.mjs';
@@ -267,6 +268,10 @@ export function maakHerken({ map, draaier }) {
     const paginas = (query.paginas ?? '').trim();
     if (paginas && !PAGINAS.test(paginas)) return { status: 400, body: { fout: 'Schrijf de pagina\'s als 1-4 7.' } };
     if (paginas && meerDanVeertigPaginas(paginas)) return { status: 400, body: { fout: 'Kies hooguit 40 pagina\'s per keer.' } };
+    if (soort === 'pdf' && !paginas) {
+      const aantal = telPdfPaginas(body);
+      if (aantal > 60) return { status: 400, body: { fout: `Deze PDF heeft ${aantal} pagina's. Kies hooguit 60 pagina's, bijvoorbeeld 1-10.` } };
+    }
     const eigenaar = gebruiker || null;
     if (eigenaar && [...taken.values()].some((taak) => taak.gebruiker === eigenaar && (taak.stand === 'wacht' || taak.stand === 'bezig'))) {
       return { status: 429, body: { fout: 'Er loopt al een herkenning van jou. Wacht tot die klaar is.' } };
