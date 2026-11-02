@@ -116,7 +116,7 @@ function partijSpoor(partij, partijIndex, beginnen, volume) {
         : element.articulaties.includes('staccato')
           ? Math.floor(element.duur / 2)
           : element.duur;
-      const einde = begin + klinkendeDuur;
+      const einde = begin + klinkendeDuur * (element.fermate ? 2 : 1);
       if (element.overbinding.eind && overbonden.has(toets)) {
         const vorige = overbonden.get(toets);
         vorige.einde = Math.max(vorige.einde, einde);
@@ -159,4 +159,3 @@ export function kanaalVan(partijIndex) {
 
 const STERKTE = { ppp: 30, pp: 40, p: 55, mp: 68, mf: 80, f: 95, ff: 110, fff: 120 };
 const EENMALIG = { sf: 105, sfz: 110, fp: 90 };
-
