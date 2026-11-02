@@ -94,15 +94,26 @@ function kiesPakker(accept = '') {
   return Object.keys(PAKKERS).find((naam) => new RegExp(`\\b${naam}\\b`).test(accept));
 }
 
-async function leesBody(verzoek) {
-  const delen = [];
-  let lengte = 0;
-  for await (const deel of verzoek) {
-    lengte += deel.length;
-    if (lengte > MAX_UPLOAD) throw Object.assign(new Error('Het bestand is te groot (maximaal 100 MB).'), { status: 413 });
-    delen.push(deel);
-  }
-  return Buffer.concat(delen);
+function leesBody(verzoek) {
+  return new Promise((ok, mis) => {
+    const delen = [];
+    let lengte = 0;
+    let teGroot = false;
+    verzoek.on('data', (deel) => {
+      if (teGroot) return;
+      lengte += deel.length;
+      if (lengte > MAX_UPLOAD) {
+        teGroot = true;
+        mis(Object.assign(new Error('Het bestand is te groot (maximaal 100 MB).'), { status: 413 }));
+        return;
+      }
+      delen.push(deel);
+    });
+    verzoek.on('end', () => {
+      if (!teGroot) ok(Buffer.concat(delen));
+    });
+    verzoek.on('error', mis);
+  });
 }
 
 async function api(verzoek, antwoord, url, module, gebruiker) {
@@ -191,10 +202,14 @@ export function maakServer() {
         }
         return await api(verzoek, antwoord, url, route[1], gebruiker);
       }
+      if (url.pathname === '/api' || url.pathname.startsWith('/api/')) {
+        return stuur(antwoord, 404, { fout: 'Niet gevonden.' });
+      }
       if (verzoek.method !== 'GET' && verzoek.method !== 'HEAD') return stuur(antwoord, 405, { fout: 'Dat kan hier niet.' });
       return await bestand(verzoek, antwoord, url);
     } catch (fout) {
-      stuur(antwoord, fout.status ?? 500, { fout: fout.status ? fout.message : 'Er ging iets mis op de server.' });
+      const status = fout.status === 413 ? 413 : 500;
+      stuur(antwoord, status, { fout: status === 413 ? fout.message : 'Er ging iets mis op de server.' });
     }
   });
 }
