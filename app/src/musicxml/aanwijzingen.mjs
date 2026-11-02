@@ -63,13 +63,22 @@ export function leesMaatrust(attributesKnoop) {
   return null;
 }
 
-function aanwijzing(start, type, waarde) {
-  return { soort: 'aanwijzing', start, type, waarde, zekerheid: 1 };
+function aanwijzing(start, type, waarde, getoond) {
+  return {
+    soort: 'aanwijzing',
+    start,
+    type,
+    waarde,
+    ...(getoond ? { getoond } : {}),
+    zekerheid: 1,
+  };
 }
 
 export function leesRichting(directionKnoop, start, vorigeWig = 'crescendo') {
   const aanwijzingen = [];
   let tempo = null;
+  let metronoomTempo = null;
+  let getoond = null;
   for (const directionType of kinderen(directionKnoop, 'direction-type')) {
     const dynamics = kind(directionType, 'dynamics');
     if (dynamics) {
@@ -89,15 +98,21 @@ export function leesRichting(directionKnoop, start, vorigeWig = 'crescendo') {
     if (letter && tekst(letter)) aanwijzingen.push(aanwijzing(start, 'letter', tekst(letter)));
     const metronome = kind(directionType, 'metronome');
     if (metronome) {
-      const factoren = { half: 2, quarter: 1, eighth: 0.5 };
+      const factoren = { whole: 4, half: 2, quarter: 1, eighth: 0.5, '16th': 0.25 };
       const eenheid = tekst(kind(metronome, 'beat-unit'));
-      const stip = kind(metronome, 'beat-unit-dot') ? 1.5 : 1;
-      tempo = getal(kind(metronome, 'per-minute')) * (factoren[eenheid] ?? 1) * stip;
+      const punt = Boolean(kind(metronome, 'beat-unit-dot'));
+      const getalTempo = getal(kind(metronome, 'per-minute'));
+      getoond = { eenheid, punt, getal: getalTempo };
+      metronoomTempo = getalTempo * (factoren[eenheid] ?? 1) * (punt ? 1.5 : 1);
+      tempo = metronoomTempo;
     }
   }
   const sound = kind(directionKnoop, 'sound');
-  if (sound?.attr.tempo !== undefined) tempo = Number(sound.attr.tempo);
-  if (tempo !== null) aanwijzingen.push(aanwijzing(start, 'tempo', tempo));
+  if (sound?.attr.tempo !== undefined) {
+    tempo = Number(sound.attr.tempo);
+    if (metronoomTempo !== null && tempo !== metronoomTempo) getoond = null;
+  }
+  if (tempo !== null) aanwijzingen.push(aanwijzing(start, 'tempo', tempo, getoond));
   return { aanwijzingen, tempo };
 }
 
