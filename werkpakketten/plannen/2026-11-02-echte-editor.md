@@ -1,5 +1,7 @@
 # Een echte editor: noten slepen en een annotatiebalk
 
+> **Bijgewerkt 2 november, 's avonds:** dit staat al op `main` (PR #336 en volgende): knoppenbalk met pictogrammen (`views/editor.js`), noten slepen (`views/slepen.js`), ongedaan maken, `noten-bewerken.mjs` (fermate, articulatie, overbinding, noot toevoegen, verwijderen). De pakketten #389 en #390 zijn daarom gesloten als dubbel werk. Wat nog kan: browsercontrole op de echte partij, en wat in de voorraad staat.
+
 Stand: 2 november 2026, op verzoek van Mels. Mels koos: slepen werkt meteen (2 november). Golf 1 staat klaar (#389, #390); golf 2 en 3 volgen na het mergen van golf 1. Noten toevoegen op een lege plek staat in de voorraad.
 
 ## Idee
