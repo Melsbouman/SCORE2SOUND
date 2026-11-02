@@ -11,6 +11,9 @@ export const INSTRUMENTEN = [
   { id: 'klarinet', naam: 'Klarinet in Bes', midiProgramma: 71, transpositie: { chromatisch: -2, diatonisch: -1 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 50, hoog: 91 } },
   { id: 'altsaxofoon', naam: 'Altsaxofoon in Es', midiProgramma: 65, transpositie: { chromatisch: -9, diatonisch: -5 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 49, hoog: 81 } },
   { id: 'tenorsaxofoon', naam: 'Tenorsaxofoon in Bes', midiProgramma: 66, transpositie: { chromatisch: -14, diatonisch: -8 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 44, hoog: 76 } },
+  { id: 'sopraansaxofoon', naam: 'Sopraansaxofoon in Bes', midiProgramma: 64, transpositie: { chromatisch: -2, diatonisch: -1 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 56, hoog: 87 } },
+  { id: 'baritonsaxofoon', naam: 'Baritonsaxofoon in Es', midiProgramma: 67, transpositie: { chromatisch: -21, diatonisch: -12 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 36, hoog: 69 } },
+  { id: 'es-kornet', naam: 'Es-kornet', midiProgramma: 56, transpositie: { chromatisch: 3, diatonisch: 2 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 58, hoog: 89 } },
   { id: 'dwarsfluit', naam: 'Dwarsfluit', midiProgramma: 73, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 60, hoog: 96 } },
   { id: 'hobo', naam: 'Hobo', midiProgramma: 68, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 58, hoog: 91 } },
   { id: 'viool', naam: 'Viool', midiProgramma: 40, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 55, hoog: 100 } },
@@ -20,7 +23,9 @@ export const INSTRUMENTEN = [
 
 // Herkent een instrument aan een partijnaam uit een partituur. De volgorde telt: de eerste die past, wint.
 const NAMEN = [
-  [/sax.*(bar|sop)|\beb\b.*(cornet|kornet)|es.*(cornet|kornet)/, null], // staan niet in de lijst; dus niet raden
+  [/sax.*sop|sop.*sax/, 'sopraansaxofoon'],
+  [/sax.*bar|bar.*sax/, 'baritonsaxofoon'],
+  [/\beb\b.*(cornet|comet|kornet)|\bes\b.*(cornet|comet|kornet)/, 'es-kornet'],
   [/bugel|flugel|fliigel|iigelho|flug\./, 'bugel'],
   [/sax.*alt|alt.*sax/, 'altsaxofoon'],
   [/sax.*ten|ten.*sax/, 'tenorsaxofoon'],
