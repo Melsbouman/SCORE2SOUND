@@ -53,6 +53,7 @@ body {
   grid-template-areas:
     "inloggen"
     "upload"
+    "hulp"
     "projecten"
     "weergave"
     "corrigeren"
@@ -75,6 +76,12 @@ body {
 }
 .werkvlak section:empty { display: none; }
 #upload { grid-area: upload; }
+#hulp { grid-area: hulp; }
+#hulp h2 { margin: 0 0 var(--ruimte-2); font-size: 18px; }
+#hulp ol { margin: 0; padding-left: 1.5em; }
+#hulp li + li { margin-top: var(--ruimte-2); }
+#hulp p { margin: var(--ruimte-3) 0 0; color: var(--kleur-zacht); }
+main:has(#weergave g.measure) #hulp { display: none; }
 #projecten { grid-area: projecten; }
 #weergave { grid-area: weergave; }
 #corrigeren { grid-area: corrigeren; }
@@ -178,6 +185,7 @@ body {
     grid-template-areas:
       "inloggen inloggen"
       "upload upload"
+      "hulp hulp"
       "projecten projecten"
       "weergave speler"
       "weergave corrigeren"
