@@ -62,21 +62,21 @@ test('OCR-hoofdletters in de instrumentnaam worden als kleine l gelezen', async 
 test('een OCR-fout in Flugelhorn wordt herkend als bugel', async (t) => {
   const klaar = await herken(t, 'Flugcl 1');
   assert.equal(klaar.stand, 'klaar');
-  assert.equal(klaar.partituur.partijen[0].naam, 'Flugcl 1');
+  assert.equal(klaar.partituur.partijen[0].naam, 'Flugelhorn 1');
   assert.equal(klaar.partituur.partijen[0].instrument.midiProgramma, 56);
 });
 
 test('een OCR-fout aan het einde van Flugelhorn wordt herkend als bugel', async (t) => {
   const klaar = await herken(t, 'Fluget 1');
   assert.equal(klaar.stand, 'klaar');
-  assert.equal(klaar.partituur.partijen[0].naam, 'Fluget 1');
+  assert.equal(klaar.partituur.partijen[0].naam, 'Flugelhorn 1');
   assert.equal(klaar.partituur.partijen[0].instrument.midiProgramma, 56);
 });
 
 test('een OCR-fout in Flugelhorn wordt ook in langere woorden herkend', async (t) => {
   const klaar = await herken(t, 'Fiugelhorn 1');
   assert.equal(klaar.stand, 'klaar');
-  assert.equal(klaar.partituur.partijen[0].naam, 'Fiugelhorn 1');
+  assert.equal(klaar.partituur.partijen[0].naam, 'Flugelhorn 1');
   assert.equal(klaar.partituur.partijen[0].instrument.midiProgramma, 56);
 });
 

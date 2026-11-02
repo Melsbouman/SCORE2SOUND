@@ -119,7 +119,9 @@ function maakNetjes(partituur, naam, creditWoorden) {
         return { waarde: hersteld, instrument: instrumentInKop(hersteld) };
       }).find(({ instrument }) => instrument);
       if (gevonden) {
-        partij.naam = gevonden.waarde;
+        const volgnummer = gevonden.waarde.match(/\s+(\d+)\s*$/)?.[1];
+        const instrumentNaam = gevonden.instrument.id === 'bugel' ? 'Flugelhorn' : gevonden.instrument.naam;
+        partij.naam = `${instrumentNaam}${volgnummer ? ` ${volgnummer}` : ''}`;
         Object.assign(partij.instrument, { midiProgramma: gevonden.instrument.midiProgramma, transpositie: gevonden.instrument.transpositie });
       } else {
         partij.naam = `Partij ${index + 1}`; // zonder tekst op het blad noemt Audiveris elke partij Voice
