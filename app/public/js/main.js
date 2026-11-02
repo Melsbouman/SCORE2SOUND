@@ -13,6 +13,45 @@ import * as corrigeren from './views/corrigeren.js';
 import * as versies from './views/versies.js';
 import * as inloggen from './views/inloggen.js';
 
+let algemeneFoutmelding;
+
+function toonAlgemeneFoutmelding() {
+  if (algemeneFoutmelding) return;
+
+  const melding = document.createElement('div');
+  melding.className = 'algemene-foutmelding';
+  melding.setAttribute('role', 'alert');
+
+  const tekst = document.createElement('p');
+  tekst.textContent = 'Er ging iets mis. Probeer het opnieuw of herlaad de pagina.';
+
+  const knoppen = document.createElement('div');
+  knoppen.className = 'algemene-foutmelding__knoppen';
+
+  const herladen = document.createElement('button');
+  herladen.type = 'button';
+  herladen.className = 'knop knop--hoofd';
+  herladen.textContent = 'Herladen';
+  herladen.addEventListener('click', () => window.location.reload());
+
+  const sluiten = document.createElement('button');
+  sluiten.type = 'button';
+  sluiten.className = 'knop';
+  sluiten.textContent = 'Sluiten';
+  sluiten.addEventListener('click', () => {
+    melding.remove();
+    algemeneFoutmelding = null;
+  });
+
+  knoppen.append(herladen, sluiten);
+  melding.append(tekst, knoppen);
+  document.body.prepend(melding);
+  algemeneFoutmelding = melding;
+}
+
+window.addEventListener('error', toonAlgemeneFoutmelding);
+window.addEventListener('unhandledrejection', toonAlgemeneFoutmelding);
+
 const app = maakApp();
 const schermen = { inloggen, upload, weergave, speler, meldingen, mixer, bewerken, exporteren, projecten, origineel, corrigeren, versies };
 
