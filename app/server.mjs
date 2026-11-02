@@ -226,3 +226,25 @@ setTimeout(() => {
     projectenMap: process.env.SCORE2SOUND_PROJECTEN || join(HIER, 'projecten'),
   }).catch((fout) => console.error('Opruimen lukte niet:', fout));
 }, 0);
+import { Server as HttpServer } from "node:http";
+
+export function logRegel(methode, url, statuscode, duurMs, tijd = new Date()) {
+  const pad = new URL(url, "http://localhost").pathname;
+  return `${tijd.toISOString()} ${methode} ${pad} ${statuscode} ${duurMs}`;
+}
+
+const oorspronkelijkEmit = HttpServer.prototype.emit;
+HttpServer.prototype.emit = function (naam, ...argumenten) {
+  if (naam === "request") {
+    const [verzoek, antwoord] = argumenten;
+    const begonnen = performance.now();
+    antwoord.once("finish", () => {
+      if (process.env.SCORE2SOUND_LOG === "aan") {
+        const duurMs = Math.round(performance.now() - begonnen);
+        console.log(logRegel(verzoek.method, verzoek.url, antwoord.statusCode, duurMs));
+      }
+    });
+  }
+  return oorspronkelijkEmit.call(this, naam, ...argumenten);
+};
+
