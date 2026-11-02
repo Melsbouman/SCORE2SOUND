@@ -119,7 +119,7 @@ body {
 
 /* Bladmuziek: altijd zwart op wit, als papier, ook in de donkere variant. */
 .bladmuziek { background: #ffffff; color: #000000; border-radius: var(--hoek); padding: var(--ruimte-2); overflow-x: auto; }
-.bladmuziek__pagina { display: block; width: 100%; height: auto; }
+.bladmuziek__pagina { display: block; max-width: none; height: auto; }
 .bladmuziek g.measure.gemarkeerd { fill: #b3261e; color: #b3261e; }
 .bladmuziek g.measure.speelt { fill: #2f5d8a; color: #2f5d8a; }
 
@@ -224,6 +224,8 @@ select, input[type="text"], input[type="number"] { font: inherit; color: var(--k
   .werkvlak, .werkvlak.met-origineel { display: block; padding: 0; }
   #weergave { border: 0; padding: 0; box-shadow: none; background: #ffffff; }
   .bladmuziek { padding: 0; overflow: visible; }
+  .bladmuziek .origineel__knoppen { display: none; }
+  .bladmuziek__pagina { width: 100% !important; }
   .bladmuziek__pagina { break-inside: avoid; }
   .bladmuziek g.note[color] { fill: #000000; color: #000000; }
 }

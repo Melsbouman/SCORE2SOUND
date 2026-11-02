@@ -52,7 +52,8 @@ export function start(app) {
     if (nummer !== tekenNummer) return; // er kwam intussen een nieuwere partituur
     const breedte = Math.max(320, vlak.clientWidth - 48);
     const schaal = Math.round(schaalVoor(breedte) * zoom);
-    tk.setOptions({ scale: schaal, pageWidth: Math.round((breedte * 100) / schaal), adjustPageHeight: true, breaks: 'auto', footer: 'none', header: 'none' });
+    const paginaBreedte = Math.max(Math.round((breedte * 100) / schaal), Math.round((zoom >= 1 ? 1500 : 1500 / zoom)));
+    tk.setOptions({ scale: schaal, pageWidth: paginaBreedte, adjustPageHeight: true, breaks: 'auto', footer: 'none', header: 'none' });
     if (!tk.loadData(musicxml)) return status('Deze partituur kon niet worden getekend.');
     const blad = document.createElement('div');
     blad.className = 'bladmuziek';
@@ -76,6 +77,7 @@ export function start(app) {
     for (let pagina = 1; pagina <= tk.getPageCount(); pagina++) {
       const svg = new DOMParser().parseFromString(tk.renderToSVG(pagina), 'image/svg+xml').documentElement;
       svg.classList.add('bladmuziek__pagina');
+      svg.style.width = `${Math.round((paginaBreedte * schaal) / 100)}px`;
       blad.append(document.importNode(svg, true));
     }
     vlak.replaceChildren(blad);
