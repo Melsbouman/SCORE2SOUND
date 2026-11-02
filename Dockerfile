@@ -20,7 +20,11 @@ RUN curl -fSL https://github.com/Audiveris/audiveris/releases/download/5.11.0/Au
 RUN dpkg-deb -x /tmp/audiveris.deb /opt/audiveris-pakket \
     && rm -f /tmp/audiveris.deb
 
-RUN curl -fSL https://github.com/tesseract-ocr/tessdata/raw/main/eng.traineddata -o "${TESSDATA_PREFIX}/eng.traineddata" \
+RUN mkdir -p "${TESSDATA_PREFIX}" \
+    && curl -fSL https://github.com/tesseract-ocr/tessdata/raw/main/eng.traineddata -o "${TESSDATA_PREFIX}/eng.traineddata" \
+    && curl -fSL https://github.com/tesseract-ocr/tessdata/raw/main/nld.traineddata -o "${TESSDATA_PREFIX}/nld.traineddata" \
+    && curl -fSL https://github.com/tesseract-ocr/tessdata/raw/main/deu.traineddata -o "${TESSDATA_PREFIX}/deu.traineddata" \
+    && curl -fSL https://github.com/tesseract-ocr/tessdata/raw/main/fra.traineddata -o "${TESSDATA_PREFIX}/fra.traineddata" \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
