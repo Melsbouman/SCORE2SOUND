@@ -29,6 +29,7 @@ const MAPPEN = [
 // (verzoek) => { status, body }, met verzoek = { methode, pad, rest, query, body }.
 // `rest` is wat er na het pad komt, bijvoorbeeld het id in /api/projecten/<id>.
 const API = [
+  ['/api/account', './src/server/inloggen.mjs'],
   ['/api/importeer', './src/server/importeer.mjs'],
   ['/api/herken', './src/server/herken.mjs'],
   ['/api/projecten', './src/server/projecten.mjs'],
@@ -95,7 +96,7 @@ async function leesBody(verzoek) {
   return Buffer.concat(delen);
 }
 
-async function api(verzoek, antwoord, url, module) {
+async function api(verzoek, antwoord, url, module, gebruiker) {
   const pad = API.find(([p]) => url.pathname === p || url.pathname.startsWith(`${p}/`))[0];
   const afhandelaar = (await import(pathToFileURL(join(HIER, module)).href)).default;
   const body = ['POST', 'PUT'].includes(verzoek.method) ? await leesBody(verzoek) : Buffer.alloc(0);
@@ -106,8 +107,26 @@ async function api(verzoek, antwoord, url, module) {
     query: Object.fromEntries(url.searchParams),
     body,
     koppen: verzoek.headers,
+    gebruiker,
   });
-  stuur(antwoord, uit.status ?? 200, uit.body ?? {}, uit.soort);
+  stuur(antwoord, uit.status ?? 200, uit.body ?? {}, uit.soort, uit.koppen);
+}
+
+function geldigeOrigin(verzoek) {
+  const origin = verzoek.headers.origin;
+  const host = verzoek.headers.host;
+  if (!origin || !host) return false;
+  try {
+    return new URL(origin).host.toLowerCase() === host.toLowerCase();
+  } catch {
+    return false;
+  }
+}
+
+function cookieToken(verzoek) {
+  const cookie = (verzoek.headers.cookie || '').split(';').map((deel) => deel.trim())
+    .find((deel) => deel.startsWith('score2sound='));
+  return cookie?.slice('score2sound='.length);
 }
 
 async function bestand(verzoek, antwoord, url) {
@@ -145,7 +164,21 @@ export function maakServer() {
     try {
       const url = new URL(verzoek.url, 'http://localhost');
       const route = API.find(([p]) => url.pathname === p || url.pathname.startsWith(`${p}/`));
-      if (route) return await api(verzoek, antwoord, url, route[1]);
+      if (route) {
+        let gebruiker;
+        if (process.env.SCORE2SOUND_ACCOUNTS === 'aan') {
+          if (['POST', 'PUT', 'DELETE'].includes(verzoek.method) && !geldigeOrigin(verzoek)) {
+            return stuur(antwoord, 403, { fout: 'Deze aanvraag is niet toegestaan.' });
+          }
+          if (route[0] !== '/api/account') {
+            const { gebruikerVan } = await import(pathToFileURL(join(HIER, './src/server/inloggen.mjs')).href);
+            gebruiker = await gebruikerVan(cookieToken(verzoek));
+            if (!gebruiker) return stuur(antwoord, 401, { fout: 'Log eerst in.' });
+            gebruiker = gebruiker.id;
+          }
+        }
+        return await api(verzoek, antwoord, url, route[1], gebruiker);
+      }
       if (verzoek.method !== 'GET' && verzoek.method !== 'HEAD') return stuur(antwoord, 405, { fout: 'Dat kan hier niet.' });
       return await bestand(verzoek, antwoord, url);
     } catch (fout) {
@@ -166,4 +199,3 @@ setTimeout(() => {
     projectenMap: process.env.SCORE2SOUND_PROJECTEN || join(HIER, 'projecten'),
   }).catch((fout) => console.error('Opruimen lukte niet:', fout));
 }, 0);
-
