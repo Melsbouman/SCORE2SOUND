@@ -51,11 +51,33 @@ export function start(app) {
     audioKnop.className = 'knop'
     audioKnop.textContent = 'Audio (WAV) downloaden'
 
+    const partijKeuze = document.createElement('select')
+    const allePartijen = document.createElement('option')
+    allePartijen.value = ''
+    allePartijen.textContent = 'Alle partijen'
+    partijKeuze.append(allePartijen)
+    for (const partij of partituur.partijen) {
+      const optie = document.createElement('option')
+      optie.value = partij.id
+      optie.textContent = partij.naam
+      partijKeuze.append(optie)
+    }
+
+    const partijAudioKnop = document.createElement('button')
+    partijAudioKnop.type = 'button'
+    partijAudioKnop.className = 'knop'
+    partijAudioKnop.textContent = 'WAV van deze partij'
+    partijAudioKnop.disabled = true
+
     const status = document.createElement('p')
     status.className = 'zacht'
     status.setAttribute('role', 'status')
 
     printKnop.addEventListener('click', () => window.print())
+
+    partijKeuze.addEventListener('change', () => {
+      partijAudioKnop.disabled = !partijKeuze.value
+    })
 
     musicXmlKnop.addEventListener('click', async () => {
       try {
@@ -103,6 +125,23 @@ export function start(app) {
       audioKnop.disabled = false
     })
 
-    vlak.append(kop, musicXmlKnop, midiKnop, audioKnop, printKnop, status)
+    partijAudioKnop.addEventListener('click', async () => {
+      const partij = partituur.partijen.find((item) => item.id === partijKeuze.value)
+      if (!partij) return
+      partijAudioKnop.disabled = true
+      status.textContent = 'Het geluid wordt gemaakt. Dit kan even duren.'
+      try {
+        const { maakWavVoorPartij } = await import('../audio-export.js')
+        const titel = partituur.titel?.trim() || 'partituur'
+        const naam = bestandsnaam({ titel: `${titel} - ${partij.naam}` }, 'wav')
+        download(await maakWavVoorPartij(partituur, partij.id), naam)
+        status.textContent = `Gedownload: ${naam}`
+      } catch (fout) {
+        status.textContent = AUDIO_FOUTEN[fout.soort] ?? 'Exporteren lukte niet. Probeer het opnieuw.'
+      }
+      partijAudioKnop.disabled = false
+    })
+
+    vlak.append(kop, musicXmlKnop, midiKnop, audioKnop, partijKeuze, partijAudioKnop, printKnop, status)
   })
 }

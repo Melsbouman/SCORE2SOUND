@@ -28,3 +28,11 @@ export async function maakWav(partituur, mixer) {
   synth.destroy();
   return audioBufferToWav(geluid, { normalizeAudio: true });
 }
+
+export function maakWavVoorPartij(partituur, partijId) {
+  const mixer = Object.fromEntries(partituur.partijen.map((partij) => [
+    partij.id,
+    { gedempt: partij.id !== partijId },
+  ]));
+  return maakWav(partituur, mixer);
+}
