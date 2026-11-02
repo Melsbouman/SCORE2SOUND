@@ -55,6 +55,7 @@ body {
     "upload"
     "hulp"
     "projecten"
+    "editor"
     "weergave"
     "corrigeren"
     "speler"
@@ -83,6 +84,7 @@ body {
 #hulp p { margin: var(--ruimte-3) 0 0; color: var(--kleur-zacht); }
 main:has(#weergave g.measure) #hulp { display: none; }
 #projecten { grid-area: projecten; }
+#editor { grid-area: editor; padding: 0; border: 0; background: transparent; box-shadow: none; }
 #weergave { grid-area: weergave; }
 #corrigeren { grid-area: corrigeren; }
 #origineel { grid-area: origineel; display: none; }
@@ -115,6 +117,7 @@ main:has(#weergave g.measure) #hulp { display: none; }
   grid-template-areas:
     "upload"
     "projecten"
+    "editor"
     "weergave"
     "origineel"
     "corrigeren"
@@ -146,6 +149,29 @@ main:has(#weergave g.measure) #hulp { display: none; }
 .bladmuziek g.note, .bladmuziek g.rest { cursor: pointer; }
 .bladmuziek g.gekozen { fill: #2f5d8a; color: #2f5d8a; }
 .corrigeren__knoppen { display: flex; flex-wrap: wrap; gap: var(--ruimte-2); margin: var(--ruimte-2) 0; }
+.editor__balk {
+  position: sticky;
+  top: 84px;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  gap: var(--ruimte-2);
+  min-width: 0;
+  padding: var(--ruimte-2);
+  overflow-x: auto;
+  background: var(--kleur-vlak);
+  border: 1px solid var(--kleur-lijn);
+  border-radius: var(--hoek);
+  box-shadow: var(--schaduw);
+  scrollbar-width: thin;
+}
+.editor__groep { display: flex; flex: 0 0 auto; gap: var(--ruimte-1); padding-right: var(--ruimte-2); border-right: 1px solid var(--kleur-lijn); }
+.editor__groep:last-of-type { padding-right: 0; border-right: 0; }
+.editor__knop { display: grid; flex: 0 0 36px; place-items: center; width: 36px; height: 36px; padding: 6px; border-radius: 8px; }
+.editor__knop svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.editor__knop[aria-pressed="true"] { color: var(--kleur-op-accent); background: var(--kleur-accent); border-color: var(--kleur-accent); }
+.editor__status { flex: 0 0 auto; color: var(--kleur-zacht); font-size: 0.75rem; white-space: nowrap; }
+.editor__status--gekozen { color: var(--kleur-accent); font-weight: 600; }
 
 /* Bladmuziek: altijd zwart op wit, als papier, ook in de donkere variant. */
 .bladmuziek { background: #ffffff; color: #000000; border-radius: var(--hoek); padding: var(--ruimte-3); overflow-x: auto; box-shadow: var(--schaduw); }
@@ -238,6 +264,7 @@ main:has(#weergave g.measure) #hulp { display: none; }
       "upload upload"
       "hulp hulp"
       "projecten projecten"
+      "editor editor"
       "weergave speler"
       "weergave corrigeren"
       "weergave mixer"
@@ -252,6 +279,7 @@ main:has(#weergave g.measure) #hulp { display: none; }
       "inloggen inloggen inloggen"
       "upload upload upload"
       "projecten projecten projecten"
+      "editor editor editor"
       "weergave origineel speler"
       "weergave origineel corrigeren"
       "weergave origineel mixer"
@@ -332,7 +360,7 @@ select, input[type="text"], input[type="number"] { font: inherit; color: var(--k
 @media (prefers-reduced-motion: reduce) { .knop { transition: none; } }
 
 @media print {
-  .kop, #upload, #projecten, #origineel, #corrigeren, #speler, #mixer, #bewerken, #meldingen, #export { display: none !important; }
+  .kop, #upload, #projecten, #editor, #origineel, #corrigeren, #speler, #mixer, #bewerken, #meldingen, #export { display: none !important; }
   body { background: #ffffff; }
   .werkvlak, .werkvlak.met-origineel { display: block; padding: 0; }
   #weergave { border: 0; padding: 0; box-shadow: none; background: #ffffff; }
