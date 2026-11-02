@@ -1,6 +1,6 @@
 # Plan: de SCORE2SOUND-app
 
-Stand: fase 1 af in de nacht van 29 op 30 oktober 2026 (akkoord van Mels op 29 oktober). Alle pakketten 0 tot en met 19 gemerged; zie het nachtrapport in `werkpakketten/nacht/`. Fase 3 grotendeels af (alleen het scherm voor samenvoegen ontbreekt). Fase 2 af op 1 november 2026, zie `2026-10-30-fase-2-herkenning.md`.
+Stand: fase 1 af in de nacht van 29 op 30 oktober 2026 (akkoord van Mels op 29 oktober). Alle pakketten 0 tot en met 19 gemerged; zie het nachtrapport in `werkpakketten/nacht/`. Fase 2 af op 1 november 2026, zie `2026-10-30-fase-2-herkenning.md`. Fase 3 en 4 af op 2 november 2026, zie `2026-11-02-afronden-fase-4.md`. Fase 5 (online) staat nog open.
 
 ## Idee
 SCORE2SOUND maakt van bladmuziek (PDF, scan of foto) digitale muziek waarmee je verder kunt: bekijken naast het origineel, corrigeren waar de herkenning twijfelt, afspelen per partij met tempo, herhalen en een mixer, partijen eruit halen of samenvoegen, transponeren naar een ander instrument, fouten laten signaleren, en bewaren en exporteren als MusicXML, MIDI, PDF of audio. Voor muzikanten, docenten, dirigenten en ensembles.

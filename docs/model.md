@@ -140,5 +140,7 @@ De controles geven een lijst meldingen:
   aangemaakt: '2026-10-29T20:00:00.000Z',
   bijgewerkt: '2026-10-29T20:00:00.000Z',
   partituur: Partituur,
+  versies: [{ id: 'uuid', naam: 'Voor het transponeren', tijd: '2026-10-29T20:00:00.000Z', partituur: Partituur }, ...],
 }
 ```
+`versies` is een lijst bewaarde kopieën van de partituur; een oud project heeft het veld niet, en dat telt als een lege lijst.
