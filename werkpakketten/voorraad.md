@@ -7,6 +7,7 @@ Claude pakt hier werk uit als een nachtplan af is en de eindtijd nog niet bereik
 - [ ] Fermate: Audiveris leest hem niet overal (bij *A Time for Peace* niet, bij *Apatheia* wel); zoek hem zoals de kaders in het bladbeeld. En de speler houdt een fermate nog niet langer aan. (Claude)
 - [ ] Letters zonder gelezen tekst worden aangenomen (A, B, C in volgorde, zekerheid 0,5); een echte tekstherkenning in het kader zou dat vervangen. (Claude)
 - [ ] Mels' punt "deel 1: ..." voor de partij: uitzoeken wat er mist, met een voorbeeld. (Claude)
+- [ ] Editor, vervolg: meerdere noten kiezen (shift of een rechthoek om te slepen) en samen verplaatsen of verwijderen; een klik op een rust om er een noot in te voeren met het toetsenbord (letters A tot en met G); maten kopiëren en plakken; een knop Maatduur herstellen die een maat vult of inkort met rusten; een suggestie bij een onzekere noot: de toonhoogte die het best bij de omringende noten of de toonsoort past (Claude)
 
 ## Wacht op Mels
 - [ ] Branch protection op `main` aanzetten (PR verplicht, later ook de check `controle`).
