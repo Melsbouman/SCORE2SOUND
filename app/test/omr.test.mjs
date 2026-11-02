@@ -62,13 +62,16 @@ test('koppelOmr neemt de ctx-grade over, ook als die lager is dan 0,8', async ()
   assert.equal(lage[0].zekerheid, 0.4);
 });
 
-test('koppelOmr geeft een noot zonder kop de zekerheid 0,5 en telt hem', async () => {
+test('koppelOmr behoudt de zekerheid van een noot zonder kop en telt hem', async () => {
   const weg = (xml) => xml.replace(/<head [^>]*staff="2"[^>]*>[\s\S]*?<\/head>/, '');
-  const { uit } = await gekoppeld(weg);
+  const { partituur, uit } = await gekoppeld(weg);
   assert.equal(uit.nietGekoppeld, 1);
-  const zonder = noten(uit.partituur).filter((n) => !n.plek);
-  assert.equal(zonder.length, 1);
-  assert.equal(zonder[0].zekerheid, 0.5);
+  const origineleNoten = noten(partituur);
+  const uitvoerNoten = noten(uit.partituur);
+  const index = uitvoerNoten.findIndex((n) => !n.plek);
+  assert.notEqual(index, -1);
+  assert.equal(uitvoerNoten.filter((n) => !n.plek).length, 1);
+  assert.equal(uitvoerNoten[index].zekerheid, origineleNoten[index].zekerheid);
 });
 
 test('koppelOmr laat de oorspronkelijke partituur met rust en zet de bron erop', async () => {
