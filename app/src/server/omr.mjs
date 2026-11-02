@@ -123,7 +123,7 @@ export function koppelOmr(partituur, bladen) {
   let maatStart = 0;
 
   for (const blad of bladen) {
-    for (const system of kinderen(kind(leesXmlBoom(blad.xml), 'page'), 'system')) {
+    for (const [systemIndex, system] of kinderen(kind(leesXmlBoom(blad.xml), 'page'), 'system').entries()) {
       const stacks = kinderen(system, 'stack');
       const delen = kinderen(system, 'part');
       if (delen.length !== uit.partijen.length) {
@@ -136,6 +136,11 @@ export function koppelOmr(partituur, bladen) {
       const rusten = kinderen(inters, 'rest').map(leesSymbool);
       delen.forEach((deel, partijIndex) => {
         const balken = kinderen(deel, 'staff').map((staff) => Number(staff.attr.id));
+        const eersteMaat = uit.partijen[partijIndex].maten[maatStart];
+        if (stacks.length && eersteMaat) {
+          eersteMaat.regelbegin = true;
+          if (systemIndex === 0) eersteMaat.paginabegin = true;
+        }
         stacks.forEach((stack, stackIndex) => {
           const maat = uit.partijen[partijIndex].maten[maatStart + stackIndex];
           if (maat) nietGekoppeld += koppelMaat(maat, balken, stack, koppen, rusten, blad.nummer);
