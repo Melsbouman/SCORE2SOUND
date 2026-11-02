@@ -27,6 +27,7 @@ export function start(app) {
   let huidige = null; // de laatst getekende MusicXML
   let tekenNummer = 0;
   let gekozen = null;
+  let zoom = 1;
 
   function status(tekst) {
     vlak.replaceChildren();
@@ -50,11 +51,28 @@ export function start(app) {
     }
     if (nummer !== tekenNummer) return; // er kwam intussen een nieuwere partituur
     const breedte = Math.max(320, vlak.clientWidth - 48);
-    const schaal = schaalVoor(breedte);
+    const schaal = Math.round(schaalVoor(breedte) * zoom);
     tk.setOptions({ scale: schaal, pageWidth: Math.round((breedte * 100) / schaal), adjustPageHeight: true, breaks: 'auto', footer: 'none', header: 'none' });
     if (!tk.loadData(musicxml)) return status('Deze partituur kon niet worden getekend.');
     const blad = document.createElement('div');
     blad.className = 'bladmuziek';
+    const knoppen = document.createElement('div');
+    knoppen.className = 'origineel__knoppen';
+    for (const [label, aanpassen] of [
+      ['Kleiner', () => { zoom = Math.round(Math.max(0.6, zoom - 0.2) * 10) / 10; }],
+      ['Groter', () => { zoom = Math.round(Math.min(2, zoom + 0.2) * 10) / 10; }],
+    ]) {
+      const knop = document.createElement('button');
+      knop.type = 'button';
+      knop.className = 'knop';
+      knop.textContent = label;
+      knop.addEventListener('click', () => {
+        aanpassen();
+        teken(huidige);
+      });
+      knoppen.append(knop);
+    }
+    blad.append(knoppen);
     for (let pagina = 1; pagina <= tk.getPageCount(); pagina++) {
       const svg = new DOMParser().parseFromString(tk.renderToSVG(pagina), 'image/svg+xml').documentElement;
       svg.classList.add('bladmuziek__pagina');
