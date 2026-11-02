@@ -16,3 +16,27 @@ ongeveer 5 euro per maand server, ongeveer 10 tot 15 euro per jaar domein.
 
 ## Bij problemen
 docker compose logs app.
+
+## Gezondheidscontrole
+De container meldt zijn gezondheid via /api/gezond. Bekijk de status met `docker compose ps`.
+
+## Back-ups maken en terugzetten
+Het script `scripts/backup.sh` maakt een back-up van `./data` in `./back-ups` en bewaart alleen de laatste 8.
+Het script `scripts/herstel.sh` zet een back-up terug over `./data`. Voer ze uit met:
+
+```bash
+scripts/backup.sh
+```
+
+Voor een wekelijkse back-up in cron:
+```
+0 2 * * 0 scripts/backup.sh
+```
+
+## Een korte demo zonder server
+Verwijs naar docs/demo.md voor een demo die lokale projecten via een tijdelijke tunnel deelt.
+
+Start met:
+```bash
+bash scripts/demo-online.sh
+```
