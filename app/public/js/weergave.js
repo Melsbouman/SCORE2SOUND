@@ -2,6 +2,7 @@
 // Tekent opnieuw bij een nieuwe partituur (via naarMusicXML uit /src/musicxml/schrijven.mjs) of bij app.meld('musicxml', tekst).
 // Luistert naar 'naar-maat' ({ maat }: markeert en toont die maat) en 'speel-maat' ({ maat } of null: de maat die nu klinkt).
 const schaalVoor = (breedte) => (breedte < 500 ? 70 : 50); // op een telefoon zijn de noten anders te klein.
+const SVG_NS = 'http://www.w3.org/2000/svg';
 
 let toolkitBelofte = null;
 
@@ -27,6 +28,7 @@ export function start(app) {
   let huidige = null; // de laatst getekende MusicXML
   let tekenNummer = 0;
   let gekozen = null;
+  let gekozenMaat = null;
   let zoom = 1;
   let verschil = []; // maten die anders zijn dan in de gekozen versie
 
@@ -136,6 +138,7 @@ export function start(app) {
     vlak.replaceChildren(blad);
     markeerGekozen(false);
     markeerVerschil();
+    markeerMaat(gekozenMaat);
   }
 
   function markeerGekozen(tonen) {
@@ -148,12 +151,59 @@ export function start(app) {
   }
 
   vlak.addEventListener('click', (gebeurtenis) => {
-    const doel = gebeurtenis.target.closest('g.note, g.rest, g.mRest');
-    if (doel?.id.startsWith('n-')) app.meld('kies-noot', { id: doel.id });
+    const kandidaten = [...vlak.querySelectorAll('g.note[id^="n-"], g.rest[id^="n-"], g.mRest[id^="n-"]')]
+      .map((element) => {
+        const kader = element.getBoundingClientRect();
+        const binnen = gebeurtenis.clientX >= kader.left - 14
+          && gebeurtenis.clientX <= kader.right + 14
+          && gebeurtenis.clientY >= kader.top - 14
+          && gebeurtenis.clientY <= kader.bottom + 14;
+        const dx = gebeurtenis.clientX - (kader.left + kader.right) / 2;
+        const dy = gebeurtenis.clientY - (kader.top + kader.bottom) / 2;
+        return { id: element.id, binnen, afstand: dx * dx + dy * dy };
+      })
+      .filter((kandidaat) => kandidaat.binnen)
+      .sort((a, b) => a.afstand - b.afstand);
+    if (kandidaten.length) {
+      app.meld('kies-noot', { id: kandidaten[0].id });
+      return;
+    }
+
+    const x = gebeurtenis.clientX;
+    const y = gebeurtenis.clientY;
+    const maat = maten()
+      .map((element, index) => {
+        const kader = element.getBoundingClientRect();
+        return {
+          index,
+          binnen: x >= kader.left && x <= kader.right && y >= kader.top && y <= kader.bottom,
+          oppervlakte: kader.width * kader.height,
+        };
+      })
+      .filter((kandidaat) => kandidaat.binnen)
+      .sort((a, b) => a.oppervlakte - b.oppervlakte)[0];
+    app.meld('kies-noot', { id: null });
+    app.meld('kies-maat', { maat: maat?.index ?? null });
   });
 
   // De maten in volgorde; Verovio tekent elke maat als <g class="measure">, over alle partijen heen.
   const maten = () => [...vlak.querySelectorAll('g.measure')];
+
+  function markeerMaat(index) {
+    for (const rect of vlak.querySelectorAll('rect.maat-markering')) rect.remove();
+    if (index === null || index === undefined) return;
+    const g = maten()[index];
+    if (!g) return;
+    const kader = g.getBBox();
+    const rect = document.createElementNS(SVG_NS, 'rect');
+    rect.setAttribute('class', 'maat-markering');
+    rect.setAttribute('x', String(kader.x));
+    rect.setAttribute('y', String(kader.y));
+    rect.setAttribute('width', String(kader.width));
+    rect.setAttribute('height', String(kader.height));
+    rect.setAttribute('pointer-events', 'none');
+    g.prepend(rect);
+  }
 
   function markeer(index, klasse, tonen) {
     for (const g of vlak.querySelectorAll(`g.measure.${klasse}`)) g.classList.remove(klasse);
@@ -172,8 +222,10 @@ export function start(app) {
   app.op('partituur', async (partituur) => {
     if (!partituur) {
       huidige = null;
+      gekozenMaat = null;
       return vlak.replaceChildren();
     }
+    gekozenMaat = null;
     try {
       await teken(await naarMusicXML(partituur));
     } catch (fout) {
@@ -191,6 +243,10 @@ export function start(app) {
   app.op('kies-noot', (keuze) => {
     gekozen = keuze?.id ?? null;
     markeerGekozen(true);
+  });
+  app.op('kies-maat', (keuze) => {
+    gekozenMaat = keuze?.maat ?? null;
+    markeerMaat(gekozenMaat);
   });
 
   // Opnieuw tekenen als de breedte echt verandert, zodat de regels passen.
