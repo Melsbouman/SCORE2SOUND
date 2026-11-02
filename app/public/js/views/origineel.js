@@ -3,6 +3,11 @@ import { zoekElement } from '/src/model/corrigeren.mjs';
 export function start(app) {
   const vlak = document.getElementById('origineel');
   const werkvlak = document.querySelector('.werkvlak');
+  vlak.tabIndex = 0;
+  vlak.setAttribute(
+    'aria-label',
+    'Origineel: pijltjestoetsen voor de vorige en volgende pagina',
+  );
   let bron = null;
   let bronBekend = false;
   let paginaIndex = 0;
@@ -15,6 +20,18 @@ export function start(app) {
   let kleinerKnop;
   let groterKnop;
   let markering = null;
+
+  vlak.addEventListener('keydown', (event) => {
+    if (event.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    event.preventDefault();
+    if (!bron) return;
+    const volgendeIndex = paginaIndex + (event.key === 'ArrowRight' ? 1 : -1);
+    if (volgendeIndex < 0 || volgendeIndex >= bron.bladen.length) return;
+    verwijderMarkering();
+    paginaIndex = volgendeIndex;
+    toonPagina();
+  });
 
   function verwijderMarkering() {
     markering?.remove();
