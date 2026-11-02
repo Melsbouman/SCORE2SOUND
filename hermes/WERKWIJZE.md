@@ -50,6 +50,8 @@ bash hermes/werkpakketten.sh --alle   # Codex, Copilot en Hermes elk hun eigen w
 
 Elke uitvoerder werkt in een eigen kloon (`C:/Users/mels1/SCORE2SOUND-agent-codex`, `-copilot`, `-hermes`) en pakt alleen de taken met zijn label; een taak zonder label is voor Codex. Een taak die een bestand deelt met een lopende taak of met een open PR wacht tot die klaar is. Zonder `--alle` is er één wachtrij voor alles; `--parallel N` kan ook. Een geplande taak in de Windows Taakplanner kan later, na een geslaagde handmatige test.
 
+Faalt na het openen van een PR de GitHub Action, dan zet het script de laatste foutregels als PR-commentaar met `De Action faalt:`, zet het issue op `agent-terug` en geeft dezelfde taak opnieuw aan dezelfde agent. Na drie mislukte Actions voor hetzelfde issue zet `werkpakketten.sh` het issue op `agent-vast` met de reden `De Action bleef falen na 3 pogingen` en gaat de rest van de wachtrij verder.
+
 Wat `werkpakket.sh` doet, in volgorde:
 1. Kiest de taak uit zijn wachtrij: eerst `agent-terug` (afgekeurde PR), anders het oudste `agent-ready`, en sla taken over die bestanden delen met lopend werk. Stopt als de wachtrij al een `agent-bezig` heeft.
 2. Zet de eigen kloon schoon, maakt de branch `agent/<nummer>-<naam>` en zet `agent-bezig`.

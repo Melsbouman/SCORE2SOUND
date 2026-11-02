@@ -456,7 +456,22 @@ if [ "${AIFLOW_AUTOMERGE:-exact}" = "exact" ] && [ "$KLAAR_VOOR_MERGE" = "ja" ] 
       log "automatisch mergen lukte niet; de PR wacht op Claude"
     fi
   else
-    log "de Action is niet groen (of meldde zich niet); de PR wacht op Claude"
+    RUN_ID=$("$GH" run list -R "$R" --branch "$BRANCH" --status failure --limit 1 --json databaseId --jq '.[0].databaseId' 2>/dev/null)
+    if [ -n "$RUN_ID" ]; then
+      "$GH" run view "$RUN_ID" -R "$R" --log-failed 2>/dev/null | grep -v '^at ' | tail -n 12 | cut -c1-300 > "$WERK/action-fout.txt"
+    else
+      echo "De mislukte Action-run kon niet worden gevonden." > "$WERK/action-fout.txt"
+    fi
+    {
+      echo "De Action faalt:"
+      echo
+      cat "$WERK/action-fout.txt"
+    } > "$WERK/action-comment.md"
+    "$GH" pr comment "$PRURL" -R "$R" --body-file "$WERK/action-comment.md" >/dev/null 2>&1
+    zet_labels "$ISSUE" agent-terug
+    printf '%s\n' "$ISSUE" > "${AIFLOW_ACTION_MELDING:-$STATUS/action-fout-$ISSUE}"
+    log "de Action faalt; dezelfde agent krijgt de taak opnieuw"
+    exit 11
   fi
 fi
 LAATSTE="$SAMEN"
