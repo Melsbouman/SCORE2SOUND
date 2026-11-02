@@ -127,3 +127,124 @@ export function vindKaders(beeld) {
   }
   return kaders;
 }
+const KADERLETTER_RASTERS = {
+  A: ['01110', '10001', '10001', '11111', '10001', '10001', '10001'],
+  B: ['11110', '10001', '10001', '11110', '10001', '10001', '11110'],
+  C: ['01111', '10000', '10000', '10000', '10000', '10000', '01111'],
+  D: ['11110', '10001', '10001', '10001', '10001', '10001', '11110'],
+  E: ['11111', '10000', '10000', '11110', '10000', '10000', '11111'],
+  F: ['11111', '10000', '10000', '11110', '10000', '10000', '10000'],
+  G: ['01111', '10000', '10000', '10111', '10001', '10001', '01111'],
+  H: ['10001', '10001', '10001', '11111', '10001', '10001', '10001'],
+  I: ['11111', '00100', '00100', '00100', '00100', '00100', '11111'],
+  J: ['00111', '00010', '00010', '00010', '00010', '10010', '01100'],
+  K: ['10001', '10010', '10100', '11000', '10100', '10010', '10001'],
+  L: ['10000', '10000', '10000', '10000', '10000', '10000', '11111'],
+  M: ['10001', '11011', '10101', '10101', '10001', '10001', '10001'],
+  N: ['10001', '11001', '10101', '10011', '10001', '10001', '10001'],
+  O: ['01110', '10001', '10001', '10001', '10001', '10001', '01110'],
+  P: ['11110', '10001', '10001', '11110', '10000', '10000', '10000'],
+  Q: ['01110', '10001', '10001', '10001', '10101', '10010', '01101'],
+  R: ['11110', '10001', '10001', '11110', '10100', '10010', '10001'],
+  S: ['01111', '10000', '10000', '01110', '00001', '00001', '11110'],
+  T: ['11111', '00100', '00100', '00100', '00100', '00100', '00100'],
+  U: ['10001', '10001', '10001', '10001', '10001', '10001', '01110'],
+  V: ['10001', '10001', '10001', '10001', '10001', '01010', '00100'],
+  W: ['10001', '10001', '10001', '10101', '10101', '10101', '01010'],
+  X: ['10001', '10001', '01010', '00100', '01010', '10001', '10001'],
+  Y: ['10001', '10001', '01010', '00100', '00100', '00100', '00100'],
+  Z: ['11111', '00001', '00010', '00100', '01000', '10000', '11111'],
+  0: ['01110', '10001', '10011', '10101', '11001', '10001', '01110'],
+  1: ['00100', '01100', '00100', '00100', '00100', '00100', '01110'],
+  2: ['01110', '10001', '00001', '00010', '00100', '01000', '11111'],
+  3: ['11110', '00001', '00001', '01110', '00001', '00001', '11110'],
+  4: ['00010', '00110', '01010', '10010', '11111', '00010', '00010'],
+  5: ['11111', '10000', '10000', '11110', '00001', '00001', '11110'],
+  6: ['01110', '10000', '10000', '11110', '10001', '10001', '01110'],
+  7: ['11111', '00001', '00010', '00100', '01000', '01000', '01000'],
+  8: ['01110', '10001', '10001', '01110', '10001', '10001', '01110'],
+  9: ['01110', '10001', '10001', '01111', '00001', '00001', '01110'],
+};
+
+function tekenKaderGrenzen(kader) {
+  const links = kader.links ?? kader.x ?? 0;
+  const boven = kader.boven ?? kader.y ?? 0;
+  const rechts = kader.rechts ?? (links + (kader.breedte ?? kader.width ?? 0) - 1);
+  const onder = kader.onder ?? (boven + (kader.hoogte ?? kader.height ?? 0) - 1);
+  return { links, boven, rechts, onder };
+}
+
+function tekenPixelIsZwart(beeld, x, y) {
+  if (typeof beeld.zwart === 'function') return Boolean(beeld.zwart(x, y));
+  if (beeld.zwart instanceof Set) {
+    return beeld.zwart.has(`${x},${y}`) || beeld.zwart.has(y * beeld.breedte + x);
+  }
+  if (Array.isArray(beeld.zwart?.[y])) return Boolean(beeld.zwart[y][x]);
+  return Boolean(beeld.zwart?.[y * (beeld.breedte ?? beeld.width) + x]);
+}
+
+function schaalTekenNaarRaster(punten, grenzen) {
+  const raster = Array.from({ length: 16 }, () => Array(12).fill(false));
+  const breedte = grenzen.rechts - grenzen.links + 1;
+  const hoogte = grenzen.onder - grenzen.boven + 1;
+  for (let ry = 0; ry < 16; ry += 1) {
+    for (let rx = 0; rx < 12; rx += 1) {
+      const x = grenzen.links + Math.min(breedte - 1, Math.floor((rx + 0.5) * breedte / 12));
+      const y = grenzen.boven + Math.min(hoogte - 1, Math.floor((ry + 0.5) * hoogte / 16));
+      raster[ry][rx] = punten.has(`${x},${y}`);
+    }
+  }
+  return raster;
+}
+
+function maakTekenSjabloon(regels) {
+  const raster = Array.from({ length: 16 }, () => Array(12).fill(false));
+  for (let y = 0; y < 16; y += 1) {
+    for (let x = 0; x < 12; x += 1) {
+      raster[y][x] = regels[Math.min(6, Math.floor(y * 7 / 16))][Math.min(4, Math.floor(x * 5 / 12))] === '1';
+    }
+  }
+  return raster;
+}
+
+const KADERTEKEN_SJABLONEN = Object.entries(KADERLETTER_RASTERS)
+  .map(([teken, regels]) => [teken, maakTekenSjabloon(regels)]);
+
+export function leesKaderTeken(beeld, kader) {
+  const kaderVak = tekenKaderGrenzen(kader);
+  const punten = new Set();
+  let links = Infinity;
+  let boven = Infinity;
+  let rechts = -Infinity;
+  let onder = -Infinity;
+  for (let y = kaderVak.boven + 4; y <= kaderVak.onder - 4; y += 1) {
+    for (let x = kaderVak.links + 4; x <= kaderVak.rechts - 4; x += 1) {
+      if (!tekenPixelIsZwart(beeld, x, y)) continue;
+      punten.add(`${x},${y}`);
+      links = Math.min(links, x);
+      boven = Math.min(boven, y);
+      rechts = Math.max(rechts, x);
+      onder = Math.max(onder, y);
+    }
+  }
+  if (punten.size === 0) return null;
+  if (rechts === links || onder === boven) return null;
+  const raster = schaalTekenNaarRaster(punten, { links, boven, rechts, onder });
+  let beste = null;
+  let besteScore = 0;
+  for (const [teken, sjabloon] of KADERTEKEN_SJABLONEN) {
+    let gelijk = 0;
+    for (let y = 0; y < 16; y += 1) {
+      for (let x = 0; x < 12; x += 1) {
+        if (raster[y][x] === sjabloon[y][x]) gelijk += 1;
+      }
+    }
+    const score = gelijk / (12 * 16);
+    if (score > besteScore) {
+      beste = teken;
+      besteScore = score;
+    }
+  }
+  return besteScore >= 0.6 ? { teken: beste, score: besteScore } : null;
+}
+
