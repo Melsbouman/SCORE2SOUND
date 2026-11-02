@@ -55,8 +55,8 @@ done
 
 if [ "$VAST" != "-" ]; then
   echo "ACTIE NODIG: agent-vast bij #${VAST//,/, #}"
-elif [ "$OPEN" -eq 0 ]; then
-  echo "ACTIE NODIG: geen open taken"
+elif [ "$OPEN" -lt "${AIFLOW_MIN_TAKEN:-6}" ]; then
+  echo "ACTIE NODIG: weinig taken ($OPEN open), maak er bij"
 else
   REVIEW=$(bash "$DIR/review.sh" 2>&1)
   if echo "$REVIEW" | grep -Eq 'diff lezen|Action faalt'; then
