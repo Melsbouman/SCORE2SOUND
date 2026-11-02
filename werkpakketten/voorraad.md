@@ -2,6 +2,8 @@
 
 Claude pakt hier werk uit als een nachtplan af is en de eindtijd nog niet bereikt is (zie `.claude/skills/nachtplan/SKILL.md`). Bovenaan staat het belangrijkste. Mels en Claude mogen allebei punten toevoegen; Claude zet bij eigen punten "(Claude)" erachter.
 
+## Open
+- [ ] Koppel telPdfPaginas (app/src/server/pdfpaginas.mjs) in start() van app/src/server/herken.mjs: een PDF zonder paginakeuze met meer dan 60 pagina's geeft status 400 met de melding Deze PDF heeft N pagina's. Kies hoogst 60 pagina's, bijvoorbeeld 1-10.; pas maken als pdfpaginas.mjs gemerged is (Claude)
 - [ ] Bij *Meditation* kon de app 146 van 214 noten niet aan het origineel koppelen (klikken naar het origineel werkt daar niet); uitzoeken waarom, met de echte pagina. (Claude)
 - [ ] Tekst die Audiveris leest bevat OCR-fouten (teneramenre, poco agitate, .m0rend0); een woordenlijst met muziektermen (rall., dolce, poco a poco, a tempo, molto, cresc.) kan ze verbeteren. (Claude)
 - [ ] Fermate: Audiveris leest hem niet overal (bij *A Time for Peace* niet, bij *Apatheia* wel); zoek hem zoals de kaders in het bladbeeld. En de speler houdt een fermate nog niet langer aan. (Claude)
