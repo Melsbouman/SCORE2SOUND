@@ -358,14 +358,16 @@ select, input[type="text"], input[type="number"] { font: inherit; color: var(--k
 }
 
 @media print {
-  .kop, #upload, #projecten, #editor, #corrigeren, #speler, #mixer, #bewerken, #meldingen, #export { display: none !important; }
-  body { background: #ffffff; }
-  .werkvlak, .werkvlak.met-origineel { display: block; padding: 0; }
-  #weergave { border: 0; padding: 0; box-shadow: none; background: #ffffff; }
-  .bladmuziek { padding: 0; overflow: visible; }
-  .bladmuziek .origineel__knoppen { display: none; }
-  .bladmuziek__pagina { width: 100% !important; }
-  .bladmuziek__pagina { break-inside: avoid; }
+  @page { margin: 15mm; }
+  body { color: #000000; background: #ffffff; }
+  .kop, main > :not(#weergave) { display: none !important; }
+  main { display: block; }
+  .werkvlak { max-width: none; margin: 0; padding: 0; }
+  #weergave { display: block !important; border: 0; padding: 0; box-shadow: none; color: #000000; background: #ffffff; }
+  #weergave .origineel__knoppen { display: none !important; }
+  .bladmuziek { padding: 0; overflow: visible; color: #000000; background: #ffffff; box-shadow: none; }
+  .bladmuziek__pagina { width: 100% !important; break-inside: avoid; page-break-inside: avoid; }
+  .bladmuziek__pagina:not(:last-of-type) { break-after: page; page-break-after: always; }
   .bladmuziek g.note[color] { fill: #000000; color: #000000; }
 }
 .tempo-lijst {
