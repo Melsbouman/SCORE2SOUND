@@ -130,3 +130,12 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === normalize(process.argv
   const poort = Number(process.env.PORT || 5175);
   maakServer().listen(poort, () => console.log(`SCORE2SOUND draait op http://localhost:${poort}`));
 }
+import { ruimOudeHerkenningenOp } from './src/server/opruimen.mjs';
+
+setTimeout(() => {
+  ruimOudeHerkenningenOp({
+    map: process.env.SCORE2SOUND_HERKENNING || join(HIER, 'herkenning'),
+    projectenMap: process.env.SCORE2SOUND_PROJECTEN || join(HIER, 'projecten'),
+  }).catch((fout) => console.error('Opruimen lukte niet:', fout));
+}, 0);
+

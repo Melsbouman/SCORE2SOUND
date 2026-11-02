@@ -128,6 +128,17 @@ export function maakHerken({ map, draaier }) {
   }
 
   async function werk(taak) {
+    try {
+      if (taak.stand !== 'afgebroken') await herken(taak);
+    } catch (fout) {
+      if (taak.stand !== 'afgebroken') Object.assign(taak, { stand: 'fout', fout: fout.message });
+    }
+    // Opruimen mag een herkenning nooit laten mislukken; wat blijft staan, ruimt de server later op.
+    const opruimen = taak.stand === 'klaar' ? ruimTussenbestandenOp(taak.uitmap) : rm(taak.uitmap, { recursive: true, force: true });
+    await opruimen.catch(() => {});
+  }
+
+  async function werkOud(taak) {
     if (taak.stand === 'afgebroken') return;
     try {
       await herken(taak);
@@ -194,3 +205,6 @@ export default maakHerken({
   map: process.env.SCORE2SOUND_HERKENNING || fileURLToPath(new URL('../../herkenning/', import.meta.url)),
   draaier: echteDraaier,
 });
+import { rm } from 'node:fs/promises';
+import { ruimTussenbestandenOp } from './opruimen.mjs';
+
