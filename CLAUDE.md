@@ -27,6 +27,7 @@ Het script staat tussen Claude en de agents en filtert de fouten eruit, voordat 
 
 Wat daarna nog open staat, laat `bash hermes/review.sh` zien, met per PR wat er nodig is. Begin daar altijd mee.
 - **Controles draait het script, niet Claude.** Elke taak krijgt tests of een `--controle`-opdracht. Is dat groen, dan merget het script zelf; Claude leest die diff niet.
+- **Claude beoordeelt alleen een PR die het script niet zelf heeft goedgekeurd** (`bash hermes/review.sh` zegt dat), en schrijft geen code of tests: dat doen Codex, Copilot en Hermes. De hartslag (`bash hermes/hartslag.sh`) bewaakt de wachtrijen en meldt alleen `ACTIE NODIG` als Claude erbij moet.
 - **Claude leest een diff alleen als een controle faalt**, of bij code die geen test of controle kan dekken. Geen hele PR-teksten of logs: alleen de foutregel.
 - **Wacht op het seintje van een achtergrondtaak**, zonder wekker en zonder tussentijds kijken. Eén browsercontrole per golf, niet per taak.
 - **Een nieuwe chat per fase of nacht:** een lange chat is het duurst. Schrijf de stand in het plan en begin daarna opnieuw.
