@@ -99,7 +99,7 @@ async function leesBody(verzoek) {
 async function api(verzoek, antwoord, url, module, gebruiker) {
   const pad = API.find(([p]) => url.pathname === p || url.pathname.startsWith(`${p}/`))[0];
   const afhandelaar = (await import(pathToFileURL(join(HIER, module)).href)).default;
-  const body = ['POST', 'PUT'].includes(verzoek.method) ? await leesBody(verzoek) : Buffer.alloc(0);
+  const body = ['POST', 'PUT', 'DELETE'].includes(verzoek.method) ? await leesBody(verzoek) : Buffer.alloc(0);
   const uit = await afhandelaar({
     methode: verzoek.method,
     pad,
