@@ -77,6 +77,8 @@ export function leesRichting(directionKnoop, start, vorigeWig = 'crescendo') {
     }
     const words = kind(directionType, 'words');
     if (words) aanwijzingen.push(aanwijzing(start, 'tekst', tekst(words)));
+    const letter = kind(directionType, 'rehearsal');
+    if (letter && tekst(letter)) aanwijzingen.push(aanwijzing(start, 'letter', tekst(letter)));
     const metronome = kind(directionType, 'metronome');
     if (metronome) {
       const factoren = { half: 2, quarter: 1, eighth: 0.5 };
@@ -129,6 +131,26 @@ export function leesNotaties(noteKnoop) {
     if (binding.attr.type === 'stop') resultaat.overbinding.eind = true;
   }
   return resultaat;
+}
+
+// Wat een noot of rust nog meer heeft: waardestreep (balk), triool en fermate. Alleen de velden die er zijn.
+export function leesDetails(noteKnoop) {
+  const uit = {};
+  const balk = kinderen(noteKnoop, 'beam').find((beam) => (beam.attr.number ?? '1') === '1');
+  const naam = { begin: 'begin', continue: 'midden', end: 'eind' }[tekst(balk ?? { tekst: '' })];
+  if (naam) uit.balk = naam;
+  const modificatie = kind(noteKnoop, 'time-modification');
+  if (modificatie) {
+    const tuplets = kinderen(noteKnoop, 'notations').flatMap((notations) => kinderen(notations, 'tuplet'));
+    uit.tuplet = {
+      aantal: getal(modificatie, 'actual-notes', 3),
+      normaal: getal(modificatie, 'normal-notes', 2),
+      begin: tuplets.some((t) => t.attr.type === 'start'),
+      eind: tuplets.some((t) => t.attr.type === 'stop'),
+    };
+  }
+  if (kinderen(noteKnoop, 'notations').some((notations) => kind(notations, 'fermata'))) uit.fermate = true;
+  return uit;
 }
 
 export function leesMaatstreep(barlineKnoop) {

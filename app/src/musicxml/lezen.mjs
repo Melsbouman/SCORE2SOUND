@@ -1,7 +1,7 @@
 // Leest een MusicXML-bestand (score-partwise) en geeft de partituur in de vorm van docs/model.md.
 // Alleen op de server: de XML-hulp gebruikt fast-xml-parser.
 import { leesXml, kind, kinderen, tekst, getal } from './xml.mjs';
-import { leesAttributen, leesRichting, leesNotaties, leesMaatstreep } from './aanwijzingen.mjs';
+import { leesAttributen, leesRichting, leesNotaties, leesDetails, leesMaatstreep } from './aanwijzingen.mjs';
 import { naarTikken, maatLengte } from '../model/duur.mjs';
 
 const LEGE_ATTRIBUTEN = { naam: 'attributes', attr: {}, kinderen: [], tekst: '' };
@@ -101,8 +101,9 @@ function leesNoot(knoop, start, duur, akkoord, stand) {
   // Een duur die niet precies in tikken past, is afgerond: dan is het element minder zeker.
   const zekerheid = duur.exact ? 1 : 0.5;
   const rust = kind(knoop, 'rest');
+  const { balk, ...details } = leesDetails(knoop);
   if (rust) {
-    return { soort: 'rust', ...gemeen, duur: duur.tikken || maatLengte(stand.maatsoort), heleMaat: rust.attr.measure === 'yes', zekerheid };
+    return { soort: 'rust', ...gemeen, duur: duur.tikken || maatLengte(stand.maatsoort), heleMaat: rust.attr.measure === 'yes', zekerheid, ...details };
   }
   const toonhoogte = kind(knoop, 'pitch');
   const notaties = leesNotaties(knoop);
@@ -119,5 +120,7 @@ function leesNoot(knoop, start, duur, akkoord, stand) {
     legato: notaties.legato,
     versiering: notaties.versiering,
     zekerheid,
+    ...(balk ? { balk } : {}),
+    ...details,
   };
 }
