@@ -30,14 +30,16 @@ async function draai(t, draaier) {
   const afhandelaar = maakHerken({ map, draaier });
   const { body: { id } } = await afhandelaar(verzoek('POST', '', PNG));
   let stand;
+  let inhoud;
   for (let i = 0; i < 500; i += 1) {
     stand = (await afhandelaar(verzoek('GET', id))).body;
     // Opruimen gebeurt net na het klaarmelden; wacht ook daarop.
-    const inhoud = await readdir(join(map, id)).catch(() => null);
-    if (['klaar', 'fout'].includes(stand.stand) && (inhoud === null || inhoud.every((naam) => naam.endsWith('.png')))) return { stand, inhoud };
+    inhoud = await readdir(join(map, id)).catch(() => null);
+    if (stand.stand === 'fout' && inhoud === null) return { stand, inhoud };
+    if (stand.stand === 'klaar' && inhoud !== null && inhoud.every((naam) => /^blad-\d+\.png$/.test(naam))) return { stand, inhoud };
     await new Promise((ok) => setTimeout(ok, 10));
   }
-  assert.fail(`niet opgeruimd: ${stand.stand}`);
+  assert.fail(`opruimen niet afgerond binnen 5 seconden; laatste stand: ${stand.stand}, laatste inhoud: ${JSON.stringify(inhoud)}`);
 }
 
 test('na een geslaagde herkenning blijven alleen de pagina\'s staan', async (t) => {
