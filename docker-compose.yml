@@ -2,16 +2,28 @@ services:
   app:
     build: .
     env_file: .env
+    mem_limit: 3g
+    mem_reservation: 1g
     environment:
       SCORE2SOUND_PROJECTEN: /data/projecten
       SCORE2SOUND_HERKENNING: /data/herkenning
       SCORE2SOUND_ACCOUNTSMAP: /data/accounts
       SCORE2SOUND_ACCOUNTS: aan
       SCORE2SOUND_HTTPS: aan
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:5175/api/gezond').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 30s
+      start_period: 30s
+      retries: 3
     volumes:
       - ./data:/data
       - ./klankbank:/app/public/klankbank:ro
     restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
 
   caddy:
     image: caddy:2
@@ -23,6 +35,11 @@ services:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
 
 volumes:
   caddy_data:
