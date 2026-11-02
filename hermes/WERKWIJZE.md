@@ -37,6 +37,7 @@ bash hermes/maak-taak.sh --voor codex --titel "Kort en concreet" --doel "Een zin
 - **`--verwacht`** zet in het issue de regels die de wijziging precies moet toevoegen (en niets verwijderen). Komt de diff overeen, dan krijgt de PR het label `agent-exact` en kun je hem sneller nakijken.
 - **`--controle`** zet in het issue een opdracht die het script na de tests uitvoert, bijvoorbeeld `grep -q kanaalVan app/public/js/speler.js`. Slagen alle controles, de tests en de Action, dan merget het script zelf en leest Claude de diff niet.
 - **`--voor`** zet het label voor de uitvoerder: `agent-codex` (standaard), `agent-copilot` of `agent-hermes`. Een taak voor Hermes gaat eerst naar het gratis model `cohere/north-mini-code:free` en moet klein en mechanisch zijn, altijd met `--verwacht`.
+- **Hermes zonder tegoed:** het gratis model `cohere/north-mini-code:free` werkt ook als het OpenRouter-tegoed op is. Geef Hermes dus werk dat klein en mechanisch is, met `--verwacht`: teksten, documentatie, lijsten en configuratie. De reserve met Haiku werkt pas na opwaarderen.
 - **Tests eerst:** een nieuwe functie krijgt eerst een test (door Claude, of als taak met de exacte testcode). De taak voor de code noemt die test in de acceptatiecriteria. Het script draait de tests; een agent draait niets.
 - Geef een agent nooit meer dan nodig is: precieze teksten en code in het issue maken het resultaat veel betrouwbaarder.
 
