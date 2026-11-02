@@ -1,12 +1,20 @@
 import { fileURLToPath } from 'node:url';
 import { maakAccounts } from './accounts.mjs';
 import { wisGebruikersdata } from './gebruikersdata.mjs';
+import { maakLimiet } from './limiet.mjs';
 
 const standaardMap = fileURLToPath(new URL('../../accounts/', import.meta.url));
 const accounts = maakAccounts({
   map: process.env.SCORE2SOUND_ACCOUNTSMAP || standaardMap,
   codes: (process.env.SCORE2SOUND_CODES || '').split(',').map((code) => code.trim()).filter(Boolean),
 });
+const inlogLimiet = maakLimiet({ max: 10, venster: 10 * 60 * 1000 });
+
+function adresVan(verzoek) {
+  const doorgestuurd = verzoek.koppen?.['x-forwarded-for'];
+  const eerste = Array.isArray(doorgestuurd) ? doorgestuurd[0] : doorgestuurd?.split(',')[0];
+  return eerste?.trim() || verzoek.adres || 'onbekend';
+}
 
 function tokenUit(koppen = {}) {
   const cookies = koppen.cookie || '';
@@ -74,6 +82,10 @@ export default async function inloggen(verzoek) {
 
   if (verzoek.methode !== 'POST' || !['registreer', 'login'].includes(verzoek.rest)) {
     return { status: 405, body: { fout: 'Dat kan hier niet.' } };
+  }
+
+  if (!inlogLimiet(adresVan(verzoek))) {
+    return { status: 429, body: { fout: 'Te veel pogingen. Probeer het over een paar minuten opnieuw.' } };
   }
 
   let gegevens;
