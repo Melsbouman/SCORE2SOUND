@@ -3,9 +3,10 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV AUDIVERIS=/opt/audiveris-pakket/opt/audiveris/bin/Audiveris
 ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
+ENV JAVA_TOOL_OPTIONS=-Djava.awt.headless=true
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates curl gnupg openjdk-17-jre-headless tesseract-ocr \
+    && apt-get install -y --no-install-recommends ca-certificates curl gnupg openjdk-17-jre-headless tesseract-ocr libgtk-3-0 libxtst6 libxrender1 \
     && install -d -m 0755 /etc/apt/keyrings \
     && curl -fSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
     && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_24.x nodistro main" > /etc/apt/sources.list.d/nodesource.list \

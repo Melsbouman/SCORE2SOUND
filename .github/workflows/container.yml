@@ -15,7 +15,7 @@ jobs:
       - name: Build image
         run: docker build --tag score2sound:test .
       - name: Check Audiveris
-        run: docker run --rm score2sound:test sh -c '"$AUDIVERIS" -help'
+        run: docker run --rm score2sound:test sh -c '"$AUDIVERIS" -batch -help'
       - name: Check container endpoints
         run: |
           docker run --detach --name score2sound-test --publish 5175:5175 score2sound:test
