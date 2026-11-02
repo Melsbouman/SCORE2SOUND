@@ -259,7 +259,25 @@ main:has(#weergave g.measure) #hulp { display: none; }
 }
 .algemene-foutmelding p { flex: 1 1 16em; margin: 0; }
 .algemene-foutmelding__knoppen { display: flex; flex-wrap: wrap; gap: var(--ruimte-2); }
-:focus-visible { outline: 3px solid var(--kleur-accent); outline-offset: 2px; }
+:focus-visible {
+  outline: 3px solid #000000;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px #ffffff;
+}
+
+.sprong {
+  position: fixed;
+  top: var(--ruimte-2);
+  left: var(--ruimte-2);
+  z-index: 40;
+  padding: var(--ruimte-2) var(--ruimte-3);
+  color: var(--kleur-tekst);
+  background: var(--kleur-vlak);
+  border: 1px solid var(--kleur-lijn);
+  border-radius: var(--hoek);
+  transform: translateY(calc(-100% - var(--ruimte-2)));
+}
+.sprong:focus { transform: translateY(0); }
 
 @media (min-width: 1000px) {
   .werkvlak {
@@ -364,7 +382,13 @@ select, input[type="text"], input[type="number"] { font: inherit; color: var(--k
 #mixer { max-height: 420px; overflow-y: auto; }
 #meldingen { max-height: 420px; overflow-y: auto; }
 #upload progress { height: 10px; accent-color: var(--kleur-accent); }
-@media (prefers-reduced-motion: reduce) { .knop { transition: none; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
 
 @media print {
   .kop, #upload, #projecten, #editor, #origineel, #corrigeren, #speler, #mixer, #bewerken, #meldingen, #export { display: none !important; }
