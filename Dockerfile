@@ -36,4 +36,5 @@ RUN mkdir -p /app/public/klankbank && chown node:node /app/public/klankbank
 USER node
 EXPOSE 5175
 VOLUME ["/app/public/klankbank"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 CMD curl --fail --silent http://localhost:5175/api/gezond || exit 1
 CMD ["node", "server.mjs"]
