@@ -126,14 +126,14 @@ function schrijfNotations(element, markering = {}) {
 }
 
 function schrijfNoot(element, meerdereBalken, partij, maat, weergave, markering, verborgen) {
-  const info = duurInfo(element.duur);
-  let inhoud = element.akkoord ? leeg('chord') : '';
+  const info = element.voorslag ? { type: 'eighth', punten: 0, triool: false } : duurInfo(element.duur);
+  let inhoud = element.voorslag ? leeg('grace', element.voorslag.schuin ? { slash: 'yes' } : {}) : element.akkoord ? leeg('chord') : '';
   if (element.soort === 'rust') inhoud += leeg('rest', element.heleMaat ? { measure: 'yes' } : {});
   else {
     const toon = element.toonhoogte;
     inhoud += tag('pitch', tag('step', esc(toon.stap)) + (toon.alter ? tag('alter', toon.alter) : '') + tag('octave', toon.octaaf));
   }
-  inhoud += tag('duration', element.duur);
+  if (!element.voorslag) inhoud += tag('duration', element.duur);
   if (element.overbinding?.eind) inhoud += leeg('tie', { type: 'stop' });
   if (element.overbinding?.begin) inhoud += leeg('tie', { type: 'start' });
   inhoud += tag('voice', element.stem);
@@ -161,12 +161,12 @@ function schrijfStemmen(maat, partij, weergave) {
   let xml = '';
   stemmen.forEach((stem, index) => {
     let positie = 0;
-    const gesorteerd = elementen.filter((item) => item.stem === stem).sort((a, b) => a.start - b.start || Number(a.akkoord) - Number(b.akkoord));
+    const gesorteerd = elementen.filter((item) => item.stem === stem).sort((a, b) => a.start - b.start || Number(Boolean(b.voorslag)) - Number(Boolean(a.voorslag)) || Number(a.akkoord) - Number(b.akkoord));
     const markeringen = tupletMarkeringen(gesorteerd);
     for (const element of gesorteerd) {
-      if (!element.akkoord && element.start > positie) xml += tag('forward', tag('duration', element.start - positie));
+      if (!element.voorslag && !element.akkoord && element.start > positie) xml += tag('forward', tag('duration', element.start - positie));
       xml += schrijfNoot(element, balken > 1, partij, maat, weergave, markeringen.get(element), maat.verborgen);
-      if (!element.akkoord) positie = Math.max(positie, element.start + element.duur);
+      if (!element.voorslag && !element.akkoord) positie = Math.max(positie, element.start + element.duur);
     }
     if (index < stemmen.length - 1 && positie > 0) xml += tag('backup', tag('duration', positie));
   });
