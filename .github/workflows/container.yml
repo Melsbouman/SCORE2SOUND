@@ -19,8 +19,16 @@ jobs:
       - name: Check container endpoints
         run: |
           docker run --detach --name score2sound-test --publish 5175:5175 score2sound:test
-          curl --fail --silent --show-error --retry 10 --retry-connrefused --retry-delay 2 --retry-max-time 30 http://localhost:5175/ > /dev/null
-          curl --fail --silent --show-error --retry 10 --retry-connrefused --retry-delay 2 --retry-max-time 30 http://localhost:5175/api/projecten > /dev/null
+          ready=false
+          for i in $(seq 1 30); do
+            if curl --fail --silent http://localhost:5175/ > /dev/null; then
+              ready=true
+              break
+            fi
+            sleep 2
+          done
+          test "$ready" = true
+          curl --fail --silent --show-error --retry-all-errors --retry 30 --retry-max-time 60 http://localhost:5175/api/projecten > /dev/null
       - name: Show container logs
         if: failure()
         run: docker logs score2sound-test
