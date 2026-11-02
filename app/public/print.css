@@ -1,0 +1,28 @@
+@media print {
+  body::before {
+    content: 'SCORE2SOUND';
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-30deg);
+    font-size: 7rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    color: rgba(0, 0, 0, .09);
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  #lint,
+  .lint,
+  #hulp,
+  #onzeker,
+  #versies,
+  #speler,
+  #tempo,
+  #mixer,
+  .origineel__knoppen {
+    display: none !important;
+  }
+}
