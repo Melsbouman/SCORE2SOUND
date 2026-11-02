@@ -18,6 +18,23 @@ SCRIPT="${AIFLOW_RUNNER:-$DIR/werkpakket.sh}"
 GH="${GH:-/c/Program Files/GitHub CLI/gh.exe}"
 R="${AIFLOW_REPO:-Melsbouman/SCORE2SOUND}"
 KLOON="${AIFLOW_KLOON:-/c/Users/mels1/SCORE2SOUND-agent}"
+STATUS="${AIFLOW_STATUS:-$HOME/.aiflow-status}"
+mkdir -p "$STATUS"
+
+action_opnieuw() { # $1 issue: telt mislukte Actions en zet de taak na drie pogingen vast
+  local issue="$1" bestand="$STATUS/$1.pogingen" pogingen=0
+  [ -f "$bestand" ] && read -r pogingen < "$bestand"
+  pogingen=$((pogingen + 1))
+  printf '%s\n' "$pogingen" > "$bestand"
+  if [ "$pogingen" -lt 3 ]; then
+    echo "Action voor #$issue faalde (poging $pogingen van 3), dezelfde taak gaat opnieuw"
+    return 0
+  fi
+  "$GH" issue comment "$issue" -R "$R" --body "De Action bleef falen na 3 pogingen" >/dev/null 2>&1
+  "$GH" issue edit "$issue" -R "$R" --add-label agent-vast --remove-label agent-terug --remove-label agent-ready --remove-label agent-bezig --remove-label agent-review >/dev/null 2>&1
+  echo "#${issue} vast: De Action bleef falen na 3 pogingen"
+  return 1
+}
 
 kloon_klaar() { # $1 pad: maakt een kloon naast de gewone kloon als die er nog niet is
   [ -d "$1/.git" ] || git clone -q "$(git -C "$KLOON" remote get-url origin)" "$1" || { echo "kloon maken mislukt: $1"; return 1; }
@@ -48,8 +65,16 @@ if [ "$N" -le 1 ]; then
   vastgelopen=0
   achterElkaar=0
   while true; do
-    bash "$SCRIPT"
+    ACTION_MELDING="$(mktemp)"
+    AIFLOW_ACTION_MELDING="$ACTION_MELDING" bash "$SCRIPT"
     code=$?
+    if [ "$code" -eq 11 ]; then
+      issue=$(cat "$ACTION_MELDING")
+      rm -f "$ACTION_MELDING"
+      if ! action_opnieuw "$issue"; then vastgelopen=$((vastgelopen + 1)); fi
+      continue
+    fi
+    rm -f "$ACTION_MELDING"
     if [ "$code" -eq 10 ]; then
       # De labelzoekfunctie van GitHub loopt een paar seconden achter: een taak die net klaar is, kan nog als
       # bezig gelden. Staan er nog taken klaar (voor deze wachtrij), wacht dan even en probeer het opnieuw (hooguit drie keer).
@@ -121,7 +146,7 @@ while true; do
     k=$((k + 1))
     KL="${KLOON}-werker-$k"
     kloon_klaar "$KL" || exit 1
-    AIFLOW_ISSUE="$nr" AIFLOW_KLOON="$KL" bash "$SCRIPT" > "$WERK/werker-$nr.log" 2>&1 &
+    AIFLOW_ISSUE="$nr" AIFLOW_KLOON="$KL" AIFLOW_ACTION_MELDING="$WERK/action-$nr" bash "$SCRIPT" > "$WERK/werker-$nr.log" 2>&1 &
     pids="$pids $!:$nr"
   done
   fout=0
@@ -129,7 +154,13 @@ while true; do
     pid="${pn%%:*}"; nr="${pn#*:}"
     wait "$pid"; code=$?
     sed "s/^/#$nr: /" "$WERK/werker-$nr.log"
-    if [ "$code" -eq 0 ]; then aantal=$((aantal + 1)); else fout=1; fi
+    if [ "$code" -eq 0 ]; then
+      aantal=$((aantal + 1))
+    elif [ "$code" -eq 11 ]; then
+      action_opnieuw "$nr" || true
+    else
+      fout=1
+    fi
   done
   if [ "$fout" -ne 0 ]; then echo "gestopt: minstens een taak liep vast na $aantal afgeronde taak/taken"; exit 1; fi
 done
