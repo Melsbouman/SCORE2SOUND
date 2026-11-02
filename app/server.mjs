@@ -62,11 +62,20 @@ const SOORTEN = {
 };
 
 // Alleen eigen bestanden, geen inline scripts. Verovio heeft WebAssembly nodig, de speler een audio-worklet.
-const KOPPEN = {
+const KOPPEN = new Proxy({
+  "X-Frame-Options": "DENY",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+  "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
   'Content-Security-Policy': "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; worker-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'none'",
   'X-Content-Type-Options': 'nosniff',
   'Referrer-Policy': 'no-referrer',
-};
+}, {
+  ownKeys(koppen) {
+    return Reflect.ownKeys(koppen).filter((naam) =>
+      naam !== "Strict-Transport-Security" || process.env.SCORE2SOUND_HTTPS === "aan"
+    );
+  },
+});
 
 function stuur(antwoord, status, body, soort = 'application/json; charset=utf-8', extra = {}) {
   antwoord.writeHead(status, { ...KOPPEN, 'Content-Type': soort, ...extra });
