@@ -349,3 +349,4 @@ function verbeterTekstaanwijzingen(project) {
   return project;
 }
 
+import { voegSplitsingenSamen } from './samenvoegen.mjs';
