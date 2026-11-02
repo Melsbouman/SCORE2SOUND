@@ -416,3 +416,22 @@ select, input[type="text"], input[type="number"] { font: inherit; color: var(--k
     grid-column: 1 / -1;
   }
 }
+
+main:has(#weergave g.measure) #upload {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  min-height: 0;
+}
+
+main:has(#weergave g.measure) #upload h2,
+main:has(#weergave g.measure) #upload p {
+  display: none;
+}
+
+main:has(#weergave g.measure) #upload label.knop,
+main:has(#weergave g.measure) #upload label:not(.knop) {
+  margin-top: 0;
+}
