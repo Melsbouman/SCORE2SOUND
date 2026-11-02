@@ -55,6 +55,14 @@ export function leesAttributen(attributesKnoop, huidig) {
   return stand;
 }
 
+export function leesMaatrust(attributesKnoop) {
+  for (const stijl of kinderen(attributesKnoop, 'measure-style')) {
+    const aantal = getal(kind(stijl, 'multiple-rest'));
+    if (aantal !== null) return aantal;
+  }
+  return null;
+}
+
 function aanwijzing(start, type, waarde) {
   return { soort: 'aanwijzing', start, type, waarde, zekerheid: 1 };
 }

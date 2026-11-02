@@ -66,6 +66,7 @@ Een instrument in C heeft `{ chromatisch: 0, diatonisch: 0 }`. Een bugel in Bes:
   elementen: [Element, ...],     // gesorteerd op start, dan op stem
 }
 ```
+`maatrust: N` staat op de eerste maat van een meermaats-rust, en de N-1 volgende maten hebben `verborgen: true`; alleen als ze er zijn.
 `maatsoort`, `toonsoort` en `sleutels` staan in **elke** maat, ook als ze niet veranderen. Dan hoeft geen enkel onderdeel terug te zoeken.
 
 ### Sleutel
