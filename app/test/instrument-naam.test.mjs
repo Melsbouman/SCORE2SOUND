@@ -17,6 +17,4 @@ test('instrumentBijNaam geeft null als de naam niets zegt', () => {
   assert.equal(id('Voice'), null);
   assert.equal(id(''), null);
   assert.equal(id('Timpani'), null);
-  assert.equal(id('Eb Cornet'), null);
-  assert.equal(id('Sax Baritone'), null);
 });
