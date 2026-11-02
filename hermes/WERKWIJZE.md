@@ -52,6 +52,8 @@ Elke uitvoerder werkt in een eigen kloon (`C:/Users/mels1/SCORE2SOUND-agent-code
 
 Faalt na het openen van een PR de GitHub Action, dan zet het script de laatste foutregels als PR-commentaar met `De Action faalt:`, zet het issue op `agent-terug` en geeft dezelfde taak opnieuw aan dezelfde agent. Na drie mislukte Actions voor hetzelfde issue zet `werkpakketten.sh` het issue op `agent-vast` met de reden `De Action bleef falen na 3 pogingen` en gaat de rest van de wachtrij verder.
 
+Loopt een taak na de herstelrondes vast bij Codex of Copilot, dan zet `werkpakketten.sh` hem één keer over naar de andere uitvoerder (Hermes gaat naar Copilot), met een commentaar en statusbestand `~/.aiflow-status/<issue>.overgezet`. Bij `--alle` start het script de nieuwe wachtrij opnieuw als de oorspronkelijke uitvoerderswachtrijen klaar zijn; loopt de tweede poging ook vast, dan blijft de taak `agent-vast` voor Claude.
+
 Wat `werkpakket.sh` doet, in volgorde:
 1. Kiest de taak uit zijn wachtrij: eerst `agent-terug` (afgekeurde PR), anders het oudste `agent-ready`, en sla taken over die bestanden delen met lopend werk. Stopt als de wachtrij al een `agent-bezig` heeft.
 2. Zet de eigen kloon schoon, maakt de branch `agent/<nummer>-<naam>` en zet `agent-bezig`.

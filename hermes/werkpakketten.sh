@@ -36,6 +36,46 @@ action_opnieuw() { # $1 issue: telt mislukte Actions en zet de taak na drie pogi
   return 1
 }
 
+zet_vast_over() { # Zet vastgelopen taken hooguit één keer over naar een andere uitvoerder.
+  local issues issue bron doel naam marker
+  issues=$("$GH" issue list -R "$R" --state open --label agent-vast --limit 100 --json number,labels 2>/dev/null) || {
+    echo "vastgelopen taken ophalen mislukt" >&2
+    return 1
+  }
+  while read -r issue doel; do
+    [ -n "$issue" ] || continue
+    marker="$STATUS/$issue.overgezet"
+    [ -e "$marker" ] && continue
+    bron="$doel"
+    case "$bron" in
+      codex) doel=copilot; naam=Copilot ;;
+      copilot) doel=codex; naam=Codex ;;
+      hermes) doel=copilot; naam=Copilot ;;
+      *) continue ;;
+    esac
+    if ! (set -o noclobber; : > "$marker") 2>/dev/null; then continue; fi
+    if ! "$GH" issue edit "$issue" -R "$R" --remove-label agent-vast --remove-label "agent-$bron" --add-label "agent-$doel" --add-label agent-ready >/dev/null 2>&1; then
+      rm -f "$marker"
+      echo "taak #$issue overzetten naar $naam mislukt" >&2
+      continue
+    fi
+    printf '%s\n' "$doel" > "$marker"
+    if ! "$GH" issue comment "$issue" -R "$R" --body "Overgezet naar $naam na een mislukte poging." >/dev/null 2>&1; then
+      echo "commentaar plaatsen bij overgezette taak #$issue mislukt" >&2
+    fi
+    echo "$doel"
+  done <<EOF
+$(printf '%s' "$issues" | python -I -X utf8 -c '
+import json,sys
+for issue in json.load(sys.stdin):
+    labels={label["name"] for label in issue["labels"]}
+    uitvoerder=next((naam for naam in ("codex","copilot","hermes") if "agent-"+naam in labels), "")
+    if uitvoerder:
+        print(issue["number"], uitvoerder)
+')
+EOF
+}
+
 kloon_klaar() { # $1 pad: maakt een kloon naast de gewone kloon als die er nog niet is
   [ -d "$1/.git" ] || git clone -q "$(git -C "$KLOON" remote get-url origin)" "$1" || { echo "kloon maken mislukt: $1"; return 1; }
 }
@@ -53,6 +93,14 @@ if [ "${1:-}" = "--alle" ]; then
     wait "${pu%%:*}" || fout=1
     sed "s/^/[${pu#*:}] /" "$WERK/${pu#*:}.log"
   done
+  while true; do
+    overgezet="$(zet_vast_over)" || { fout=1; break; }
+    [ -n "$overgezet" ] || break
+    for u in $overgezet; do
+      echo "wachtrij $u opnieuw gestart voor een overgezette taak"
+      AIFLOW_ALLEEN="$u" AIFLOW_KLOON="$KLOON-$u" bash "$0" || fout=1
+    done
+  done
   exit "$fout"
 fi
 
@@ -68,6 +116,7 @@ if [ "$N" -le 1 ]; then
     ACTION_MELDING="$(mktemp)"
     AIFLOW_ACTION_MELDING="$ACTION_MELDING" bash "$SCRIPT"
     code=$?
+    if [ -z "${AIFLOW_ALLEEN:-}" ]; then zet_vast_over >/dev/null || true; fi
     if [ "$code" -eq 11 ]; then
       issue=$(cat "$ACTION_MELDING")
       rm -f "$ACTION_MELDING"
