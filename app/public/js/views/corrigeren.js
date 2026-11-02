@@ -132,7 +132,7 @@ export function start(app) {
     aantal.className = 'zacht';
     aantal.textContent = onzeker.length === 0
       ? 'Geen onzekere noten meer.'
-      : `${onzeker.length} onzekere noten`;
+      : `${onzeker.length} onzekere ${onzeker.length === 1 ? 'noot' : 'noten'}`;
     vlak.replaceChildren(kop, aantal);
 
     vlak.append(maakKnoppen([
@@ -210,6 +210,7 @@ export function start(app) {
   }
 
   document.addEventListener('keydown', (gebeurtenis) => {
+    if (gebeurtenis.key === 'Enter' && gebeurtenis.target.matches('button')) return;
     if (gebeurtenis.target.matches('input, select, textarea')) return;
     const partituur = app.stand.partituur;
     if (!partituur) return;

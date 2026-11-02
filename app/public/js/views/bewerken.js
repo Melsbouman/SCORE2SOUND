@@ -158,9 +158,11 @@ export function start(app) {
       } else {
         const samengevoegd = voegSamen([app.stand.partituur, resultaat.partituur]);
         const aantal = resultaat.partituur.partijen.length;
-        const status = `${aantal} partijen toegevoegd uit ${bestand.name}.${
+        const status = `${aantal} ${aantal === 1 ? 'partij' : 'partijen'} toegevoegd uit ${bestand.name}.${
           samengevoegd.meldingen.length
-            ? ` Let op: ${samengevoegd.meldingen.length} meldingen, zie Meldingen.`
+            ? ` Let op: ${samengevoegd.meldingen.length} ${
+              samengevoegd.meldingen.length === 1 ? 'melding' : 'meldingen'
+            }, zie Meldingen.`
             : ''
         }`;
         toonStatus(status);
