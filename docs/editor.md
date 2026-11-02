@@ -38,3 +38,9 @@ Waarom een noot rood is
 - Ongzekere noten worden getoond in het corrigeren-venster.
 - Klik op Vorige onzekere / Volgende onzekere om tussen onzekere noten te schakelen.
 - Na bewerking of goedkeuren verdwijnt de onzekerheid.
+
+## Lint, selectie, titelgegevens en PDF
+- Boven de partituur staat een lint met tabbladen: Bestand, Start, Noten, Partij en Weergave. Het afspelen en het tempo staan in Start, de knoppen voor noten in Noten.
+- Tik een noot aan om hem te kiezen (ook een klik vlak ernaast telt). Tik op een lege plek in een maat om de maat te kiezen.
+- Onder Bestand pas je de titel, de componist en de arrangeur aan.
+- PDF downloaden opent het afdrukvenster; kies Opslaan als PDF. Elke pagina krijgt het watermerk SCORE2SOUND.
