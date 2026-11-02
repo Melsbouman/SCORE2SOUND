@@ -36,6 +36,11 @@ export function start(app) {
     musicXmlKnop.className = 'knop'
     musicXmlKnop.textContent = 'MusicXML downloaden'
 
+    const partijenZipKnop = document.createElement('button')
+    partijenZipKnop.type = 'button'
+    partijenZipKnop.className = 'knop'
+    partijenZipKnop.textContent = 'Alle partijen (zip)'
+
     const midiKnop = document.createElement('button')
     midiKnop.type = 'button'
     midiKnop.className = 'knop'
@@ -77,6 +82,29 @@ export function start(app) {
 
     partijKeuze.addEventListener('change', () => {
       partijAudioKnop.disabled = !partijKeuze.value
+    })
+
+    partijenZipKnop.addEventListener('click', async () => {
+      partijenZipKnop.disabled = true
+      status.textContent = 'De partijen worden geëxporteerd. Dit kan even duren.'
+      try {
+        const [{ partijUitnemen }, { naarMusicXML }, { maakZip }] = await Promise.all([
+          import('/src/model/partijen.mjs'),
+          import('/src/musicxml/schrijven.mjs'),
+          import('/src/model/zipschrijven.mjs'),
+        ])
+        const bestanden = partituur.partijen.map((partij, index) => ({
+          naam: `${String(index + 1).padStart(2, '0')} - ${partij.naam.replace(/[/:]/g, '-')}.musicxml`,
+          inhoud: naarMusicXML(partijUitnemen(partituur, partij.id)),
+        }))
+        const blob = new Blob([maakZip(bestanden)], { type: 'application/zip' })
+        const naam = bestandsnaam({ titel: `${partituur.titel?.trim() || 'partituur'} - partijen` }, 'zip')
+        download(blob, naam)
+        status.textContent = `Gedownload: ${naam}`
+      } catch {
+        status.textContent = 'Exporteren lukte niet. Probeer het opnieuw.'
+      }
+      partijenZipKnop.disabled = false
     })
 
     musicXmlKnop.addEventListener('click', async () => {
@@ -142,6 +170,6 @@ export function start(app) {
       partijAudioKnop.disabled = false
     })
 
-    vlak.append(kop, musicXmlKnop, midiKnop, audioKnop, partijKeuze, partijAudioKnop, printKnop, status)
+    vlak.append(kop, musicXmlKnop, partijenZipKnop, midiKnop, audioKnop, partijKeuze, partijAudioKnop, printKnop, status)
   })
 }
