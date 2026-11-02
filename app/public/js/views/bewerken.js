@@ -2,7 +2,7 @@
 // Wordt gebouwd in fase 3 van werkpakketten/plannen/2026-10-29-score2sound-app.md.
 import { INSTRUMENTEN } from '/src/model/instrumenten.mjs';
 import { transponeerPartij } from '/src/model/transponeren.mjs';
-import { partijUitnemen, voegSamen } from '/src/model/partijen.mjs';
+import { hernoemPartij, partijUitnemen, voegSamen } from '/src/model/partijen.mjs';
 
 export function start(app) {
   const vlak = document.getElementById('bewerken');
@@ -44,6 +44,28 @@ export function start(app) {
     const partijSelect = maakSelect('Partij', partituur.partijen);
     const instrumentSelect = maakSelect('Naar instrument', INSTRUMENTEN);
     vlak.append(partijSelect.label, instrumentSelect.label);
+
+    const naamLabel = document.createElement('label');
+    const naamTekst = document.createElement('span');
+    const naamInvoer = document.createElement('input');
+    naamTekst.textContent = 'Nieuwe naam ';
+    naamInvoer.type = 'text';
+    naamLabel.append(naamTekst, naamInvoer);
+    const hernoem = document.createElement('button');
+    hernoem.type = 'button';
+    hernoem.className = 'knop';
+    hernoem.textContent = 'Naam wijzigen';
+    hernoem.addEventListener('click', () => {
+      try {
+        const nieuw = hernoemPartij(partituur, partijSelect.select.value, naamInvoer.value);
+        const naam = nieuw.partijen.find((item) => item.id === partijSelect.select.value).naam;
+        app.zet({ partituur: nieuw });
+        toonStatus(`De partij heet nu ${naam}.`);
+      } catch (fout) {
+        toonStatus(`Dat lukte niet: ${fout.message}`);
+      }
+    });
+    vlak.append(naamLabel, hernoem);
 
     const knoppen = document.createElement('div');
     const omzetten = document.createElement('button');

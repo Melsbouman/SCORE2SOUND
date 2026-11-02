@@ -1,3 +1,17 @@
+import { instrumentBijNaam } from './instrumenten.mjs';
+
+export function hernoemPartij(partituur, id, naam) {
+  const schoon = naam.trim();
+  if (!schoon) throw new Error('Geef de partij een naam.');
+  const nieuw = structuredClone(partituur);
+  const partij = nieuw.partijen.find((item) => item.id === id);
+  if (!partij) throw new Error('Onbekende partij.');
+  partij.naam = schoon;
+  const instrument = instrumentBijNaam(schoon);
+  if (instrument) Object.assign(partij.instrument, { midiProgramma: instrument.midiProgramma, transpositie: instrument.transpositie });
+  return nieuw;
+}
+
 export function partijUitnemen(partituur, id) {
   const partij = partituur.partijen.find((item) => item.id === id);
   if (!partij) {
