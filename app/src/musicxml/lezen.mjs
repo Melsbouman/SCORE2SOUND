@@ -93,12 +93,13 @@ function leesMaat(maat, index, voortgang) {
         elementen.push(aanwijzing);
       }
       if (richting.tempo !== null && tempo === null) tempo = richting.tempo;
-    } else if (knoop.naam === 'note' && !kind(knoop, 'grace') && !kind(knoop, 'cue')) {
-      const duur = tikken(knoop);
+    } else if (knoop.naam === 'note' && !kind(knoop, 'cue')) {
+      const grace = kind(knoop, 'grace');
+      const duur = grace ? { tikken: 0, exact: true } : tikken(knoop);
       const akkoord = Boolean(kind(knoop, 'chord'));
-      const start = akkoord ? vorigeStart : cursor;
-      elementen.push(leesNoot(knoop, start, duur, akkoord, voortgang.stand));
-      if (!akkoord) {
+      const start = grace ? cursor : akkoord ? vorigeStart : cursor;
+      elementen.push(leesNoot(knoop, start, duur, akkoord, voortgang.stand, grace ? grace.attr.slash === 'yes' : null));
+      if (!akkoord && !grace) {
         vorigeStart = start;
         cursor = start + duur.tikken;
       }
@@ -125,7 +126,7 @@ function leesMaat(maat, index, voortgang) {
   };
 }
 
-function leesNoot(knoop, start, duur, akkoord, stand) {
+function leesNoot(knoop, start, duur, akkoord, stand, schuinVoorslag = null) {
   const gemeen = {
     start,
     stem: getal(knoop, 'voice', 1),
@@ -152,6 +153,7 @@ function leesNoot(knoop, start, duur, akkoord, stand) {
     articulaties: notaties.articulaties,
     legato: notaties.legato,
     versiering: notaties.versiering,
+    ...(schuinVoorslag !== null ? { voorslag: { schuin: schuinVoorslag } } : {}),
     zekerheid,
     ...(balk ? { balk } : {}),
     ...details,

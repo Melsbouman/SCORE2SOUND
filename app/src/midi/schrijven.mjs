@@ -153,7 +153,7 @@ function partijSpoor(partij, partijIndex, beginnen, volume) {
         sterkte = STERKTE[element.waarde];
         continue;
       }
-      if (element.soort !== 'noot') continue;
+      if (element.soort !== 'noot' || element.voorslag) continue;
       const toets = naarMidi(element.toonhoogte) + partij.instrument.transpositie.chromatisch;
       const begin = maatBegin + element.start;
       const klinkendeDuur = element.articulaties.includes('staccatissimo')

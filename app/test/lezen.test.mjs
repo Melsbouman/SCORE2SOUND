@@ -106,9 +106,10 @@ test('akkoorden, voorslagen en divisions die niet deelbaar zijn', () => {
       <note><pitch><step>F</step><alter>1</alter><octave>5</octave></pitch><duration>1</duration><voice>1</voice></note>
     </measure></part></score-partwise>`);
   const elementen = p.partijen[0].maten[0].elementen;
-  assert.equal(elementen.length, 5, 'de voorslag telt niet mee');
+  assert.equal(elementen.length, 6);
+  assert.deepEqual(elementen[0].voorslag, { schuin: false });
   assert.deepEqual(elementen.map((n) => [naam(n), n.start, n.duur, n.akkoord]), [
-    ['C5', 0, 480, false], ['E5', 0, 480, true], ['D5', 480, 160, false], ['E5', 640, 160, false], ['F#5', 800, 160, false],
+    ['B4', 0, 0, false], ['C5', 0, 480, false], ['E5', 0, 480, true], ['D5', 480, 160, false], ['E5', 640, 160, false], ['F#5', 800, 160, false],
   ]);
   assert.equal(p.titel, '');
   assert.deepEqual(p.partijen[0].instrument, { midiProgramma: 0, transpositie: { chromatisch: 0, diatonisch: 0 } });
