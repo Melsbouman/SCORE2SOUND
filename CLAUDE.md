@@ -10,6 +10,8 @@ Geeft Mels een idee, volg dan de skill `idee` (`.claude/skills/idee/SKILL.md`): 
 - De opzet en de keuzes staan in `hermes/ARCHITECTUUR.md`. De werkwijze, met het commando per stap, staat in `hermes/WERKWIJZE.md`. Lees die voor je taken klaarzet of PR's controleert.
 - De mod "Agents" (`.claude/skills/agents`) toont de workflow per taak in een paneel: `/agents-paneel`.
 - Een nachtplan loopt tot een eindtijd, niet tot het plan af is: volg de skill `nachtplan` (`.claude/skills/nachtplan/SKILL.md`), met de werkvoorraad in `werkpakketten/voorraad.md`.
+- **Er staan altijd genoeg taken klaar.** Zijn er minder dan 6 open taken, dan maakt Claude zonder goedkeuring van Mels zelf 6 tot 8 taken bij (uit `werkpakketten/voorraad.md`, het plan, of zelf verzonnen verbeteringen) en start de wachtrijen. Alleen wat geld, een server of accounts van Mels vraagt blijft voor hem.
+- De hartslag (`bash hermes/hartslag.sh`, elk uur) bewaakt dit en meldt `ACTIE NODIG: weinig taken`. Claude maakt de taken in woorden, met voorbeelden en controles, en schrijft zelf geen code.
 
 ## Taken schrijven
 Elke taak is klein genoeg voor een goedkoper model: één doel, de exacte bestanden, en controleerbare acceptatiecriteria. Taken die dezelfde bestanden raken lopen nooit tegelijk.
