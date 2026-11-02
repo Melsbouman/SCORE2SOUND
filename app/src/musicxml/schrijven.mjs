@@ -64,12 +64,48 @@ function schrijfAanwijzing(aanwijzing) {
     type = leeg('wedge', { type: waarde });
   } else if (aanwijzing.type === 'tekst') {
     type = tag('words', esc(aanwijzing.waarde));
+  } else if (aanwijzing.type === 'letter') {
+    type = tag('rehearsal', esc(aanwijzing.waarde), { enclosure: 'square' });
   }
   return tag('direction', tag('direction-type', type) + offset + sound);
 }
 
-function schrijfNotations(element) {
+// Waar een triool begint en eindigt. Staat dat niet in het bestand, dan begint hij bij de eerste noot en eindigt hij bij de laatste.
+function tupletMarkeringen(elementen) {
+  const uit = new Map();
+  let open = false;
+  let vorige = null;
+  const sluit = () => {
+    if (open && vorige) uit.set(vorige, { ...uit.get(vorige), stop: true });
+    open = false;
+  };
+  for (const element of elementen) {
+    if (element.akkoord) continue;
+    if (!element.tuplet) {
+      sluit();
+      vorige = element;
+      continue;
+    }
+    if (element.tuplet.begin) sluit();
+    if (element.tuplet.begin || !open) {
+      uit.set(element, { start: true });
+      open = true;
+    }
+    if (element.tuplet.eind) {
+      uit.set(element, { ...uit.get(element), stop: true });
+      open = false;
+    }
+    vorige = element;
+  }
+  sluit();
+  return uit;
+}
+
+function schrijfNotations(element, markering = {}) {
   let inhoud = '';
+  if (markering.start) inhoud += leeg('tuplet', { type: 'start', number: 1, placement: 'above', bracket: 'yes' });
+  if (markering.stop) inhoud += leeg('tuplet', { type: 'stop', number: 1 });
+  if (element.fermate) inhoud += leeg('fermata', { type: 'upright' });
   if (element.overbinding?.eind) inhoud += leeg('tied', { type: 'stop' });
   if (element.overbinding?.begin) inhoud += leeg('tied', { type: 'start' });
   if (element.legato?.eind) inhoud += leeg('slur', { type: 'stop', number: 1 });
@@ -82,7 +118,7 @@ function schrijfNotations(element) {
   return inhoud ? tag('notations', inhoud) : '';
 }
 
-function schrijfNoot(element, meerdereBalken, partij, maat, weergave) {
+function schrijfNoot(element, meerdereBalken, partij, maat, weergave, markering) {
   const info = duurInfo(element.duur);
   let inhoud = element.akkoord ? leeg('chord') : '';
   if (element.soort === 'rust') inhoud += leeg('rest', element.heleMaat ? { measure: 'yes' } : {});
@@ -96,9 +132,13 @@ function schrijfNoot(element, meerdereBalken, partij, maat, weergave) {
   inhoud += tag('voice', element.stem);
   if (!(element.soort === 'rust' && element.heleMaat) && info.type) inhoud += tag('type', info.type);
   inhoud += leeg('dot').repeat(info.punten);
-  if (info.triool) inhoud += tag('time-modification', tag('actual-notes', 3) + tag('normal-notes', 2));
+  const tuplet = element.tuplet ?? (info.triool ? { aantal: 3, normaal: 2 } : null);
+  if (tuplet) inhoud += tag('time-modification', tag('actual-notes', tuplet.aantal) + tag('normal-notes', tuplet.normaal));
   if (meerdereBalken) inhoud += tag('staff', element.notenbalk);
-  inhoud += schrijfNotations(element);
+  if (element.balk && ['eighth', '16th', '32nd', '64th'].includes(info.type)) {
+    inhoud += tag('beam', { begin: 'begin', midden: 'continue', eind: 'end' }[element.balk], { number: 1 });
+  }
+  inhoud += schrijfNotations(element, markering);
   const attributen = weergave ? {
     id: `n-${partij.id}-${maat.index}-${maat.elementen.indexOf(element)}`,
     color: element.zekerheid < 0.8 ? '#C0392B' : null,
@@ -113,9 +153,11 @@ function schrijfStemmen(maat, partij, weergave) {
   let xml = '';
   stemmen.forEach((stem, index) => {
     let positie = 0;
-    for (const element of elementen.filter((item) => item.stem === stem).sort((a, b) => a.start - b.start || Number(a.akkoord) - Number(b.akkoord))) {
+    const gesorteerd = elementen.filter((item) => item.stem === stem).sort((a, b) => a.start - b.start || Number(a.akkoord) - Number(b.akkoord));
+    const markeringen = tupletMarkeringen(gesorteerd);
+    for (const element of gesorteerd) {
       if (!element.akkoord && element.start > positie) xml += tag('forward', tag('duration', element.start - positie));
-      xml += schrijfNoot(element, balken > 1, partij, maat, weergave);
+      xml += schrijfNoot(element, balken > 1, partij, maat, weergave, markeringen.get(element));
       if (!element.akkoord) positie = Math.max(positie, element.start + element.duur);
     }
     if (index < stemmen.length - 1 && positie > 0) xml += tag('backup', tag('duration', positie));

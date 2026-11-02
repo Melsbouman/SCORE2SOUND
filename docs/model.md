@@ -103,6 +103,8 @@ plek: { blad: 2, x: 637, y: 979, breedte: 16, hoogte: 14 }
 }
 ```
 
+Een noot of rust kan ook deze velden hebben, alleen als ze op het blad staan: `balk` (`begin`, `midden` of `eind`: de waardestreep van achtsten en korter, niet bij een rust), `tuplet` (`{ aantal: 3, normaal: 2, begin: true, eind: false }` voor een triool) en `fermate` (`true`).
+
 ### Rust
 ```js
 { soort: 'rust', start: 0, duur: 1920, stem: 1, notenbalk: 1, heleMaat: true, zekerheid: 1 }
@@ -110,10 +112,13 @@ plek: { blad: 2, x: 637, y: 979, breedte: 16, hoogte: 14 }
 `heleMaat` is `true` voor een rust die de hele maat vult (in MusicXML `measure="yes"`); de duur is dan de lengte van de maat.
 
 ### Aanwijzing
+
+- `'letter'`: een repetitieletter of -getal in een kader, `waarde` is de tekst zelf, zoals `'A'` of `'104'`.
 ```js
 { soort: 'aanwijzing', start: 0, type: 'dynamiek', waarde: 'mf', zekerheid: 1 }
 ```
 `type` is een van:
+ - \'letter\': een repetitieletter of -getal in een kader, \'waarde\' is de tekst zelf, zoals \'A\' of \'104\'.
 - `'dynamiek'`: `waarde` is `ppp` tot `fff`, `sf`, `sfz` of `fp`;
 - `'crescendo'` of `'decrescendo'`: `waarde` is `'begin'` of `'eind'`;
 - `'tempo'`: `waarde` is kwartnoten per minuut (een getal);
