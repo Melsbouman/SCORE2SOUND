@@ -163,6 +163,9 @@ export function maakServer() {
   return createServer(async (verzoek, antwoord) => {
     try {
       const url = new URL(verzoek.url, 'http://localhost');
+      if (verzoek.method === 'GET' && url.pathname === '/api/gezond') {
+        return stuur(antwoord, 200, { ok: true });
+      }
       const route = API.find(([p]) => url.pathname === p || url.pathname.startsWith(`${p}/`));
       if (route) {
         let gebruiker;
