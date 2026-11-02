@@ -66,6 +66,8 @@ Wat `werkpakket.sh` doet, in volgorde:
 
 Doet de agent niets (limiet op, model faalt), dan neemt een reserve het over: Codex en Copilot vangen elkaar op, en als laatste Hermes met `anthropic/claude-haiku-5.5` via OpenRouter. Een Hermes-taak gaat na het gratis model naar Haiku.
 
+Voor een lokale herkenning van een echte partituur gebruik je `bash hermes/echte-controle.sh <pdf> [paginas]`. Het commando start de app tijdelijk, wacht hooguit 15 minuten en toont de herkenningsstand, partijen, letters, onzekere noten, maten met maatrust en de eerste meldingen; daarna stopt de server. Echte partituren mogen vanwege auteursrecht niet in de repo staan en worden alleen lokaal gebruikt.
+
 ## 5. Labels op een issue
 | Label | Betekenis |
 |---|---|
