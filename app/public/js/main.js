@@ -10,9 +10,10 @@ import * as exporteren from './views/export.js';
 import * as projecten from './views/projecten.js';
 import * as origineel from './views/origineel.js';
 import * as corrigeren from './views/corrigeren.js';
+import * as versies from './views/versies.js';
 
 const app = maakApp();
-const schermen = { upload, weergave, speler, meldingen, mixer, bewerken, exporteren, projecten, origineel, corrigeren };
+const schermen = { upload, weergave, speler, meldingen, mixer, bewerken, exporteren, projecten, origineel, corrigeren, versies };
 
 for (const [naam, scherm] of Object.entries(schermen)) {
   try {
