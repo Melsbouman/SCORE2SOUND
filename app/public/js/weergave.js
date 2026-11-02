@@ -1,7 +1,7 @@
 // Notatie tekenen met Verovio in #weergave.
 // Tekent opnieuw bij een nieuwe partituur (via naarMusicXML uit /src/musicxml/schrijven.mjs) of bij app.meld('musicxml', tekst).
 // Luistert naar 'naar-maat' ({ maat }: markeert en toont die maat) en 'speel-maat' ({ maat } of null: de maat die nu klinkt).
-const schaalVoor = (breedte) => (breedte < 500 ? 70 : 50); // op een telefoon zijn de noten anders te klein.
+const schaalVoor = (breedte) => (breedte < 500 ? 70 : breedte <= 1200 ? 60 : 75); // op een telefoon zijn de noten anders te klein.
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
 let toolkitBelofte = null;
@@ -55,8 +55,8 @@ export function start(app) {
     if (nummer !== tekenNummer) return; // er kwam intussen een nieuwere partituur
     const breedte = Math.max(320, vlak.clientWidth - 48);
     const vasteRegels = window.innerWidth >= 700 && musicxml.includes('new-system=');
-    const schaal = vasteRegels ? 40 : Math.round(schaalVoor(breedte) * zoom);
-    const paginaBreedte = vasteRegels ? 2400 : Math.max(Math.round((breedte * 100) / schaal), Math.round((zoom >= 1 ? 1500 : 1500 / zoom)));
+    const schaal = vasteRegels ? Math.min(100, Math.max(35, Math.round(breedte * 100 / 2400 * zoom))) : Math.round(schaalVoor(breedte) * zoom);
+    const paginaBreedte = vasteRegels ? 2400 : Math.round((breedte * 100) / schaal);
     tk.setOptions({
       scale: schaal,
       pageWidth: paginaBreedte,
@@ -132,7 +132,7 @@ export function start(app) {
     for (let pagina = 1; pagina <= tk.getPageCount(); pagina++) {
       const svg = new DOMParser().parseFromString(tk.renderToSVG(pagina), 'image/svg+xml').documentElement;
       svg.classList.add('bladmuziek__pagina');
-      svg.style.width = vasteRegels ? `${Math.round(zoom * 100)}%` : `${Math.round((paginaBreedte * schaal) / 100)}px`;
+      svg.style.width = vasteRegels ? '100%' : `${Math.round((paginaBreedte * schaal) / 100)}px`;
       blad.append(document.importNode(svg, true));
     }
     vlak.replaceChildren(blad);
