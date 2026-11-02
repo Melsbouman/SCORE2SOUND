@@ -7,6 +7,22 @@ export function start(app) {
   const uitleg = document.createElement('p');
   uitleg.textContent = 'Sleep een PDF, scan, foto of MusicXML-bestand hierheen, of kies een bestand.';
 
+  const stappen = document.createElement('ol');
+  stappen.className = 'zacht';
+  for (const tekst of [
+    'Open een PDF, scan, foto of MusicXML-bestand.',
+    'Bekijk de noten naast het origineel en corrigeer wat rood is.',
+    'Luister, oefen per partij en exporteer.',
+  ]) {
+    const stap = document.createElement('li');
+    stap.textContent = tekst;
+    stappen.append(stap);
+  }
+  stappen.hidden = Boolean(app.stand.partituur);
+  app.op('partituur', (partituur) => {
+    stappen.hidden = Boolean(partituur);
+  });
+
   const knop = document.createElement('button');
   knop.type = 'button';
   knop.className = 'knop knop--hoofd';
@@ -29,7 +45,7 @@ export function start(app) {
   status.className = 'zacht';
   status.setAttribute('role', 'status');
 
-  vlak.replaceChildren(kop, uitleg, knop, paginaLabel, invoer, status);
+  vlak.replaceChildren(kop, uitleg, stappen, knop, paginaLabel, invoer, status);
 
   knop.addEventListener('click', () => invoer.click());
 
