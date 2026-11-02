@@ -76,6 +76,7 @@ function aanwijzing(start, type, waarde, getoond) {
 
 export function leesRichting(directionKnoop, start, vorigeWig = 'crescendo') {
   const aanwijzingen = [];
+  const sprong = {};
   let tempo = null;
   let metronoomTempo = null;
   let getoond = null;
@@ -93,7 +94,21 @@ export function leesRichting(directionKnoop, start, vorigeWig = 'crescendo') {
       if (type === 'diminuendo') aanwijzingen.push(aanwijzing(start, 'decrescendo', 'begin'));
     }
     const words = kind(directionType, 'words');
-    if (words) aanwijzingen.push(aanwijzing(start, 'tekst', tekst(words)));
+    if (words) {
+      const waarde = tekst(words);
+      const compact = waarde.toLowerCase().replace(/[\s.]/g, '');
+      const sprongTekst = /^dc(?:alfine)?$/.test(compact)
+        || /^ds(?:alfine)?$/.test(compact) || compact === 'tocoda' || compact === 'fine';
+      if (/^dc(?:alfine)?$/.test(compact)) sprong.daCapo = true;
+      if (/^ds(?:alfine)?$/.test(compact)) sprong.dalSegno = 'segno';
+      if (compact === 'tocoda') sprong.naarCoda = 'coda';
+      if (compact === 'fine') sprong.fine = true;
+      if (!sprongTekst) aanwijzingen.push(aanwijzing(start, 'tekst', waarde));
+    }
+    const segno = kind(directionType, 'segno');
+    if (segno) sprong.segno = tekst(segno) || 'waar';
+    const coda = kind(directionType, 'coda');
+    if (coda) sprong.coda = tekst(coda) || 'waar';
     const letter = kind(directionType, 'rehearsal');
     if (letter && tekst(letter)) aanwijzingen.push(aanwijzing(start, 'letter', tekst(letter)));
     const metronome = kind(directionType, 'metronome');
@@ -108,12 +123,20 @@ export function leesRichting(directionKnoop, start, vorigeWig = 'crescendo') {
     }
   }
   const sound = kind(directionKnoop, 'sound');
+  if (sound) {
+    if (sound.attr.segno !== undefined) sprong.segno = sound.attr.segno === 'yes' ? 'waar' : sound.attr.segno;
+    if (sound.attr.coda !== undefined) sprong.coda = sound.attr.coda === 'yes' ? 'waar' : sound.attr.coda;
+    if (sound.attr.dacapo === 'yes') sprong.daCapo = true;
+    if (sound.attr.dalsegno) sprong.dalSegno = sound.attr.dalsegno;
+    if (sound.attr.tocoda) sprong.naarCoda = sound.attr.tocoda;
+    if (sound.attr.fine === 'yes') sprong.fine = true;
+  }
   if (sound?.attr.tempo !== undefined) {
     tempo = Number(sound.attr.tempo);
     if (metronoomTempo !== null && tempo !== metronoomTempo) getoond = null;
   }
   if (tempo !== null) aanwijzingen.push(aanwijzing(start, 'tempo', tempo, getoond));
-  return { aanwijzingen, tempo };
+  return { aanwijzingen, tempo, ...(Object.keys(sprong).length ? { sprong } : {}) };
 }
 
 export function leesNotaties(noteKnoop) {
@@ -179,12 +202,23 @@ export function leesDetails(noteKnoop) {
 export function leesMaatstreep(barlineKnoop) {
   const repeat = kind(barlineKnoop, 'repeat');
   const ending = kind(barlineKnoop, 'ending');
+  const sound = kind(barlineKnoop, 'sound');
   const nummers = ending?.attr.number?.split(',').map((nummer) => Number(nummer.trim()))
     .filter((nummer) => Number.isInteger(nummer) && nummer > 0) ?? [];
+  const sprong = {};
+  if (sound) {
+    if (sound.attr.segno !== undefined) sprong.segno = sound.attr.segno === 'yes' ? 'waar' : sound.attr.segno;
+    if (sound.attr.coda !== undefined) sprong.coda = sound.attr.coda === 'yes' ? 'waar' : sound.attr.coda;
+    if (sound.attr.dacapo === 'yes') sprong.daCapo = true;
+    if (sound.attr.dalsegno) sprong.dalSegno = sound.attr.dalsegno;
+    if (sound.attr.tocoda) sprong.naarCoda = sound.attr.tocoda;
+    if (sound.attr.fine === 'yes') sprong.fine = true;
+  }
   return {
     begin: repeat?.attr.direction === 'forward',
     eind: repeat?.attr.direction === 'backward',
     keer: repeat?.attr.times === undefined ? 2 : Number(repeat.attr.times),
+    ...(Object.keys(sprong).length ? { sprong } : {}),
     ...(ending ? {
       volta: {
         nummers,

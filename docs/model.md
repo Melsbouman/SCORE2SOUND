@@ -66,6 +66,7 @@ Een instrument in C heeft `{ chromatisch: 0, diatonisch: 0 }`. Een bugel in Bes:
   tempo: null,                   // kwartnoten per minuut als hier een tempo begint, anders null
   herhaling: { begin: false, eind: false, keer: 2 },  // herhaalstrepen
   volta: { nummers: [1], begin: true, eind: false },  // eerste of tweede (of ander) einde; alleen als die er is
+  sprong: { segno: 'segno', dalSegno: 'segno' }, // alleen aanwezige velden: segno/coda (naam of 'waar'), daCapo/fine (true), dalSegno/naarCoda (naam)
   elementen: [Element, ...],     // gesorteerd op start, dan op stem
 }
 ```
