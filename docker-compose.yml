@@ -1,0 +1,28 @@
+services:
+  app:
+    build: .
+    env_file: .env
+    environment:
+      SCORE2SOUND_PROJECTEN: /data/projecten
+      SCORE2SOUND_HERKENNING: /data/herkenning
+      SCORE2SOUND_ACCOUNTSMAP: /data/accounts
+      SCORE2SOUND_ACCOUNTS: aan
+      SCORE2SOUND_HTTPS: aan
+    volumes:
+      - ./data:/data
+      - ./klankbank:/app/public/klankbank:ro
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2
+    environment:
+      DOMEIN: ${DOMEIN}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+
+volumes:
+  caddy_data:
