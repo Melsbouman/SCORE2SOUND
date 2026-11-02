@@ -342,3 +342,49 @@ select, input[type="text"], input[type="number"] { font: inherit; color: var(--k
   .bladmuziek__pagina { break-inside: avoid; }
   .bladmuziek g.note[color] { fill: #000000; color: #000000; }
 }
+.tempo-lijst {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.tempo-regel {
+  display: grid;
+  grid-template-columns: minmax(6rem, 1fr) minmax(5rem, 7rem) auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tempo-regel input,
+.tempo-toevoegen input {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+}
+
+.tempo-toevoegen {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.tempo-toevoegen label {
+  display: grid;
+  grid-template-columns: minmax(6rem, 1fr) minmax(5rem, 7rem);
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tempo-status {
+  min-height: 1.5em;
+  margin: 0;
+}
+
+@media (max-width: 375px) {
+  .tempo-regel {
+    grid-template-columns: 1fr minmax(4.5rem, 6rem);
+  }
+
+  .tempo-regel button {
+    grid-column: 1 / -1;
+  }
+}

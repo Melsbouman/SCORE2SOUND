@@ -66,3 +66,6 @@ for (const [naam, scherm] of Object.entries(schermen)) {
 
 // Handig bij het testen in de browser: de stand bekijken in de console.
 window.score2sound = app;
+import { start as startTempo } from './views/tempo.js';
+
+startTempo(app);
