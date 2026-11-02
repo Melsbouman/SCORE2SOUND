@@ -22,6 +22,8 @@ export function start(app) {
       const instelling = app.stand.mixer?.[partij.id] ?? {};
       const rij = document.createElement('div');
       rij.className = 'mixer__rij';
+      rij.setAttribute('role', 'group');
+      rij.setAttribute('aria-label', partij.naam);
 
       const naam = document.createElement('span');
       naam.textContent = partij.naam;
@@ -33,7 +35,18 @@ export function start(app) {
         value: instelling.volume ?? 100,
       });
       volume.setAttribute('aria-label', `Volume van ${partij.naam}`);
-      volume.addEventListener('input', () => verander(partij.id, { volume: Number(volume.value) }));
+      volume.setAttribute('aria-valuetext', `${volume.value} van 127, ${partij.naam}`);
+      volume.addEventListener('input', () => {
+        verander(partij.id, { volume: Number(volume.value) });
+        volume.setAttribute('aria-valuetext', `${volume.value} van 127, ${partij.naam}`);
+      });
+      volume.addEventListener('keydown', (event) => {
+        if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+        event.preventDefault();
+        const stap = event.key === 'ArrowRight' ? 5 : -5;
+        volume.value = String(Math.max(0, Math.min(127, Number(volume.value) + stap)));
+        volume.dispatchEvent(new Event('input', { bubbles: true }));
+      });
 
       const dempen = Object.assign(document.createElement('button'), {
         type: 'button',
