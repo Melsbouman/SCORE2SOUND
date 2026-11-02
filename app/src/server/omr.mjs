@@ -103,10 +103,7 @@ function koppelMaat(maat, balken, stack, koppen, rusten, nummer) {
       const positie = lijnPositie(element.toonhoogte, sleutel);
       const kop = neemLinkste(koppen, (s) => s.staff === staff && s.pitch === positie && inStack(s));
       if (kop) zet(element, kop);
-      else {
-        element.zekerheid = 0.5;
-        nietGekoppeld += 1;
-      }
+      else nietGekoppeld += 1;
     } else if (element.soort === 'rust') {
       const rust = neemLinkste(rusten, (s) => s.staff === staff && inStack(s));
       if (rust) {
