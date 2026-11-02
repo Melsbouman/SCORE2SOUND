@@ -1,6 +1,7 @@
 import { naarMidi } from '../model/toonhoogte.mjs';
 import { maatLengte } from '../model/duur.mjs';
 import { uitgevouwen } from '../model/maten.mjs';
+import { tempoOverloop } from '../model/tempoverloop.mjs';
 
 const tekstEncoder = new TextEncoder();
 
@@ -58,6 +59,7 @@ function maatBeginnen(partituur) {
 function dirigentenSpoor(partituur, beginnen) {
   const events = [];
   const maten = partituur.partijen[0]?.maten ?? [];
+  const tempoOverlopen = tempoOverloop(partituur);
   const eersteMaat = maten[0];
   const maatsoort = eersteMaat?.maatsoort ?? { teller: 4, noemer: 4 };
   events.push({
@@ -78,6 +80,39 @@ function dirigentenSpoor(partituur, beginnen) {
       volgorde: 1,
       bytes: [0xff, 0x51, 3, (microseconden >>> 16) & 0xff, (microseconden >>> 8) & 0xff, microseconden & 0xff],
     });
+  }
+  for (const verloop of tempoOverlopen) {
+    let tempoVoor = 120;
+    for (let index = 0; index <= verloop.vanMaat; index += 1) {
+      if (typeof maten[index]?.tempo === 'number') tempoVoor = maten[index].tempo;
+    }
+
+    const aantalMaten = verloop.totMaat - verloop.vanMaat;
+    for (let offset = 0; offset < aantalMaten; offset += 1) {
+      const factor = aantalMaten === 1
+        ? verloop.factorEind
+        : 1 + (verloop.factorEind - 1) * offset / (aantalMaten - 1);
+      const microseconden = Math.round(60000000 / (tempoVoor * factor));
+      const index = verloop.vanMaat + offset;
+      events.push({
+        tik: beginnen[index],
+        volgorde: 2,
+        bytes: [0xff, 0x51, 3, (microseconden >>> 16) & 0xff, (microseconden >>> 8) & 0xff, microseconden & 0xff],
+      });
+    }
+
+    const maatNaVerloop = maten[verloop.totMaat];
+    const aTempo = maatNaVerloop?.elementen?.some((element) =>
+      element.soort === 'aanwijzing' && element.type === 'tekst' &&
+      /^(?:a\s+tempo|tempo\s+primo|tempo\s+i)(?:\b|[.!?])/i.test(String(element.waarde ?? '').trim())
+    );
+    if (aTempo && typeof maatNaVerloop.tempo !== 'number') {
+      events.push({
+        tik: beginnen[verloop.totMaat],
+        volgorde: 2,
+        bytes: [0xff, 0x51, 3, (Math.round(60000000 / tempoVoor) >>> 16) & 0xff, (Math.round(60000000 / tempoVoor) >>> 8) & 0xff, Math.round(60000000 / tempoVoor) & 0xff],
+      });
+    }
   }
   return maakSpoor(events);
 }
