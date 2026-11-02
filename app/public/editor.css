@@ -52,6 +52,23 @@
 }
 .lint__paneel > #speler, .lint__paneel > #tempo, .lint__paneel > #editor { flex: 1 1 auto; }
 .lint__paneel > #export, .lint__paneel > #projecten, .lint__paneel > #titel { flex: 0 0 auto; }
+@media (min-width: 700px) {
+  .lint__paneel #speler, .lint__paneel #tempo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+  }
+  .lint__paneel #speler .speler__passage {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    border: 0;
+    padding: 0;
+  }
+}
+main:has(#weergave g.measure) #tempo > p { display: none; }
 @media (max-width: 600px) {
   .werkvlak > .lint { position: static; }
 }
