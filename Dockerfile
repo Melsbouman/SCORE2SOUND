@@ -1,7 +1,7 @@
 FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV AUDIVERIS=/usr/bin/audiveris
+ENV AUDIVERIS=/opt/audiveris-pakket/opt/audiveris/bin/Audiveris
 ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
 
 RUN apt-get update \
@@ -17,10 +17,10 @@ RUN apt-get update \
 
 RUN curl -fSL https://github.com/Audiveris/audiveris/releases/download/5.11.0/Audiveris-5.11.0-ubuntu22.04-x86_64.deb -o /tmp/audiveris.deb
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends /tmp/audiveris.deb \
-    && curl -fSL https://github.com/tesseract-ocr/tessdata/raw/main/eng.traineddata -o "${TESSDATA_PREFIX}/eng.traineddata" \
-    && rm -f /tmp/audiveris.deb \
+RUN dpkg-deb -x /tmp/audiveris.deb /opt/audiveris-pakket \
+    && rm -f /tmp/audiveris.deb
+
+RUN curl -fSL https://github.com/tesseract-ocr/tessdata/raw/main/eng.traineddata -o "${TESSDATA_PREFIX}/eng.traineddata" \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
