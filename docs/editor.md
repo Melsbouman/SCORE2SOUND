@@ -77,3 +77,6 @@ Tik een maat aan en kies Maat kopiëren. Tik daarna de maat aan waar de noten mo
 
 ## De speler onderaan
 De speler staat vast onderaan het scherm, ook als je een ander tabblad van het lint kiest. Daar start en stopt je het afspelen en stel je het tempo, de metronoom en de voorinteller in.
+
+## Suggestie toepassen
+Kies een onzekere noot en klik op Suggestie toepassen. De noot krijgt de toonhoogte van de dichtstbijzijnde zekere noot in dezelfde partij en wordt goedgekeurd.
