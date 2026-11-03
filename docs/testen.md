@@ -55,10 +55,13 @@ Alle tests gebruiken testvoorbeelden uit `app/test/voorbeelden/`:
 
 ## Regels
 - Een nieuwe functie krijgt een test. Testen worden geschreven in dezelfde bestandsnaam als de functie (bijvoorbeeld `duur.test.mjs` voor `duur.mjs`).
-- Een agent past bestaande tests niet aan zonder dat de taak dat vraagt. Als een test faalt, los je het op in de code die wordt getest, niet in de test zelf.
+- Een agent past bestaande tests niet aan zonder dat de taak dat vraagt. Als een test faalt, lossen we het op in de code die wordt getest, niet in de test zelf.
 - Echte partituren komen nooit in de repository; alleen de testvoorbeelden uit `app/test/voorbeelden/` worden gebruikt.
 
 ## Opmerkingen
 - Alle tests zijn geschreven in JavaScript-modules (`.mjs`) met `node:test` en `node:assert/strict`.
 - De testvoorbeelden zijn kleine, doelbewuste partituren die de functionaliteit van elk gedeelte van de code uittesten.
 - Het script `hermes/tests.sh` voert de volledige testsuite uit en controleert de regels.
+
+## Tests voor de grote editor
+Nieuw zijn onder meer eerste-account.test.mjs, speelvolgorde-herhaling.test.mjs, maatduur.test.mjs, titelgegevens.test.mjs, maat-goedkeuren.test.mjs en pdf-watermerk.test.mjs. Draai ze allemaal met npm test in de map app.
