@@ -40,3 +40,6 @@ Start met:
 ```bash
 bash scripts/demo-online.sh
 ```
+
+## Het eerste account
+Het eerste account kan zich zonder uitnodigingscode registreren zolang er geen codes zijn ingesteld (SCORE2SOUND_CODES). Zet bij online gebruik altijd codes, zodat vreemden zich niet kunnen registreren.
