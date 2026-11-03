@@ -14,6 +14,8 @@ import {
   zetArticulatie,
   zetOverbinding,
 } from '/src/model/noten-bewerken.mjs';
+import { maakTriool, maakTriooLos } from '/src/model/triolen.mjs';
+import { voegMaatToe, verwijderMaat, zetMaatsoort } from '/src/model/maten-bewerken.mjs';
 import { opAlle, verwijderAlle } from '/src/model/meerdere.mjs';
 import { controleerMaatduur } from '/src/controle/maatduur.mjs';
 
@@ -113,6 +115,16 @@ export function start(app) {
     pas(partituur);
   }
 
+  function pasTriool() {
+    if (!gekozen) return;
+    const element = zoekElement(app.stand.partituur, gekozen);
+    if (element?.soort !== 'noot' && element?.soort !== 'rust') return;
+    gekozenIds = [gekozen];
+    pas(element.tuplet
+      ? maakTriooLos(app.stand.partituur, gekozen)
+      : maakTriool(app.stand.partituur, gekozen));
+  }
+
   function markeerSelectie() {
     for (const element of document.querySelectorAll('g.note.gekozen, g.rest.gekozen, g.mRest.gekozen')) {
       element.classList.remove('gekozen');
@@ -163,6 +175,17 @@ export function start(app) {
       return knop;
     }
 
+    function maakTekstKnop(naam, actie, uitgeschakeld = false) {
+      const knop = document.createElement('button');
+      knop.type = 'button';
+      knop.className = 'knop editor__knop';
+      knop.textContent = naam;
+      knop.setAttribute('aria-label', naam);
+      knop.disabled = uitgeschakeld;
+      knop.addEventListener('click', actie);
+      return knop;
+    }
+
     function groep(knoppen) {
       const rij = document.createElement('div');
       rij.className = 'editor__groep';
@@ -201,6 +224,11 @@ export function start(app) {
         elementen.length > 0 && elementen.every((item) => GESTIPTE_DUUR.has(item.duur)),
       ),
     ));
+    groep([maakTekstKnop(
+      'Triool',
+      pasTriool,
+      elementen.length !== 1 || !['noot', 'rust'].includes(element?.soort),
+    )]);
     groep([
       maakKnop('Wordt rust', PICTOGRAMMEN.rust, pasMaakRustAlle, !isNoot),
       maakKnop('Goedkeuren', PICTOGRAMMEN.goedkeuren, () => pasAlle((partituur, id) => keurGoed(partituur, id)), !heeftKeuze),
@@ -230,7 +258,90 @@ export function start(app) {
         }
         pas(nieuw);
       });
-      groep([knop, herstelKnop]);
+      const maatGroep = [knop, herstelKnop];
+      const bronMaat = app.stand.partituur.partijen
+        .map((partij) => partij.maten.find((maat) => maat.index === gekozenMaat))
+        .find(Boolean);
+      const maatsoortMenu = document.createElement('select');
+      maatsoortMenu.className = 'knop editor__knop';
+      maatsoortMenu.setAttribute('aria-label', 'Maatsoort vanaf de gekozen maat');
+      const maatsoorten = [
+        ['2/4', '2/4'],
+        ['3/4', '3/4'],
+        ['4/4', '4/4'],
+        ['6/8', '6/8'],
+      ];
+      for (const [waarde, label] of maatsoorten) {
+        const optie = document.createElement('option');
+        optie.value = waarde;
+        optie.textContent = label;
+        maatsoortMenu.append(optie);
+      }
+      const eigenOptie = document.createElement('option');
+      eigenOptie.value = 'eigen';
+      eigenOptie.textContent = 'Eigen waarde…';
+      maatsoortMenu.append(eigenOptie);
+      const huidigeMaatsoort = bronMaat?.maatsoort;
+      const huidigeWaarde = huidigeMaatsoort
+        ? `${huidigeMaatsoort.teller}/${huidigeMaatsoort.noemer}`
+        : '4/4';
+      if (!maatsoorten.some(([waarde]) => waarde === huidigeWaarde)) {
+        const optie = document.createElement('option');
+        optie.value = huidigeWaarde;
+        optie.textContent = huidigeWaarde;
+        maatsoortMenu.insertBefore(optie, eigenOptie);
+      }
+      maatsoortMenu.value = huidigeWaarde;
+      maatsoortMenu.addEventListener('change', () => {
+        let waarde = maatsoortMenu.value;
+        if (waarde === 'eigen') {
+          const tellerTekst = window.prompt('Teller van de maatsoort', String(huidigeMaatsoort?.teller ?? 4));
+          if (tellerTekst === null) {
+            maatsoortMenu.value = huidigeWaarde;
+            return;
+          }
+          const teller = Number(tellerTekst);
+          if (!Number.isInteger(teller) || teller <= 0) {
+            maatsoortMenu.value = huidigeWaarde;
+            statusBalk.textContent = 'Vul een positieve teller in.';
+            return;
+          }
+          const noemerTekst = window.prompt('Noemer van de maatsoort', String(huidigeMaatsoort?.noemer ?? 4));
+          if (noemerTekst === null) {
+            maatsoortMenu.value = huidigeWaarde;
+            return;
+          }
+          const noemer = Number(noemerTekst);
+          if (!Number.isInteger(noemer) || noemer <= 0) {
+            maatsoortMenu.value = huidigeWaarde;
+            statusBalk.textContent = 'Vul een positieve noemer in.';
+            return;
+          }
+          if (!Number.isInteger(teller * 1920 / noemer)) {
+            maatsoortMenu.value = huidigeWaarde;
+            statusBalk.textContent = 'Deze maatsoort past niet in een geheel aantal tikken.';
+            return;
+          }
+          waarde = `${teller}/${noemer}`;
+        }
+        const [teller, noemer] = waarde.split('/').map(Number);
+        pas(zetMaatsoort(app.stand.partituur, gekozenMaat, teller, noemer));
+      });
+      maatGroep.push(maatsoortMenu);
+      maatGroep.push(maakTekstKnop('Maat invoegen', () => {
+        pas(voegMaatToe(app.stand.partituur, gekozenMaat));
+        app.meld('kies-maat', { maat: gekozenMaat + 1 });
+      }));
+      maatGroep.push(maakTekstKnop('Maat verwijderen', () => {
+        const nieuw = verwijderMaat(app.stand.partituur, gekozenMaat);
+        const aantalMaten = Math.max(0, ...nieuw.partijen.map((partij) => partij.maten.length));
+        const volgendeMaat = aantalMaten === 0 ? null : Math.min(gekozenMaat, aantalMaten - 1);
+        gekozen = null;
+        gekozenIds = [];
+        pas(nieuw);
+        app.meld('kies-maat', { maat: volgendeMaat });
+      }, !app.stand.partituur.partijen.some((partij) => partij.maten.some((maat) => maat.index === gekozenMaat))));
+      groep(maatGroep);
     }
     groep([
       maakKnop(
@@ -471,6 +582,8 @@ export function start(app) {
     } else if (toets.toLowerCase() === 'a') {
       actie = () => pasAlle((partituur, id) => zetArticulatie(partituur, id, 'accent'));
     } else if (toets.toLowerCase() === 't') {
+      actie = pasTriool;
+    } else if (toets.toLowerCase() === 'n') {
       actie = () => pasAlle((partituur, id) => zetArticulatie(partituur, id, 'tenuto'));
     } else if (toets.toLowerCase() === 'f') {
       actie = () => pasAlle((partituur, id) => zetFermate(partituur, id, !zoekElement(partituur, id).fermate));
