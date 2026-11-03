@@ -7,7 +7,7 @@ const tabbladen = [
 ];
 
 export function start(app) {
-  let geselecteerd = 1;
+  let geselecteerd = 2;
   try {
     const opgeslagen = localStorage.getItem('score2sound-lint-tab');
     const index = tabbladen.findIndex((tabblad) => tabblad.naam === opgeslagen);
