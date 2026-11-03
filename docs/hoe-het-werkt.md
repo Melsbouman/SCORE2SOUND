@@ -29,3 +29,6 @@
 
 ## De PDF
 De server tekent de partituur met Verovio en zet elke pagina in een PDF met pdfkit. Over elke pagina komt het schuine watermerk SCORE2SOUND.
+
+## De vaste speler
+De speler zit als een lage balk onderaan het scherm en blijft zichtbaar bij elk tabblad van het lint. Het tempo, de metronoom, de voorinteller en het herhalen van een passage staan daar.
