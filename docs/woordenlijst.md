@@ -24,9 +24,11 @@ De muziektermen in SCORE2SOUND, met de term uit MusicXML. Gebruik in teksten van
 | genoteerd | written | de noot zoals hij op het blad staat |
 | klinkend | sounding | de noot zoals hij werkelijk klinkt |
 | herkenning | (geen) | bladmuziek van een PDF, scan of foto omzetten naar noten |
-| origineel | (geen) | de pagina waar de herkenning van uitging |
-| onzekere noot | (geen) | een noot waar de herkenning aan twijfelt; de app kleurt hem rood |
-| lint | (geen) | de balk met tabbladen boven de partituur: Bestand, Start, Noten, Partij en Weergave |
-| watermerk | (geen) | de tekst SCORE2SOUND die schuin over elke pagina van de PDF staat |
-| suggestie | (geen) | de toonhoogte die de app voorstelt voor een rode noot, op basis van de dichtstbijzijnde zekere noot |
-| vaste speler | (geen) | de balk onderaan het scherm met afspelen, tempo, metronoom en voorinteller |
+|| origineel | (geen) | de pagina waar de herkenning van uitging |
+|| onzekere noot | (geen) | een noot waar de herkenning aan twijfelt; de app kleurt hem rood |
+|| lint | (geen) | de balk met tabbladen boven de partituur: Bestand, Start, Noten, Partij en Weergave |
+|| watermerk | (geen) | de tekst SCORE2SOUND die schuin over elke pagina van de PDF staat |
+|| suggestie | (geen) | de toonhoogte die de app voorstelt voor een rode noot, op basis van de dichtstbijzijnde zekere noot |
+|| vaste speler | (geen) | de balk onderaan het scherm met afspelen, tempo, metronoom en voorinteller |
+|| haak | (geen) | een crescendo- of decrescendoteken (< of >) onder de balk |
+|| aanduiding | (geen) | een term bij de noten, zoals Andante, dolce, mf of cresc., met een vaste plek boven of onder de balk |
