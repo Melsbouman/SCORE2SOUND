@@ -64,3 +64,6 @@ Kies een noot of een rust en tik een letter van A tot en met G: de noot krijgt d
 
 ## Tempo en spelaanduidingen zetten
 Kies een noot of een maat en open het tabblad Aanduidingen. Klik op een term, bijvoorbeeld Andante, rit., dolce of mf. Tempo, expressie en spelwijze komen altijd boven de balk; sterkte (p tot ff, sf) en cresc. of dim. komen altijd eronder.
+
+## De speler
+Onderaan staat de speler. Met de knop links ga je naar het begin, de ronde knop speelt af of pauzeert en de knop rechts gaat naar de volgende maat. De balk daaronder toont hoever het stuk is. Rechts stel je het tempo, de metronoom en de voorinteller in. Passage herhalen staat in het tabblad Start.
