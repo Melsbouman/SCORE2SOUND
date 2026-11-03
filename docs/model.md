@@ -100,6 +100,7 @@ plek: { blad: 2, x: 637, y: 979, breedte: 16, hoogte: 14 }
   stem: 1,                       // stem binnen de partij, vanaf 1
   notenbalk: 1,                  // notenbalk binnen de partij, vanaf 1
   toonhoogte: { stap: 'C', alter: 0, octaaf: 4 },
+  ongestemd: true,               // alleen voor slagwerknoten zonder vaste toonhoogte
   octaafVerschuiving: 1,        // alleen binnen een octaafteken; +1/+2 hoger, -1/-2 lager
   akkoord: false,                // true: hoort bij de vorige noot (zelfde start)
   overbinding: { begin: false, eind: false },
