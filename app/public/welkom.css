@@ -414,3 +414,5 @@ h2 {
     transition-duration: .01ms !important;
   }
 }
+
+.w-noot { max-width: 44rem; margin: 2rem auto 0; padding: 1rem 1.25rem; text-align: center; color: var(--zwart); background: #ffffffb3; border: 1px solid #1c4a1433; border-radius: 14px; font-size: 0.95rem; }
