@@ -37,9 +37,15 @@ function toolkit() {
   return toolkitBelofte;
 }
 
-export async function maakPdf(musicxml, { watermerk = 'SCORE2SOUND', comprimeer = true } = {}) {
+export async function maakPdf(musicxml, { watermerk = 'SCORE2SOUND', comprimeer = true, titelblok } = {}) {
   const tk = await toolkit();
-  tk.setOptions({ pageWidth: 2100, pageHeight: 2970, scale: 40, adjustPageHeight: false });
+  tk.setOptions({
+    pageWidth: 2100,
+    pageHeight: 2970,
+    scale: 40,
+    adjustPageHeight: false,
+    ...(titelblok ? { pageMarginTop: 280 } : {}),
+  });
   tk.loadData(musicxml);
 
   const doc = new PDFDocument({ size: 'A4', margin: 0, compress: comprimeer, info: { Title: 'SCORE2SOUND', Producer: 'SCORE2SOUND' } });
@@ -58,6 +64,30 @@ export async function maakPdf(musicxml, { watermerk = 'SCORE2SOUND', comprimeer 
       assumePt: true,
       preserveAspectRatio: 'xMinYMin meet',
     });
+    if (pagina === 1 && titelblok) {
+      const tekst = (waarde) => waarde?.replace(/♭/g, 'b');
+      if (titelblok.titel) {
+        doc.font('Times-Bold').fontSize(20).text(tekst(titelblok.titel), 40, 40, {
+          width: doc.page.width - 80,
+          align: 'center',
+        });
+      }
+      if (titelblok.partij) {
+        doc.font('Times-Roman').fontSize(11).text(tekst(titelblok.partij), 40, 80);
+      }
+      if (titelblok.componist) {
+        doc.font('Times-Roman').fontSize(11).text(tekst(titelblok.componist), 40, 70, {
+          width: doc.page.width - 80,
+          align: 'right',
+        });
+      }
+      if (titelblok.arrangeur) {
+        doc.font('Times-Roman').fontSize(11).text(`arr. ${tekst(titelblok.arrangeur)}`, 40, 84, {
+          width: doc.page.width - 80,
+          align: 'right',
+        });
+      }
+    }
     doc.save();
     doc.fillColor('#888888').fillOpacity(0.15).fontSize(80);
     doc.rotate(-45, { origin: [doc.page.width / 2, doc.page.height / 2] });
