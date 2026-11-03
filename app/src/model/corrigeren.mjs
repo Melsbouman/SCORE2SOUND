@@ -209,3 +209,65 @@ export function verschuifHalvetoon(partituur, id, richting) {
   element.toonhoogte = { stap: nieuweStap, alter: nieuweAlter, octaaf };
   return kopie;
 }
+export function nootBijLetter(partituur, id, letter) {
+  const kopie = structuredClone(partituur);
+  const stap = typeof letter === 'string' ? letter.toUpperCase() : '';
+  const tonen = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+  if (!(stap in tonen)) return kopie;
+
+  const delen = id.match(/^n-(.+)-(\d+)-(\d+)$/);
+  if (!delen) return kopie;
+  const partijIndex = kopie.partijen.findIndex((partij) => partij.id === delen[1]);
+  const maatIndex = Number(delen[2]);
+  const elementIndex = Number(delen[3]);
+  const partij = kopie.partijen[partijIndex];
+  const element = partij?.maten[maatIndex]?.elementen[elementIndex];
+  if (!element || (element.soort !== 'noot' && element.soort !== 'rust')) return kopie;
+
+  let referentieMidi = 72;
+  let referentieOctaaf = 5;
+  let heeftReferentie = false;
+  if (element.soort === 'noot') {
+    heeftReferentie = true;
+    referentieOctaaf = element.toonhoogte.octaaf;
+    referentieMidi = (referentieOctaaf + 1) * 12 + tonen[element.toonhoogte.stap] + element.toonhoogte.alter;
+  } else {
+    let vorigeNoot = null;
+    for (let vorigeMaat = maatIndex; vorigeMaat >= 0 && !vorigeNoot; vorigeMaat -= 1) {
+      const elementen = partij.maten[vorigeMaat].elementen;
+      const begin = vorigeMaat === maatIndex ? elementIndex - 1 : elementen.length - 1;
+      for (let vorigElement = begin; vorigElement >= 0; vorigElement -= 1) {
+        if (elementen[vorigElement].soort === 'noot') {
+          vorigeNoot = elementen[vorigElement];
+          break;
+        }
+      }
+    }
+    if (vorigeNoot) {
+      heeftReferentie = true;
+      referentieOctaaf = vorigeNoot.toonhoogte.octaaf;
+      referentieMidi = (referentieOctaaf + 1) * 12 + tonen[vorigeNoot.toonhoogte.stap] + vorigeNoot.toonhoogte.alter;
+    }
+  }
+
+  const octaaf = heeftReferentie
+    ? [referentieOctaaf - 1, referentieOctaaf, referentieOctaaf + 1].reduce((beste, kandidaat) => {
+      const afstand = Math.abs((kandidaat + 1) * 12 + tonen[stap] - referentieMidi);
+      const besteAfstand = Math.abs((beste + 1) * 12 + tonen[stap] - referentieMidi);
+      return afstand < besteAfstand ? kandidaat : beste;
+    })
+    : 5;
+  const toonhoogte = { stap, alter: 0, octaaf };
+
+  partij.maten[maatIndex].elementen[elementIndex] = element.soort === 'noot'
+    ? { ...element, toonhoogte, zekerheid: 1 }
+    : {
+      soort: 'noot', start: element.start, duur: element.duur, stem: element.stem, notenbalk: element.notenbalk,
+      ...(element.plek === undefined ? {} : { plek: element.plek }),
+      toonhoogte, akkoord: false,
+      overbinding: { begin: false, eind: false }, articulaties: [],
+      legato: { begin: false, eind: false }, versiering: null, zekerheid: 1,
+    };
+  return kopie;
+}
+
