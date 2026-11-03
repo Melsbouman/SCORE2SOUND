@@ -1,7 +1,7 @@
 .bladmuziek g.note:hover, .bladmuziek g.rest:hover { fill: #2f5d8a; color: #2f5d8a; }
 .bladmuziek .maat-markering { fill: rgba(47, 93, 138, 0.12); }
 .bladmuziek g.measure { cursor: pointer; }
-.werkvlak { grid-template-areas: "inloggen" "upload" "hulp" "lint" "weergave"; }
+.werkvlak { grid-template-areas: "lint" "weergave" "inloggen" "upload" "voorbeeld" "hulp"; }
 .werkvlak { grid-template-columns: minmax(0, 1fr); }
 .werkvlak > .lint {
   position: sticky;
@@ -70,6 +70,7 @@
   }
 }
 main:has(#weergave g.measure) #tempo > p { display: none; }
-@media (max-width: 600px) {
-  .werkvlak > .lint { position: static; }
-}
+#upload { grid-area: upload; }
+#voorbeeld { grid-area: voorbeeld; }
+#hulp { grid-area: hulp; }
+#weergave { grid-area: weergave; }
