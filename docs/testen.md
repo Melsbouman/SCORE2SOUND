@@ -74,3 +74,6 @@ Nieuw zijn onder meer verschuif-halvetoon, noot-bij-letter, kopieer-maten, aandu
 
 ## Tests voor de herkenning en de bogen
 Nieuw zijn herstel-maatsoorten, begin-rust, begin-rust-later, verdachte-noten, ontbrekende-maten, bogen-nummers, midi-volledig en sand-and-stars-fixture. Het testbestand app/test/fixtures/sand-and-stars-begin.xml bevat de eerste 30 maten van de ruwe uitvoer van Audiveris.
+
+## Tests met het echte stuk
+roundtrip-fixture controleert dat schrijven en lezen elkaar niet tegenspreken, zangtekst-ruis dat paginatekst als zangtekst wordt weggehaald, en herstel-keten-geldig dat de hele herstelketen schrijfbare partituren geeft.
