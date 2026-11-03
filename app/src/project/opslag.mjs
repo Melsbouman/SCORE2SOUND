@@ -1,4 +1,4 @@
-import { mkdir, readdir, readFile, unlink, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, rename, unlink, writeFile } from 'node:fs/promises';
 import { randomBytes } from 'node:crypto';
 import { join } from 'node:path';
 
@@ -67,7 +67,18 @@ export function maakOpslag(map) {
       versies: Array.isArray(versies) ? versies : eerdereVersies,
     };
     await mkdir(map, { recursive: true });
-    await writeFile(bestand(id), `${JSON.stringify(project, null, 2)}\n`, 'utf8');
+    const tijdelijkBestand = `${bestand(id)}.tmp`;
+    try {
+      await writeFile(tijdelijkBestand, `${JSON.stringify(project, null, 2)}\n`, 'utf8');
+      await rename(tijdelijkBestand, bestand(id));
+    } catch (fout) {
+      try {
+        await unlink(tijdelijkBestand);
+      } catch (opruimFout) {
+        if (opruimFout.code !== 'ENOENT') throw opruimFout;
+      }
+      throw fout;
+    }
     return project;
   }
 
