@@ -182,7 +182,8 @@ function leesNoot(knoop, start, duur, akkoord, stand, schuinVoorslag = null) {
   if (rust) {
     return { soort: 'rust', ...gemeen, duur: duur.tikken || maatLengte(stand.maatsoort), heleMaat: rust.attr.measure === 'yes', zekerheid, ...details };
   }
-  const toonhoogte = kind(knoop, 'pitch');
+  const ongestemd = kind(knoop, 'unpitched');
+  const toonhoogte = ongestemd ?? kind(knoop, 'pitch');
   const notaties = leesNotaties(knoop);
   return {
     soort: 'noot',
@@ -190,7 +191,10 @@ function leesNoot(knoop, start, duur, akkoord, stand, schuinVoorslag = null) {
     duur: duur.tikken,
     stem: gemeen.stem,
     notenbalk: gemeen.notenbalk,
-    toonhoogte: { stap: tekst(toonhoogte, 'step'), alter: Math.round(getal(toonhoogte, 'alter', 0)), octaaf: getal(toonhoogte, 'octave', 4) },
+    toonhoogte: ongestemd
+      ? { stap: tekst(toonhoogte, 'display-step'), alter: 0, octaaf: getal(toonhoogte, 'display-octave', 4) }
+      : { stap: tekst(toonhoogte, 'step'), alter: Math.round(getal(toonhoogte, 'alter', 0)), octaaf: getal(toonhoogte, 'octave', 4) },
+    ...(ongestemd ? { ongestemd: true } : {}),
     akkoord,
     overbinding: notaties.overbinding,
     articulaties: notaties.articulaties,

@@ -169,7 +169,9 @@ function schrijfNoot(element, meerdereBalken, partij, maat, weergave, markering,
   if (element.soort === 'rust') inhoud += leeg('rest', element.heleMaat ? { measure: 'yes' } : {});
   else {
     const toon = element.toonhoogte;
-    inhoud += tag('pitch', tag('step', esc(toon.stap)) + (toon.alter ? tag('alter', toon.alter) : '') + tag('octave', toon.octaaf));
+    inhoud += element.ongestemd
+      ? tag('unpitched', tag('display-step', esc(toon.stap)) + tag('display-octave', toon.octaaf))
+      : tag('pitch', tag('step', esc(toon.stap)) + (toon.alter ? tag('alter', toon.alter) : '') + tag('octave', toon.octaaf));
   }
   if (!element.voorslag) inhoud += tag('duration', element.duur);
   if (element.overbinding?.eind) inhoud += leeg('tie', { type: 'stop' });
