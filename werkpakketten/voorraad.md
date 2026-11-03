@@ -21,6 +21,12 @@ Claude pakt hier werk uit als een nachtplan af is en de eindtijd nog niet bereik
 - [ ] Branch protection op `main` aanzetten (PR verplicht, later ook de check `controle`).
 
 ## Klaar
+- [x] Grote editor: lint met tabbladen, partituur over de volle breedte, origineel-paneel weg, muisselectie van noten en maten, titel/componist/arrangeur aanpassen, PDF met watermerk (via afdrukken), pijlen, Shift+pijl, Escape, Alt+1 tot 5, Maat klopt, afspelen vanaf de gekozen maat (3 november 2026, zie `werkpakketten/nacht/rapport-2026-11-03.md`). (Claude)
+- [ ] Telefoonlayout: de partituur begint op 375 px nog op 507 px; lint en upload compacter. (Claude)
+- [ ] Dependabot-PR's (#522 tot #527) beoordelen en beslissen of Dependabot aan blijft. Wacht op Mels.
+- [ ] OpenRouter-tegoed voor Hermes aanvullen. Wacht op Mels.
+- [ ] `corrigeren.js` en `onzeker.js`: controleer of het keydown-doel een Element is. (Claude)
+- [ ] Echte server-PDF met watermerk (vraagt een nieuwe bibliotheek, dus akkoord van Mels).
 - [x] Fase 4 en 5 en de editor (3 november 2026, nacht): audio-export (WAV), Verovio ingepakt, versies, tweede ronde voor vastgelopen pagina's, regelindeling en meermaats-rusten, tempo per maat, letters in kaders, partijnaam uit de kop en samenvoegen van gesplitste partijen, voorslagen, volta's, sprongen (D.C., D.S.), rallentando en wiggen in het afspelen, accounts met uitnodigingscode, projecten en herkenningen per gebruiker, container met Docker, de editor (knoppenbalk, slepen, extra bewerkfuncties), een hartslag en automatische terugloop in het script (Claude)
 - [x] Notatie zoals het blad: waardestrepen, triolen, fermates en repetitieletters in kaders (2 november 2026); tweede ronde voor vastgelopen pagina's gemerged. (Claude)
 - [x] Audio-export als WAV, Verovio ingepakt en onthouden in de browser, herkenningen opruimen, tweede ronde voor een vastgelopen pagina, versies bewaren, vergelijken en om en om beluisteren (2 november 2026). (Claude)
