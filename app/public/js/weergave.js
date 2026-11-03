@@ -31,6 +31,29 @@ async function naarMusicXML(partituur) {
 }
 
 export function start(app) {
+  document.addEventListener('keydown', (gebeurtenis) => {
+    const doel = gebeurtenis.target;
+    if (
+      app.stand.partituur === null ||
+      doel?.closest?.('input, select, textarea, [contenteditable]') ||
+      (!gebeurtenis.ctrlKey && !gebeurtenis.metaKey)
+    ) {
+      return;
+    }
+
+    if (['+', '=', 'Add'].includes(gebeurtenis.key)) {
+      gebeurtenis.preventDefault();
+      wijzigZoom(0.1);
+    } else if (['-', 'Subtract'].includes(gebeurtenis.key)) {
+      gebeurtenis.preventDefault();
+      wijzigZoom(-0.1);
+    } else if (gebeurtenis.key === '0') {
+      gebeurtenis.preventDefault();
+      zoom = 0.8;
+      localStorage.setItem('score2sound-zoom', String(zoom));
+      teken(huidige, { meteen: true, opnieuw: true });
+    }
+  });
 const vlak = document.getElementById('weergave');
 
   function wijzigZoom(stap) {
