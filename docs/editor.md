@@ -71,3 +71,6 @@ De knoppenbalk blijft tijdens het scrollen bovenaan staan en breekt op een smal 
 
 ## PDF downloaden
 De knop PDF downloaden (tabblad Bestand) haalt een PDF met het watermerk SCORE2SOUND van de server. Lukt dat niet, dan opent het afdrukvenster van de browser.
+
+## Maten kopiëren en plakken
+Tik een maat aan en kies Maat kopiëren. Tik daarna de maat aan waar de noten moeten komen en kies Maat plakken. De noten van alle partijen worden gekopieerd; de oude noten in die maat verdwijnen.
