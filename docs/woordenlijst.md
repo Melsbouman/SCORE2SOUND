@@ -26,4 +26,5 @@ De muziektermen in SCORE2SOUND, met de term uit MusicXML. Gebruik in teksten van
 | herkenning | (geen) | bladmuziek van een PDF, scan of foto omzetten naar noten |
 | origineel | (geen) | de pagina waar de herkenning van uitging |
 | onzekere noot | (geen) | een noot waar de herkenning aan twijfelt; de app kleurt hem rood |
-| melding | (geen) | wat de app laat zien als er iets niet lijkt te kloppen |
+| lint | (geen) | de balk met tabbladen boven de partituur: Bestand, Start, Noten, Partij en Weergave |
+| watermerk | (geen) | de tekst SCORE2SOUND die schuin over elke pagina van de PDF staat |
