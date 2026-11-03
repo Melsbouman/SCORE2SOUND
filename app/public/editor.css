@@ -256,3 +256,10 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
 }
 #hulp ol { list-style-position: inside; padding-left: 0; }
 #hulp li { margin: 0; padding: 0; }
+
+/* Merkregel uit de PDF SCORE2SOUND: hoofdteksten in Bodoni (Bold). Bodoni Moda heeft een optische-grootte-as; op groot formaat zijn de haarlijnen dan te dun.
+   Op opsz 6 is de letter zo stevig als in de PDF. */
+.kop h1, #upload h2, .zijbalk__logo { font-optical-sizing: none; }
+.kop h1, #upload h2 { font-family: var(--letter-kop); font-variation-settings: "opsz" 6; font-weight: 700; letter-spacing: 0.01em; }
+.kop h1 { font-size: clamp(1.8rem, 3vw, 2.6rem); line-height: 1.05; text-transform: uppercase; }
+.kop h1 .logo__2 { color: var(--kleur-zijbalk); }
