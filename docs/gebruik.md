@@ -85,3 +85,6 @@ Heeft een stuk meer dan een partij, dan staan de instrumentnamen voor elke regel
 
 ## De kop van de pdf
 Bovenaan de pdf staan de titel, links de partijnaam met stemming (bij een losse partij), rechts de componist en daaronder arr. met de arrangeur. Een teken voor b (mol) staat in de pdf als de letter b.
+
+## Alle partijen als pdf
+Heeft je stuk meer dan een partij, dan staat in het tabblad Bestand de knop Alle partijen (PDF zip). Je krijgt een zip met per partij een pdf, elk met het watermerk SCORE2SOUND en bovenaan de titel, de partijnaam met stemming, de componist en arr. met de arrangeur.
