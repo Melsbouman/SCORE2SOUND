@@ -1,43 +1,48 @@
 export function vulBeginRust(partituur) {
   const nieuw = structuredClone(partituur);
-  const eersteMaat = nieuw.partijen?.[0]?.maten?.[0];
-  const aanwijzing = eersteMaat?.elementen.find((element) =>
-    element.soort === 'aanwijzing'
-    && element.type === 'letter'
-    && /^\d+$/.test(String(element.waarde).trim()));
-  const aantal = aanwijzing ? Number(String(aanwijzing.waarde).trim()) : 0;
+  const partij = nieuw.partijen?.[0];
+  const gevonden = partij?.maten?.slice(0, 8).map((maat, k) => ({
+    k,
+    aanwijzing: maat.elementen.find((element) => element.soort === 'aanwijzing'
+      && element.type === 'letter'
+      && /^\d+$/.test(String(element.waarde).trim())),
+  })).find(({ aanwijzing }) => aanwijzing);
 
-  if (aantal < 2 || aantal > 200) return nieuw;
+  if (!gevonden) return nieuw;
 
-  const verschuiving = aantal - 1;
+  const nummer = Number(String(gevonden.aanwijzing.waarde).trim());
+  const aantal = nummer - (gevonden.k + 1);
+  if (nummer > 200 || aantal < 1 || aantal > 200) return nieuw;
 
-  for (const partij of nieuw.partijen) {
-    const oorspronkelijk = partij.maten[0];
-    const teller = oorspronkelijk.maatsoort.teller;
-    const noemer = oorspronkelijk.maatsoort.noemer;
-    const ingevoegd = Array.from({ length: verschuiving }, (_, index) => ({
-      ...structuredClone(oorspronkelijk),
-      nummer: String(index + 1),
-      index,
-      opmaat: false,
-      sleutels: index === 0 ? structuredClone(oorspronkelijk.sleutels) : [],
-      toonsoort: structuredClone(oorspronkelijk.toonsoort),
-      tempo: index === 0 ? oorspronkelijk.tempo : null,
-      herhaling: { ...oorspronkelijk.herhaling, begin: false, eind: false },
-      elementen: [{
-        soort: 'rust', start: 0, duur: Math.round(teller * 1920 / noemer), stem: 1,
-        notenbalk: 1, heleMaat: true, zekerheid: 1,
-      }],
-    }));
+  for (const huidigePartij of nieuw.partijen) {
+    const eersteMaat = huidigePartij.maten[0];
+    const teller = eersteMaat.maatsoort.teller;
+    const noemer = eersteMaat.maatsoort.noemer;
+    const ingevoegd = Array.from({ length: aantal }, (_, index) => ({
+        ...structuredClone(eersteMaat),
+        nummer: String(index + 1),
+        index,
+        opmaat: false,
+        sleutels: index === 0 ? structuredClone(eersteMaat.sleutels) : [],
+        toonsoort: structuredClone(eersteMaat.toonsoort),
+        tempo: index === 0 ? eersteMaat.tempo : null,
+        herhaling: { ...eersteMaat.herhaling, begin: false, eind: false },
+        elementen: [{
+          soort: 'rust', start: 0, duur: Math.round(teller * 1920 / noemer), stem: 1,
+          notenbalk: 1, heleMaat: true, zekerheid: 1,
+        }],
+        ...(aantal >= 2 && index === 0 ? { maatrust: aantal } : {}),
+        ...(aantal >= 2 && index > 0 ? { verborgen: true } : {}),
+      }));
     for (const maat of ingevoegd.slice(1)) delete maat.toonsoort;
 
-    for (const maat of partij.maten) {
-      maat.index += verschuiving;
+    for (const maat of huidigePartij.maten) {
+      maat.index += aantal;
       if (/^-?\d+$/.test(String(maat.nummer))) {
-        maat.nummer = String(Number(maat.nummer) + verschuiving);
+        maat.nummer = String(Number(maat.nummer) + aantal);
       }
     }
-    partij.maten.unshift(...ingevoegd);
+    huidigePartij.maten.unshift(...ingevoegd);
   }
 
   return nieuw;
