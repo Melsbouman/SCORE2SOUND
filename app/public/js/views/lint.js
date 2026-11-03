@@ -58,6 +58,19 @@ export function start(app) {
       if (element) paneel.append(element);
     }
 
+    if (tabblad.naam === 'Bestand') {
+      const open = document.createElement('button');
+      open.type = 'button';
+      open.className = 'knop';
+      open.textContent = 'Ander bestand openen';
+      open.addEventListener('click', () => {
+        const vak = document.getElementById('upload');
+        vak?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        (vak?.querySelector('input[type="file"], button'))?.focus();
+      });
+      paneel.prepend(open);
+    }
+
     knop.addEventListener('click', () => selecteer(index));
     knop.addEventListener('keydown', (gebeurtenis) => {
       if (gebeurtenis.key !== 'ArrowLeft' && gebeurtenis.key !== 'ArrowRight') return;
