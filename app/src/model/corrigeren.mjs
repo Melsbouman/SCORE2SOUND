@@ -154,3 +154,30 @@ export function kopieerMaat(partituur, partijId, vanIndex, naarIndex) {
   nieuw.partijen.find((kandidaat) => kandidaat.id === partijId).maten[naarIndex].elementen = structuredClone(vanMaat.elementen);
   return nieuw;
 }
+
+export function suggestieToonhoogte(partituur, id) {
+  if (!leesId(id)) return null;
+
+  const partij = partituur.partijen.find((kandidaat) => id.startsWith(`n-${kandidaat.id}-`));
+  if (!partij) return null;
+
+  const plaats = id.slice(`n-${partij.id}-`.length).match(/^(\d+)-(\d+)$/);
+  if (!plaats) return null;
+
+  const maatIndex = Number(plaats[1]);
+  const elementIndex = Number(plaats[2]);
+  const doel = partij.maten[maatIndex]?.elementen[elementIndex];
+  if (doel?.soort !== 'noot') return null;
+
+  const noten = partij.maten.flatMap((maat) => maat.elementen.filter((element) => element.soort === 'noot'));
+  const index = noten.indexOf(doel);
+  if (index < 0) return null;
+
+  for (let i = index - 1; i >= 0; i -= 1) {
+    if (noten[i].zekerheid >= 0.8) return structuredClone(noten[i].toonhoogte);
+  }
+  for (let i = index + 1; i < noten.length; i += 1) {
+    if (noten[i].zekerheid >= 0.8) return structuredClone(noten[i].toonhoogte);
+  }
+  return null;
+}
