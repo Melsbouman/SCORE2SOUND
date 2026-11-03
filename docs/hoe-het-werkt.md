@@ -23,6 +23,9 @@
 - `hermes/review.sh` en `hermes/hartslag.sh`.
 
 ## Wat te doen als er niets gebeurt
-1. Kijk of de laptop wakker is.
-2. Draai `bash hermes/hartslag.sh`.
-3. Kijk of er een taak met het label `agent-stuck` staat.
+- 1. Kijk of de laptop wakker is.
+- 2. Draai `bash hermes/hartslag.sh`.
+- 3. Kijk of er een taak met het label `agent-stuck` staat.
+
+## De PDF
+De server tekent de partituur met Verovio en zet elke pagina in een PDF met pdfkit. Over elke pagina komt het schuine watermerk SCORE2SOUND.
