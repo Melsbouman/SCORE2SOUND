@@ -10,8 +10,9 @@ import { existsSync, readFileSync } from 'node:fs';
 const FRONTEND_MAPPEN = ['app/public/'];
 // Bestanden waarin een nieuwe regel een nieuwe dependency kan zijn.
 const DEPENDENCY_BESTANDEN = /(^|\/)(package\.json|requirements[^/]*\.txt|pyproject\.toml)$/;
-// Bibliotheken waar Mels akkoord op gaf (plan van 29 oktober 2026). Een nieuwe komt hier pas na zijn akkoord bij.
-const TOEGESTANE_DEPENDENCIES = new Set(['fast-xml-parser', 'spessasynth_lib', 'verovio']);
+// Bibliotheken waar Mels akkoord op gaf (plan van 29 oktober 2026; pdfkit en svg-to-pdfkit op 3 november 2026, voor de PDF met watermerk).
+// Een nieuwe komt hier pas na zijn akkoord bij.
+const TOEGESTANE_DEPENDENCIES = new Set(['fast-xml-parser', 'spessasynth_lib', 'verovio', 'pdfkit', 'svg-to-pdfkit']);
 
 const args = process.argv.slice(2);
 const optie = (naam, standaard) => {
