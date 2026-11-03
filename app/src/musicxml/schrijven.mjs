@@ -141,10 +141,19 @@ function schrijfNotations(element, markering = {}) {
   if (element.legato?.eind) inhoud += leeg('slur', { type: 'stop', number: 1 });
   if (element.legato?.begin) inhoud += leeg('slur', { type: 'start', number: 1 });
   if (element.articulaties?.length) inhoud += tag('articulations', element.articulaties.map((naam) => leeg(naam === 'marcato' ? 'strong-accent' : naam)).join(''));
+  let ornaments = '';
   if (element.versiering) {
     const namen = { triller: 'trill-mark', mordent: 'mordent', dubbelslag: 'turn' };
-    if (namen[element.versiering]) inhoud += tag('ornaments', leeg(namen[element.versiering]));
+    if (namen[element.versiering]) ornaments += leeg(namen[element.versiering]);
   }
+  if (element.tremolo) ornaments += tag('tremolo', esc(element.tremolo.streepjes), { type: element.tremolo.type });
+  if (ornaments) inhoud += tag('ornaments', ornaments);
+  if (element.arpeggio) {
+    const direction = { omlaag: 'down', omhoog: 'up' }[element.arpeggio];
+    inhoud += leeg('arpeggiate', direction ? { direction } : {});
+  }
+  if (element.glissando?.begin) inhoud += leeg('glissando', { type: 'start', number: 1 });
+  if (element.glissando?.eind) inhoud += leeg('glissando', { type: 'stop', number: 1 });
   return inhoud ? tag('notations', inhoud) : '';
 }
 

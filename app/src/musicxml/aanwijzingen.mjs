@@ -171,10 +171,26 @@ export function leesNotaties(noteKnoop) {
     }
     const ornaments = kind(notations, 'ornaments');
     if (ornaments) {
-      const ornament = kinderen(ornaments)[0]?.naam;
+      const ornamenten = kinderen(ornaments);
+      const ornament = ornamenten[0]?.naam;
       if (ornament === 'trill-mark') resultaat.versiering = 'triller';
       if (ornament === 'mordent' || ornament === 'inverted-mordent') resultaat.versiering = 'mordent';
       if (ornament === 'turn') resultaat.versiering = 'dubbelslag';
+      const tremolo = ornamenten.find((item) => item.naam === 'tremolo');
+      const streepjes = tremolo ? getal(tremolo) : null;
+      if (streepjes !== null && ['single', 'start', 'stop'].includes(tremolo.attr.type)) {
+        resultaat.tremolo = { streepjes, type: tremolo.attr.type };
+      }
+    }
+    const arpeggiate = kind(notations, 'arpeggiate');
+    if (arpeggiate) {
+      resultaat.arpeggio = { down: 'omlaag', up: 'omhoog' }[arpeggiate.attr.direction] ?? true;
+    }
+    for (const teken of [...kinderen(notations, 'glissando'), ...kinderen(notations, 'slide')]) {
+      if (!['start', 'stop'].includes(teken.attr.type)) continue;
+      resultaat.glissando ??= { begin: false, eind: false };
+      if (teken.attr.type === 'start') resultaat.glissando.begin = true;
+      if (teken.attr.type === 'stop') resultaat.glissando.eind = true;
     }
   }
   const bindingen = [
@@ -194,6 +210,10 @@ export function leesDetails(noteKnoop) {
   const balk = kinderen(noteKnoop, 'beam').find((beam) => (beam.attr.number ?? '1') === '1');
   const naam = { begin: 'begin', continue: 'midden', end: 'eind' }[tekst(balk ?? { tekst: '' })];
   if (naam) uit.balk = naam;
+  const notaties = leesNotaties(noteKnoop);
+  for (const veld of ['tremolo', 'arpeggio', 'glissando']) {
+    if (notaties[veld] !== undefined) uit[veld] = notaties[veld];
+  }
   const modificatie = kind(noteKnoop, 'time-modification');
   if (modificatie) {
     const tuplets = kinderen(noteKnoop, 'notations').flatMap((notations) => kinderen(notations, 'tuplet'));

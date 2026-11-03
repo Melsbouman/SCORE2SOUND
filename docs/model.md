@@ -106,6 +106,9 @@ plek: { blad: 2, x: 637, y: 979, breedte: 16, hoogte: 14 }
   articulaties: [],              // 'staccato', 'accent', 'tenuto', 'marcato', 'staccatissimo'
   legato: { begin: false, eind: false },   // legatoboog
   versiering: null,              // 'triller', 'mordent', 'dubbelslag' of null
+  tremolo: { streepjes: 3, type: 'single' }, // alleen als aanwezig; type: 'single', 'start' of 'stop'
+  arpeggio: 'omlaag',             // alleen als aanwezig; true, 'omlaag' of 'omhoog'
+  glissando: { begin: true, eind: false }, // alleen als aanwezig; glijboog begint of eindigt op deze noot
   voorslag: { schuin: true },    // alleen bij een voorslag; duur is 0 en de noot wordt niet afgespeeld
   zekerheid: 1,
 }
