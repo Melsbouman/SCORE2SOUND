@@ -10,6 +10,7 @@ import {
   keurGoed,
   keurMaatGoed,
   kopieerMaten,
+  leegMaten,
 } from '/src/model/corrigeren.mjs';
 import { herstelMaatduur } from '/src/model/maatduur.mjs';
 import {
@@ -267,6 +268,9 @@ export function start(app) {
       });
       const kopieerKnop = maakTekstKnop('Kopiëren', onthoudGekozenMaten);
       kopieerKnop.setAttribute('aria-label', 'Onthoud de gekozen maten om te plakken');
+      const leegmaakKnop = maakTekstKnop('Maten leegmaken', () => {
+        pas(leegMaten(app.stand.partituur, gekozenMaat, gekozenTot ?? gekozenMaat));
+      });
       const herstelKnop = document.createElement('button');
       herstelKnop.type = 'button';
       herstelKnop.className = 'knop editor__knop';
@@ -279,7 +283,7 @@ export function start(app) {
         }
         pas(nieuw);
       });
-      const maatGroep = [knop, kopieerKnop, herstelKnop];
+      const maatGroep = [knop, kopieerKnop, leegmaakKnop, herstelKnop];
       if (gekopieerdeReeks !== null) {
         const plakKnop = maakTekstKnop('Plakken', plakGekopieerdeReeks);
         plakKnop.setAttribute('aria-label', 'Plak de gekopieerde maten vanaf de gekozen maat');
@@ -551,7 +555,13 @@ export function start(app) {
       return;
     }
     if (toets === 'Delete' || toets === 'Backspace') {
-      if (gekozenIds.length === 0) return;
+      if (gekozenIds.length === 0) {
+        if (gekozenMaat === null) return;
+        gebeurtenis.preventDefault();
+        gebeurtenis.stopImmediatePropagation();
+        pas(leegMaten(app.stand.partituur, gekozenMaat, gekozenTot ?? gekozenMaat));
+        return;
+      }
       gebeurtenis.preventDefault();
       gebeurtenis.stopImmediatePropagation();
       pas(verwijderAlle(app.stand.partituur, idsVoorBewerking()));
