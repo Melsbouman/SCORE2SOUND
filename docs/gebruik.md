@@ -30,7 +30,7 @@ Het scherm Onzekere noten toont een teller van de resterende onzekere noten en b
 Druk op het vraagteken (?) wanneer je nergens in een invoerveld zit om een dialoog te openen met toetsencombinaties: omhoog/omlaag verplaatsen een geselecteerde noot een stap (Shift+omhoog/omlaag een octaaf), links/rechts gaan naar vorige/volgende noot, N ga naar volgende onzekere noot, Enter keur de geselecteerde noot goed.
 
 ## Meerdere bestanden tegelijk openen
-Bij het uploaden van bestanden kan je meerdere bestanden tegelijk selecteren (bijvoorbeeld met Ctrl-klik of Shift-klik). Het systeem opent en voegt ze dan samen tot één partituur.
+Selecteer of sleep meer dan één bestand tegelijk om ze te openen. De bestanden worden een voor een verwerkt; de status toont welk bestand aan de beurt is. Geslaagde bestanden worden samengevoegd tot één partituur. Als een bestand niet lukt, vermeldt de status de naam; andere geslaagde bestanden worden wel geopend.
 
 ## Het lint bovenaan
 Zodra je een partituur hebt, staat bovenaan een balk met vijf tabbladen: Bestand, Start, Noten, Partij en Weergave. Start bevat afspelen, tempo, metronoom, voorinteller en een passage herhalen. Noten bevat de knoppen om noten aan te passen en Maat klopt. Partij bevat de mixer en het bewerken van partijen. Weergave bevat de zoomknoppen. Met Alt en een cijfer van 1 tot en met 5 kies je een tabblad. Het lint onthoudt het tabblad dat je laatst gebruikte.
@@ -67,6 +67,12 @@ Kies een noot of een maat en open het tabblad Aanduidingen. Klik op een term, bi
 
 ## De speler
 Onderaan staat de speler. Met de knop links ga je naar het begin, de ronde knop speelt af of pauzeert en de knop rechts gaat naar de volgende maat. De balk daaronder toont hoever het stuk is. Rechts stel je het tempo, de metronoom en de voorinteller in. Passage herhalen staat in het tabblad Start.
+
+## Het klikspoor
+Onderaan in de speler zet je het klikspoor aan of uit met het vakje Metronoom. Bij Maten vooraf kies je Geen, 1 maat of 2 maten voor de Voorinteller. De speler onthoudt deze keuzes in de browser.
+
+## Partijen verbergen in de notatie
+Open de mixer en gebruik bij een partij het vakje Tonen in de notatie. Haal het vinkje weg om die partij uit de notatie te verbergen. Zet het vinkje terug om de partij weer te tonen.
 
 ## Een tempo met een getal zetten
 Kies een noot of maat, open het tabblad Aanduidingen, typ bij Tempo (bpm) een getal van 20 tot en met 300 en klik op Zetten. Boven de balk verschijnt een kwartnoot met dat getal.
