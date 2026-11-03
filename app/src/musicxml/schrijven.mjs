@@ -1,4 +1,4 @@
-import { dynamiekUitTekst } from './aanwijzingen.mjs';
+import { dynamiekUitTekst } from '../model/dynamiek.mjs';
 
 const esc = (waarde) => String(waarde)
   .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');

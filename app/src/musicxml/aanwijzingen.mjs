@@ -1,4 +1,7 @@
 import { kind, kinderen, tekst, getal } from './xml.mjs';
+import { dynamiekUitTekst } from '../model/dynamiek.mjs';
+
+export { dynamiekUitTekst };
 
 const STANDAARD = {
   deelwaarden: 1,
@@ -7,16 +10,6 @@ const STANDAARD = {
   sleutels: [{ teken: 'G', lijn: 2, notenbalk: 1, octaafVerschuiving: 0 }],
   transpositie: { chromatisch: 0, diatonisch: 0 },
 };
-
-const DYNAMIEKTEKENS = new Set([
-  'pppp', 'ppp', 'pp', 'p', 'mp', 'mf', 'f', 'ff', 'fff', 'ffff',
-  'fp', 'sf', 'sfz', 'sfp', 'rfz',
-]);
-
-export function dynamiekUitTekst(waarde) {
-  const naam = String(waarde).trim().toLowerCase();
-  return DYNAMIEKTEKENS.has(naam) ? naam : null;
-}
 
 export function leesAttributen(attributesKnoop, huidig) {
   const stand = structuredClone(huidig ?? STANDAARD);
