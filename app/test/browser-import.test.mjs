@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 // Deze bestanden draaien ook in de browser, waar fast-xml-parser niet bestaat. Ze mogen die bibliotheek niet
 // laden, ook niet via een ander bestand dat ze importeren.
-const BROWSER_BESTANDEN = ['../src/musicxml/schrijven.mjs', '../src/model/dynamiek.mjs', '../src/model/corrigeren.mjs'];
+const BROWSER_BESTANDEN = ['../src/musicxml/schrijven.mjs', '../src/model/dynamiek.mjs', '../src/model/corrigeren.mjs', '../src/midi/hoorbaar.mjs', '../src/midi/schrijven.mjs', '../src/model/partijen.mjs', '../src/model/duur.mjs', '../src/midi/dynamiek.mjs', '../src/model/maten.mjs', '../src/midi/tijdlijn.mjs', '../src/model/instrumenten.mjs', '../src/model/partituurvolgorde.mjs', '../src/model/transponeren.mjs', '../src/controle/maatduur.mjs', '../src/model/maatduur.mjs', '../src/model/noten-bewerken.mjs', '../src/model/triolen.mjs', '../src/model/maten-bewerken.mjs', '../src/model/meerdere.mjs', '../src/model/titelgegevens.mjs', '../src/model/versies.mjs'];
 const hier = dirname(fileURLToPath(import.meta.url));
 
 async function importKeten(pad, gezien = new Set()) {
