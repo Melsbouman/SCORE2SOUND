@@ -55,3 +55,6 @@ Een rode noot is een noot waar de herkenning aan twijfelt. Tik hem aan en versch
 
 ## Suggestie bij een rode noot
 Kies een rode noot en klik op Suggestie toepassen in het blok Onzekere noten. De noot krijgt dan de toonhoogte van de dichtstbijzijnde noot waar de herkenning zeker van was. Klopt dat niet, verschuif de noot dan zelf met de pijlen.
+
+## Een maat kopiëren
+Tik een maat aan en kies in het tabblad Noten Maat kopiëren. Tik daarna de maat aan waar de noten heen moeten en kies Maat plakken.
