@@ -31,7 +31,51 @@ async function naarMusicXML(partituur) {
 }
 
 export function start(app) {
-  const vlak = document.getElementById('weergave');
+const vlak = document.getElementById('weergave');
+  if (localStorage.getItem('score2sound-zoom') === null) zoom = 0.8;
+
+  function wijzigZoom(stap) {
+    zoom = Math.min(2, Math.max(0.4, Math.round((zoom + stap) * 10) / 10));
+    localStorage.setItem('score2sound-zoom', String(zoom));
+    teken(huidige, { meteen: true, opnieuw: true });
+  }
+
+  function voegZoombalkToe() {
+    if (vlak.querySelector('.zoombalk')) return;
+    const titelblok = vlak.firstElementChild;
+    if (!titelblok) return;
+    const zoombalk = document.createElement('div');
+    zoombalk.className = 'zoombalk';
+    const kleiner = document.createElement('button');
+    kleiner.type = 'button';
+    kleiner.className = 'knop';
+    kleiner.textContent = '−';
+    kleiner.setAttribute('aria-label', 'Stuk kleiner');
+    kleiner.addEventListener('click', () => wijzigZoom(-0.1));
+    const percentage = document.createElement('button');
+    percentage.type = 'button';
+    percentage.className = 'knop';
+    percentage.textContent = Math.round(zoom * 100) + '%';
+    percentage.setAttribute('aria-label', 'Zoom terugzetten naar 80 procent');
+    percentage.addEventListener('click', () => wijzigZoom(0.8 - zoom));
+    const groter = document.createElement('button');
+    groter.type = 'button';
+    groter.className = 'knop';
+    groter.textContent = '+';
+    groter.setAttribute('aria-label', 'Stuk groter');
+    groter.addEventListener('click', () => wijzigZoom(0.1));
+    zoombalk.append(kleiner, percentage, groter);
+    titelblok.after(zoombalk);
+  }
+
+  vlak.addEventListener('wheel', (gebeurtenis) => {
+    if (!gebeurtenis.ctrlKey) return;
+    gebeurtenis.preventDefault();
+    if (gebeurtenis.deltaY !== 0) wijzigZoom(gebeurtenis.deltaY < 0 ? 0.1 : -0.1);
+  }, { passive: false });
+
+  new MutationObserver(voegZoombalkToe).observe(vlak, { childList: true });
+  voegZoombalkToe();
   let huidige = null; // de laatst aangevraagde MusicXML
   let laatstGetekend = null;
   let tekenNummer = 0;
