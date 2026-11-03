@@ -182,7 +182,12 @@ export function start(app) {
           const bijgewerkt = document.createElement('span');
           knop.type = 'button';
           knop.className = 'knop';
-          knop.append(document.createTextNode(project.naam));
+    const miniatuur = document.createElement('span');
+    miniatuur.className = 'projecten__miniatuur';
+    miniatuur.setAttribute('aria-hidden', 'true');
+    miniatuur.innerHTML = miniatuurSvg(project.naam);
+    knop.append(miniatuur);
+    knop.append(document.createTextNode(project.naam));
           bijgewerkt.className = 'zacht';
           bijgewerkt.textContent = `bijgewerkt op ${new Date(project.bijgewerkt).toLocaleString('nl-NL', {
             dateStyle: 'medium',
@@ -277,3 +282,5 @@ export function start(app) {
   app.op('project', teken);
   laadProjecten();
 }
+import { miniatuurSvg } from '../miniatuur.js';
+
