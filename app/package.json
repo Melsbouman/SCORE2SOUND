@@ -4,14 +4,18 @@
   "private": true,
   "description": "Van bladmuziek naar hoorbare, bewerkbare muziek",
   "type": "module",
-  "engines": { "node": ">=24" },
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "start": "node server.mjs",
     "test": "node --test --test-timeout=120000"
   },
   "dependencies": {
     "fast-xml-parser": "5.11.2",
+    "pdfkit": "0.20.2",
     "spessasynth_lib": "4.4.1",
+    "svg-to-pdfkit": "0.1.8",
     "verovio": "6.3.0"
   }
 }
