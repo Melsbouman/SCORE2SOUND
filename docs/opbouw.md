@@ -95,3 +95,6 @@ app/src/export/pdf.mjs maakt de PDF uit MusicXML (Verovio, pdfkit en svg-to-pdfk
 
 ## Aanduidingen en speler
 app/src/model/aanduidingen.mjs bevat de bibliotheek met termen en de regel voor boven of onder de balk. app/public/js/views/aanduidingen.js is het tabblad Aanduidingen. app/public/js/speler.js is de speler onderaan, met links de titel, in het midden de knoppen en de voortgangsbalk en rechts tempo en metronoom. app/src/model/stemming.mjs geeft de stemming van een instrument, zoals in B♭.
+
+## De pdf in onderdelen
+app/src/export/pdf.mjs tekent de pagina's (Verovio, pdfkit en svg-to-pdfkit), het titelblok, het watermerk en de paginanummers. app/src/server/pdf.mjs is de route /api/pdf. app/public/js/views/export.js heeft de knoppen PDF downloaden en Alle partijen (PDF zip).
