@@ -1,4 +1,9 @@
-import { onzekereElementen, keurGoed } from '/src/model/corrigeren.mjs';
+import {
+  onzekereElementen,
+  keurGoed,
+  suggestieToonhoogte,
+  zetToonhoogte,
+} from '/src/model/corrigeren.mjs';
 
 export function start(app) {
   const vlak = document.getElementById('onzeker');
@@ -59,9 +64,21 @@ export function start(app) {
 
     const knoppen = document.createElement('div');
     knoppen.className = 'onzeker__knoppen';
+    const suggestieKnop = maakKnop(
+      'Suggestie toepassen',
+      () => {
+        const toonhoogte = suggestieToonhoogte(app.stand.partituur, gekozen);
+        if (toonhoogte) {
+          app.zet({ partituur: zetToonhoogte(app.stand.partituur, gekozen, toonhoogte) });
+        }
+      },
+      gekozen === null || suggestieToonhoogte(partituur, gekozen) === null,
+    );
+    suggestieKnop.setAttribute('aria-label', 'Pas de voorgestelde toonhoogte toe op de gekozen noot');
     knoppen.append(
       maakKnop('Vorige', () => kiesOnzeker(-1), ids.length === 0),
       maakKnop('Volgende', () => kiesOnzeker(1), ids.length === 0),
+      suggestieKnop,
       maakKnop(
         bevestigen ? 'Bevestig alles goedkeuren' : 'Alles goedkeuren',
         keurAllesGoed,
@@ -88,6 +105,7 @@ export function start(app) {
   });
   app.op('kies-noot', ({ id }) => {
     gekozen = id;
+    teken();
   });
   teken();
 }
