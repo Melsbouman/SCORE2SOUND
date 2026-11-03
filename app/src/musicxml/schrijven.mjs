@@ -348,11 +348,13 @@ function naarMusicXMLZonderArrangeur(partituur, opties = {}) {
   let hoofd = '';
   if (partituur.titel) hoofd += tag('work', tag('work-title', esc(partituur.titel)));
   if (partituur.componist) hoofd += tag('identification', tag('creator', esc(partituur.componist), { type: 'composer' }));
+  const meerPartijen = partijen.length > 1;
   hoofd += tag('part-list', partijen.map((partij) => {
-    let inhoud = opties.weergave
+    let inhoud = opties.weergave && !meerPartijen
       ? tag('part-name', esc(partij.naam), { 'print-object': 'no' })
       : tag('part-name', esc(partij.naam));
-    if (opties.weergave) inhoud += leeg('part-abbreviation-display', { 'print-object': 'no' });
+    if (opties.weergave && !meerPartijen) inhoud += leeg('part-abbreviation-display', { 'print-object': 'no' });
+    else if (opties.weergave && meerPartijen) inhoud += tag('part-abbreviation', esc(partij.afkorting || partij.naam));
     else if (partij.afkorting) inhoud += tag('part-abbreviation', esc(partij.afkorting));
     inhoud += tag('midi-instrument', tag('midi-program', partij.instrument.midiProgramma + 1), { id: `${partij.id}-I1` });
     return tag('score-part', inhoud, { id: partij.id });
