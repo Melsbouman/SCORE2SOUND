@@ -86,3 +86,6 @@ Er zijn accounts, maar ze worden aangeboden via een uitnodigingscode. Dit contro
 
 ## PDF met watermerk
 De server maakt de PDF met pdfkit en svg-to-pdfkit (akkoord van Mels op 3 november 2026). Elke pagina krijgt het watermerk SCORE2SOUND. Lukt dat niet, dan opent de browser het afdrukvenster.
+
+## Lint en vaste speler
+Het lint met tabbladen staat boven de partituur. De speler staat buiten het lint, vast onderaan, zodat hij blijft zichtbaar als je van tabblad wisselt (gevonden en opgelost op 3 november 2026).
