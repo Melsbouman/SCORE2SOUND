@@ -7,6 +7,7 @@ import {
   maakRust,
   keurGoed,
   keurMaatGoed,
+  kopieerMaat,
 } from '/src/model/corrigeren.mjs';
 import { herstelMaatduur } from '/src/model/maatduur.mjs';
 import {
@@ -53,6 +54,7 @@ export function start(app) {
   let gekozen = null;
   let gekozenIds = [];
   let gekozenMaat = null;
+  let gekopieerdeMaat = null;
   let statusBalk = null;
   let vorigePartituur = app.stand.partituur;
   let bezigMetGeschiedenis = false;
@@ -246,6 +248,11 @@ export function start(app) {
         }
         pas(nieuw);
       });
+      const kopieerKnop = maakTekstKnop('Maat kopiëren', () => {
+        gekopieerdeMaat = gekozenMaat;
+        teken();
+      });
+      kopieerKnop.setAttribute('aria-label', 'Onthoud de gekozen maat om te plakken');
       const herstelKnop = document.createElement('button');
       herstelKnop.type = 'button';
       herstelKnop.className = 'knop editor__knop';
@@ -258,7 +265,18 @@ export function start(app) {
         }
         pas(nieuw);
       });
-      const maatGroep = [knop, herstelKnop];
+      const maatGroep = [knop, kopieerKnop, herstelKnop];
+      if (gekopieerdeMaat !== null) {
+        const plakKnop = maakTekstKnop('Maat plakken', () => {
+          let nieuw = app.stand.partituur;
+          for (const partij of nieuw.partijen) {
+            nieuw = kopieerMaat(nieuw, partij.id, gekopieerdeMaat, gekozenMaat);
+          }
+          pas(nieuw);
+        });
+        plakKnop.setAttribute('aria-label', 'Plak de gekopieerde maat in de gekozen maat');
+        maatGroep.push(plakKnop);
+      }
       const bronMaat = app.stand.partituur.partijen
         .map((partij) => partij.maten.find((maat) => maat.index === gekozenMaat))
         .find(Boolean);
