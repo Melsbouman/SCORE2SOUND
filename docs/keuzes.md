@@ -101,3 +101,6 @@ De pdf bevat notenbalken, noten, stokken en balken, een schuin watermerk, pagina
 
 ## Wat de herkenning achteraf herstelt
 Audiveris leest soms de verkeerde maatsoort (9/8 of 5/4 als 6/8 of 4/4) en slaat maten rust aan het begin over. We herstellen de maatsoort uit de inhoud van de maat (herstelMaatsoorten) en zetten de maten rust voor het eerste repetitiecijfer terug (vulBeginRust). Dat gebeurt alleen bij herkende bladmuziek, niet bij een MusicXML-bestand dat je zelf opent.
+
+## De herstelketen van de herkenning
+Na het lezen van de uitvoer van Audiveris volgen vier stappen in vaste volgorde: de maatsoort uit de inhoud van de maat afleiden, de maten rust aan het begin terugzetten uit het eerste repetitiecijfer, ontbrekende maten tussen repetitiecijfers vullen (een lege maat wordt een samengestelde rust, anders komen er onzekere rustmaten bij) en verdachte noten die ver van hun buren liggen rood maken. Alles wat onzeker is, staat rood.
