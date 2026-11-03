@@ -67,3 +67,6 @@ Kies een noot of een maat en open het tabblad Aanduidingen. Klik op een term, bi
 
 ## De speler
 Onderaan staat de speler. Met de knop links ga je naar het begin, de ronde knop speelt af of pauzeert en de knop rechts gaat naar de volgende maat. De balk daaronder toont hoever het stuk is. Rechts stel je het tempo, de metronoom en de voorinteller in. Passage herhalen staat in het tabblad Start.
+
+## Een tempo met een getal zetten
+Kies een noot of maat, open het tabblad Aanduidingen, typ bij Tempo (bpm) een getal van 20 tot en met 300 en klik op Zetten. Boven de balk verschijnt een kwartnoot met dat getal.
