@@ -47,5 +47,9 @@ export function start(app) {
   }
 
   app.op('partituur', teken);
+  app.op('partituur', (partituur) => {
+    const naam = partituur?.titel?.trim();
+    document.title = naam ? naam + ' – SCORE2SOUND' : 'SCORE2SOUND';
+  });
   teken();
 }
