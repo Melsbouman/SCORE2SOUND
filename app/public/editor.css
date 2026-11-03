@@ -332,3 +332,10 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
 .werkvlak > .lint { position: static; }
 .werkvlak > .lint[data-tab="Noten"] { position: sticky; top: 0; z-index: 20; }
 @media (min-width: 1200px) { .editor-knoppengroep__kop { display: none; } .editor-knoppenbalk { flex-wrap: nowrap; gap: 6px 10px; padding: 6px 10px; overflow-x: auto; } .editor-knoppengroep { padding-right: 10px; } .editor-knoppengroep__knoppen { flex-wrap: nowrap; gap: 2px; } .editor-knoppenbalk button { min-width: 32px; height: 34px; padding: 0 5px; } .editor-knoppenbalk .muzieksymbool { font-size: 1.35rem; } }
+
+@media (min-width: 900px) and (max-width: 1150px) {
+  #speler { grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr) minmax(0, 1.3fr); gap: 12px; }
+  #speler .speler__rechts { flex-wrap: wrap; justify-content: flex-end; gap: 4px 12px; white-space: normal; }
+  #speler .speler__rechts input[type="range"] { flex: 0 0 70px; width: 70px; }
+  #speler .speler__titel, #speler .speler__partij { max-width: 14ch; }
+}
