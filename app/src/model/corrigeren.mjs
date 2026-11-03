@@ -326,3 +326,22 @@ export function voegHaakToe(partituur, partijId, vanMaat, vanStart, totMaat, tot
   const metBegin = voegAanwijzingToe(partituur, partijId, vanMaat, vanStart, soort, 'begin');
   return voegAanwijzingToe(metBegin, partijId, totMaat, totStart, soort, 'eind');
 }
+
+export function leegMaten(partituur, van, tot) {
+  const aantalMaten = Math.max(0, ...partituur.partijen.map((partij) => partij.maten.length));
+  if (van < 0 || van > tot || tot >= aantalMaten) return partituur;
+
+  const nieuw = structuredClone(partituur);
+  for (const partij of nieuw.partijen) {
+    for (let index = van; index <= tot; index += 1) {
+      const maat = partij.maten[index];
+      if (!maat) continue;
+      maat.elementen = [{
+        soort: 'rust', start: 0,
+        duur: Math.round(maat.maatsoort.teller * 1920 / maat.maatsoort.noemer),
+        stem: 1, notenbalk: 1, heleMaat: true, zekerheid: 1,
+      }];
+    }
+  }
+  return nieuw;
+}
