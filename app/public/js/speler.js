@@ -151,6 +151,7 @@ let doelMaat = null;
     knoppen.append(stop, speel, volgende);
     const voortgang = document.createElement('div');
     voortgang.className = 'speler__voortgang';
+    voortgang.tabIndex = 0;
     voortgang.setAttribute('role', 'progressbar');
     voortgang.setAttribute('aria-label', 'Voortgang');
     voortgang.setAttribute('aria-valuemin', '0');
@@ -159,6 +160,36 @@ let doelMaat = null;
     voortgangVulling = document.createElement('span');
     voortgangVulling.style.width = '0%';
     voortgang.append(voortgangVulling);
+    const zoekMaat = (maat) => {
+      const aantalMaten = app.stand.partituur.partijen[0].maten.length;
+      if (!aantalMaten) return;
+      voortgangVulling.style.width = `${(maat + 1) / aantalMaten * 100}%`;
+      voortgang.setAttribute('aria-valuenow', String((maat + 1) / aantalMaten * 100));
+      app.meld('naar-maat', { maat });
+    };
+    const zoekVanafPointer = (gebeurtenis) => {
+      const kader = voortgang.getBoundingClientRect();
+      const aantalMaten = app.stand.partituur.partijen[0].maten.length;
+      if (!aantalMaten || !kader.width) return;
+      const fractie = Math.min(1, Math.max(0, (gebeurtenis.clientX - kader.left) / kader.width));
+      const maat = Math.round(fractie * (aantalMaten - 1));
+      zoekMaat(maat);
+    };
+    voortgang.addEventListener('pointerdown', (gebeurtenis) => {
+      voortgang.setPointerCapture(gebeurtenis.pointerId);
+      zoekVanafPointer(gebeurtenis);
+    });
+    voortgang.addEventListener('pointermove', (gebeurtenis) => {
+      if (gebeurtenis.buttons) zoekVanafPointer(gebeurtenis);
+    });
+    voortgang.addEventListener('keydown', (gebeurtenis) => {
+      if (gebeurtenis.key !== 'ArrowLeft' && gebeurtenis.key !== 'ArrowRight') return;
+      gebeurtenis.preventDefault();
+      const aantalMaten = app.stand.partituur.partijen[0].maten.length;
+      if (!aantalMaten) return;
+      const huidige = speelMaat ?? doelMaat ?? 0;
+      zoekMaat(Math.min(aantalMaten - 1, Math.max(0, huidige + (gebeurtenis.key === 'ArrowRight' ? 1 : -1))));
+    });
     midden.append(knoppen, voortgang);
     const rechts = document.createElement('div');
     rechts.className = 'speler__rechts';
