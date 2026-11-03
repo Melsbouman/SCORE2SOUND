@@ -17,3 +17,10 @@
   .zijbalk__logo { width: 100%; margin-bottom: 6px; }
   .zijbalk__nieuw, .zijbalk__vul, .zijbalk__voet { display: none; }
 }
+@media (max-width: 600px) {
+  #speler .speler__passage, #speler .speler__veld:has(select), #speler .speler__veld:has(input[type="checkbox"]), #speler > span, #speler > p { display: none; }
+  #speler { padding-top: 8px; padding-bottom: 8px; }
+  #speler .speler__knoppen { margin-bottom: 4px; }
+  body:has(#speler) .werkvlak { padding-bottom: 140px; }
+  .kop h1 { display: none; }
+}
