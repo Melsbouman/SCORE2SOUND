@@ -20,3 +20,14 @@ Je exporteert naar MusicXML door op de knop 'Exporteer als MusicXML' te klikken.
 
 ## Bewaren
 Je bewaart je werk door op de knop 'Bewaar' te klikken. Na het opslaan zie je een bevestigingsbericht en wordt je werk veilig opgeslagen in de cloud.
+## Tempo per maat aanpassen
+In het Temposcherm kan je het tempo voor elke maat aanpassen. De lijst toont de BPM per maat; klik op een tempo-indicatie in de partituur om die BPM te bewerken, of gebruik het formulier om een nieuw tempo toe te voegen of te verwijderen per maat.
+
+## Door de onzekere noten lopen
+Het scherm Onzekere noten toont een teller van de resterende onzekere noten en bevat Vorige-/Volgende-knoppen om tussen hen te navigeren. Je kunt ook N (volgende) en P (vorige) op het toetsenbord gebruiken om door de onzekere noten te lopen.
+
+## De sneltoetsen bekijken
+Druk op het vraagteken (?) wanneer je nergens in een invoerveld zit om een dialoog te openen met toetsencombinaties: omhoog/omlaag verplaatsen een geselecteerde noot een stap (Shift+omhoog/omlaag een octaaf), links/rechts gaan naar vorige/volgende noot, N ga naar volgende onzekere noot, Enter keur de geselecteerde noot goed.
+
+## Meerdere bestanden tegelijk openen
+Bij het uploaden van bestanden kan je meerdere bestanden tegelijk selecteren (bijvoorbeeld met Ctrl-klik of Shift-klik). Het systeem opent en voegt ze dan samen tot één partituur.
