@@ -161,3 +161,6 @@ De SCORE2SOUND-app biedt de volgende API-adressen voor uitbreiding en testen. Di
 
 ## Inhoud van de pdf
 De pdf bevat de notenbalken, noten, stokken en balken, een schuin watermerk SCORE2SOUND op elke pagina en geen voetregel van Verovio.
+
+## /api/pdf met een titelblok
+De body mag ook JSON zijn: { "musicxml": "...", "titelblok": { "titel": "", "componist": "", "arrangeur": "", "partij": "" } }. Dan staan de titel, de partijnaam, de componist en arr. met de arrangeur bovenaan de pdf. Een ongeldige JSON geeft 400.
