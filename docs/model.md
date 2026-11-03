@@ -173,3 +173,6 @@ Tempo-, expressie-, spelwijze- en structuurtekst staat altijd boven de balk. Dyn
 
 ## Haken (crescendo en decrescendo)
 Een haak is twee aanwijzingen met type crescendo of decrescendo: eerst met waarde begin, daarna met waarde eind. voegHaakToe in app/src/model/corrigeren.mjs zet ze op de juiste plek. Een haak staat altijd onder de balk.
+
+## Maten leegmaken
+leegMaten(partituur, van, tot) in app/src/model/corrigeren.mjs vervangt alle elementen van de maten van tot en met tot, voor alle partijen, door een hele maat rust met de duur van de maatsoort.
