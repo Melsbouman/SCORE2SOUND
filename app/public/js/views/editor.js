@@ -591,6 +591,14 @@ export function start(app) {
       }
       return;
     }
+    if ((gebeurtenis.ctrlKey || gebeurtenis.metaKey) && toets.toLowerCase() === 'a' && partituur) {
+      gebeurtenis.preventDefault();
+      gebeurtenis.stopImmediatePropagation();
+      const aantalMaten = Math.max(...partituur.partijen.map((partij) => partij.maten.length));
+      app.meld('kies-noot', { id: null });
+      app.meld('kies-maat', aantalMaten > 1 ? { maat: 0, tot: aantalMaten - 1 } : { maat: 0 });
+      return;
+    }
     if (gekozenIds.length === 0) return;
 
     let actie = null;
