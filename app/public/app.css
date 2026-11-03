@@ -180,6 +180,11 @@ main:has(#weergave g.measure) #hulp { display: none; }
   overflow-wrap: anywhere;
 }
 .bladmuziek__ondertitel { margin: var(--ruimte-1) 0 0; font-size: 1.1rem; overflow-wrap: anywhere; }
+.bladmuziek__aanpasbaar { cursor: text; }
+.bladmuziek__aanpasbaar:hover { text-decoration: underline; }
+.bladmuziek__aanpasbaar:focus,
+.bladmuziek__titel-invoer:focus { background: #f0f4f8; }
+.bladmuziek__titel-invoer { max-width: 100%; font: inherit; color: inherit; text-align: inherit; }
 .bladmuziek__details {
   display: flex;
   flex-wrap: wrap;
