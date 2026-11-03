@@ -6,11 +6,17 @@ import schrijfSvgNaarPdf from 'svg-to-pdfkit';
 
 const verovioOpties = { footer: 'none', header: 'none' };
 
+function voegAttribuutToe(tag, naam, waarde) {
+  const attribuut = new RegExp(`(\\s${naam}\\s*=\\s*)(?:"[^"]*"|'[^']*')`);
+  if (attribuut.test(tag)) return tag.replace(attribuut, `$1"${waarde}"`);
+  return tag.replace(/^<[\w:-]+/, `$& ${naam}="${waarde}"`);
+}
+
 function SVGtoPDF(document, svg, ...opties) {
   void verovioOpties;
   const svgMetLijnen = svg.replace(
     /<(path|rect|ellipse|polygon|polyline)\b([^>]*\bstroke-width=(?:"[^"]*"|'[^']*')[^>]*)>/g,
-    '<$1 fill="none" stroke="#000000"$2>',
+    (tag) => voegAttribuutToe(voegAttribuutToe(tag, 'fill', 'none'), 'stroke', '#000000'),
   );
   return schrijfSvgNaarPdf(document, svgMetLijnen, ...opties);
 }
