@@ -303,3 +303,4 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
 .aanduidingen__knop { padding: 4px 12px; color: #0d150b; background: transparent; border: 1px solid var(--kleur-lijn); border-radius: 6px; font-size: 0.85rem; }
 .aanduidingen__knop:hover:not(:disabled) { background: #0d150b14; }
 .aanduidingen__knop:disabled { opacity: 0.4; }
+#corrigeren { display: none; }
