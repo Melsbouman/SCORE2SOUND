@@ -11,26 +11,55 @@ export function vulOntbrekendeMaten(partituur) {
     ));
     return aanwijzing ? [{ index, nummer: Number(String(aanwijzing.waarde).trim()) }] : [];
   });
-  const invoegingen = [];
+  const gaten = [];
   for (let index = 1; index < cijfers.length; index += 1) {
     const vorige = cijfers[index - 1];
     const huidige = cijfers[index];
     const verwacht = huidige.nummer - vorige.nummer;
     const werkelijk = huidige.index - vorige.index;
     const aantal = verwacht - werkelijk;
-    if (verwacht > 0 && aantal > 0 && aantal <= 40) invoegingen.push({ index: huidige.index, aantal });
+    if (verwacht > 0 && aantal > 0 && aantal <= 40) {
+      const leeg = [];
+      for (let maatIndex = vorige.index; maatIndex < huidige.index; maatIndex += 1) {
+        const maat = eerstePartij.maten[maatIndex];
+        if (maat && !maat.elementen.some((element) => ['noot', 'rust'].includes(element.soort))) {
+          leeg.push(maatIndex);
+        }
+      }
+      gaten.push({ index: huidige.index, aantal, leeg });
+    }
   }
 
   for (const partij of kopie.partijen) {
-    const ingevoegdeMaten = new Set();
-    for (const invoeging of invoegingen.toReversed()) {
-      const volgende = partij.maten[invoeging.index];
+    const origineleIndex = new Map(partij.maten.map((maat, index) => [maat, index]));
+    const ingevoegdeMaten = new Map();
+    for (const gat of gaten.toReversed()) {
+      if (gat.leeg.length > 0) {
+        const perMaat = 1 + Math.floor(gat.aantal / gat.leeg.length);
+        const extra = gat.aantal % gat.leeg.length;
+        gat.leeg.forEach((maatIndex, index) => {
+          const maat = partij.maten[maatIndex];
+          if (!maat) return;
+          const maatrust = perMaat + (index < extra ? 1 : 0);
+          maat.maatrust = maatrust;
+          maat.elementen = [{
+            soort: 'rust',
+            start: 0,
+            duur: Math.round(maat.maatsoort.teller * 1920 / maat.maatsoort.noemer),
+            stem: 1,
+            notenbalk: 1,
+            heleMaat: true,
+            zekerheid: 0.3,
+          }];
+        });
+        continue;
+      }
+
+      const volgende = partij.maten[gat.index];
       if (!volgende) continue;
       const nummerVolgende = Number(volgende.nummer);
-      const eerderIngevoegd = invoegingen.reduce((totaal, andere) => (
-        totaal + (andere.index < invoeging.index ? andere.aantal : 0)
-      ), 0);
-      const nieuweMaten = Array.from({ length: invoeging.aantal }, (_, index) => {
+      const eerderIngevoegd = extraVoorIndex(gaten, gat.index);
+      const nieuweMaten = Array.from({ length: gat.aantal }, (_, index) => {
         const nieuweMaat = structuredClone(volgende);
         nieuweMaat.nummer = Number.isInteger(nummerVolgende)
           ? String(nummerVolgende + eerderIngevoegd + index)
@@ -48,10 +77,10 @@ export function vulOntbrekendeMaten(partituur) {
           heleMaat: true,
           zekerheid: 0.3,
         }];
-        ingevoegdeMaten.add(nieuweMaat);
+        ingevoegdeMaten.set(nieuweMaat, true);
         return nieuweMaat;
       });
-      partij.maten.splice(invoeging.index, 0, ...nieuweMaten);
+      partij.maten.splice(gat.index, 0, ...nieuweMaten);
     }
 
     partij.maten.forEach((maat, index) => {
@@ -59,11 +88,24 @@ export function vulOntbrekendeMaten(partituur) {
       if (!ingevoegdeMaten.has(maat)) {
         const oorspronkelijkNummer = Number(maat.nummer);
         if (Number.isInteger(oorspronkelijkNummer)) {
-          const eerderIngevoegd = invoegingen.reduce((totaal, invoeging) => totaal + (index >= invoeging.index + invoeging.aantal ? invoeging.aantal : 0), 0);
-          maat.nummer = String(oorspronkelijkNummer + eerderIngevoegd);
+          const oorspronkelijkeIndex = origineleIndex.get(maat);
+          maat.nummer = String(oorspronkelijkNummer + extraVoorIndex(gaten, oorspronkelijkeIndex, true));
         }
       }
     });
   }
   return kopie;
+}
+
+function extraVoorIndex(gaten, index, invoegingOpIndexTeltMee = false) {
+  return gaten.reduce((totaal, gat) => {
+    if (gat.leeg.length === 0) {
+      return totaal + (gat.index < index || (invoegingOpIndexTeltMee && gat.index === index) ? gat.aantal : 0);
+    }
+    return totaal + gat.leeg.reduce((extra, maatIndex, maatPositie) => (
+      extra + (maatIndex < index
+        ? Math.floor(gat.aantal / gat.leeg.length) + (maatPositie < gat.aantal % gat.leeg.length ? 1 : 0)
+        : 0)
+    ), 0);
+  }, 0);
 }
