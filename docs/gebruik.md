@@ -31,3 +31,9 @@ Druk op het vraagteken (?) wanneer je nergens in een invoerveld zit om een dialo
 
 ## Meerdere bestanden tegelijk openen
 Bij het uploaden van bestanden kan je meerdere bestanden tegelijk selecteren (bijvoorbeeld met Ctrl-klik of Shift-klik). Het systeem opent en voegt ze dan samen tot één partituur.
+
+## Het lint bovenaan
+Zodra je een partituur hebt, staat bovenaan een balk met vijf tabbladen: Bestand, Start, Noten, Partij en Weergave. Start bevat afspelen, tempo, metronoom, voorinteller en een passage herhalen. Noten bevat de knoppen om noten aan te passen en Maat klopt. Partij bevat de mixer en het bewerken van partijen. Weergave bevat de zoomknoppen. Met Alt en een cijfer van 1 tot en met 5 kies je een tabblad. Het lint onthoudt het tabblad dat je laatst gebruikte.
+
+## Titel, componist en arrangeur aanpassen
+Onder het tabblad Bestand pas je de titel, de componist en de arrangeur aan. Ze staan daarna ook in de MusicXML en in de PDF.
