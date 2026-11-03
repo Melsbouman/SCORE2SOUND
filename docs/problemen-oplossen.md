@@ -20,3 +20,6 @@ Controleer dat de uitnodigingscode klopt. Wachtwoord moet minstens 10 tekens zij
 
 ## De container start niet
 Voer `docker compose logs app` uit om de foutmelding te zien.
+
+## Ik kan niet inloggen
+Is er nog geen account en zijn er geen uitnodigingscodes ingesteld, dan kun je je eerste account registreren zonder code. Heb je een tweede account nodig, dan is een uitnodigingscode verplicht. Start de server opnieuw na een wijziging.
