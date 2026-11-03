@@ -1,8 +1,25 @@
 @font-face {
-  font-family: 'Archivo';
-  src: url('fonts/Archivo-latin.woff2') format('woff2');
-  font-weight: 400 900;
-  font-stretch: 100% 125%;
+  font-family: 'Archivo Black';
+  src: url('fonts/ArchivoBlack-latin.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Bodoni Moda';
+  src: url('fonts/BodoniModa-latin.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Poppins';
+  src: url('fonts/Poppins-400-latin.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Poppins';
+  src: url('fonts/Poppins-600-latin.woff2') format('woff2');
+  font-weight: 600;
   font-display: swap;
 }
 
@@ -24,7 +41,10 @@
   --ruimte-5: 40px;
   --hoek: 6px;
   --schaduw: none;
-  --letter: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --letter: 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --letter-kop: 'Bodoni Moda', 'Bodoni 72', Didot, Georgia, serif;
+  --letter-logo: 'Archivo Black', 'Arial Black', sans-serif;
+  --kleur-licht: #c7e3b0;
   --kleur-zijbalk: #1c4a14;
   --kleur-donker: #0d150b;
   --kleur-wit: #ffffff;
@@ -40,6 +60,7 @@ body {
 }
 .kop { padding: var(--ruimte-3) var(--ruimte-4); border-bottom: 1px solid var(--kleur-lijn); }
 .kop h1 { margin: 0; font-size: 20px; }
+.kop h1 .logo__2 { color: var(--kleur-accent); }
 .kop p { margin: var(--ruimte-1) 0 0; color: var(--kleur-tekst); }
 .werkvlak {
   padding: var(--ruimte-3);
@@ -75,8 +96,8 @@ body {
 .werkvlak section:empty { display: none; }
 .werkvlak h2 {
   font-size: 0.95rem;
-  font-weight: 800;
-  font-stretch: 125%;
+  font-family: var(--letter-kop);
+  font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -233,7 +254,7 @@ main:has(#weergave g.measure) #hulp { display: none; }
   border: 1px solid var(--kleur-accent);
   border-radius: 50px;
   font: inherit;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
 }
 .knop--hoofd { color: var(--kleur-op-accent); background: var(--kleur-accent); border-color: var(--kleur-accent); }
@@ -346,8 +367,8 @@ main:has(#weergave g.measure) #hulp { display: none; }
 .kop { position: sticky; top: 0; z-index: 10; background: var(--kleur-vlak); box-shadow: var(--schaduw); }
 .kop h1 {
   font-size: clamp(1.9rem, 3.6vw, 2.9rem);
-  font-weight: 800;
-  font-stretch: 125%;
+  font-family: var(--letter-logo);
+  font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
