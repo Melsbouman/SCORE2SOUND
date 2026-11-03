@@ -537,3 +537,5 @@ body:has(#speler) .werkvlak { padding-bottom: calc(40vh + var(--ruimte-4)); }
 #upload ol { display: none; }
 #voorbeeld { background: transparent; border: 0; box-shadow: none; padding: 0 0 var(--ruimte-3); margin-top: calc(var(--ruimte-3) * -1); }
 #hulp { margin-top: 0; }
+.bladmuziek__details { display: flex; justify-content: space-between; align-items: flex-start; }
+.bladmuziek__maker { text-align: right; display: grid; gap: 2px; }

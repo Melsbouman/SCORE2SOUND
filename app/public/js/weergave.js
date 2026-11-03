@@ -194,25 +194,31 @@ const vlak = document.getElementById('weergave');
         titelblok.append(kop);
       }
       if (partijnaam || componist || arrangeur) {
+        const { partijTitel } = await import('/src/model/stemming.mjs');
         const details = document.createElement('div');
         details.className = 'bladmuziek__details';
-        if (partijnaam) {
-          const partij = document.createElement('span');
-          partij.textContent = partijnaam;
-          details.append(partij);
-        }
+        const partij = document.createElement('span');
+        partij.textContent = partijTitel(gegevens.partijen[0]);
+        details.append(partij);
+        const maker = document.createElement('div');
+        maker.className = 'bladmuziek__maker';
         if (componist) {
-          const maker = document.createElement('span');
-          maker.textContent = componist;
-          maakAanpasbaar(maker, 'componist');
-          details.append(maker);
+          const componistNaam = document.createElement('span');
+          componistNaam.textContent = componist;
+          maakAanpasbaar(componistNaam, 'componist');
+          maker.append(componistNaam);
         }
         if (arrangeur) {
+          const arrangeurRegel = document.createElement('div');
+          const label = document.createElement('span');
+          label.textContent = 'arr. ';
           const bewerker = document.createElement('span');
           bewerker.textContent = arrangeur;
           maakAanpasbaar(bewerker, 'arrangeur');
-          details.append(bewerker);
+          arrangeurRegel.append(label, bewerker);
+          maker.append(arrangeurRegel);
         }
+        details.append(maker);
         titelblok.append(details);
       }
       blad.append(titelblok);
