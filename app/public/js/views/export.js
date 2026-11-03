@@ -36,6 +36,11 @@ export function start(app) {
     musicXmlKnop.className = 'knop'
     musicXmlKnop.textContent = 'MusicXML downloaden'
 
+    const mxlKnop = document.createElement('button')
+    mxlKnop.type = 'button'
+    mxlKnop.className = 'knop'
+    mxlKnop.textContent = 'Gecomprimeerd (.mxl) downloaden'
+
     const partijenZipKnop = document.createElement('button')
     partijenZipKnop.type = 'button'
     partijenZipKnop.className = 'knop'
@@ -150,6 +155,23 @@ export function start(app) {
       }
     })
 
+    mxlKnop.addEventListener('click', async () => {
+      try {
+        const [{ naarMusicXML }, { maakMxl }] = await Promise.all([
+          import('/src/musicxml/schrijven.mjs'),
+          import('/src/musicxml/mxl.mjs'),
+        ])
+        const blob = new Blob([maakMxl(naarMusicXML(partituur))], {
+          type: 'application/vnd.recordare.musicxml'
+        })
+        const naam = bestandsnaam(partituur, 'mxl')
+        download(blob, naam)
+        status.textContent = 'Gedownload: ' + naam
+      } catch {
+        status.textContent = 'Exporteren lukte niet. Probeer het opnieuw.'
+      }
+    })
+
     midiKnop.addEventListener('click', async () => {
       try {
         const { schrijfMidi } = await import('/src/midi/schrijven.mjs')
@@ -199,6 +221,6 @@ export function start(app) {
       partijAudioKnop.disabled = false
     })
 
-    vlak.append(kop, musicXmlKnop, partijenZipKnop, midiKnop, audioKnop, partijKeuze, partijAudioKnop, printKnop, status)
+    vlak.append(kop, musicXmlKnop, mxlKnop, partijenZipKnop, midiKnop, audioKnop, partijKeuze, partijAudioKnop, printKnop, status)
   })
 }
