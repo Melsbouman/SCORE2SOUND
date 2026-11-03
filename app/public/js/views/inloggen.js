@@ -130,7 +130,7 @@ export function start() {
       const verwijderenFormulier = verwijderenSectie.querySelector('form');
       const verwijderenFout = verwijderenSectie.querySelector('[role="status"]');
       gebruiker.append(email, uitloggen, foutElement, wijzigKnop, wijzigSectie, verwijderenKnop, verwijderenSectie);
-      kop.append(gebruiker);
+      const accountVak = document.getElementById("account"); (accountVak ?? kop).append(gebruiker);
 
       wijzigKnop.addEventListener('click', () => {
         wijzigSectie.hidden = !wijzigSectie.hidden;
