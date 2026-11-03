@@ -28,3 +28,5 @@ De muziektermen in SCORE2SOUND, met de term uit MusicXML. Gebruik in teksten van
 | onzekere noot | (geen) | een noot waar de herkenning aan twijfelt; de app kleurt hem rood |
 | lint | (geen) | de balk met tabbladen boven de partituur: Bestand, Start, Noten, Partij en Weergave |
 | watermerk | (geen) | de tekst SCORE2SOUND die schuin over elke pagina van de PDF staat |
+| suggestie | (geen) | de toonhoogte die de app voorstelt voor een rode noot, op basis van de dichtstbijzijnde zekere noot |
+| vaste speler | (geen) | de balk onderaan het scherm met afspelen, tempo, metronoom en voorinteller |
