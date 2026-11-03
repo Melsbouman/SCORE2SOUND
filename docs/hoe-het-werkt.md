@@ -31,4 +31,7 @@
 De server tekent de partituur met Verovio en zet elke pagina in een PDF met pdfkit. Over elke pagina komt het schuine watermerk SCORE2SOUND.
 
 ## De vaste speler
-De speler zit als een lage balk onderaan het scherm en blijft zichtbaar bij elk tabblad van het lint. Het tempo, de metronoom, de voorinteller en het herhalen van een passage staan daar.
+|De speler zit als een lage balk onderaan het scherm en blijft zichtbaar bij elk tabblad van het lint. Het tempo, de metronoom, de voorinteller en het herhalen van een passage staan daar.
+
+## Titelblok en kopiëren
+|Boven het stuk staat links de partijnaam met de stemming, zoals Flugelhorn 1 in B♭, en rechts de componist met daaronder arr. en de naam van de arrangeur. Je kunt een reeks maten kiezen met Shift-klik of alle maten met Ctrl en A en ze kopiëren en plakken.
