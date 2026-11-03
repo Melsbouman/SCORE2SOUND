@@ -40,6 +40,29 @@ export default async function inloggen(verzoek) {
       : { status: 401, body: { fout: 'Log eerst in.' } };
   }
 
+  if (verzoek.methode === 'POST' && verzoek.rest === 'wachtwoord') {
+    const gebruiker = await accounts.gebruikerVan(token);
+    if (!gebruiker) return { status: 401, body: { fout: 'Log eerst in.' } };
+
+    let gegevens;
+    try {
+      gegevens = JSON.parse(verzoek.body.toString());
+    } catch {
+      return { status: 400, body: { fout: 'De gegevens zijn geen geldige JSON.' } };
+    }
+
+    try {
+      await accounts.wijzigWachtwoord(gebruiker.id, gegevens.oud, gegevens.nieuw, token);
+      return { status: 200, body: { gewijzigd: true } };
+    } catch (fout) {
+      if (![
+        'Het huidige wachtwoord klopt niet.',
+        'Kies een nieuw wachtwoord van minstens 10 tekens.',
+      ].includes(fout.message)) throw fout;
+      return { status: 400, body: { fout: fout.message } };
+    }
+  }
+
   if (verzoek.methode === 'POST' && verzoek.rest === 'uit') {
     accounts.logUit(token);
     const beveiligd = process.env.SCORE2SOUND_HTTPS === 'aan' ? '; Secure' : '';
