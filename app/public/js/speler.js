@@ -49,6 +49,19 @@ export function start(app) {
   const tempoPercentage = Object.assign(document.createElement('input'), { type: 'number', min: 10, max: 300, step: 1, value: 100 });
   tempoPercentage.setAttribute('aria-label', 'Tempo in procenten');
   const tempoTekst = document.createElement('span');
+  const metronoom = Object.assign(document.createElement('input'), { type: 'checkbox' });
+  const voorinteller = document.createElement('select');
+  voorinteller.append(
+    ...[['0', 'Geen'], ['1', '1 maat'], ['2', '2 maten']].map(([waarde, tekst]) =>
+      Object.assign(document.createElement('option'), { value: waarde, textContent: tekst })
+    )
+  );
+  try {
+    const keuze = JSON.parse(localStorage.getItem('speler-metronoom') ?? 'null');
+    if (typeof keuze?.metronoom === 'boolean') metronoom.checked = keuze.metronoom;
+    if (['0', '1', '2'].includes(keuze?.voorinteller)) voorinteller.value = keuze.voorinteller;
+  } catch {}
+  voorinteller.disabled = !metronoom.checked;
   const van = Object.assign(document.createElement('input'), { type: 'text', value: '1', inputMode: 'numeric', size: 4 });
   const tot = Object.assign(document.createElement('input'), { type: 'text', value: '1', inputMode: 'numeric', size: 4 });
   const herhaal = Object.assign(document.createElement('input'), { type: 'checkbox' });
@@ -65,7 +78,7 @@ export function start(app) {
     const passage = document.createElement('fieldset');
     passage.className = 'speler__passage';
     passage.append(Object.assign(document.createElement('legend'), { textContent: 'Passage herhalen' }), veld('Van maat ', van), veld('tot en met maat ', tot), veld(herhaal, document.createTextNode(' Herhalen')));
-    vlak.replaceChildren(kop, knoppen, veld('Tempo ', tempo, tempoPercentage), tempoTekst, passage, status);
+    vlak.replaceChildren(kop, knoppen, veld('Tempo ', tempo, tempoPercentage), tempoTekst, veld(metronoom, document.createTextNode(' Metronoom')), veld('Voorinteller ', voorinteller), passage, status);
     werkTempoTekstBij();
   }
 
@@ -88,9 +101,17 @@ export function start(app) {
   }
 
   const maatIndex = (seconden) => {
+    if (seconden < 0) return -1;
     let i = 0;
     while (i + 1 < tijden.length && tijden[i + 1] <= seconden + 1e-6) i++;
     return i;
+  };
+  const voorintellerSeconden = () => {
+    if (!metronoom.checked || Number(voorinteller.value) === 0) return 0;
+    const eersteMaat = maten()[0];
+    const maatsoort = eersteMaat?.maatsoort ?? { teller: 4, noemer: 4 };
+    const tikken = maatsoort.teller * 1920 / maatsoort.noemer;
+    return Number(voorinteller.value) * tikken / 480 * 60 / (eersteMaat?.tempo ?? 120);
   };
   const maten = () => app.stand.partituur?.partijen[0]?.maten ?? [];
   const geldigeMaat = (invoer) => maatIndexVanNummer(maten(), invoer.value);
@@ -125,26 +146,53 @@ export function start(app) {
     if (herhaal.checked) {
       const begin = eersteKeer(geldigeMaat(van));
       const eind = volgorde.lastIndexOf(geldigeMaat(tot)) + 1;
-      const eindSec = eind < tijden.length ? tijden[eind] : geluid.seq.duration;
-      if (t >= eindSec || t < tijden[begin] - 0.05) {
-        geluid.seq.currentTime = tijden[begin];
-        t = tijden[begin];
+      const verschuiving = voorintellerSeconden();
+      const eindSec = eind < tijden.length ? tijden[eind] + verschuiving : geluid.seq.duration;
+      if (t >= verschuiving && (t >= eindSec || t < tijden[begin] + verschuiving - 0.05)) {
+        geluid.seq.currentTime = tijden[begin] + verschuiving;
+        t = tijden[begin] + verschuiving;
       }
     }
-    const nu = maatIndex(t);
+    const nu = maatIndex(t - voorintellerSeconden());
     if (nu !== speelMaat) {
       speelMaat = nu;
-      app.meld('speel-maat', { maat: volgorde[nu] });
+      app.meld('speel-maat', { maat: nu < 0 ? null : volgorde[nu] });
     }
     lus = requestAnimationFrame(volg);
   }
 
   async function laad() {
     const { schrijfMidi } = await import('/src/midi/schrijven.mjs');
-    const midi = schrijfMidi(luisterNaar ?? app.stand.partituur);
+    const midi = schrijfMidi(luisterNaar ?? app.stand.partituur, {
+      klik: metronoom.checked,
+      voorinteller: metronoom.checked ? Number(voorinteller.value) : 0,
+    });
     geluid.seq.loadNewSongList([{ binary: midi.buffer.slice(midi.byteOffset, midi.byteOffset + midi.byteLength), fileName: 'partituur.mid' }]);
     geluid.seq.pause();
     geladen = true;
+  }
+
+  async function wijzigMetronoom() {
+    voorinteller.disabled = !metronoom.checked;
+    try {
+      localStorage.setItem('speler-metronoom', JSON.stringify({
+        metronoom: metronoom.checked,
+        voorinteller: voorinteller.value,
+      }));
+    } catch {}
+    if (!geluid || !geladen) return;
+    const tijd = geluid.seq.currentTime - voorintellerSeconden();
+    const speelde = !geluid.seq.paused;
+    await laad();
+    geluid.seq.currentTime = Math.max(0, tijd + voorintellerSeconden());
+    geluid.seq.playbackRate = Number(tempoPercentage.value) / 100;
+    speelMaat = null;
+    app.meld('speel-maat', { maat: null });
+    if (speelde) {
+      geluid.seq.play();
+      cancelAnimationFrame(lus);
+      lus = requestAnimationFrame(volg);
+    }
   }
 
   async function afspelen() {
@@ -156,7 +204,7 @@ export function start(app) {
       await geluid.context.resume();
       if (!geladen) await laad();
       geluid.seq.playbackRate = Number(tempoPercentage.value) / 100;
-      if (herhaal.checked) geluid.seq.currentTime = tijden[eersteKeer(geldigeMaat(van))];
+      if (herhaal.checked) geluid.seq.currentTime = tijden[eersteKeer(geldigeMaat(van))] + voorintellerSeconden();
       geluid.seq.play();
       pasMixerToe();
       speel.textContent = 'Pauze';
@@ -191,6 +239,8 @@ export function start(app) {
     pasTempoToe(Number(tempo.value));
   });
   tempoPercentage.addEventListener('input', () => pasTempoToe(Number(tempoPercentage.value)));
+  metronoom.addEventListener('change', wijzigMetronoom);
+  voorinteller.addEventListener('change', wijzigMetronoom);
 
   app.op('partituur', (partituur) => {
     pauze();
@@ -231,7 +281,7 @@ export function start(app) {
   app.op('naar-maat', (doel) => {
     if (doel?.maat === null || doel?.maat === undefined || !tijden.length) return;
     van.value = maten()[doel.maat]?.nummer ?? van.value;
-    if (geluid && geladen) geluid.seq.currentTime = tijden[eersteKeer(doel.maat)];
+    if (geluid && geladen) geluid.seq.currentTime = tijden[eersteKeer(doel.maat)] + voorintellerSeconden();
   });
   teken();
 }
