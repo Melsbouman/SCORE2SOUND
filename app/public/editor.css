@@ -237,3 +237,8 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
   padding: 4px 10px;
   background: #ffffffe6;
 }
+
+/* De knoppenbalk van Noten krijgt de volle breedte van het lint, anders klapt hij dicht tot een smalle kolom. */
+.lint__paneel:has(> #editor) { flex-wrap: wrap; }
+.lint__paneel > #editor { flex: 1 1 100%; width: 100%; min-width: 0; }
+.editor__balk.editor-knoppenbalk { overflow: visible; top: auto; }
