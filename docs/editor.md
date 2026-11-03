@@ -50,3 +50,8 @@ Waarom een noot rood is
 - Shift met pijl omhoog of omlaag verschuift de gekozen noot een octaaf.
 - Tik een maat aan om hem te kiezen: het afspelen begint dan bij die maat.
 - Het lint onthoudt het tabblad dat je laatst gebruikte.
+
+## Zoom en toetsen
+- Kleiner en Groter staan in het tabblad Weergave van het lint; de browser onthoudt de zoom.
+- Escape heft de gekozen noot of maat op.
+- Delete maakt van de geselecteerde noot een rust.
