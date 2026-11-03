@@ -619,3 +619,101 @@ export function start(app) {
   selectieObserver.observe(document.body, { childList: true, subtree: true });
   teken();
 }
+import { SYMBOOL } from "./muzieksymbolen.js";
+
+
+const KNOPPENBALK_GROEPEN = [
+  ["Noten", ["heel", "half", "kwart", "achtste", "zestiende", "rust", "punt", "triool"]],
+  ["Voortekens", ["kruis", "mol", "herstelling", "dubbelkruis", "dubbelmol"]],
+  ["Toonhoogte", ["hoger", "lager"]],
+  ["Tekens", ["fermate", "staccato", "accent", "tenuto", "overbinding"]],
+  ["Bewerken", ["ongedaan", "opnieuw", "verwijderen", "goedkeuren", "maat klopt", "maatduur herstellen"]],
+];
+
+const KNOP_INFO = {
+  heel: ["Hele noot", "1", "heel"],
+  half: ["Halve noot", "2", "half"],
+  kwart: ["Kwartnoot", "3", "kwart"],
+  achtste: ["Achtste noot", "4", "achtste"],
+  zestiende: ["Zestiende noot", "5", "zestiende"],
+  rust: ["Kwartrust", "R", "rustkwart"],
+  punt: ["Punt", ".", "punt"],
+  kruis: ["Kruis", "K", "kruis"],
+  mol: ["Mol", "M", "mol"],
+  herstelling: ["Herstellingsteken", "H", "herstellingsteken"],
+  dubbelkruis: ["Dubbelkruis", null, "dubbelkruis"],
+  dubbelmol: ["Dubbelmol", null, "dubbelmol"],
+  fermate: ["Fermate", null, "fermate"],
+  staccato: ["Staccato", null, "staccato"],
+  accent: ["Accent", null, "accent"],
+  tenuto: ["Tenuto", null, "tenuto"],
+  overbinding: ["Overbinding", null, "overbinding"],
+};
+
+function knopNaam(knop) {
+  return `${knop.dataset.actie || ""} ${knop.getAttribute("aria-label") || ""} ${knop.title || ""} ${knop.textContent || ""}`.toLocaleLowerCase("nl");
+}
+
+function zoekActie(knop, acties) {
+  const naam = knopNaam(knop);
+  return acties.find((actie) => naam.includes(actie)) || null;
+}
+
+function groepeerEditorKnoppenbalk() {
+  const editor = document.querySelector("#editor");
+  if (!editor) return;
+  let balk = editor.querySelector('[role="toolbar"], .editor-toolbar, .editor-knoppenbalk');
+  if (!balk) {
+    balk = [...editor.querySelectorAll("div, nav")].find((element) => element.querySelectorAll(":scope > button").length >= 6);
+  }
+  if (!balk || balk.dataset.gegroepeerd === "true") return;
+
+  const knoppen = [...balk.querySelectorAll("button")];
+  const gebruikt = new Set();
+  const fragment = document.createDocumentFragment();
+  for (const [kop, acties] of KNOPPENBALK_GROEPEN) {
+    const groepKnoppen = knoppen.filter((knop) => {
+      if (gebruikt.has(knop)) return false;
+      const actie = zoekActie(knop, acties);
+      if (!actie) return false;
+      gebruikt.add(knop);
+      const info = KNOP_INFO[actie];
+      if (info) {
+        const [naam, sneltoets, symbool] = info;
+        knop.title = sneltoets ? `${naam} (${sneltoets})` : naam;
+        knop.setAttribute("aria-label", knop.title);
+        const waarde = SYMBOOL[symbool];
+        knop.replaceChildren();
+        const span = document.createElement("span");
+        span.className = "muzieksymbool";
+        if (symbool === "overbinding") span.innerHTML = waarde;
+        else span.textContent = waarde;
+        knop.append(span);
+      } else if (!knop.getAttribute("aria-label")) {
+        knop.setAttribute("aria-label", knop.title || knop.textContent.trim());
+      }
+      return true;
+    });
+    if (!groepKnoppen.length) continue;
+    const groep = document.createElement("div");
+    groep.className = "editor-knoppengroep";
+    const rij = document.createElement("div");
+    rij.className = "editor-knoppengroep__knoppen";
+    rij.append(...groepKnoppen);
+    const label = document.createElement("div");
+    label.className = "editor-knoppengroep__kop";
+    label.textContent = kop;
+    groep.append(rij, label);
+    fragment.append(groep);
+  }
+  if (!gebruikt.size) return;
+  const overig = knoppen.filter((knop) => !gebruikt.has(knop));
+  balk.replaceChildren(fragment, ...overig);
+  balk.classList.add("editor-knoppenbalk");
+  balk.dataset.gegroepeerd = "true";
+}
+
+if (typeof document !== "undefined") {
+  document.addEventListener("DOMContentLoaded", groepeerEditorKnoppenbalk);
+  new MutationObserver(groepeerEditorKnoppenbalk).observe(document.documentElement, { childList: true, subtree: true });
+}
