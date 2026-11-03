@@ -2,6 +2,7 @@ De editor laat je bladmuziek bewerken door noten aan te passen.
 
 Selecteren
 - Klik in de notatieomgeving of in het oorspronkelijke bestand om een noot te kiezen.
+- Shift+klik op noten om ze aan de keuze toe te voegen of eruit te halen; klik zonder Shift kiest één noot.
 
 Aanpassen met de knoppen
 - **Tonhoogte**: Hoger, Lager
@@ -10,6 +11,7 @@ Aanpassen met de knoppen
 - **Punt**: Maakt een noot (of rust) gepunteerd
 - **Rust**: Maakt een noot tot rust
 - **Goedkeuren**: Maakt een onzekere noot zeker
+- **Verwijderen**: Maakt de gekozen noot of noten tot rusten
 - **Maatduur herstellen**: Vult de gekozen maat in alle partijen aan met rusten of kort de maat in tot de maatsoort klopt
 - **Ongedaan maken**: Herstelt de vorige bewerking
 - **Opnieuw**: Herstelt een ongedaan gemaakte bewerking
@@ -24,6 +26,7 @@ Sneltoetsen
 - **1-5**: Duur (heel/half/kwart/achtste/zestiende)
 - **. **: Punt (maakt noot gepunteerd)
 - **R**: Wordt rust (voor een noot)
+- **Delete**: Verwijdert de gekozen noot of noten (maakt er rusten van)
 - **Enter**: Goedkeuren (of in corrigeren: klopt)
 
 Slepen om de toonhoogte te veranderen
@@ -54,5 +57,4 @@ Waarom een noot rood is
 
 ## Zoom en toetsen
 - Kleiner en Groter staan in het tabblad Weergave van het lint; de browser onthoudt de zoom.
-- Escape heft de gekozen noot of maat op.
-- Delete maakt van de geselecteerde noot een rust.
+- Escape heft de gekozen noten of maat op.

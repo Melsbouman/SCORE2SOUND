@@ -25,11 +25,12 @@ export function start(app) {
     ['↑ / ↓', 'Verschuif de geselecteerde noot omhoog of omlaag.'],
     ['Shift + ↑ / ↓', 'Verschuif de geselecteerde noot een octaaf omhoog of omlaag.'],
     ['← / →', 'Ga naar de vorige of volgende noot.'],
+    ['Shift + klik', 'Voeg een noot toe aan de keuze of haal hem eruit.'],
     ['N', 'Ga naar de volgende onzekere noot.'],
     ['Enter', 'Keur de geselecteerde noot goed.'],
-    ['Escape', 'Hef de gekozen noot of maat op.'],
+    ['Escape', 'Hef de gekozen noten of maat op.'],
     ['Alt + 1 tot 5', 'Kies een tabblad van het lint.'],
-    ['Delete', 'Maak van de geselecteerde noot een rust.'],
+    ['Delete', 'Maak van de gekozen noot of noten een rust.'],
   ]) {
     const item = document.createElement('li');
     const kbd = document.createElement('kbd');
