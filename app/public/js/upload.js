@@ -1,4 +1,6 @@
 // Een muziekbestand kiezen of slepen, naar de API sturen en het resultaat in app zetten.
+import { voegSamen } from '/src/model/partijen.mjs';
+
 export function start(app) {
   const vlak = document.getElementById('upload');
   const kop = document.createElement('h2');
@@ -39,6 +41,7 @@ export function start(app) {
   const invoer = document.createElement('input');
   invoer.type = 'file';
   invoer.accept = '.musicxml,.xml,.mxl,.pdf,.png,.jpg,.jpeg';
+  invoer.multiple = true;
   invoer.hidden = true;
 
   const status = document.createElement('p');
@@ -51,7 +54,7 @@ export function start(app) {
 
   let herkenning = null;
 
-  async function openBestand(bestand) {
+  async function openBestand(bestand, batch = null) {
     if (!bestand) return;
 
     if (herkenning) {
@@ -59,17 +62,20 @@ export function start(app) {
       return;
     }
 
+    const toonStatus = (tekst) => {
+      status.textContent = batch ? `Bestand ${batch.index} van ${batch.totaal}: ${bestand.name} — ${tekst}` : tekst;
+    };
+
     if (/\.(pdf|png|jpe?g)$/i.test(bestand.name)) {
-      herken(bestand);
-      return;
+      return herken(bestand, toonStatus, batch !== null);
     }
 
     if (!/\.(musicxml|xml|mxl)$/i.test(bestand.name)) {
-      status.textContent = 'Dit bestand kan de app niet openen. Kies een PDF, PNG, JPG of MusicXML-bestand.';
-      return;
+      toonStatus('Dit bestand kan de app niet openen. Kies een PDF, PNG, JPG of MusicXML-bestand.');
+      return null;
     }
 
-    status.textContent = `Bezig met lezen van ${bestand.name}…`;
+    toonStatus(`Bezig met lezen van ${bestand.name}…`);
 
     let antwoord;
     try {
@@ -79,31 +85,35 @@ export function start(app) {
         body: bestand,
       });
     } catch {
-      status.textContent = 'De server is niet bereikbaar. Probeer het opnieuw.';
-      return;
+      toonStatus('De server is niet bereikbaar. Probeer het opnieuw.');
+      return null;
     }
 
     let resultaat;
     try {
       resultaat = await antwoord.json();
     } catch (fout) {
-      status.textContent = `Het bestand kon niet worden geopend: ${fout.message}`;
-      return;
+      toonStatus(`Het bestand kon niet worden geopend: ${fout.message}`);
+      return null;
     }
 
     if (!antwoord.ok) {
-      status.textContent = `Het bestand kon niet worden geopend: ${resultaat.fout ?? 'onbekende fout'}`;
-      return;
+      toonStatus(`Het bestand kon niet worden geopend: ${resultaat.fout ?? 'onbekende fout'}`);
+      return null;
     }
 
-    app.zet({ partituur: resultaat.partituur, meldingen: resultaat.meldingen, project: null });
-    status.textContent = `Geopend: ${bestand.name}`;
+    if (!batch) {
+      app.zet({ partituur: resultaat.partituur, meldingen: resultaat.meldingen, project: null });
+    }
+    toonStatus(`Geopend: ${bestand.name}`);
+    return { partituur: resultaat.partituur, meldingen: resultaat.meldingen };
   }
 
-  async function herken(bestand) {
+  async function herken(bestand, toonStatus = (tekst) => { status.textContent = tekst; }, batch = false) {
     const taak = { stop: false, voortgang: null, afbreken: null };
     herkenning = taak;
-    status.textContent = `Bezig met uploaden van ${bestand.name}…`;
+    toonStatus(`Bezig met uploaden van ${bestand.name}…`);
+    let geopend = null;
 
     const ruimOp = () => {
       taak.voortgang?.remove();
@@ -112,7 +122,7 @@ export function start(app) {
     const nietBereikbaar = () => {
       taak.stop = true;
       ruimOp();
-      status.textContent = 'De server is niet bereikbaar. Probeer het opnieuw.';
+      toonStatus('De server is niet bereikbaar. Probeer het opnieuw.');
     };
 
     try {
@@ -136,13 +146,13 @@ export function start(app) {
         resultaat = await antwoord.json();
       } catch (fout) {
         ruimOp();
-        status.textContent = `Het bestand kon niet worden geopend: ${fout.message}`;
+        toonStatus(`Het bestand kon niet worden geopend: ${fout.message}`);
         return;
       }
 
       if (!antwoord.ok) {
         ruimOp();
-        status.textContent = `Het bestand kon niet worden geopend: ${resultaat.fout ?? 'onbekende fout'}`;
+        toonStatus(`Het bestand kon niet worden geopend: ${resultaat.fout ?? 'onbekende fout'}`);
         return;
       }
 
@@ -163,7 +173,7 @@ export function start(app) {
             const fout = await antwoordAfbreken.json();
             taak.stop = true;
             ruimOp();
-            status.textContent = `Afbreken lukte niet: ${fout.fout ?? 'onbekende fout'}`;
+            toonStatus(`Afbreken lukte niet: ${fout.fout ?? 'onbekende fout'}`);
           }
         } catch {
           nietBereikbaar();
@@ -189,7 +199,7 @@ export function start(app) {
         } catch (fout) {
           taak.stop = true;
           ruimOp();
-          status.textContent = `Herkennen lukte niet: ${fout.message}`;
+          toonStatus(`Herkennen lukte niet: ${fout.message}`);
           break;
         }
         if (taak.stop) break;
@@ -197,41 +207,97 @@ export function start(app) {
         if (!antwoordStatus.ok) {
           taak.stop = true;
           ruimOp();
-          status.textContent = `Herkennen lukte niet: ${voortgang.fout ?? 'onbekende fout'}`;
+          toonStatus(`Herkennen lukte niet: ${voortgang.fout ?? 'onbekende fout'}`);
           break;
         }
 
         taak.voortgang.value = voortgang.procent;
-        status.textContent = voortgang.tekst;
+        toonStatus(voortgang.tekst);
 
         if (voortgang.stand === 'klaar') {
           taak.stop = true;
           ruimOp();
-          app.zet({
-            partituur: voortgang.partituur,
-            meldingen: voortgang.meldingen,
-            project: null,
-          });
-          status.textContent = `Geopend: ${bestand.name}`;
+          geopend = { partituur: voortgang.partituur, meldingen: voortgang.meldingen };
+          if (!batch) {
+            app.zet({
+              partituur: voortgang.partituur,
+              meldingen: voortgang.meldingen,
+              project: null,
+            });
+          }
+          toonStatus(`Geopend: ${bestand.name}`);
         } else if (voortgang.stand === 'fout') {
           taak.stop = true;
           ruimOp();
-          status.textContent = `Herkennen lukte niet: ${voortgang.fout}`;
+          toonStatus(`Herkennen lukte niet: ${voortgang.fout}`);
         } else if (voortgang.stand === 'afgebroken') {
           taak.stop = true;
           ruimOp();
-          status.textContent = 'Afgebroken.';
+          toonStatus('Afgebroken.');
         }
       }
+      return geopend;
     } finally {
       if (herkenning === taak) herkenning = null;
     }
   }
 
+  async function openBestanden(bestanden) {
+    if (bestanden.length < 2) {
+      openBestand(bestanden[0]);
+      return;
+    }
+    if (herkenning) {
+      status.textContent = 'Wacht tot de herkenning klaar is, of breek hem af.';
+      return;
+    }
+
+    let basis = null;
+    let meldingen = [];
+    const mislukt = [];
+    let aantalGeopend = 0;
+
+    for (let index = 0; index < bestanden.length; index += 1) {
+      const bestand = bestanden[index];
+      const voortgang = { index: index + 1, totaal: bestanden.length };
+      try {
+        const resultaat = await openBestand(bestand, voortgang);
+        if (!resultaat) {
+          mislukt.push(bestand.name);
+          continue;
+        }
+
+        if (!basis) {
+          basis = resultaat.partituur;
+          meldingen = [...(resultaat.meldingen ?? [])];
+        } else {
+          const samengevoegd = voegSamen([basis, resultaat.partituur]);
+          basis = samengevoegd.partituur;
+          meldingen.push(...(resultaat.meldingen ?? []), ...samengevoegd.meldingen);
+        }
+        aantalGeopend += 1;
+      } catch (fout) {
+        mislukt.push(bestand.name);
+        status.textContent = `Bestand ${index + 1} van ${bestanden.length}: ${bestand.name} — Het bestand kon niet worden geopend: ${fout.message}`;
+      }
+    }
+
+    if (basis) {
+      app.zet({ partituur: basis, meldingen, project: null });
+    }
+    if (mislukt.length) {
+      status.textContent = basis
+        ? `${aantalGeopend} bestanden geopend. Niet gelukt: ${mislukt.join(', ')}.`
+        : `Geen bestand kon worden geopend. Niet gelukt: ${mislukt.join(', ')}.`;
+    } else {
+      status.textContent = `${aantalGeopend} bestanden geopend.`;
+    }
+  }
+
   invoer.addEventListener('change', () => {
-    const bestand = invoer.files[0];
+    const bestanden = Array.from(invoer.files);
     invoer.value = '';
-    openBestand(bestand);
+    openBestanden(bestanden);
   });
 
   vlak.addEventListener('dragover', (gebeurtenis) => {
@@ -246,6 +312,6 @@ export function start(app) {
   vlak.addEventListener('drop', (gebeurtenis) => {
     gebeurtenis.preventDefault();
     vlak.classList.remove('sleept');
-    openBestand(gebeurtenis.dataTransfer.files[0]);
+    openBestanden(Array.from(gebeurtenis.dataTransfer.files));
   });
 }
