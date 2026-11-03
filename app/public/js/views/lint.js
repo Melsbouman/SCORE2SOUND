@@ -3,7 +3,7 @@ const tabbladen = [
   { naam: 'Start', vlakken: ['speler', 'tempo'] },
   { naam: 'Noten', vlakken: ['editor', 'corrigeren', 'onzeker'] },
   { naam: 'Partij', vlakken: ['mixer', 'bewerken'] },
-  { naam: 'Weergave', vlakken: ['versies', 'meldingen'] },
+  { naam: 'Weergave', vlakken: ['zoom', 'versies', 'meldingen'] },
 ];
 
 export function start(app) {
@@ -20,6 +20,11 @@ export function start(app) {
   lint.className = 'lint';
   lint.setAttribute('aria-label', 'Lint');
   weergave.before(lint);
+
+  const zoom = document.createElement('section');
+  zoom.id = 'zoom';
+  zoom.setAttribute('aria-label', 'Zoom');
+  document.getElementById('weergave').before(zoom);
 
   const lijst = document.createElement('div');
   lijst.className = 'lint__tabs';
