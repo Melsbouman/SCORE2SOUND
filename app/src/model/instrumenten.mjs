@@ -9,6 +9,7 @@ export const INSTRUMENTEN = [
   { id: 'tuba', naam: 'Tuba', midiProgramma: 58, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'F', lijn: 4 }, bereik: { laag: 28, hoog: 58 } },
   { id: 'bes-tuba', naam: 'Bes-tuba (vioolsleutel)', midiProgramma: 58, transpositie: { chromatisch: -26, diatonisch: -15 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 28, hoog: 58 } },
   { id: 'klarinet', naam: 'Klarinet in Bes', midiProgramma: 71, transpositie: { chromatisch: -2, diatonisch: -1 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 50, hoog: 91 } },
+  { id: 'piccolo', naam: 'Piccolo', midiProgramma: 72, transpositie: { chromatisch: 12, diatonisch: 7 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 72, hoog: 108 } },
   { id: 'altsaxofoon', naam: 'Altsaxofoon in Es', midiProgramma: 65, transpositie: { chromatisch: -9, diatonisch: -5 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 49, hoog: 81 } },
   { id: 'tenorsaxofoon', naam: 'Tenorsaxofoon in Bes', midiProgramma: 66, transpositie: { chromatisch: -14, diatonisch: -8 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 44, hoog: 76 } },
   { id: 'sopraansaxofoon', naam: 'Sopraansaxofoon in Bes', midiProgramma: 64, transpositie: { chromatisch: -2, diatonisch: -1 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 56, hoog: 87 } },
@@ -16,6 +17,8 @@ export const INSTRUMENTEN = [
   { id: 'es-kornet', naam: 'Es-kornet', midiProgramma: 56, transpositie: { chromatisch: 3, diatonisch: 2 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 58, hoog: 89 } },
   { id: 'dwarsfluit', naam: 'Dwarsfluit', midiProgramma: 73, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 60, hoog: 96 } },
   { id: 'hobo', naam: 'Hobo', midiProgramma: 68, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 58, hoog: 91 } },
+  { id: 'fagot', naam: 'Fagot', midiProgramma: 70, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'F', lijn: 4 }, bereik: { laag: 34, hoog: 75 } },
+  { id: 'timpani', naam: 'Timpani', midiProgramma: 47, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'F', lijn: 4 }, bereik: { laag: 38, hoog: 81 } },
   { id: 'viool', naam: 'Viool', midiProgramma: 40, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 55, hoog: 100 } },
   { id: 'altviool', naam: 'Altviool', midiProgramma: 41, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'C', lijn: 3 }, bereik: { laag: 48, hoog: 88 } },
   { id: 'cello', naam: 'Cello', midiProgramma: 42, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'F', lijn: 4 }, bereik: { laag: 36, hoog: 76 } },
@@ -25,19 +28,22 @@ export const INSTRUMENTEN = [
 const NAMEN = [
   [/sax.*sop|sop.*sax/, 'sopraansaxofoon'],
   [/sax.*bar|bar.*sax/, 'baritonsaxofoon'],
-  [/\beb\b.*(cornet|comet|kornet)|\bes\b.*(cornet|comet|kornet)/, 'es-kornet'],
-  [/bugel|flugel|fliigel|iigelho|flug\./, 'bugel'],
+  [/\beb\b.*(cornet|comet|kornet)|\bes\b.*(cornet|comet|kornet)|\beb\b.*soprano|\bes\b.*sopraan/, 'es-kornet'],
+  [/bugel|flugelhorn|flugel|fliigel|iigelho|flug\.\s*hn/, 'bugel'],
   [/sax.*alt|alt.*sax/, 'altsaxofoon'],
   [/sax.*ten|ten.*sax/, 'tenorsaxofoon'],
-  [/trombone|\btrb\b|\btbn\b/, 'trombone'],
-  [/trompet|trumpet|cornet|kornet|\bcts?\b/, 'trompet'],
-  [/althoorn|alto horn|tenor horn/, 'althoorn'],
+  [/bass\s+trombone|trombone/, 'trombone'],
+  [/solo\s+cts?\.?|trompet|trumpet|cornet|kornet/, 'trompet'],
+  [/althoorn|alto horn|tenor horn|solo horn|solo hn\.?|1st horn/, 'althoorn'],
   [/hoorn in f|horn in f/, 'hoorn'],
-  [/\bhorn\b|\bhom\b|\bhn\b|\bhoorn\b/, 'althoorn'],
-  [/bariton|euph/, 'bariton'],
+  [/\bhorn\b|\bhom\b|\bhoorn\b/, 'althoorn'],
+  [/baritonhoorn|bariton|baritone|euphonium|euph/, 'bariton'],
   [/tuba|\bbass\b|\bbas\b|\bbasses\b/, 'tuba'],
   [/klarinet|clarinet/, 'klarinet'],
   [/fluit|flute/, 'dwarsfluit'],
+  [/piccolo/, 'piccolo'],
+  [/slagwerk|percussion/, 'timpani'],
+  [/fagot|bassoon/, 'fagot'],
   [/hobo|oboe/, 'hobo'],
   [/altviool|viola/, 'altviool'],
   [/viool|violin/, 'viool'],
@@ -46,6 +52,14 @@ const NAMEN = [
 
 export function instrumentBijNaam(naam) {
   const schoon = naam.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const afkorting = schoon.replace(/\d/g, '').replace(/[^a-z]/g, '');
+  const AFKORTINGEN = [
+    ['cnt', 'trompet'], ['cts', 'trompet'], ['Flgh', 'bugel'], ['hn', 'althoorn'],
+    ['bar', 'bariton'], ['euph', 'bariton'], ['tbn', 'trombone'], ['trb', 'trombone'],
+    ['tba', 'tuba'], ['perc', 'timpani'], ['cl', 'klarinet'], ['fl', 'dwarsfluit'],
+    ['hb', 'hobo'], ['fg', 'fagot'], ['trp', 'trompet'],
+  ].find(([naam]) => naam.toLowerCase() === afkorting);
+  if (AFKORTINGEN) return INSTRUMENTEN.find((instrument) => instrument.id === AFKORTINGEN[1]) ?? null;
   const regel = NAMEN.find(([patroon]) => patroon.test(schoon));
   return INSTRUMENTEN.find((instrument) => instrument.id === regel?.[1]) ?? null;
 }
