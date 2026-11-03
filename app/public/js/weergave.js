@@ -31,6 +31,7 @@ async function naarMusicXML(partituur) {
 }
 
 export function start(app) {
+  const BEGINZOOM = window.innerWidth < 700 ? 0.5 : 0.8;
   document.addEventListener('keydown', (gebeurtenis) => {
     const doel = gebeurtenis.target;
     if (
@@ -49,7 +50,7 @@ export function start(app) {
       wijzigZoom(-0.1);
     } else if (gebeurtenis.key === '0') {
       gebeurtenis.preventDefault();
-      zoom = 0.8;
+      zoom = BEGINZOOM;
       localStorage.setItem('score2sound-zoom', String(zoom));
       teken(huidige, { meteen: true, opnieuw: true });
     }
@@ -57,7 +58,7 @@ export function start(app) {
 const vlak = document.getElementById('weergave');
 
   function wijzigZoom(stap) {
-    zoom = Math.min(2, Math.max(0.4, Math.round((zoom + stap) * 10) / 10));
+    zoom = Math.min(2, Math.max(0.3, Math.round((zoom + stap) * 10) / 10));
     localStorage.setItem('score2sound-zoom', String(zoom));
     teken(huidige, { meteen: true, opnieuw: true });
   }
@@ -78,8 +79,8 @@ const vlak = document.getElementById('weergave');
     percentage.type = 'button';
     percentage.className = 'knop';
     percentage.textContent = Math.round(zoom * 100) + '%';
-    percentage.setAttribute('aria-label', 'Zoom terugzetten naar 80 procent');
-    percentage.addEventListener('click', () => wijzigZoom(0.8 - zoom));
+    percentage.setAttribute('aria-label', 'Zoom terugzetten');
+    percentage.addEventListener('click', () => wijzigZoom(BEGINZOOM - zoom));
     const groter = document.createElement('button');
     groter.type = 'button';
     groter.className = 'knop';
@@ -106,10 +107,10 @@ const vlak = document.getElementById('weergave');
   let gekozen = null;
   let gekozenMaat = null;
   let gekozenTot = null;
-  let zoom = 0.8;
+  let zoom = BEGINZOOM;
   try {
     const opgeslagenZoom = Number(localStorage.getItem('score2sound-zoom'));
-    if (opgeslagenZoom >= 0.4 && opgeslagenZoom <= 2) zoom = opgeslagenZoom;
+    if (opgeslagenZoom >= 0.3 && opgeslagenZoom <= 2) zoom = opgeslagenZoom;
   } catch {}
   document.addEventListener('click', (gebeurtenis) => {
     if (gebeurtenis.target.textContent.trim() !== 'Kleiner') return;
@@ -249,7 +250,7 @@ const vlak = document.getElementById('weergave');
     const knoppen = document.createElement('div');
     knoppen.className = 'origineel__knoppen';
     for (const [label, aanpassen] of [
-      ['Kleiner', () => { zoom = Math.round(Math.max(0.6, zoom - 0.2) * 10) / 10; }],
+      ['Kleiner', () => { zoom = Math.round(Math.max(0.3, zoom - 0.2) * 10) / 10; }],
       ['Groter', () => { zoom = Math.round(Math.min(2, zoom + 0.2) * 10) / 10; }],
     ]) {
       const knop = document.createElement('button');
