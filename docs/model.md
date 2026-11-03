@@ -130,6 +130,7 @@ Een noot of rust kan ook deze velden hebben, alleen als ze op het blad staan: `b
 ```
 `type` is een van:
  - \'letter\': een repetitieletter of -getal in een kader, \'waarde\' is de tekst zelf, zoals \'A\' of \'104\'.
+- `'pedaal'`: een pedaalaanduiding, met `waarde` `'begin'`, `'eind'` of `'wissel'`. Bij inlezen uit MusicXML bewaart `musicxmlType` het oorspronkelijke type (`start`, `stop`, `change` of `continue`) voor terugschrijven.
 - `'dynamiek'`: `waarde` is `ppp` tot `fff`, `sf`, `sfz` of `fp`;
 - `'crescendo'` of `'decrescendo'`: `waarde` is `'begin'` of `'eind'`;
 - `'octaafteken'`: `waarde` is `'begin-omhoog'`, `'begin-omlaag'` of `'eind'`, met `grootte` (`8` of `15`) en `nummer` (MusicXML-nummer, standaard `1`);
