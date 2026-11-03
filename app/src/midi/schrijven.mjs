@@ -2,6 +2,7 @@ import { naarMidi } from '../model/toonhoogte.mjs';
 import { maatLengte } from '../model/duur.mjs';
 import { uitgevouwen } from '../model/maten.mjs';
 import { tempoOverloop } from '../model/tempoverloop.mjs';
+import { klikGebeurtenissen } from './klik.mjs';
 
 const tekstEncoder = new TextEncoder();
 
@@ -56,7 +57,7 @@ function maatBeginnen(partituur) {
   return beginnen;
 }
 
-function dirigentenSpoor(partituur, beginnen) {
+function dirigentenSpoor(partituur, beginnen, voorintellerTik = 0) {
   const events = [];
   const maten = partituur.partijen[0]?.maten ?? [];
   const tempoOverlopen = tempoOverloop(partituur);
@@ -70,10 +71,17 @@ function dirigentenSpoor(partituur, beginnen) {
 
   if (eersteMaat?.tempo == null) {
     events.push({ tik: 0, volgorde: 1, bytes: [0xff, 0x51, 3, 0x07, 0xa1, 0x20] });
+  } else if (voorintellerTik > 0) {
+    const microseconden = Math.round(60000000 / eersteMaat.tempo);
+    events.push({
+      tik: 0,
+      volgorde: 1,
+      bytes: [0xff, 0x51, 3, (microseconden >>> 16) & 0xff, (microseconden >>> 8) & 0xff, microseconden & 0xff],
+    });
   }
   for (let index = 0; index < maten.length; index += 1) {
     const tempo = maten[index].tempo;
-    if (tempo != null) {
+    if (tempo != null && !(voorintellerTik > 0 && index === 0)) {
       const microseconden = Math.round(60000000 / tempo);
       events.push({
         tik: beginnen[index],
@@ -246,13 +254,28 @@ function partijSpoor(partij, partijIndex, beginnen, volume) {
   return maakSpoor(events);
 }
 
-export function schrijfMidi(partituur, { volume = {} } = {}) {
+function klikSpoor(partituur, voorinteller, verschuiving) {
+  const events = [];
+  for (const gebeurtenis of klikGebeurtenissen(partituur, { voorinteller })) {
+    const tik = gebeurtenis.tik + verschuiving;
+    const toets = gebeurtenis.kracht === 110 ? 76 : 77;
+    events.push({ tik, volgorde: 4, bytes: [0x99, toets, gebeurtenis.kracht] });
+    events.push({ tik: tik + 60, volgorde: 3, bytes: [0x89, toets, 0] });
+  }
+  return maakSpoor(events);
+}
+
+export function schrijfMidi(partituur, { volume = {}, klik = false, voorinteller = 0 } = {}) {
   const gespeeld = uitgevouwen(partituur); // herhalingen klinken echt twee keer
-  const beginnen = maatBeginnen(gespeeld);
-  const sporen = [dirigentenSpoor(gespeeld, beginnen)];
+  const verschuiving = klik && voorinteller > 0
+    ? voorinteller * maatLengte(gespeeld.partijen[0]?.maten[0]?.maatsoort ?? { teller: 4, noemer: 4 })
+    : 0;
+  const beginnen = maatBeginnen(gespeeld).map((tik) => tik + verschuiving);
+  const sporen = [dirigentenSpoor(gespeeld, beginnen, verschuiving)];
   for (let index = 0; index < gespeeld.partijen.length; index += 1) {
     sporen.push(partijSpoor(gespeeld.partijen[index], index, beginnen, volume));
   }
+  if (klik) sporen.push(klikSpoor(partituur, voorinteller, verschuiving));
   return Uint8Array.from([
     ...blok('MThd', [...getal16(1), ...getal16(sporen.length), ...getal16(480)]),
     ...sporen.flat(),
