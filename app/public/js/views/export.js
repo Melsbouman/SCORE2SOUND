@@ -97,6 +97,8 @@ export function start(app) {
       status.textContent = 'De pdf wordt gemaakt...'
       try {
         const { naarMusicXML } = await import('/src/musicxml/schrijven.mjs')
+        printKnop.disabled = true
+        printKnop.setAttribute('aria-busy', 'true')
         const antwoord = await fetch('/api/pdf', {
           method: 'POST',
           headers: { 'Content-Type': 'application/xml' },
@@ -111,6 +113,9 @@ export function start(app) {
         status.textContent = 'Gedownload: ' + naam
       } catch {
         afdrukken()
+      } finally {
+        printKnop.disabled = false
+        printKnop.removeAttribute('aria-busy')
       }
     })
 
