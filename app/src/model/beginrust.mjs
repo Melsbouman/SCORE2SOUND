@@ -26,7 +26,7 @@ export function vulBeginRust(partituur) {
         sleutels: index === 0 ? structuredClone(eersteMaat.sleutels) : [],
         toonsoort: structuredClone(eersteMaat.toonsoort),
         tempo: index === 0 ? eersteMaat.tempo : null,
-        herhaling: { ...eersteMaat.herhaling, begin: false, eind: false },
+        herhaling: { begin: false, eind: false, keer: 2 },
         elementen: [{
           soort: 'rust', start: 0, duur: Math.round(teller * 1920 / noemer), stem: 1,
           notenbalk: 1, heleMaat: true, zekerheid: 1,
@@ -34,8 +34,6 @@ export function vulBeginRust(partituur) {
         ...(aantal >= 2 && index === 0 ? { maatrust: aantal } : {}),
         ...(aantal >= 2 && index > 0 ? { verborgen: true } : {}),
       }));
-    for (const maat of ingevoegd.slice(1)) delete maat.toonsoort;
-
     for (const maat of huidigePartij.maten) {
       maat.index += aantal;
       if (/^-?\d+$/.test(String(maat.nummer))) {

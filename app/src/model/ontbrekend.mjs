@@ -68,7 +68,7 @@ export function vulOntbrekendeMaten(partituur) {
           index: gat.index + index,
           opmaat: false,
           maatsoort,
-          toonsoort: structuredClone(volgende.toonsoort),
+          toonsoort: structuredClone(volgende.toonsoort ?? partij.maten[gat.index - 1]?.toonsoort),
           sleutels: [],
           tempo: null,
           herhaling: { begin: false, eind: false, keer: 2 },
