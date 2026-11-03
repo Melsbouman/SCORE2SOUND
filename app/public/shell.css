@@ -1,0 +1,19 @@
+.app { display: grid; grid-template-columns: 250px minmax(0, 1fr); min-height: 100vh; }
+.zijbalk { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 2px; padding: 28px 24px 20px; background: var(--kleur-zijbalk); color: var(--kleur-wit); }
+.zijbalk__logo { margin-bottom: 22px; font: 800 1.15rem/1.1 var(--letter); font-stretch: 125%; text-transform: uppercase; }
+.zijbalk__nieuw { display: block; margin-bottom: 18px; padding: 11px 16px; border-radius: 50px; background: var(--kleur-wit); color: var(--kleur-zijbalk); text-align: center; text-decoration: none; font-weight: 700; }
+.zijbalk__nieuw:hover { background: var(--kleur-achtergrond); }
+.zijbalk__item { padding: 8px 0; color: var(--kleur-wit); text-decoration: none; }
+.zijbalk__item:hover { text-decoration: underline; text-underline-offset: 4px; }
+.zijbalk__vul { flex: 1; }
+.zijbalk__voet { padding-top: 14px; border-top: 1px solid #ffffff55; font-size: 0.85rem; }
+.zijbalk__voet a { color: var(--kleur-wit); text-decoration: none; opacity: 0.85; }
+.zijbalk__voet a:hover { opacity: 1; text-decoration: underline; }
+.zijbalk a:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+.inhoud { min-width: 0; padding-bottom: 120px; }
+@media (max-width: 900px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .zijbalk { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 2px 22px; padding: 16px 20px; }
+  .zijbalk__logo { width: 100%; margin-bottom: 6px; }
+  .zijbalk__nieuw, .zijbalk__vul, .zijbalk__voet { display: none; }
+}
