@@ -16,6 +16,7 @@ const NIVEAUS = Object.keys(STERKTE);
 const EENMALIG = { fp: 90, sf: 105, sfz: 110, sfp: 100, rfz: 110 };
 const OPLOPENDE_TEKST = new Set(['cresc', 'cresc.', 'crescendo']);
 const AFLOPENDE_TEKST = new Set(['dim.', 'dimin.', 'decresc.', 'decrescendo']);
+const begrensVolume = (volume) => Math.max(30, Math.min(127, volume));
 
 function maatDuur(maat) {
   if (!maat.opmaat) return maatLengte(maat.maatsoort);
@@ -95,7 +96,7 @@ export function maakVolumeOp(partij) {
   const huidigeDynamiek = (begin) => dynamieken.filter((dynamiek) => opTik(dynamiek, begin) < 0).at(-1);
   return (tik) => {
     const eenmalig = eenmaligeDynamieken.filter((dynamiek) => dynamiek.tik === tik).at(-1);
-    if (eenmalig) return eenmalig.volume;
+    if (eenmalig) return begrensVolume(eenmalig.volume);
     const verlopenVoorTik = verlopen
       .filter(({ begin }) => begin.tik <= tik)
       .sort((a, b) => opTik(a.begin, b.begin));
@@ -105,7 +106,7 @@ export function maakVolumeOp(partij) {
     });
     if (!actief) {
       const huidig = dynamieken.filter((dynamiek) => dynamiek.tik <= tik).at(-1);
-      return STERKTE[huidig?.naam ?? 'mf'];
+      return begrensVolume(STERKTE[huidig?.naam ?? 'mf']);
     }
 
     const { begin, eind } = actief;
@@ -119,7 +120,7 @@ export function maakVolumeOp(partij) {
     const fractie = eindTik <= begin.tik ? 1 : Math.max(0, Math.min(1, (tik - begin.tik) / (eindTik - begin.tik)));
     const beginVolume = STERKTE[NIVEAUS[startNiveau]];
     const eindVolume = STERKTE[NIVEAUS[eindNiveau]];
-    return Math.round(beginVolume + (eindVolume - beginVolume) * fractie);
+    return begrensVolume(Math.round(beginVolume + (eindVolume - beginVolume) * fractie));
   };
 }
 
