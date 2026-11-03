@@ -263,3 +263,38 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
 .kop h1, #upload h2 { font-family: var(--letter-kop); font-variation-settings: "opsz" 6; font-weight: 700; letter-spacing: 0.01em; }
 .kop h1 { font-size: clamp(1.8rem, 3vw, 2.6rem); line-height: 1.05; text-transform: uppercase; }
 .kop h1 .logo__2 { color: var(--kleur-zijbalk); }
+
+@media (min-width: 900px) {
+  #speler { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr) minmax(0, 1fr); align-items: center; gap: 24px; overflow: visible; padding-top: 12px; padding-bottom: 12px; font-size: 0.9rem; }
+  #speler .speler__links { display: grid; min-width: 0; }
+  #speler .speler__titel { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #speler .speler__partij { opacity: 0.75; font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #speler .speler__midden { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  #speler .speler__knoppen { display: flex; flex-wrap: nowrap; gap: 18px; align-items: center; margin: 0; }
+  #speler .speler__knoppen .knop { display: grid; place-items: center; width: 34px; height: 34px; padding: 0; color: var(--kleur-wit); background: transparent; border: 0; border-radius: 50%; }
+  #speler .speler__knoppen .knop:hover { background: #ffffff22; }
+  #speler .speler__knoppen .speler__spelen { width: 44px; height: 44px; color: var(--kleur-donker); background: var(--kleur-achtergrond); }
+  #speler .speler__knoppen .speler__spelen:hover { background: var(--kleur-wit); }
+  #speler .speler__knoppen svg { width: 20px; height: 20px; fill: currentColor; }
+  #speler .speler__spelen svg { width: 22px; height: 22px; }
+  #speler .speler__voortgang { position: relative; width: 100%; max-width: 560px; height: 4px; background: #ffffff40; border-radius: 2px; }
+  #speler .speler__voortgang > span { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--kleur-wit); border-radius: 2px; }
+  #speler .speler__rechts { display: flex; flex-wrap: nowrap; justify-content: flex-end; align-items: center; gap: 16px; white-space: nowrap; }
+  #speler .speler__rechts .speler__veld { flex-wrap: nowrap; margin: 0; gap: 6px; }
+  #speler .speler__rechts input[type="range"] { flex: 0 0 90px; width: 90px; }
+  #speler .speler__rechts > span { display: none; }
+  #speler > .zacht { grid-column: 1 / -1; margin: 0; }
+  body:has(#speler) .werkvlak { padding-bottom: 120px; }
+}
+@media (max-width: 899px) {
+  #speler { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding-top: 8px; padding-bottom: 8px; }
+  #speler .speler__links, #speler .speler__rechts { display: none; }
+  #speler .speler__midden { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; }
+  #speler .speler__knoppen { display: flex; gap: 18px; align-items: center; margin: 0; }
+  #speler .speler__knoppen .knop { display: grid; place-items: center; width: 38px; height: 38px; padding: 0; color: var(--kleur-wit); background: transparent; border: 0; border-radius: 50%; }
+  #speler .speler__knoppen .speler__spelen { width: 46px; height: 46px; color: var(--kleur-donker); background: var(--kleur-achtergrond); }
+  #speler .speler__knoppen svg { width: 20px; height: 20px; fill: currentColor; }
+  #speler .speler__voortgang { position: relative; width: 100%; height: 4px; background: #ffffff40; border-radius: 2px; }
+  #speler .speler__voortgang > span { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--kleur-wit); border-radius: 2px; }
+  body:has(#speler) .werkvlak { padding-bottom: 110px; }
+}
