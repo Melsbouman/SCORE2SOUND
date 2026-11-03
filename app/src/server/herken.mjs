@@ -15,6 +15,7 @@ import { leesMusicXML } from '../musicxml/lezen.mjs';
 import { herstelMaatsoorten as herstelMaatsoortenZonderBeginrust } from '../model/maatsoorten.mjs';
 import { vulBeginRust as vulOorspronkelijkeBeginRust } from '../model/beginrust.mjs';
 import { vulOntbrekendeMaten } from '../model/ontbrekend.mjs';
+import { markeerVerdachteNoten } from '../model/verdacht.mjs';
 
 const vulBeginRust = (partituur) => vulOntbrekendeMaten(vulOorspronkelijkeBeginRust(partituur));
 
@@ -242,7 +243,7 @@ export function maakHerken({ map, draaier }) {
   const nagekeken = markeerFouteMaten(gevuld, maatMeldingen);
   uit.partituur = nagekeken;
   const letters = voegLettersToe(uit.partituur, bladenGoed);
-  uit.partituur = letters.partituur;
+  uit.partituur = markeerVerdachteNoten(letters.partituur);
   const meldingen = [
     ...letters.meldingen.map(herkenMelding),
       ...mislukt.map((nummer) => herkenMelding(`Pagina ${nummer} is overgeslagen: daar kon de app geen muziek lezen.`)),
