@@ -144,3 +144,13 @@ export function keurMaatGoed(partituur, partijId, maatIndex) {
   return kopie;
 }
 
+export function kopieerMaat(partituur, partijId, vanIndex, naarIndex) {
+  const partij = partituur.partijen.find((kandidaat) => kandidaat.id === partijId);
+  const vanMaat = partij?.maten[vanIndex];
+  const naarMaat = partij?.maten[naarIndex];
+  if (!partij || !vanMaat || !naarMaat) return partituur;
+
+  const nieuw = structuredClone(partituur);
+  nieuw.partijen.find((kandidaat) => kandidaat.id === partijId).maten[naarIndex].elementen = structuredClone(vanMaat.elementen);
+  return nieuw;
+}
