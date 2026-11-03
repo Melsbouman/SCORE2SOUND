@@ -235,6 +235,19 @@ export function start(app) {
     speelMaat = null;
     app.meld('speel-maat', { maat: null });
   });
+  document.addEventListener('keydown', (event) => {
+    const doel = event.target;
+    if (!app.stand.partituur || event.ctrlKey || event.altKey || event.metaKey
+      || ['input', 'select', 'textarea', 'button'].includes(doel?.tagName?.toLowerCase())
+      || doel?.isContentEditable) return;
+    if (event.key === ' ') {
+      event.preventDefault();
+      speel.click();
+    } else if (event.key === 'Home') {
+      event.preventDefault();
+      stop.click();
+    }
+  });
   tempo.addEventListener('input', () => {
     pasTempoToe(Number(tempo.value));
   });
