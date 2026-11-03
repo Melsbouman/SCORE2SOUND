@@ -71,3 +71,6 @@ app/test/browser-import.test.mjs controleert dat bestanden die de browser laadt 
 
 ## Tests voor de Noteflight-editor en de pdf
 Nieuw zijn onder meer verschuif-halvetoon, noot-bij-letter, kopieer-maten, aanduidingen, stemming, aanwijzing-toevoegen, haak-toevoegen, aanduiding-plaatsing, dynamiek-als-zangtekst, instrumentnamen-weergave, partijnaam-weergave, pdf-lijnen, pdf-meer-systemen, pdf-titelblok en pdf-zonder-extra-tekst. Draai ze met npm test in de map app.
+
+## Tests voor de herkenning en de bogen
+Nieuw zijn herstel-maatsoorten, begin-rust, begin-rust-later, verdachte-noten, ontbrekende-maten, bogen-nummers, midi-volledig en sand-and-stars-fixture. Het testbestand app/test/fixtures/sand-and-stars-begin.xml bevat de eerste 30 maten van de ruwe uitvoer van Audiveris.
