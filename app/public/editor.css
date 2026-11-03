@@ -39,7 +39,7 @@
   min-width: 0;
   min-height: 64px;
   overflow: auto;
-  padding: 8px 0;
+  padding: 4px 8px;
 }
 .lint__paneel[hidden] { display: none; }
 .lint__paneel h2, .lint__paneel h3 { display: none; }
@@ -83,3 +83,11 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
 #voorbeeld { grid-area: voorbeeld; }
 #hulp { grid-area: hulp; }
 #weergave { grid-area: weergave; }
+
+.lint label { display: inline-flex; flex-direction: row; align-items: center; gap: 6px; margin: 0; white-space: nowrap; }
+.lint .speler__passage { flex-wrap: nowrap; }
+.lint .speler__passage legend, .lint .speler__passage > span { padding: 0; white-space: nowrap; }
+.lint output, .lint p { margin: 0; white-space: nowrap; }
+.lint input[type="number"] { width: 4.5em; }
+.lint input[type="checkbox"] { margin: 0; }
+.lint__paneel { overflow-y: hidden; }
