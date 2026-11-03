@@ -59,7 +59,7 @@ Wat `werkpakket.sh` doet, in volgorde:
 2. Zet de eigen kloon schoon, maakt de branch `agent/<nummer>-<naam>` en zet `agent-bezig`.
 3. Roept de agent aan, met alleen de rechten om bestanden te schrijven (geen shell, geen git).
 4. Kijkt zelf welke bestanden echt zijn gewijzigd, draait wijzigingen buiten de lijst terug, controleert dat elk genoemd bestand bestaat en vergelijkt met `## Verwacht`.
-5. Commit, draait `regels-controle.mjs` (met syntaxcontrole) en `tests.sh`, en vergelijkt met `## Verwacht`.
+5. Commit, draait `regels-controle.mjs` (met syntaxcontrole) en `tests.sh`, en vergelijkt met `## Verwacht`. Bij falende tests toont de terugkoppeling de mislukte tests met hun foutmelding.
 6. Faalt iets, dan krijgt dezelfde agent de foutmelding en zijn huidige wijziging terug als herstelronde (`AIFLOW_HERSTEL`, standaard 2). Faalt het daarna nog, dan `agent-vast` met de reden als comment en er wordt niet gepusht. Een afwijking van `## Verwacht` mag na de laatste ronde wel door, zonder `agent-exact`.
 7. Pusht, opent de PR (of plaatst een comment bij een afgekeurde PR) met de echte uitkomsten, en zet `agent-review`.
 8. Is de wijziging precies `## Verwacht`, of slagen alle opdrachten uit `## Controle`, en zijn daarnaast tests, regelcontrole en Action groen en is er niets teruggedraaid, dan merget het script de PR en sluit het issue (`AIFLOW_AUTOMERGE=uit` zet dat uit). Een genoemd nieuw testbestand telt daarbij niet als gewijzigd testbestand; alleen een taak zonder `## Controle` en zonder `## Verwacht` blijft voor Claude.
@@ -134,4 +134,3 @@ Een nachtplan loopt tot een eindtijd (standaard 07:00, eindcontrole 45 minuten e
 **Genoeg taken.** De hartslag houdt de wachtrij gevuld: zijn er minder dan `AIFLOW_MIN_TAKEN` (standaard 6) open taken, dan maakt Claude er zelf bij, zonder goedkeuring van Mels, en start de wachtrijen opnieuw. Alleen werk dat geld, een server of accounts van Mels vraagt blijft liggen.
 
 Een taak doorloopt maximaal drie fasen: eerst werkt de aangewezen uitvoerder eraan; loopt die vast, dan wordt de taak automatisch overgezet naar de andere uitvoerder; loopt de taak ook na die overzetting vast, dan krijgt Codex één laatste poging met de foutmeldingen van beide eerdere pogingen en de vrijheid om zelf een andere aanpak te bedenken, waarna een nieuwe mislukking als `agent-vast` voor Claude blijft staan.
-
