@@ -88,3 +88,6 @@ Bovenaan de pdf staan de titel, links de partijnaam met stemming (bij een losse 
 
 ## Alle partijen als pdf
 Heeft je stuk meer dan een partij, dan staat in het tabblad Bestand de knop Alle partijen (PDF zip). Je krijgt een zip met per partij een pdf, elk met het watermerk SCORE2SOUND en bovenaan de titel, de partijnaam met stemming, de componist en arr. met de arrangeur.
+
+## Paginanummers in de pdf
+Onderaan elke pagina van de pdf staat het paginanummer, bijvoorbeeld pagina 1 van 2.
