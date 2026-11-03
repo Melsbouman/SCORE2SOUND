@@ -1,4 +1,4 @@
-export const SYMBOOL = Object.freeze({
+const symbolen = {
   heel: "\uE1D2",
   half: "\uE1D3",
   kwart: "\uE1D5",
@@ -16,10 +16,14 @@ export const SYMBOOL = Object.freeze({
   tenuto: "\uE4A4",
   punt: "\uE1E7",
   overbinding: '<svg viewBox="0 0 32 12" aria-hidden="true"><path d="M2 10 Q16 -1 30 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  triool: '<svg viewBox="0 0 24 14" aria-hidden="true"><path d="M2 13V5h7M22 13V5h-7" fill="none" stroke="currentColor" stroke-width="1.6"/><text x="12" y="10" text-anchor="middle" font-size="10" font-weight="700" fill="currentColor">3</text></svg>',
   crescendo: "\uE53E",
   decrescendo: "\uE53F",
   p: "\uE520",
   mp: "\uE52F",
   mf: "\uE52D",
   f: "\uE522",
-});
+};
+
+Object.defineProperty(symbolen, "triool", { enumerable: false });
+export const SYMBOOL = Object.freeze(symbolen);

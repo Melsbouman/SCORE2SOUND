@@ -666,6 +666,7 @@ const KNOP_INFO = {
   accent: ["Accent", null, "accent"],
   tenuto: ["Tenuto", null, "tenuto"],
   overbinding: ["Overbinding", null, "overbinding"],
+  triool: ["Triool", "T", "triool"],
 };
 
 function knopNaam(knop) {
@@ -704,7 +705,7 @@ function groepeerEditorKnoppenbalk() {
         knop.replaceChildren();
         const span = document.createElement("span");
         span.className = "muzieksymbool";
-        if (symbool === "overbinding") span.innerHTML = waarde;
+        if (symbool === "overbinding" || symbool === "triool") span.innerHTML = waarde;
         else span.textContent = waarde;
         knop.append(span);
       } else if (!knop.getAttribute("aria-label")) {
