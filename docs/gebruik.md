@@ -73,3 +73,6 @@ Kies een noot of maat, open het tabblad Aanduidingen, typ bij Tempo (bpm) een ge
 
 ## Een heel stuk of een reeks maten kopiëren
 Tik een maat aan en houd Shift ingedrukt terwijl je een andere maat aantikt: alle maten ertussen zijn gekozen. Ctrl en A kiest het hele stuk. Ctrl en C kopieert, daarna tik je de maat aan waar het moet komen en doe je Ctrl en V.
+
+## Het tabblad Bestand
+Bovenaan open je een ander bestand. Daaronder staan je projecten en de titelgegevens (titel, componist en arrangeur). Onderaan staan de exportknoppen: MusicXML, gecomprimeerd (.mxl), alle partijen als zip, MIDI, audio en PDF met watermerk.
