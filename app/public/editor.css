@@ -339,3 +339,4 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
   #speler .speler__rechts input[type="range"] { flex: 0 0 70px; width: 70px; }
   #speler .speler__titel, #speler .speler__partij { max-width: 14ch; }
 }
+.lint__paneel[hidden], .lint__paneel:has(> #projecten)[hidden] { display: none !important; }
