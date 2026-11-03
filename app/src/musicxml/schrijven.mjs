@@ -214,6 +214,11 @@ function schrijfNotations(element, markering = {}) {
   return inhoud ? tag('notations', inhoud) : '';
 }
 
+function dynamiekVanTekst(tekst) {
+  const genormaliseerd = String(tekst).trim().replace(/[.\s]+$/, '');
+  return dynamiekUitTekst(genormaliseerd);
+}
+
 function schrijfNoot(element, meerdereBalken, partij, maat, weergave, markering, verborgen) {
   const info = element.voorslag ? { type: 'eighth', punten: 0, triool: false } : duurInfo(element.duur);
   let inhoud = element.voorslag ? leeg('grace', element.voorslag.schuin ? { slash: 'yes' } : {}) : element.akkoord ? leeg('chord') : '';
@@ -238,6 +243,7 @@ function schrijfNoot(element, meerdereBalken, partij, maat, weergave, markering,
   }
   inhoud += schrijfNotations(element, markering);
   for (const lyric of element.teksten ?? []) {
+    if (dynamiekVanTekst(lyric.lettergreep)) continue;
     const syllabic = { single: 'single', begin: 'begin', midden: 'middle', eind: 'end' }[lyric.soort] ?? 'single';
     inhoud += tag('lyric', tag('syllabic', syllabic) + tag('text', esc(lyric.lettergreep)), { number: lyric.couplet ?? 1 });
   }
@@ -260,6 +266,10 @@ function schrijfStemmen(maat, partij, weergave) {
     const markeringen = tupletMarkeringen(gesorteerd);
     for (const element of gesorteerd) {
       if (!element.voorslag && !element.akkoord && element.start > positie) xml += tag('forward', tag('duration', element.start - positie));
+      for (const tekst of element.teksten ?? []) {
+        const dynamiek = dynamiekVanTekst(tekst.lettergreep);
+        if (dynamiek) xml += tag('direction', tag('direction-type', tag('dynamics', leeg(dynamiek))), { placement: 'below' });
+      }
       xml += schrijfNoot(element, balken > 1, partij, maat, weergave, markeringen.get(element), maat.verborgen);
       if (!element.voorslag && !element.akkoord) positie = Math.max(positie, element.start + element.duur);
     }
