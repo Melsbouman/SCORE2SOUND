@@ -23,6 +23,7 @@ export function start(app) {
   const lijst = document.createElement('ul');
   for (const [toets, omschrijving] of [
     ['↑ / ↓', 'Verschuif de geselecteerde noot omhoog of omlaag.'],
+    ['Shift + ↑ / ↓', 'Verschuif de geselecteerde noot een octaaf omhoog of omlaag.'],
     ['← / →', 'Ga naar de vorige of volgende noot.'],
     ['N', 'Ga naar de volgende onzekere noot.'],
     ['Enter', 'Keur de geselecteerde noot goed.'],
