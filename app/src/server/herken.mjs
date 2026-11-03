@@ -24,6 +24,7 @@ import { kinderen, leesXml, tekst } from '../musicxml/xml.mjs';
 import { controleerMaatduur } from '../controle/maatduur.mjs';
 import { vulLegeMaten, markeerFouteMaten } from '../controle/nabewerken.mjs';
 import { INSTRUMENTEN, instrumentBijNaam } from '../model/instrumenten.mjs';
+import { partijNaamUitKop } from '../model/partijnaam.mjs';
 import { maakLimiet } from './limiet.mjs';
 
 const GELDIG_ID = /^[a-f0-9]{12}$/;
@@ -150,7 +151,7 @@ function maakNetjes(partituur, naam, creditWoorden) {
       if (gevonden) {
         const volgnummer = gevonden.waarde.match(/\s+(\d+)\s*$/)?.[1];
         const instrumentNaam = gevonden.instrument.id === 'bugel' ? 'Flugelhorn' : gevonden.instrument.naam;
-        partij.naam = `${instrumentNaam}${volgnummer ? ` ${volgnummer}` : ''}`;
+        partij.naam = partijNaamUitKop(gevonden.waarde) ?? `${instrumentNaam}${volgnummer ? ` ${volgnummer}` : ''}`;
         Object.assign(partij.instrument, { midiProgramma: gevonden.instrument.midiProgramma, transpositie: gevonden.instrument.transpositie });
       } else {
         partij.naam = `Partij ${index + 1}`; // zonder tekst op het blad noemt Audiveris elke partij Voice
