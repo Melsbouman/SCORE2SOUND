@@ -219,6 +219,12 @@ export function start(app) {
     status.setAttribute('role', 'status');
     statusBalk = status;
     balk.append(status);
+    const selectieStatus = document.createElement('span');
+    selectieStatus.className = 'editor__selectie';
+    selectieStatus.setAttribute('role', 'status');
+    selectieStatus.textContent = gekozenMaat === null ? '' : `Maat ${gekozenMaat + 1} gekozen`;
+    selectieStatus.hidden = gekozenMaat === null;
+    balk.append(selectieStatus);
     vlak.replaceChildren(balk);
   }
 
