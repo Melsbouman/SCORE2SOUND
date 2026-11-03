@@ -156,7 +156,13 @@ export function start(app) {
       });
       knoppen.append(knop);
     }
-    blad.append(knoppen);
+    const zoomVlak = document.getElementById('zoom');
+    if (zoomVlak) {
+      zoomVlak.className = 'zoom';
+      zoomVlak.replaceChildren(knoppen);
+    } else {
+      blad.append(knoppen);
+    }
     for (let pagina = 1; pagina <= tk.getPageCount(); pagina++) {
       const svg = new DOMParser().parseFromString(tk.renderToSVG(pagina), 'image/svg+xml').documentElement;
       svg.classList.add('bladmuziek__pagina');
