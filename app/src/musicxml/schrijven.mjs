@@ -58,6 +58,7 @@ function schrijfAanwijzing(aanwijzing, weergave) {
   let type = '';
   let sound = '';
   let dynamiekTekst = false;
+  let verloopWoord = false;
   if (aanwijzing.type === 'tempo') {
     const getoond = aanwijzing.getoond;
     const eenheid = getoond?.eenheid ?? 'quarter';
@@ -98,7 +99,8 @@ function schrijfAanwijzing(aanwijzing, weergave) {
     const waarde = aanwijzing.musicxmlType ?? { begin: 'start', eind: 'stop', wissel: 'change' }[aanwijzing.waarde];
     if (waarde) type = leeg('pedal', { type: waarde });
   }
-  const placement = !dynamiekTekst && ['tekst', 'tempo', 'letter', 'octaafteken'].includes(aanwijzing.type) ? 'above' : 'below';
+  verloopWoord = aanwijzing.type === 'tekst' && /cresc|dim/i.test(String(aanwijzing.waarde));
+  const placement = !dynamiekTekst && !verloopWoord && ['tekst', 'tempo', 'letter', 'octaafteken'].includes(aanwijzing.type) ? 'above' : 'below';
   return tag('direction', tag('direction-type', type) + offset + sound, { placement });
 }
 
