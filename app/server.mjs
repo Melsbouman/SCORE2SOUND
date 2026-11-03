@@ -77,9 +77,19 @@ const KOPPEN = new Proxy({
   },
 });
 
-function stuur(antwoord, status, body, soort = 'application/json; charset=utf-8', extra = {}) {
-  antwoord.writeHead(status, { ...KOPPEN, 'Content-Type': soort, ...extra });
-  antwoord.end(typeof body === 'string' || Buffer.isBuffer(body) ? body : JSON.stringify(body));
+async function stuur(antwoord, status, body, soort = 'application/json; charset=utf-8', extra = {}, acceptEncoding = '') {
+  const isBytes = Buffer.isBuffer(body);
+  let inhoud = typeof body === 'string' || isBytes ? body : JSON.stringify(body);
+  const pakker = !isBytes && soort?.toLowerCase().startsWith('application/json')
+    && Buffer.byteLength(inhoud) > 1024 ? kiesPakker(acceptEncoding) : undefined;
+  const koppen = { ...KOPPEN, 'Content-Type': soort, ...extra };
+  if (pakker) {
+    inhoud = await PAKKERS[pakker](Buffer.from(inhoud));
+    koppen['Content-Encoding'] = pakker;
+    koppen.Vary = koppen.Vary ? `${koppen.Vary}, Accept-Encoding` : 'Accept-Encoding';
+  }
+  antwoord.writeHead(status, koppen);
+  antwoord.end(inhoud);
 }
 
 // Tekst en WebAssembly pakken goed in: Verovio gaat van 7 MB naar ongeveer 2 MB. De klankbank is al ingepakt.
@@ -129,7 +139,7 @@ async function api(verzoek, antwoord, url, module, gebruiker) {
     koppen: verzoek.headers,
     gebruiker,
   });
-  stuur(antwoord, uit.status ?? 200, uit.body ?? {}, uit.soort, uit.koppen);
+  await stuur(antwoord, uit.status ?? 200, uit.body ?? {}, uit.soort, uit.koppen, verzoek.headers['accept-encoding']);
 }
 
 function geldigeOrigin(verzoek) {
@@ -155,7 +165,7 @@ async function bestand(verzoek, antwoord, url) {
   if (relatief === '' || relatief.endsWith('/')) relatief += 'index.html';
   const volledig = normalize(join(map, relatief));
   // Nooit buiten de map: ../ in de URL levert een 404 op, geen bestand van elders.
-  if (volledig !== map && !volledig.startsWith(map + sep)) return stuur(antwoord, 404, { fout: 'Niet gevonden.' });
+  if (volledig !== map && !volledig.startsWith(map + sep)) return stuur(antwoord, 404, { fout: 'Niet gevonden.' }, undefined, {}, verzoek.headers['accept-encoding']);
   try {
     const info = await stat(volledig);
     const pakker = INPAKKEN.has(extname(volledig)) ? kiesPakker(verzoek.headers['accept-encoding']) : undefined;
@@ -173,9 +183,9 @@ async function bestand(verzoek, antwoord, url) {
         ingepakt.set(`${volledig}|${etag}`, inhoud);
       }
     }
-    stuur(antwoord, 200, inhoud, soort, extra);
+    await stuur(antwoord, 200, inhoud, soort, extra);
   } catch {
-    stuur(antwoord, 404, { fout: 'Niet gevonden.' });
+    await stuur(antwoord, 404, { fout: 'Niet gevonden.' });
   }
 }
 
@@ -184,32 +194,32 @@ export function maakServer() {
     try {
       const url = new URL(verzoek.url, 'http://localhost');
       if (verzoek.method === 'GET' && url.pathname === '/api/gezond') {
-        return stuur(antwoord, 200, { ok: true });
+        return await stuur(antwoord, 200, { ok: true }, undefined, {}, verzoek.headers['accept-encoding']);
       }
       const route = API.find(([p]) => url.pathname === p || url.pathname.startsWith(`${p}/`));
       if (route) {
         let gebruiker;
         if (process.env.SCORE2SOUND_ACCOUNTS === 'aan') {
           if (['POST', 'PUT', 'DELETE'].includes(verzoek.method) && !geldigeOrigin(verzoek)) {
-            return stuur(antwoord, 403, { fout: 'Deze aanvraag is niet toegestaan.' });
+            return await stuur(antwoord, 403, { fout: 'Deze aanvraag is niet toegestaan.' }, undefined, {}, verzoek.headers['accept-encoding']);
           }
           if (route[0] !== '/api/account') {
             const { gebruikerVan } = await import(pathToFileURL(join(HIER, './src/server/inloggen.mjs')).href);
             gebruiker = await gebruikerVan(cookieToken(verzoek));
-            if (!gebruiker) return stuur(antwoord, 401, { fout: 'Log eerst in.' });
+            if (!gebruiker) return await stuur(antwoord, 401, { fout: 'Log eerst in.' }, undefined, {}, verzoek.headers['accept-encoding']);
             gebruiker = gebruiker.id;
           }
         }
         return await api(verzoek, antwoord, url, route[1], gebruiker);
       }
       if (url.pathname === '/api' || url.pathname.startsWith('/api/')) {
-        return stuur(antwoord, 404, { fout: 'Niet gevonden.' });
+        return await stuur(antwoord, 404, { fout: 'Niet gevonden.' }, undefined, {}, verzoek.headers['accept-encoding']);
       }
-      if (verzoek.method !== 'GET' && verzoek.method !== 'HEAD') return stuur(antwoord, 405, { fout: 'Dat kan hier niet.' });
+      if (verzoek.method !== 'GET' && verzoek.method !== 'HEAD') return await stuur(antwoord, 405, { fout: 'Dat kan hier niet.' }, undefined, {}, verzoek.headers['accept-encoding']);
       return await bestand(verzoek, antwoord, url);
     } catch (fout) {
       const status = fout.status === 413 ? 413 : 500;
-      stuur(antwoord, status, { fout: status === 413 ? fout.message : 'Er ging iets mis op de server.' });
+      await stuur(antwoord, status, { fout: status === 413 ? fout.message : 'Er ging iets mis op de server.' }, undefined, {}, verzoek.headers['accept-encoding']);
     }
   });
 }
@@ -247,4 +257,3 @@ HttpServer.prototype.emit = function (naam, ...argumenten) {
   }
   return oorspronkelijkEmit.call(this, naam, ...argumenten);
 };
-
