@@ -49,3 +49,6 @@ Claude pakt hier werk uit als een nachtplan af is en de eindtijd nog niet bereik
 - [x] Repetitieletters. (2 november 2026)
 - [x] Hermes-tegoed (opgewaardeerd). (2 november 2026)
 - [x] Mels' punt deel 1. (2 november 2026)
+
+- [x] Noteflight-editor (3 november 2026): pijlen per halve toon, letters A-G, maten kiezen en kopiëren, aanduidingenbibliotheek met vaste plaatsing, stemming en arr. in het titelblok, zoom los van de pagina, Spotify-speler, merkletters volgens de PDF.
+
