@@ -52,3 +52,6 @@ Claude pakt hier werk uit als een nachtplan af is en de eindtijd nog niet bereik
 
 - [x] Noteflight-editor (3 november 2026): pijlen per halve toon, letters A-G, maten kiezen en kopiëren, aanduidingenbibliotheek met vaste plaatsing, stemming en arr. in het titelblok, zoom los van de pagina, Spotify-speler, merkletters volgens de PDF.
 
+- [ ] PDF: titelblok (partijnaam met stemming, componist, arr.) bovenaan de pagina laten tekenen; nu staat alleen de titel boven het stuk.
+- [ ] Noten horizontaal verplaatsen en slepen naar een andere maat; crescendo- en decrescendohaken (wedge) uit het tabblad Aanduidingen.
+
