@@ -32,6 +32,7 @@ export function start(app) {
     ['Shift + A / Shift + F', 'Accent en fermate.'],
     ['Ctrl + C / Ctrl + V', 'Kopieer en plak de gekozen maten.'],
     ['Ctrl + A', 'Kies alle maten van het stuk.'],
+    ['Delete', 'Maak de gekozen noot een rust, of maak de gekozen maten leeg.'],
     ['Twee vingers knijpen', 'Zoom het muziekstuk in of uit op een aanraakscherm.'],
     ['Shift + klik', 'Kies een reeks maten.'],
     ['Ctrl + scrollen', 'Zoom het muziekstuk in of uit.'],
