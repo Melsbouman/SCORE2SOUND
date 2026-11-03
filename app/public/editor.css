@@ -298,3 +298,8 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
   #speler .speler__voortgang > span { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--kleur-wit); border-radius: 2px; }
   body:has(#speler) .werkvlak { padding-bottom: 110px; }
 }
+.aanduidingen__groep { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 6px 0; }
+.aanduidingen__kop { flex: 0 0 90px; color: #0d150b99; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.aanduidingen__knop { padding: 4px 12px; color: #0d150b; background: transparent; border: 1px solid var(--kleur-lijn); border-radius: 6px; font-size: 0.85rem; }
+.aanduidingen__knop:hover:not(:disabled) { background: #0d150b14; }
+.aanduidingen__knop:disabled { opacity: 0.4; }
