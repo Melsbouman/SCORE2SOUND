@@ -196,6 +196,7 @@ main:has(#weergave g.measure) #hulp { display: none; }
 .bladmuziek__details span { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
 .bladmuziek__details span:last-child { margin-left: auto; text-align: right; }
 .bladmuziek__pagina { display: block; max-width: none; height: auto; }
+.bladmuziek g.tempo .rend { transform: scale(0.75); transform-box: fill-box; transform-origin: left center; }
 .bladmuziek g.measure.gemarkeerd { fill: #b3261e; color: #b3261e; }
 .bladmuziek g.measure.speelt { fill: #2f5d8a; color: #2f5d8a; }
 .bladmuziek g.measure.verschilt { fill: #8a5a00; color: #8a5a00; }
