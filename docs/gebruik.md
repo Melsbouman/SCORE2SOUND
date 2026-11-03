@@ -79,3 +79,6 @@ Bovenaan open je een ander bestand. Daaronder staan je projecten en de titelgege
 
 ## Een crescendo of decrescendo zetten
 Kies een maat of, met Shift-klik, een reeks maten en open het tabblad Aanduidingen. Klik bij Haak op Crescendo of Decrescendo. De haak loopt van het begin van de eerste maat tot de laatste noot van de laatste maat en staat onder de balk.
+
+## Partituur of losse partij
+Heeft een stuk meer dan een partij, dan staan de instrumentnamen voor elke regel (de volle naam bij de eerste regel, daarna de afkorting). Bij een losse partij staat de partijnaam met de stemming linksboven en niet voor de balk.
