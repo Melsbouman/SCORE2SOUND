@@ -53,6 +53,7 @@
 }
 .lint__paneel > section:first-child { border-left: 0; }
 .lint button, .lint input, .lint select { font-size: 13px; padding: 4px 10px; min-height: 30px; }
+.lint button.knop { padding: 10px 22px; }
 .lint input[type="range"] { width: 140px; padding: 0; }
 .lint label { font-size: 13px; }
 .lint__paneel > #speler, .lint__paneel > #tempo, .lint__paneel > #editor { flex: 1 1 auto; }
