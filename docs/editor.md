@@ -68,3 +68,6 @@ Waarom een noot rood is
 ## Knoppenbalk
 
 De knoppenbalk blijft tijdens het scrollen bovenaan staan en breekt op een smal scherm af over meerdere regels. De acties zijn gegroepeerd onder de kopjes **Noten**, **Voortekens**, **Toonhoogte**, **Tekens** en **Bewerken**. Muzikale acties worden met tekens uit het Bravura-muziekfont getoond; de titel van iedere knop vermeldt ook de bijbehorende sneltoets. Een actieve knop heeft een duidelijke markering en acties die op dat moment niet beschikbaar zijn, zijn uitgeschakeld.
+
+## PDF downloaden
+De knop PDF downloaden (tabblad Bestand) haalt een PDF met het watermerk SCORE2SOUND van de server. Lukt dat niet, dan opent het afdrukvenster van de browser.
