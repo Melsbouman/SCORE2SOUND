@@ -293,3 +293,27 @@ export function kopieerMaten(partituur, vanBegin, vanEinde, naarBegin) {
   }
   return resultaat;
 }
+
+export function voegAanwijzingToe(partituur, partijId, maatIndex, start, type, waarde) {
+  const partij = partituur.partijen.find((item) => item.id === partijId);
+  const maat = partij?.maten[maatIndex];
+  if (!maat) return partituur;
+
+  const nieuw = structuredClone(partituur);
+  const elementen = nieuw.partijen.find((item) => item.id === partijId).maten[maatIndex].elementen;
+  const aanwijzing = { soort: 'aanwijzing', start, type, waarde, zekerheid: 1 };
+  const positie = elementen.findIndex((element) => element.start >= start);
+  elementen.splice(positie === -1 ? elementen.length : positie, 0, aanwijzing);
+  return nieuw;
+}
+
+export function verwijderAanwijzing(partituur, id) {
+  const { partijId, maatIndex, elementIndex } = leesId(id);
+  const partij = partituur.partijen.find((item) => item.id === partijId);
+  const element = partij?.maten[maatIndex]?.elementen[elementIndex];
+  if (element?.soort !== 'aanwijzing') return partituur;
+
+  const nieuw = structuredClone(partituur);
+  nieuw.partijen.find((item) => item.id === partijId).maten[maatIndex].elementen.splice(elementIndex, 1);
+  return nieuw;
+}
