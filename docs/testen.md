@@ -65,3 +65,6 @@ Alle tests gebruiken testvoorbeelden uit `app/test/voorbeelden/`:
 
 ## Tests voor de grote editor
 Nieuw zijn onder meer eerste-account.test.mjs, speelvolgorde-herhaling.test.mjs, maatduur.test.mjs, titelgegevens.test.mjs, maat-goedkeuren.test.mjs en pdf-watermerk.test.mjs. Draai ze allemaal met npm test in de map app.
+
+## Bestanden die ook in de browser draaien
+app/test/browser-import.test.mjs controleert dat bestanden die de browser laadt geen server-only bibliotheek (fast-xml-parser) binnenhalen, ook niet via een ander bestand. Anders tekent de app geen partituur meer.
