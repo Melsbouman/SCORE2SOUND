@@ -23,3 +23,6 @@ Voer `docker compose logs app` uit om de foutmelding te zien.
 
 ## Ik kan niet inloggen
 Is er nog geen account en zijn er geen uitnodigingscodes ingesteld, dan kun je je eerste account registreren zonder code. Heb je een tweede account nodig, dan is een uitnodigingscode verplicht. Start de server opnieuw na een wijziging.
+
+## De PDF lukt niet
+Lukt PDF downloaden niet, dan opent de browser het afdrukvenster: kies daar Opslaan als PDF. Controleer ook of je bent ingelogd en of de server draait.
