@@ -46,3 +46,6 @@ Als je bent ingelogd, staat bovenaan een knop Wachtwoord wijzigen. Vul je huidig
 
 ## PDF downloaden
 Onder het tabblad Bestand staat de knop PDF downloaden. Je krijgt een PDF van de partituur met het watermerk SCORE2SOUND schuin over elke pagina. Lukt het maken op de server niet, dan opent de browser het afdrukvenster; kies daar Opslaan als PDF.
+
+## De eerste keer inloggen
+Is er nog geen account, dan kies je Registreren met je e-mailadres en een wachtwoord van minstens 10 tekens. De uitnodigingscode laat je dan leeg. Een tweede account heeft wel een uitnodigingscode nodig.
