@@ -47,7 +47,7 @@ function maatDuur(maat) {
     .reduce((einde, element) => Math.max(einde, element.start + element.duur), 0);
 }
 
-function maatBeginnen(partituur) {
+function maatBeginnenBasis(partituur) {
   const beginnen = [];
   let tik = 0;
   for (const maat of partituur.partijen[0]?.maten ?? []) {
@@ -57,7 +57,34 @@ function maatBeginnen(partituur) {
   return beginnen;
 }
 
-function dirigentenSpoor(partituur, beginnen, voorintellerTik = 0) {
+export function maakTijdlijn(partituur) {
+  const basisBeginnen = maatBeginnenBasis(partituur);
+  const verlengingen = [];
+  for (const partij of partituur.partijen) {
+    for (let maatIndex = 0; maatIndex < partij.maten.length; maatIndex += 1) {
+      const maatBegin = basisBeginnen[maatIndex];
+      if (maatBegin === undefined) continue;
+      for (const element of partij.maten[maatIndex].elementen) {
+        if (!element.fermate || (element.soort !== 'noot' && element.soort !== 'rust')) continue;
+        verlengingen.push({
+          einde: maatBegin + element.start + element.duur,
+          duur: Math.round(element.duur * 0.8),
+        });
+      }
+    }
+  }
+  verlengingen.sort((a, b) => a.einde - b.einde);
+  const verplaats = (tik) => tik + verlengingen
+    .filter((verlenging) => tik >= verlenging.einde)
+    .reduce((som, verlenging) => som + verlenging.duur, 0);
+  return {
+    basisBeginnen,
+    maatBeginnen: basisBeginnen.map(verplaats),
+    verplaats,
+  };
+}
+
+function dirigentenSpoor(partituur, beginnen, tijdlijn, voorintellerTik = 0) {
   const events = [];
   const maten = partituur.partijen[0]?.maten ?? [];
   const tempoOverlopen = tempoOverloop(partituur);
@@ -93,7 +120,7 @@ function dirigentenSpoor(partituur, beginnen, voorintellerTik = 0) {
       if (aanwijzing.soort !== 'aanwijzing' || aanwijzing.type !== 'tempo' || !(aanwijzing.start > 0)) continue;
       const microseconden = Math.round(60000000 / aanwijzing.waarde);
       events.push({
-        tik: beginnen[index] + aanwijzing.start,
+        tik: tijdlijn.verplaats(tijdlijn.basisBeginnen[index] + aanwijzing.start) + voorintellerTik,
         volgorde: 1,
         bytes: [0xff, 0x51, 3, (microseconden >>> 16) & 0xff, (microseconden >>> 8) & 0xff, microseconden & 0xff],
       });
@@ -135,13 +162,17 @@ function dirigentenSpoor(partituur, beginnen, voorintellerTik = 0) {
   return maakSpoor(events);
 }
 
-function wiggenVoor(partij, beginnen) {
+function wiggenVoor(partij, tijdlijn, voorintellerTik) {
   const dynamieken = [];
   const wigAanwijzingen = [];
   let volgorde = 0;
   for (let maatIndex = 0; maatIndex < partij.maten.length; maatIndex += 1) {
     for (const element of partij.maten[maatIndex].elementen) {
-      const aanwijzing = { ...element, tik: beginnen[maatIndex] + element.start, volgorde };
+      const aanwijzing = {
+        ...element,
+        tik: tijdlijn.verplaats(tijdlijn.basisBeginnen[maatIndex] + element.start) + voorintellerTik,
+        volgorde,
+      };
       if (element.soort === 'aanwijzing' && element.type === 'dynamiek' && element.waarde in STERKTE) {
         dynamieken.push(aanwijzing);
       }
@@ -189,7 +220,7 @@ function wiggenVoor(partij, beginnen) {
   return wiggen;
 }
 
-function partijSpoor(partij, partijIndex, beginnen, volume) {
+function partijSpoor(partij, partijIndex, tijdlijn, volume, voorintellerTik) {
   const { poort, kanaal } = kanaalVan(partijIndex);
   const naam = [...tekstEncoder.encode(partij.naam)];
   const events = [
@@ -199,13 +230,12 @@ function partijSpoor(partij, partijIndex, beginnen, volume) {
     { tik: 0, volgorde: 2, bytes: [0xb0 | kanaal, 7, volume[partij.id] ?? 100] },
   ];
   const noten = [];
-  const wiggen = wiggenVoor(partij, beginnen);
+  const wiggen = wiggenVoor(partij, tijdlijn, voorintellerTik);
   let sterkte = 80;
   const overbonden = new Map();
 
   for (let maatIndex = 0; maatIndex < partij.maten.length; maatIndex += 1) {
     const maat = partij.maten[maatIndex];
-    const maatBegin = beginnen[maatIndex];
     const eenmalig = new Map();
     for (const element of maat.elementen) {
       if (element.soort !== 'aanwijzing' || element.type !== 'dynamiek') continue;
@@ -218,7 +248,7 @@ function partijSpoor(partij, partijIndex, beginnen, volume) {
       }
       if (element.soort !== 'noot' || element.voorslag) continue;
       const toets = naarMidi(element.toonhoogte) + partij.instrument.transpositie.chromatisch + (element.octaafVerschuiving ?? 0) * 12;
-      const begin = maatBegin + element.start;
+      const begin = tijdlijn.verplaats(tijdlijn.basisBeginnen[maatIndex] + element.start) + voorintellerTik;
       const klinkendeDuur = element.articulaties.includes('staccatissimo')
         ? Math.floor(element.duur / 4)
         : element.articulaties.includes('staccato')
@@ -254,11 +284,11 @@ function partijSpoor(partij, partijIndex, beginnen, volume) {
   return maakSpoor(events);
 }
 
-function klikSpoor(partituur, voorinteller, verschuiving, alleenVoorinteller = false) {
+function klikSpoor(partituur, voorinteller, verschuiving, alleenVoorinteller, tijdlijn) {
   const events = [];
   for (const gebeurtenis of klikGebeurtenissen(partituur, { voorinteller })) {
     if (alleenVoorinteller && gebeurtenis.tik >= 0) continue;
-    const tik = gebeurtenis.tik + verschuiving;
+    const tik = (gebeurtenis.tik < 0 ? gebeurtenis.tik : tijdlijn.verplaats(gebeurtenis.tik)) + verschuiving;
     const toets = gebeurtenis.kracht === 110 ? 76 : 77;
     events.push({ tik, volgorde: 4, bytes: [0x99, toets, gebeurtenis.kracht] });
     events.push({ tik: tik + 60, volgorde: 3, bytes: [0x89, toets, 0] });
@@ -271,12 +301,15 @@ export function schrijfMidi(partituur, { volume = {}, klik = false, voorinteller
   const verschuiving = voorinteller > 0
     ? voorinteller * maatLengte(gespeeld.partijen[0]?.maten[0]?.maatsoort ?? { teller: 4, noemer: 4 })
     : 0;
-  const beginnen = maatBeginnen(gespeeld).map((tik) => tik + verschuiving);
-  const sporen = [dirigentenSpoor(gespeeld, beginnen, verschuiving)];
+  const tijdlijn = maakTijdlijn(gespeeld);
+  const beginnen = tijdlijn.maatBeginnen.map((tik) => tik + verschuiving);
+  const sporen = [dirigentenSpoor(gespeeld, beginnen, tijdlijn, verschuiving)];
   for (let index = 0; index < gespeeld.partijen.length; index += 1) {
-    sporen.push(partijSpoor(gespeeld.partijen[index], index, beginnen, volume));
+    sporen.push(partijSpoor(gespeeld.partijen[index], index, tijdlijn, volume, verschuiving));
   }
-  if (klik || voorinteller > 0) sporen.push(klikSpoor(partituur, voorinteller, verschuiving, !klik));
+  if (klik || voorinteller > 0) {
+    sporen.push(klikSpoor(partituur, voorinteller, verschuiving, !klik, tijdlijn));
+  }
   return Uint8Array.from([
     ...blok('MThd', [...getal16(1), ...getal16(sporen.length), ...getal16(480)]),
     ...sporen.flat(),
