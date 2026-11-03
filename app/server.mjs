@@ -1,6 +1,29 @@
 // SCORE2SOUND-server: levert de app aan de browser en beantwoordt de API.
 // Starten met `npm start` in app/; daarna draait de app op http://localhost:5175.
-import { createServer } from 'node:http';
+import { createServer as maakNodeServer } from 'node:http';
+
+function createServer(...args) {
+  const afhandelaar = args[0];
+  if (typeof afhandelaar === 'function') {
+    args[0] = (verzoek, antwoord) => {
+      const jsonVerzoek = verzoek.headers['content-type']?.split(';')[0].trim() === 'application/json';
+      const jsonPad = verzoek.url === '/api/projecten' || verzoek.url === '/api/account';
+      const jsonMethode = verzoek.method === 'POST' || verzoek.method === 'PUT' || verzoek.method === 'DELETE';
+      const grootte = Number(verzoek.headers['content-length']);
+      if (jsonVerzoek && jsonPad && jsonMethode && grootte > 10_000_000) {
+        antwoord.writeHead(413, { 'content-type': 'application/json; charset=utf-8' });
+        antwoord.end(JSON.stringify({ fout: 'Dit verzoek is te groot.' }));
+        return;
+      }
+      afhandelaar(verzoek, antwoord);
+    };
+  }
+  const server = maakNodeServer(...args);
+  server.headersTimeout = 15000;
+  server.requestTimeout = 600000;
+  server.keepAliveTimeout = 5000;
+  return server;
+}
 import { readFile, stat } from 'node:fs/promises';
 import { dirname, extname, join, normalize, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
