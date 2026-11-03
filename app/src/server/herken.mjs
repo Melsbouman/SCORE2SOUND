@@ -12,6 +12,7 @@ import { leesZip } from './zip.mjs';
 import { telPdfPaginas } from './pdfpaginas.mjs';
 import { bladenUitOmr, koppelOmr, voegPaginasSamen } from './omr.mjs';
 import { leesMusicXML } from '../musicxml/lezen.mjs';
+import { herstelMaatsoorten } from '../model/maatsoorten.mjs';
 import { kinderen, leesXml, tekst } from '../musicxml/xml.mjs';
 import { controleerMaatduur } from '../controle/maatduur.mjs';
 import { vulLegeMaten, markeerFouteMaten } from '../controle/nabewerken.mjs';
@@ -58,7 +59,7 @@ async function leesUitvoer(uitmap) {
   const namen = (await readdir(uitmap)).filter((naam) => /^invoer(\.mvt\d+)?\.xml$/.test(naam)).sort();
   if (namen.length === 0) return null;
   const xmlTeksten = await Promise.all(namen.map((naam) => readFile(join(uitmap, naam), 'utf8')));
-  const delen = xmlTeksten.map((xml) => leesMusicXML(xml));
+  const delen = xmlTeksten.map((xml) => herstelMaatsoorten(leesMusicXML(xml)));
   const creditWoorden = xmlTeksten.flatMap((xml) => kinderen(leesXml(xml), 'credit').flatMap((credit) => kinderen(credit, 'credit-words').map((woord) => tekst(woord))));
   const [partituur, ...rest] = delen;
   for (const deel of rest.filter((d) => d.partijen.length === partituur.partijen.length)) {
