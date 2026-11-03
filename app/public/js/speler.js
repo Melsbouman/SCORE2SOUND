@@ -27,22 +27,6 @@ import { kanaalVan } from '/src/midi/schrijven.mjs';
 // Kanaal per partij, zoals in schrijfMidi: elke poort heeft 16 kanalen en kanaal 9 (slagwerk) wordt overgeslagen.
 const kanaal = (index) => { const plek = kanaalVan(index); return plek.poort * 16 + plek.kanaal; };
 
-// Begin van elke maat in seconden, uit de maatlengtes en tempo's van de eerste partij.
-function tijdlijn(partituur) {
-  const uit = [];
-  let seconden = 0;
-  let tempo = 120;
-  for (const maat of partituur.partijen[0]?.maten ?? []) {
-    if (maat.tempo) tempo = maat.tempo;
-    uit.push(seconden);
-    const tikken = maat.opmaat
-      ? Math.max(0, ...maat.elementen.filter((e) => e.soort !== 'aanwijzing').map((e) => e.start + e.duur))
-      : (maat.maatsoort.teller * 1920) / maat.maatsoort.noemer;
-    seconden += (tikken / 480) * (60 / tempo);
-  }
-  return uit;
-}
-
 export function start(app) {
   const vlak = document.getElementById('speler');
   let tijden = []; // begin van elke gespeelde maat in seconden; herhaalde maten staan er meer keer in
@@ -213,7 +197,7 @@ export function start(app) {
     geladen = false;
     luisterNaar = null;
     speelMaat = null;
-    tijden = partituur ? tijdlijn(uitgevouwen(partituur)) : [];
+    tijden = partituur ? maatTijden(partituur) : [];
     volgorde = speelVolgorde(maten());
     van.value = maten()[0]?.nummer ?? '1';
     tot.value = maten().at(-1)?.nummer ?? '1';
@@ -251,4 +235,5 @@ export function start(app) {
   });
   teken();
 }
-import { maatIndexVanNummer, speelVolgorde, uitgevouwen } from '/src/model/maten.mjs';
+import { maatIndexVanNummer, speelVolgorde } from '/src/model/maten.mjs';
+import { maatTijden } from '/src/midi/tijdlijn.mjs';
