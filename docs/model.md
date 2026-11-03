@@ -166,4 +166,7 @@ De controles geven een lijst meldingen:
   versies: [{ id: 'uuid', naam: 'Voor het transponeren', tijd: '2026-10-29T20:00:00.000Z', partituur: Partituur }, ...],
 }
 ```
-`versies` is een lijst bewaarde kopieën van de partituur; een oud project heeft het veld niet, en dat telt als een lege lijst.
+versies is een lijst bewaarde kopieën van de partituur; een oud project heeft het veld niet, en dat telt als een lege lijst.
+
+## Plaatsing van aanwijzingen
+Tempo-, expressie-, spelwijze- en structuurtekst staat altijd boven de balk. Dynamiek (pp tot ff, sf, sfz, fp) en cresc. en dim. staan altijd onder de balk. De bibliotheek met termen staat in app/src/model/aanduidingen.mjs.
