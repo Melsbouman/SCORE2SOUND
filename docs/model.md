@@ -176,3 +176,6 @@ Een haak is twee aanwijzingen met type crescendo of decrescendo: eerst met waard
 
 ## Maten leegmaken
 leegMaten(partituur, van, tot) in app/src/model/corrigeren.mjs vervangt alle elementen van de maten van tot en met tot, voor alle partijen, door een hele maat rust met de duur van de maatsoort.
+
+## Herstelde maten uit de herkenning
+Ontbreken maten aan het begin of tussen twee repetitiecijfers, dan voegt de herkenning maten rust in. De maten rust aan het begin zijn een samengestelde maat (maatrust op de eerste, verborgen op de rest). Tussen repetitiecijfers zijn het hele maten rust met zekerheid 0.3, dus rood.
