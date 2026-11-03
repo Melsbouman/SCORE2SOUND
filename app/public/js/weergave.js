@@ -253,9 +253,11 @@ const vlak = document.getElementById('weergave');
         const { partijTitel } = await import('/src/model/stemming.mjs');
         const details = document.createElement('div');
         details.className = 'bladmuziek__details';
-        const partij = document.createElement('span');
-        partij.textContent = partijTitel(gegevens.partijen[0]);
-        details.append(partij);
+        if (gegevens.partijen.length === 1) {
+          const partij = document.createElement('span');
+          partij.textContent = partijTitel(gegevens.partijen[0]);
+          details.append(partij);
+        }
         const maker = document.createElement('div');
         maker.className = 'bladmuziek__maker';
         if (componist) {
