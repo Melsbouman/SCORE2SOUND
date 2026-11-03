@@ -26,6 +26,51 @@ export function start(app) {
         ? `Gekozen: maat ${gekozenMaat + 1}`
         : 'Kies een noot of een maat en klik op een aanduiding.';
 
+    const tempo = document.createElement('div');
+    tempo.className = 'aanduidingen__tempo';
+    const tempoLabel = document.createElement('label');
+    tempoLabel.textContent = 'Tempo (bpm) ';
+    const tempoInput = document.createElement('input');
+    tempoInput.type = 'number';
+    tempoInput.min = '20';
+    tempoInput.max = '300';
+    tempoInput.value = '96';
+    tempoInput.setAttribute('aria-label', 'Tempo in slagen per minuut');
+    tempoLabel.append(tempoInput);
+    const tempoKnop = document.createElement('button');
+    tempoKnop.type = 'button';
+    tempoKnop.className = 'knop aanduidingen__knop';
+    tempoKnop.textContent = 'Zetten';
+    tempoKnop.disabled = !app.stand.partituur || (gekozenNoot == null && gekozenMaat == null);
+    tempoKnop.addEventListener('click', () => {
+      const partituur = app.stand.partituur;
+      if (!partituur) return;
+
+      const getal = Number(tempoInput.value);
+      if (!Number.isInteger(getal) || getal < 20 || getal > 300) return;
+
+      let partijId;
+      let maatIndex;
+      let start;
+      if (gekozenNoot != null) {
+        const plaats = leesId(gekozenNoot);
+        const elementBijNoot = zoekElement(partituur, gekozenNoot);
+        if (!plaats || !elementBijNoot) return;
+        ({ partijId, maatIndex } = plaats);
+        start = elementBijNoot.start;
+      } else {
+        partijId = partituur.partijen[0]?.id;
+        maatIndex = gekozenMaat;
+        start = 0;
+      }
+
+      if (partijId == null) return;
+      app.zet({
+        partituur: voegAanwijzingToe(partituur, partijId, maatIndex, start, 'tempo', getal),
+      });
+    });
+    tempo.append(tempoLabel, tempoKnop);
+
     const groepen = Object.entries(AANDUIDINGEN).map(([groep, termen]) => {
       const element = document.createElement('div');
       element.className = 'aanduidingen__groep';
@@ -116,7 +161,7 @@ export function start(app) {
       }
     }
 
-    vlak.replaceChildren(tekst, ...groepen, ...(lijst ? [lijst] : []));
+    vlak.replaceChildren(tekst, tempo, ...groepen, ...(lijst ? [lijst] : []));
   }
 
   app.op('kies-noot', ({ id }) => {
