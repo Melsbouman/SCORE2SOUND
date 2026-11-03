@@ -43,3 +43,6 @@ Onder Exporteren staat een knop voor een gecomprimeerd MusicXML-bestand (.mxl). 
 
 ## Je wachtwoord wijzigen
 Als je bent ingelogd, staat bovenaan een knop Wachtwoord wijzigen. Vul je huidige en je nieuwe wachtwoord in (minstens 10 tekens).
+
+## PDF downloaden
+Onder het tabblad Bestand staat de knop PDF downloaden. Je krijgt een PDF van de partituur met het watermerk SCORE2SOUND schuin over elke pagina. Lukt het maken op de server niet, dan opent de browser het afdrukvenster; kies daar Opslaan als PDF.
