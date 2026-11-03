@@ -80,7 +80,7 @@ function schrijfAanwijzing(aanwijzing, weergave) {
       number: aanwijzing.nummer ?? 1,
     });
   } else if (aanwijzing.type === 'tekst') {
-    const dynamiek = dynamiekUitTekst(aanwijzing.waarde);
+    const dynamiek = dynamiekUitTekst(String(aanwijzing.waarde).trim().replace(/\.$/, ''));
     if (dynamiek) {
       type = tag('dynamics', leeg(dynamiek));
       dynamiekTekst = true;
