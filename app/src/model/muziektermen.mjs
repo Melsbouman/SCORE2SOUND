@@ -1,44 +1,109 @@
-const muziektermen = [
-  'rall.', 'rit.', 'ritard.', 'accel.', 'a tempo', 'tempo primo', 'tempo I',
-  'poco a poco', 'poco', 'molto', 'meno mosso', 'piu mosso', 'cresc.',
-  'decresc.', 'dim.', 'dolce', 'espress.', 'espressivo', 'con espress.',
-  'legato', 'staccato', 'marcato', 'tenuto', 'sostenuto', 'sempre', 'subito',
-  'simile', 'tutti', 'soli', 'solo', 'unis.', 'div.', 'arco', 'pizz.',
-  'con sord.', 'senza sord.', 'open', 'muted', 'morendo', 'perdendosi',
-  'smorzando', 'calando', 'animando', 'agitato', 'appassionato', 'cantabile',
-  'maestoso', 'grandioso', 'giocoso', 'scherzando', 'pesante', 'lento',
-  'adagio', 'andante', 'moderato', 'allegro', 'vivace', 'presto', 'larghetto',
-  'tranquillo', 'semplice', 'deliberamente', 'fieramente', 'minaccioso',
-  'tenerezza', 'teneramente', 'colla parte', 'ritenuto', 'stringendo',
-  'allargando', 'rubato', 'grazioso', 'brillante', 'energico', 'con moto',
+export const MUZIEKTERMEN = [
+  'rall.',
+  'rit.',
+  'dolce',
+  'poco a poco',
+  'a tempo',
+  'molto',
+  'cresc.',
+  'dim.',
+  'morendo',
+  'agitato',
+  'poco agitato',
+  'espressivo',
+  'legato',
+  'staccato',
+  'tenuto',
+  'con moto',
+  'tranquillo',
+  'sostenuto',
+  'ritardando',
+  'accelerando',
+  'mezzo',
+  'forte',
+  'piano',
+  'pizz.',
+  'arco',
+  'teneramente',
+  'andante',
+  'allegro',
+  'adagio',
+  'largo',
+  'presto',
+  'vivace',
+  'moderato',
+  'cantabile',
+  'maestoso',
+  'grazioso',
+  'marcato',
+  'sempre',
+  'subito',
+  'rubato',
+  'animato',
+  'appassionato',
+  'delicato',
+  'leggiero',
+  'smorzando',
+  'perdendosi',
+  'calando',
+  'stringendo',
+  'fortissimo',
+  'pianissimo',
 ];
 
+function normaliseer(tekst) {
+  return tekst
+    .toLowerCase()
+    .replaceAll('0', 'o')
+    .replaceAll('1', 'l')
+    .replaceAll('5', 's')
+    .replace(/^[.\-]+|[.\-]+$/g, '');
+}
+
+function levenshtein(a, b) {
+  let vorigeRij = Array.from({ length: b.length + 1 }, (_, index) => index);
+
+  for (let i = 1; i <= a.length; i += 1) {
+    const huidigeRij = [i];
+    for (let j = 1; j <= b.length; j += 1) {
+      huidigeRij[j] = Math.min(
+        huidigeRij[j - 1] + 1,
+        vorigeRij[j] + 1,
+        vorigeRij[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1),
+      );
+    }
+    vorigeRij = huidigeRij;
+  }
+
+  return vorigeRij[b.length];
+}
+
+export function herstelMuziekterm(tekst) {
+  const genormaliseerd = normaliseer(tekst);
+  let besteTerm = null;
+  let kleinsteAfstand = Infinity;
+
+  for (const term of MUZIEKTERMEN) {
+    const afstand = levenshtein(genormaliseerd, normaliseer(term));
+    if (afstand < kleinsteAfstand) {
+      besteTerm = term;
+      kleinsteAfstand = afstand;
+    }
+  }
+
+  if (kleinsteAfstand <= 2 && kleinsteAfstand <= genormaliseerd.length / 3) {
+    return besteTerm;
+  }
+
+  return tekst;
+}
+
 const woorden = new Map();
-for (const term of muziektermen) {
+for (const term of MUZIEKTERMEN) {
   for (const woord of term.split(' ')) {
     const sleutel = normaliseer(woord);
     if (!woorden.has(sleutel)) woorden.set(sleutel, woord);
   }
-}
-
-function normaliseer(woord) {
-  return woord.toLowerCase().replaceAll('0', 'o').replaceAll('1', 'l');
-}
-
-function afstand(a, b) {
-  const vorige = Array.from({ length: b.length + 1 }, (_, index) => index);
-  for (let i = 1; i <= a.length; i += 1) {
-    const huidige = [i];
-    for (let j = 1; j <= b.length; j += 1) {
-      huidige[j] = Math.min(
-        huidige[j - 1] + 1,
-        vorige[j] + 1,
-        vorige[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1),
-      );
-    }
-    vorige.splice(0, vorige.length, ...huidige);
-  }
-  return vorige[b.length];
 }
 
 function behoudHoofdletter(bron, vervanging) {
@@ -65,7 +130,7 @@ function verbeterWoord(woord) {
   let beste;
   let besteAfstand = maximum + 1;
   for (const [sleutel, term] of woorden) {
-    const verschil = afstand(genormaliseerd, sleutel);
+    const verschil = levenshtein(genormaliseerd, sleutel);
     if (verschil < besteAfstand) {
       beste = term;
       besteAfstand = verschil;
