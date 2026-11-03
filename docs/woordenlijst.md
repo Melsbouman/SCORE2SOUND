@@ -34,3 +34,5 @@ De muziektermen in SCORE2SOUND, met de term uit MusicXML. Gebruik in teksten van
 || aanduiding | (geen) | een term bij de noten, zoals Andante, dolce, mf of cresc., met een vaste plek boven of onder de balk |
 | startpagina | (geen) | de pagina die je ziet als je de website opent, met uitleg en de knop Inloggen |
 | maten vooraf | voorinteller | het aantal maten tikken dat voor het stuk klinkt |
+| voorteken | (geen) | het mol-, kruis- of herstellingsteken vlak voor een noot |
+| samengestelde rust | meermaats-rust | een blok met een cijfer erboven dat meerdere maten rust voorstelt |
