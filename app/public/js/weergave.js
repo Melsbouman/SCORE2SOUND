@@ -83,6 +83,7 @@ const vlak = document.getElementById('weergave');
   let eersteTekeningGestart = false;
   let gekozen = null;
   let gekozenMaat = null;
+  let gekozenTot = null;
   let zoom = 1;
   try {
     const opgeslagenZoom = Number(localStorage.getItem('score2sound-zoom'));
@@ -250,7 +251,7 @@ const vlak = document.getElementById('weergave');
     laatstGetekend = musicxml;
     markeerGekozen(false);
     markeerVerschil();
-    markeerMaat(gekozenMaat);
+    markeerMaat(gekozenMaat, gekozenTot);
   }
 
   function maakAanpasbaar(element, veldnaam) {
@@ -356,6 +357,13 @@ const vlak = document.getElementById('weergave');
       })
       .filter((kandidaat) => kandidaat.binnen)
       .sort((a, b) => a.oppervlakte - b.oppervlakte)[0];
+    if (gebeurtenis.shiftKey && gekozenMaat !== null && maat?.index !== undefined) {
+      const van = Math.min(gekozenMaat, maat.index);
+      const tot = Math.max(gekozenMaat, maat.index);
+      app.meld('kies-noot', { id: null });
+      app.meld('kies-maat', van === tot ? { maat: van } : { maat: van, tot });
+      return;
+    }
     app.meld('kies-noot', { id: null });
     app.meld('kies-maat', { maat: maat?.index ?? null });
   });
@@ -363,7 +371,20 @@ const vlak = document.getElementById('weergave');
   // De maten in volgorde; Verovio tekent elke maat als <g class="measure">, over alle partijen heen.
   const maten = () => [...vlak.querySelectorAll('g.measure')];
 
-  function markeerMaat(index) {
+  function markeerMaat(index, tot) {
+    if (tot !== undefined && tot !== null) {
+      const markeringen = [];
+      for (let maatIndex = index; maatIndex <= tot; maatIndex += 1) {
+        markeerMaat(maatIndex);
+        const markering = vlak.querySelector('rect.maat-markering');
+        if (markering) {
+          markeringen.push({ ouder: markering.parentNode, markering: markering.cloneNode(true) });
+        }
+      }
+      vlak.querySelectorAll('rect.maat-markering').forEach((markering) => markering.remove());
+      for (const item of markeringen) item.ouder.append(item.markering);
+      return;
+    }
     for (const rect of vlak.querySelectorAll('rect.maat-markering')) rect.remove();
     if (index === null || index === undefined) return;
     const g = maten()[index];
@@ -425,7 +446,8 @@ const vlak = document.getElementById('weergave');
   });
   app.op('kies-maat', (keuze) => {
     gekozenMaat = keuze?.maat ?? null;
-    markeerMaat(gekozenMaat);
+    gekozenTot = keuze?.tot ?? null;
+    markeerMaat(gekozenMaat, gekozenTot);
   });
 
   // Opnieuw tekenen als de breedte echt verandert, zodat de regels passen.
