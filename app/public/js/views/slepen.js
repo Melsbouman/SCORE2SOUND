@@ -23,6 +23,28 @@ function nootnaam(noot, stappen) {
 }
 
 function staphoogte(noot) {
+  const staff = noot.closest('g.staff')
+    ?? noot.closest('g.measure')?.querySelector('g.staff');
+  if (staff) {
+    let lijnen = [...staff.querySelectorAll(':scope > path')].slice(0, 2);
+    if (lijnen.length < 2) {
+      lijnen = [...staff.querySelectorAll('path')]
+        .filter((pad) => {
+          const vak = pad.getBoundingClientRect();
+          return (pad.getAttribute('d') ?? '').startsWith('M')
+            && vak.width > vak.height;
+        })
+        .slice(0, 2);
+    }
+    if (lijnen.length === 2) {
+      const [a, b] = lijnen;
+      const afstand = Math.abs(
+        b.getBoundingClientRect().top - a.getBoundingClientRect().top,
+      );
+      if (afstand > 0) return afstand / 2;
+    }
+  }
+
   const kop = noot.querySelector('.notehead');
   if (!kop) return null;
   const hoogte = kop.getBBox().height;
