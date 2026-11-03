@@ -55,3 +55,5 @@ Claude pakt hier werk uit als een nachtplan af is en de eindtijd nog niet bereik
 - [ ] PDF: titelblok (partijnaam met stemming, componist, arr.) bovenaan de pagina laten tekenen; nu staat alleen de titel boven het stuk.
 - [ ] Noten horizontaal verplaatsen en slepen naar een andere maat; crescendo- en decrescendohaken (wedge) uit het tabblad Aanduidingen.
 
+- [ ] Herkenning: de credit-words van Audiveris bevatten de maatnummers aan het begin van elke regel (bij Sand and Stars 28, 34, 45, 53, 56, 59, 64, ...) en de aantallen boven samengestelde rusten (12, 4, 2, 3). Koppel ze aan de maten waar een regel begint (maat.regelbegin) en geef lege maten het juiste aantal; de volgorde en pagina van een credit staan in het MusicXML (credit page, default-x en default-y).
+- [ ] Herkenning: fermate herkennen waar Audiveris hem mist, en het tempo-getal van een metronoomteken lezen als Audiveris het als losse tekst bewaart (staat nu in tempo-uit-tekst voor tekstaanwijzingen, niet voor credit-words).
