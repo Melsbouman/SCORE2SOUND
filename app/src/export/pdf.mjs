@@ -46,7 +46,7 @@ export async function maakPdf(musicxml, { watermerk = 'SCORE2SOUND', comprimeer 
     pageHeight: 2970,
     scale: 40,
     adjustPageHeight: false,
-    ...(titelblok ? { pageMarginTop: 280 } : {}),
+    ...(titelblok ? { pageMarginTop: 360 } : {}),
   });
   tk.loadData(musicxml);
 
