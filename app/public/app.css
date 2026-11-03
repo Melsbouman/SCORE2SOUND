@@ -534,3 +534,6 @@ body:has(#speler) .werkvlak { padding-bottom: calc(40vh + var(--ruimte-4)); }
 #hulp h2 { display: none; }
 #hulp ol { display: flex; flex-wrap: wrap; gap: var(--ruimte-2) var(--ruimte-4); margin: 0; padding-left: 1.2em; color: var(--kleur-zacht); font-size: 0.9rem; }
 #hulp p { display: none; }
+#upload ol { display: none; }
+#voorbeeld { background: transparent; border: 0; box-shadow: none; padding: 0 0 var(--ruimte-3); margin-top: calc(var(--ruimte-3) * -1); }
+#hulp { margin-top: 0; }
