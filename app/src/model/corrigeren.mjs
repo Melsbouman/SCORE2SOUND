@@ -191,3 +191,21 @@ export function zetToonhoogte(partituur, id, toonhoogte) {
   }
   return kopie;
 }
+export function verschuifHalvetoon(partituur, id, richting) {
+  const { kopie } = kopieMetPlaats(partituur, id);
+  const element = zoekElement(kopie, id);
+  if (!element || element.soort !== 'noot') return kopie;
+
+  const tonen = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+  const { stap, alter, octaaf: oudOctaaf } = element.toonhoogte;
+  const midi = (oudOctaaf + 1) * 12 + tonen[stap] + alter;
+  const nieuw = midi + richting;
+  const pc = ((nieuw % 12) + 12) % 12;
+  const octaaf = Math.floor(nieuw / 12) - 1;
+  const namen = richting === 1
+    ? [['C', 0], ['C', 1], ['D', 0], ['D', 1], ['E', 0], ['F', 0], ['F', 1], ['G', 0], ['G', 1], ['A', 0], ['A', 1], ['B', 0]]
+    : [['C', 0], ['D', -1], ['D', 0], ['E', -1], ['E', 0], ['F', 0], ['G', -1], ['G', 0], ['A', -1], ['A', 0], ['B', -1], ['B', 0]];
+  const [nieuweStap, nieuweAlter] = namen[pc];
+  element.toonhoogte = { stap: nieuweStap, alter: nieuweAlter, octaaf };
+  return kopie;
+}
