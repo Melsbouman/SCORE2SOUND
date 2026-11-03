@@ -49,3 +49,6 @@ Onder het tabblad Bestand staat de knop PDF downloaden. Je krijgt een PDF van de
 
 ## De eerste keer inloggen
 Is er nog geen account, dan kies je Registreren met je e-mailadres en een wachtwoord van minstens 10 tekens. De uitnodigingscode laat je dan leeg. Een tweede account heeft wel een uitnodigingscode nodig.
+
+## Een rode noot verbeteren
+Een rode noot is een noot waar de herkenning aan twijfelt. Tik hem aan en verschuif hem met de pijl omhoog of omlaag, zet er een kruis of mol voor, of keur hem goed met Enter. Met Maat klopt keur je alle noten van een maat in een keer goed.
