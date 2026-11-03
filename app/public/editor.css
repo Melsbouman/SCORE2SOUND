@@ -91,3 +91,15 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
 .lint input[type="number"] { width: 4.5em; }
 .lint input[type="checkbox"] { margin: 0; }
 .lint__paneel { overflow-y: hidden; }
+
+@media (min-width: 900px) {
+  .lint #speler { display: flex; flex-wrap: nowrap; align-items: center; gap: 14px; }
+  .lint #speler .speler__knoppen { display: flex; flex-wrap: nowrap; gap: 6px; margin: 0; }
+  .lint #speler .speler__veld { flex-wrap: nowrap; margin: 0; gap: 6px; }
+  .lint #speler .speler__veld input[type="range"] { flex: 0 0 140px; width: 140px; }
+  .lint #speler .speler__veld input[type="number"] { width: 4.5em; }
+  .lint #speler .speler__passage { display: flex; flex-wrap: nowrap; align-items: center; gap: 10px; margin: 0; padding: 0; border: 0; }
+  .lint #speler .speler__passage legend { float: left; margin: 0 6px 0 0; padding: 0; white-space: nowrap; }
+  .lint #speler > span, .lint #speler > p { margin: 0; white-space: nowrap; }
+  .lint #tempo:has(> p:only-of-type) { display: none; }
+}
