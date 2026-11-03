@@ -220,3 +220,20 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
 .editor-knoppengroep__kop { color: #0d150b99; font-size: 0.65rem; letter-spacing: 0.05em; text-transform: uppercase; }
 @media (min-width: 900px) { .lint__paneel { max-height: none; overflow: visible; } }
 .bladmuziek g.tempo tspan[font-family="Leland"] { font-size: 470px; }
+.zoombalk {
+  position: sticky;
+  top: 8px;
+  z-index: 5;
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  margin: 0 0 -36px auto;
+  width: fit-content;
+  float: right;
+}
+
+.zoombalk .knop {
+  min-width: 36px;
+  padding: 4px 10px;
+  background: #ffffffe6;
+}
