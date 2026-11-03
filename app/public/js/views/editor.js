@@ -576,9 +576,6 @@ export function start(app) {
         app.meld('kies-noot', { id: `n-${partij.id}-${volgende.maatIndex}-${volgende.elementIndex}` });
         return;
       }
-      return;
-    }
-    if (gebeurtenis.ctrlKey || gebeurtenis.metaKey) {
       if (toets.toLowerCase() === 'c' && gekozenMaat !== null) {
         gebeurtenis.preventDefault();
         gebeurtenis.stopImmediatePropagation();
@@ -591,6 +588,7 @@ export function start(app) {
         plakGekopieerdeReeks();
         return;
       }
+      return;
     }
     if (gekozenIds.length === 0) return;
 
