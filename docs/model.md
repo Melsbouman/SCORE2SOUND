@@ -170,3 +170,6 @@ versies is een lijst bewaarde kopieën van de partituur; een oud project heeft h
 
 ## Plaatsing van aanwijzingen
 Tempo-, expressie-, spelwijze- en structuurtekst staat altijd boven de balk. Dynamiek (pp tot ff, sf, sfz, fp) en cresc. en dim. staan altijd onder de balk. De bibliotheek met termen staat in app/src/model/aanduidingen.mjs.
+
+## Haken (crescendo en decrescendo)
+Een haak is twee aanwijzingen met type crescendo of decrescendo: eerst met waarde begin, daarna met waarde eind. voegHaakToe in app/src/model/corrigeren.mjs zet ze op de juiste plek. Een haak staat altijd onder de balk.
