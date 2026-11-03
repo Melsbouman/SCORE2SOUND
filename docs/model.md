@@ -24,6 +24,7 @@ Een octaafteken verandert de genoteerde toonhoogte niet. Binnen het teken heeft 
   versie: 1,
   titel: 'Mars',                 // '' als onbekend
   componist: '',                 // '' als onbekend
+  arrangeur: '',                 // '' als onbekend
   partijen: [Partij, ...],
   bron: Bron,                    // alleen na herkenning, anders ontbreekt het veld
 }
