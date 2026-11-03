@@ -331,3 +331,4 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
 .zoombalk .knop:focus-visible, .aanduidingen__knop:focus-visible, .editor-knoppenbalk button:focus-visible { outline: 2px solid var(--kleur-accent); outline-offset: 2px; }
 .werkvlak > .lint { position: static; }
 .werkvlak > .lint[data-tab="Noten"] { position: sticky; top: 0; z-index: 20; }
+@media (min-width: 1200px) { .editor-knoppengroep__kop { display: none; } .editor-knoppenbalk { flex-wrap: nowrap; gap: 6px 10px; padding: 6px 10px; overflow-x: auto; } .editor-knoppengroep { padding-right: 10px; } .editor-knoppengroep__knoppen { flex-wrap: nowrap; gap: 2px; } .editor-knoppenbalk button { min-width: 32px; height: 34px; padding: 0 5px; } .editor-knoppenbalk .muzieksymbool { font-size: 1.35rem; } }
