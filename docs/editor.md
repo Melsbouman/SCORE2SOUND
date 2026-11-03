@@ -80,3 +80,6 @@ De speler staat vast onderaan het scherm, ook als je een ander tabblad van het l
 
 ## Suggestie toepassen
 Kies een onzekere noot en klik op Suggestie toepassen. De noot krijgt de toonhoogte van de dichtstbijzijnde zekere noot in dezelfde partij en wordt goedgekeurd.
+
+## Zoomen en de speler
+Houd Ctrl ingedrukt en scroll boven het muziekstuk om alleen het stuk in of uit te zoomen, of gebruik de knoppen rechtsboven in het stuk. De pagina zelf zoomt niet mee. De speler onderaan heeft knoppen voor naar het begin, afspelen of pauze en de volgende maat, met een voortgangsbalk; het tempo en de metronoom staan rechts. Passage herhalen staat in het tabblad Start.
