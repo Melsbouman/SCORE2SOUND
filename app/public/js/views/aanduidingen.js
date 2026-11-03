@@ -75,6 +75,8 @@ export function start(app) {
     const groepen = Object.entries(AANDUIDINGEN).map(([groep, termen]) => {
       const element = document.createElement('div');
       element.className = 'aanduidingen__groep';
+      element.setAttribute('role', 'group');
+      element.setAttribute('aria-label', groepsnamen[groep]);
 
       const kop = document.createElement('div');
       kop.className = 'aanduidingen__kop';
@@ -120,6 +122,8 @@ export function start(app) {
 
     const haakGroep = document.createElement('div');
     haakGroep.className = 'aanduidingen__groep';
+    haakGroep.setAttribute('role', 'group');
+    haakGroep.setAttribute('aria-label', 'Haak');
     const haakKop = document.createElement('div');
     haakKop.className = 'aanduidingen__kop';
     haakKop.textContent = 'Haak';
@@ -176,6 +180,8 @@ export function start(app) {
     const lijst = aanwijzingen.length > 0 ? document.createElement('div') : null;
     if (lijst) {
       lijst.className = 'aanduidingen__lijst';
+      lijst.setAttribute('role', 'group');
+      lijst.setAttribute('aria-label', 'In deze maat');
       const kop = document.createElement('div');
       kop.className = 'aanduidingen__kop';
       kop.textContent = 'In deze maat';
