@@ -30,6 +30,7 @@
   cursor: pointer;
 }
 .lint__tab[aria-selected="true"] { color: var(--kleur-tekst); border-bottom-color: var(--kleur-accent); font-weight: 600; }
+.lint__tab:focus-visible { outline: 2px solid var(--kleur-accent); outline-offset: -2px; }
 .lint__paneel {
   display: flex;
   flex-wrap: nowrap;
