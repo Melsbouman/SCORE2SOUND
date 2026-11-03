@@ -317,3 +317,12 @@ export function verwijderAanwijzing(partituur, id) {
     .maten[plaats.maatIndex].elementen.splice(plaats.elementIndex, 1);
   return nieuw;
 }
+
+export function voegHaakToe(partituur, partijId, vanMaat, vanStart, totMaat, totStart, soort) {
+  if (soort !== 'crescendo' && soort !== 'decrescendo') return partituur;
+  const partij = partituur.partijen.find((p) => p.id === partijId);
+  if (!partij || !partij.maten[vanMaat] || !partij.maten[totMaat]) return partituur;
+  if (totMaat < vanMaat || (totMaat === vanMaat && totStart < vanStart)) return partituur;
+  const metBegin = voegAanwijzingToe(partituur, partijId, vanMaat, vanStart, soort, 'begin');
+  return voegAanwijzingToe(metBegin, partijId, totMaat, totStart, soort, 'eind');
+}
