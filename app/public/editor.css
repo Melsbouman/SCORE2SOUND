@@ -206,3 +206,4 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
   #speler > span { display: none; }
   #speler .speler__passage legend { display: none; }
 }
+.kop { position: static; box-shadow: none; }
