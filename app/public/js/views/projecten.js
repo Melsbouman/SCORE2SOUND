@@ -1,6 +1,16 @@
 import { controleerMaatduur } from '/src/controle/maatduur.mjs';
 
 const nietBereikbaar = 'De server is niet bereikbaar. Probeer het opnieuw.';
+const sorteringSleutel = 'score2sound-projecten-sortering';
+
+function leesSortering() {
+  try {
+    const sortering = localStorage.getItem(sorteringSleutel);
+    return ['nieuwste', 'oudste', 'naam'].includes(sortering) ? sortering : 'nieuwste';
+  } catch {
+    return 'nieuwste';
+  }
+}
 
 async function vraag(url, opties) {
   let antwoord;
@@ -28,6 +38,8 @@ export function start(app) {
   const vlak = document.getElementById('projecten');
   let projecten = null;
   let status = '';
+  let zoekterm = '';
+  let sortering = leesSortering();
   const verwijderTimers = new Map();
   const verwijderBevestigingen = new Set();
   let laatstBewaardePartituur = app.stand.project
@@ -108,9 +120,63 @@ export function start(app) {
         leeg.textContent = 'Nog geen bewaarde projecten.';
         vlak.append(leeg);
       } else {
+        if (projecten.length > 3) {
+          const zoeken = document.createElement('input');
+          zoeken.type = 'search';
+          zoeken.setAttribute('aria-label', 'Zoek een project');
+          zoeken.value = zoekterm;
+          zoeken.addEventListener('input', () => {
+            zoekterm = zoeken.value;
+            const positie = zoeken.selectionStart;
+            teken();
+            const nieuwZoekveld = vlak.querySelector('[aria-label="Zoek een project"]');
+            nieuwZoekveld.focus();
+            nieuwZoekveld.setSelectionRange(positie, positie);
+          });
+
+          const sorteer = document.createElement('select');
+          sorteer.setAttribute('aria-label', 'Sorteren');
+          for (const [waarde, tekst] of [
+            ['nieuwste', 'Nieuwste eerst'],
+            ['oudste', 'Oudste eerst'],
+            ['naam', 'Naam A tot Z']
+          ]) {
+            const optie = document.createElement('option');
+            optie.value = waarde;
+            optie.textContent = tekst;
+            sorteer.append(optie);
+          }
+          sorteer.value = sortering;
+          sorteer.addEventListener('change', () => {
+            sortering = sorteer.value;
+            try {
+              localStorage.setItem(sorteringSleutel, sortering);
+            } catch {
+            }
+            teken();
+          });
+          vlak.append(zoeken, sorteer);
+        }
+
+        const actieveZoekterm = projecten.length > 3 ? zoekterm.toLowerCase() : '';
+        const getoondeProjecten = projecten
+          .filter(project => project.naam.toLowerCase().includes(actieveZoekterm))
+          .sort((eerste, tweede) => {
+            if (sortering === 'naam') return eerste.naam.localeCompare(tweede.naam, 'nl-NL');
+            const verschil = new Date(tweede.bijgewerkt) - new Date(eerste.bijgewerkt);
+            return sortering === 'oudste' ? -verschil : verschil;
+          });
+        if (getoondeProjecten.length === 0) {
+          const leeg = document.createElement('p');
+          leeg.className = 'zacht';
+          leeg.textContent = 'Geen projecten gevonden.';
+          vlak.append(leeg);
+          return;
+        }
+
         const lijst = document.createElement('div');
         lijst.className = 'projecten__lijst';
-        for (const project of projecten) {
+        for (const project of getoondeProjecten) {
           const knop = document.createElement('button');
           const verwijderKnop = document.createElement('button');
           const bijgewerkt = document.createElement('span');
