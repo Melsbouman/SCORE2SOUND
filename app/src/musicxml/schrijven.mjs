@@ -1,3 +1,5 @@
+import { dynamiekUitTekst } from './aanwijzingen.mjs';
+
 const esc = (waarde) => String(waarde)
   .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
 
@@ -55,6 +57,7 @@ function schrijfAanwijzing(aanwijzing, weergave) {
   const offset = aanwijzing.start > 0 ? tag('offset', aanwijzing.start) : '';
   let type = '';
   let sound = '';
+  let dynamiekTekst = false;
   if (aanwijzing.type === 'tempo') {
     const getoond = aanwijzing.getoond;
     const eenheid = getoond?.eenheid ?? 'quarter';
@@ -76,7 +79,16 @@ function schrijfAanwijzing(aanwijzing, weergave) {
       number: aanwijzing.nummer ?? 1,
     });
   } else if (aanwijzing.type === 'tekst') {
-    type = tag('words', esc(aanwijzing.waarde));
+    const dynamiek = dynamiekUitTekst(aanwijzing.waarde);
+    if (dynamiek) {
+      type = tag('dynamics', leeg(dynamiek));
+      dynamiekTekst = true;
+    }
+    else {
+      const verloop = /^(?:cresc\.|cresc|crescendo|dim\.|dimin\.|decresc\.|decrescendo)$/i
+        .test(String(aanwijzing.waarde).trim());
+      type = tag('words', esc(aanwijzing.waarde), verloop ? { 'font-style': 'italic' } : {});
+    }
   } else if (aanwijzing.type === 'letter') {
     type = tag('rehearsal', esc(aanwijzing.waarde), {
       enclosure: 'square',
@@ -86,7 +98,7 @@ function schrijfAanwijzing(aanwijzing, weergave) {
     const waarde = aanwijzing.musicxmlType ?? { begin: 'start', eind: 'stop', wissel: 'change' }[aanwijzing.waarde];
     if (waarde) type = leeg('pedal', { type: waarde });
   }
-  const placement = ['tekst', 'tempo', 'letter', 'octaafteken'].includes(aanwijzing.type) ? 'above' : 'below';
+  const placement = !dynamiekTekst && ['tekst', 'tempo', 'letter', 'octaafteken'].includes(aanwijzing.type) ? 'above' : 'below';
   return tag('direction', tag('direction-type', type) + offset + sound, { placement });
 }
 

@@ -23,9 +23,58 @@ async function maakGeluid() {
 
 // Kanaal per partij, zoals in schrijfMidi: kanaal 9 (slagwerk) wordt overgeslagen.
 import { kanaalVan } from '/src/midi/schrijven.mjs';
+import { maatLengte } from '/src/model/duur.mjs';
+import { maakVolumeOp } from '/src/midi/dynamiek.mjs';
 
 // Kanaal per partij, zoals in schrijfMidi: elke poort heeft 16 kanalen en kanaal 9 (slagwerk) wordt overgeslagen.
 const kanaal = (index) => { const plek = kanaalVan(index); return plek.poort * 16 + plek.kanaal; };
+
+const VOLUME_DYNAMIEKEN = [
+  ['ppp', 30], ['pp', 40], ['p', 55], ['mp', 68], ['mf', 80], ['f', 95], ['ff', 110], ['fff', 120],
+];
+const DYNAMIEKTEKSTEN = new Set(['cresc.', 'cresc', 'crescendo', 'dim.', 'dimin.', 'decresc.', 'decrescendo']);
+
+function maatDuur(maat) {
+  if (!maat.opmaat) return maatLengte(maat.maatsoort);
+  return maat.elementen
+    .filter((element) => element.soort === 'noot' || element.soort === 'rust')
+    .reduce((einde, element) => Math.max(einde, element.start + element.duur), 0);
+}
+
+function metDynamiek(partituur) {
+  if (!partituur) return partituur;
+  return {
+    ...partituur,
+    partijen: partituur.partijen.map((partij) => {
+      const volume = maakVolumeOp(partij);
+      let maatBegin = 0;
+      const maten = partij.maten.map((maat) => {
+        const elementen = [];
+        for (const element of maat.elementen) {
+          const aanwijzing = element.soort === 'aanwijzing';
+          const tekst = String(element.waarde ?? '').trim().toLowerCase();
+          const isVerlooptekst = aanwijzing && element.type === 'tekst' && DYNAMIEKTEKSTEN.has(tekst);
+          const eenmaligeDynamiek = aanwijzing && element.type === 'dynamiek' && ['sf', 'sfz', 'fp'].includes(tekst);
+          if (aanwijzing && ((element.type === 'dynamiek' && !eenmaligeDynamiek)
+            || element.type === 'crescendo' || element.type === 'decrescendo' || isVerlooptekst)) {
+            continue;
+          }
+          if (element.soort === 'noot' && !element.voorslag) {
+            const kracht = volume(maatBegin + element.start);
+            const dynamiek = VOLUME_DYNAMIEKEN.reduce((beste, kandidaat) =>
+              Math.abs(kandidaat[1] - kracht) < Math.abs(beste[1] - kracht) ? kandidaat : beste
+            )[0];
+            elementen.push({ soort: 'aanwijzing', start: element.start, type: 'dynamiek', waarde: dynamiek, zekerheid: 1 });
+          }
+          elementen.push(element);
+        }
+        maatBegin += maatDuur(maat);
+        return { ...maat, elementen };
+      });
+      return { ...partij, maten };
+    }),
+  };
+}
 
 export function start(app) {
   const vlak = document.getElementById('speler');
@@ -163,7 +212,7 @@ export function start(app) {
 
   async function laad() {
     const { schrijfMidi } = await import('/src/midi/schrijven.mjs');
-    const midi = schrijfMidi(luisterNaar ?? app.stand.partituur, {
+    const midi = schrijfMidi(metDynamiek(luisterNaar ?? app.stand.partituur), {
       klik: metronoom.checked,
       voorinteller: metronoom.checked ? Number(voorinteller.value) : 0,
     });

@@ -8,6 +8,16 @@ const STANDAARD = {
   transpositie: { chromatisch: 0, diatonisch: 0 },
 };
 
+const DYNAMIEKTEKENS = new Set([
+  'pppp', 'ppp', 'pp', 'p', 'mp', 'mf', 'f', 'ff', 'fff', 'ffff',
+  'fp', 'sf', 'sfz', 'sfp', 'rfz',
+]);
+
+export function dynamiekUitTekst(waarde) {
+  const naam = String(waarde).trim().toLowerCase();
+  return DYNAMIEKTEKENS.has(naam) ? naam : null;
+}
+
 export function leesAttributen(attributesKnoop, huidig) {
   const stand = structuredClone(huidig ?? STANDAARD);
   const divisions = kind(attributesKnoop, 'divisions');
@@ -135,6 +145,7 @@ export function leesRichting(directionKnoop, start, vorigeWig = 'crescendo') {
     const words = kind(directionType, 'words');
     if (words) {
       const waarde = tekst(words);
+      const dynamiek = dynamiekUitTekst(waarde);
       const compact = waarde.toLowerCase().replace(/[\s.]/g, '');
       const sprongTekst = /^dc(?:alfine)?$/.test(compact)
         || /^ds(?:alfine)?$/.test(compact) || compact === 'tocoda' || compact === 'fine';
@@ -142,7 +153,8 @@ export function leesRichting(directionKnoop, start, vorigeWig = 'crescendo') {
       if (/^ds(?:alfine)?$/.test(compact)) sprong.dalSegno = 'segno';
       if (compact === 'tocoda') sprong.naarCoda = 'coda';
       if (compact === 'fine') sprong.fine = true;
-      if (!sprongTekst) aanwijzingen.push(aanwijzing(start, 'tekst', waarde));
+      if (dynamiek) aanwijzingen.push(aanwijzing(start, 'dynamiek', dynamiek));
+      else if (!sprongTekst) aanwijzingen.push(aanwijzing(start, 'tekst', waarde));
     }
     const segno = kind(directionType, 'segno');
     if (segno) sprong.segno = tekst(segno) || 'waar';
