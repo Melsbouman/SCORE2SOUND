@@ -60,4 +60,7 @@ Kies een rode noot en klik op Suggestie toepassen in het blok Onzekere noten. De
 Tik een maat aan en kies in het tabblad Noten Maat kopiëren. Tik daarna de maat aan waar de noten heen moeten en kies Maat plakken.
 
 ## Noten invoeren met het toetsenbord
-Kies een noot of een rust en tik een letter van A tot en met G: de noot krijgt die toon, in het octaaf dat het dichtst bij de vorige noot ligt. Met de pijl omhoog of omlaag ga je een halve toon hoger of lager (omhoog met kruisen, omlaag met mollen); met Shift een octaaf. Delete maakt van een noot een rust. Shift+A is een accent en Shift+F een fermate.
+Kies een noot of een rust en tik een letter van A tot en met G: de noot krijgt die toon, in het octaaf dat het dichtst bij de vorige noot ligt. Met de pijl omhoog of omlaag ga je een halve toon hoger of lager (omhoog met kruisen, omlaag met mollen); met Shift een octaaf. Delete maakt van een noot een rust. Shift+A is een accent en Shift+F is een fermate.
+
+## Tempo en spelaanduidingen zetten
+Kies een noot of een maat en open het tabblad Aanduidingen. Klik op een term, bijvoorbeeld Andante, rit., dolce of mf. Tempo, expressie en spelwijze komen altijd boven de balk; sterkte (p tot ff, sf) en cresc. of dim. komen altijd eronder.
