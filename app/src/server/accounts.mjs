@@ -1,4 +1,4 @@
-import { mkdir, readdir, readFile, unlink, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, rename, unlink, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import {
   createHash,
@@ -41,6 +41,23 @@ function codeLimiet(codes, code) {
 
 function bestand(map, id) {
   return join(map, `${id}.json`);
+}
+
+async function schrijfAtomair(pad, inhoud) {
+  const tijdelijk = `${pad}.${randomBytes(8).toString('hex')}.tmp`;
+  try {
+    await writeFile(tijdelijk, inhoud, 'utf8');
+    await rename(tijdelijk, pad);
+  } catch (fout) {
+    try {
+      await unlink(tijdelijk);
+    } catch (opruimFout) {
+      if (opruimFout.code !== 'ENOENT') {
+        throw new AggregateError([fout, opruimFout], 'Tijdelijk accountbestand opruimen is mislukt.');
+      }
+    }
+    throw fout;
+  }
 }
 
 async function wachtwoordHash(wachtwoord, zout) {
@@ -89,7 +106,7 @@ export function maakAccounts({ map, codes, nu = Date.now }) {
     const namen = await readdir(map);
     const resultaten = [];
     for (const naam of namen) {
-      if (!/^[a-f0-9]{12}\.json$/.test(naam)) continue;
+      if (naam.endsWith('.tmp') || !/^[a-f0-9]{12}\.json$/.test(naam)) continue;
       try {
         resultaten.push(JSON.parse(await readFile(join(map, naam), 'utf8')));
       } catch {
@@ -125,7 +142,7 @@ export function maakAccounts({ map, codes, nu = Date.now }) {
       zout,
       code,
     };
-    await writeFile(bestand(map, id), `${JSON.stringify(gebruiker, null, 2)}\n`, 'utf8');
+    await schrijfAtomair(bestand(map, id), `${JSON.stringify(gebruiker, null, 2)}\n`);
     return { id, email: adres };
   }
 
