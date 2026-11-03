@@ -1,12 +1,20 @@
+@font-face {
+  font-family: 'Archivo';
+  src: url('fonts/Archivo-latin.woff2') format('woff2');
+  font-weight: 400 900;
+  font-stretch: 100% 125%;
+  font-display: swap;
+}
+
 :root {
-  --kleur-achtergrond: #f4f1ea;
+  --kleur-achtergrond: #f0ede1;
   --kleur-vlak: #ffffff;
-  --kleur-tekst: #1d1d1f;
-  --kleur-zacht: #5f5f5a;
-  --kleur-lijn: #e2e0d8;
-  --kleur-accent: #2b5f8c;
-  --kleur-accent-zacht: #e6eef6;
-  --kleur-op-accent: #ffffff;
+  --kleur-tekst: #0d150b;
+  --kleur-zacht: #3d4a39;
+  --kleur-lijn: #2b6a1f55;
+  --kleur-accent: #2b6a1f;
+  --kleur-accent-zacht: #e4e9d8;
+  --kleur-op-accent: #f0ede1;
   --kleur-fout: #b3261e;
   --kleur-waarschuwing: #8a5a00;
   --ruimte-1: 4px;
@@ -14,25 +22,12 @@
   --ruimte-3: 16px;
   --ruimte-4: 24px;
   --ruimte-5: 40px;
-  --hoek: 12px;
-  --schaduw: 0 1px 3px rgba(20, 20, 30, 0.08), 0 8px 24px rgba(20, 20, 30, 0.05);
-  --letter: system-ui, -apple-system, 'Segoe UI', sans-serif;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --kleur-achtergrond: #14161a;
-    --kleur-vlak: #222529;
-    --kleur-tekst: #f2f2ef;
-    --kleur-zacht: #b7b8b2;
-    --kleur-lijn: #41454a;
-    --kleur-accent: #9ac3ed;
-    --kleur-accent-zacht: #29394a;
-    --kleur-op-accent: #10202f;
-    --kleur-fout: #ffb4ab;
-    --kleur-waarschuwing: #f4c76b;
-    --schaduw: 0 1px 3px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.25);
-  }
+  --hoek: 6px;
+  --schaduw: none;
+  --letter: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --kleur-zijbalk: #1c4a14;
+  --kleur-donker: #0d150b;
+  --kleur-wit: #ffffff;
 }
 
 * { box-sizing: border-box; }
