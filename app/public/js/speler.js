@@ -25,6 +25,7 @@ async function maakGeluid() {
 import { kanaalVan } from '/src/midi/schrijven.mjs';
 import { maatLengte } from '/src/model/duur.mjs';
 import { maakVolumeOp } from '/src/midi/dynamiek.mjs';
+import { leesId } from '/src/model/corrigeren.mjs';
 
 // Kanaal per partij, zoals in schrijfMidi: elke poort heeft 16 kanalen en kanaal 9 (slagwerk) wordt overgeslagen.
 const kanaal = (index) => { const plek = kanaalVan(index); return plek.poort * 16 + plek.kanaal; };
@@ -237,6 +238,15 @@ let doelMaat = null;
   const maten = () => app.stand.partituur?.partijen[0]?.maten ?? [];
   const geldigeMaat = (invoer) => maatIndexVanNummer(maten(), invoer.value);
   const eersteKeer = (maat) => Math.max(0, volgorde.indexOf(maat));
+  function zetSpeelpositie(maat) {
+    if (!Number.isInteger(maat) || maat < 0 || maat >= maten().length) return;
+    doelMaat = maat;
+    const tijd = tijden[eersteKeer(maat)];
+    if (geluid && geladen && tijd !== undefined) {
+      geluid.seq.currentTime = tijd + voorintellerSeconden();
+      if (!geluid.seq.paused) doelMaat = null;
+    }
+  }
 
   function pasMixerToe() {
     if (!geluid || !app.stand.partituur) return;
@@ -326,7 +336,12 @@ let doelMaat = null;
       await geluid.context.resume();
       if (!geladen) await laad();
       geluid.seq.playbackRate = Number(tempoPercentage.value) / 100;
-      if (herhaal.checked) geluid.seq.currentTime = tijden[eersteKeer(geldigeMaat(van))] + voorintellerSeconden();
+      if (doelMaat !== null) {
+        geluid.seq.currentTime = tijden[eersteKeer(doelMaat)] + voorintellerSeconden();
+        doelMaat = null;
+      } else if (herhaal.checked) {
+        geluid.seq.currentTime = tijden[eersteKeer(geldigeMaat(van))] + voorintellerSeconden();
+      }
       geluid.seq.play();
       pasMixerToe();
       zetSpeelKnop(true);
@@ -354,6 +369,7 @@ let doelMaat = null;
   stop.addEventListener('click', () => {
     pauze();
     if (geluid && geladen) geluid.seq.currentTime = 0;
+    doelMaat = null;
     speelMaat = null;
     app.meld('speel-maat', { maat: null });
   });
@@ -407,14 +423,30 @@ let doelMaat = null;
   });
   app.op('mixer', pasMixerToe);
   app.op('kies-maat', ({ maat }) => {
-    if (typeof maat !== 'number' || !Number.isFinite(maat)) return;
-    const nummer = maat + 1;
+    const nummer = maten()[maat]?.nummer;
+    if (nummer === undefined) return;
     if (nummer > Number(tot.value)) {
       tot.value = String(nummer);
       tot.dispatchEvent(new Event('input', { bubbles: true }));
     }
     van.value = String(nummer);
     van.dispatchEvent(new Event('input', { bubbles: true }));
+    zetSpeelpositie(maat);
+  });
+  app.op('kies-noot', ({ id }) => {
+    if (typeof id !== 'string') return;
+    const plaats = leesId(id);
+    if (plaats) {
+      const nummer = maten()[plaats.maatIndex]?.nummer;
+      if (nummer === undefined) return;
+      if (nummer > Number(tot.value)) {
+        tot.value = String(nummer);
+        tot.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      van.value = String(nummer);
+      van.dispatchEvent(new Event('input', { bubbles: true }));
+      zetSpeelpositie(plaats.maatIndex);
+    }
   });
   // Om en om luisteren: de andere versie laden en op dezelfde tijd verder gaan.
   app.op('luister-versie', async (partituur) => {
@@ -430,10 +462,9 @@ let doelMaat = null;
     }
   });
   app.op('naar-maat', (doel) => {
-    doelMaat = doel.maat;
     if (doel?.maat === null || doel?.maat === undefined || !tijden.length) return;
     van.value = maten()[doel.maat]?.nummer ?? van.value;
-    if (geluid && geladen) geluid.seq.currentTime = tijden[eersteKeer(doel.maat)] + voorintellerSeconden();
+    zetSpeelpositie(doel.maat);
   });
   teken();
 }
