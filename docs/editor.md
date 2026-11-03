@@ -64,3 +64,7 @@ Waarom een noot rood is
 ## Zoom en toetsen
 - Kleiner en Groter staan in het tabblad Weergave van het lint; de browser onthoudt de zoom.
 - Escape heft de gekozen noten of maat op.
+
+## Knoppenbalk
+
+De knoppenbalk blijft tijdens het scrollen bovenaan staan en breekt op een smal scherm af over meerdere regels. De acties zijn gegroepeerd onder de kopjes **Noten**, **Voortekens**, **Toonhoogte**, **Tekens** en **Bewerken**. Muzikale acties worden met tekens uit het Bravura-muziekfont getoond; de titel van iedere knop vermeldt ook de bijbehorende sneltoets. Een actieve knop heeft een duidelijke markering en acties die op dat moment niet beschikbaar zijn, zijn uitgeschakeld.

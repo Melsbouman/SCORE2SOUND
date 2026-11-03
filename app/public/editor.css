@@ -112,3 +112,74 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
   .lint__tab { padding: 6px 10px; }
   .werkvlak { padding: 8px; gap: 8px; }
 }
+@font-face {
+  font-family: "Bravura";
+  src: url("/fonts/Bravura.woff2") format("woff2");
+  font-display: swap;
+}
+
+.muzieksymbool {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Bravura", serif;
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.muzieksymbool svg {
+  width: 1.6rem;
+  height: 1rem;
+}
+
+.editor-knoppenbalk {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+
+.editor-knoppengroep {
+  display: grid;
+  grid-template-rows: 1fr auto;
+}
+
+.editor-knoppengroep__knoppen {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.editor-knoppengroep__kop {
+  margin-top: 0.2rem;
+  color: var(--tekst-zacht, #5b6470);
+  font-size: 0.7rem;
+  line-height: 1;
+  text-align: center;
+}
+
+.editor-knoppenbalk button[aria-pressed="true"],
+.editor-knoppenbalk button.actief {
+  color: var(--accent, #155eef);
+  background: var(--accent-zacht, #e8f0ff);
+  box-shadow: inset 0 0 0 2px currentColor;
+}
+
+.editor-knoppenbalk button:disabled {
+  cursor: not-allowed;
+  opacity: 0.38;
+}
+
+.editor-knoppenbalk button:focus-visible {
+  outline: 3px solid var(--focus, #2563eb);
+  outline-offset: 2px;
+}
+
+@media (max-width: 30rem) {
+  .editor-knoppenbalk {
+    gap: 0.35rem;
+  }
+}
