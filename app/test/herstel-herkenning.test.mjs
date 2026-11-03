@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { leesMusicXML } from '../src/musicxml/lezen.mjs';
-import { herstelMaatsoorten } from '../src/model/maatsoorten.mjs';
+import { herstelMaatsoorten as herstelMaatsoortenZonderTempo } from '../src/model/maatsoorten.mjs';
 import { vulBeginRust } from '../src/model/beginrust.mjs';
 import { vulOntbrekendeMaten } from '../src/model/ontbrekend.mjs';
 import { markeerVerdachteNoten } from '../src/model/verdacht.mjs';
@@ -25,3 +25,6 @@ test('herstelHerkenning verandert de invoer niet en is een veilige tweede keer',
   assert.equal(herstelHerkenning(eerste).partijen[0].maten.length, eerste.partijen[0].maten.length);
 });
 import { ruimZangtekstOp } from '../src/model/zangtekst.mjs';
+import { tempoUitTekst } from '../src/model/tempotekst.mjs';
+
+const herstelMaatsoorten = (partituur) => herstelMaatsoortenZonderTempo(tempoUitTekst(partituur));

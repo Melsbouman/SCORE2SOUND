@@ -1,4 +1,4 @@
-import { herstelMaatsoorten } from './maatsoorten.mjs';
+import { herstelMaatsoorten as herstelMaatsoortenZonderTempo } from './maatsoorten.mjs';
 import { vulBeginRust } from './beginrust.mjs';
 import { vulOntbrekendeMaten } from './ontbrekend.mjs';
 import { markeerVerdachteNoten } from './verdacht.mjs';
@@ -15,3 +15,6 @@ export function herstelHerkenning(partituur) {
   return hersteld;
 }
 import { ruimZangtekstOp } from './zangtekst.mjs';
+import { tempoUitTekst } from './tempotekst.mjs';
+
+const herstelMaatsoorten = (partituur) => herstelMaatsoortenZonderTempo(tempoUitTekst(partituur));
