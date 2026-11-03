@@ -8,6 +8,7 @@ import {
   keurGoed,
   keurMaatGoed,
 } from '/src/model/corrigeren.mjs';
+import { herstelMaatduur } from '/src/model/maatduur.mjs';
 import {
   zetFermate,
   zetArticulatie,
@@ -152,7 +153,19 @@ export function start(app) {
         }
         pas(nieuw);
       });
-      groep([knop]);
+      const herstelKnop = document.createElement('button');
+      herstelKnop.type = 'button';
+      herstelKnop.className = 'knop editor__knop';
+      herstelKnop.textContent = 'Maatduur herstellen';
+      herstelKnop.setAttribute('aria-label', 'Herstel de duur van de gekozen maat in alle partijen');
+      herstelKnop.addEventListener('click', () => {
+        let nieuw = app.stand.partituur;
+        for (const partij of app.stand.partituur.partijen) {
+          nieuw = herstelMaatduur(nieuw, partij.id, gekozenMaat);
+        }
+        pas(nieuw);
+      });
+      groep([knop, herstelKnop]);
     }
     groep([
       maakKnop(
