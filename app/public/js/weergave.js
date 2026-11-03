@@ -32,7 +32,6 @@ async function naarMusicXML(partituur) {
 
 export function start(app) {
 const vlak = document.getElementById('weergave');
-  if (localStorage.getItem('score2sound-zoom') === null) zoom = 0.8;
 
   function wijzigZoom(stap) {
     zoom = Math.min(2, Math.max(0.4, Math.round((zoom + stap) * 10) / 10));
@@ -84,10 +83,10 @@ const vlak = document.getElementById('weergave');
   let gekozen = null;
   let gekozenMaat = null;
   let gekozenTot = null;
-  let zoom = 1;
+  let zoom = 0.8;
   try {
     const opgeslagenZoom = Number(localStorage.getItem('score2sound-zoom'));
-    if (opgeslagenZoom >= 0.6 && opgeslagenZoom <= 2) zoom = opgeslagenZoom;
+    if (opgeslagenZoom >= 0.4 && opgeslagenZoom <= 2) zoom = opgeslagenZoom;
   } catch {}
   document.addEventListener('click', (gebeurtenis) => {
     if (gebeurtenis.target.textContent.trim() !== 'Kleiner') return;
