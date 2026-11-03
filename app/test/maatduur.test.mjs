@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { controleerMaatduur } from '../src/controle/maatduur.mjs';
+import { herstelMaatduur } from '../src/model/maatduur.mjs';
 
 const noot = (start, duur, stem = 1) => ({ soort: 'noot', start, duur, stem, notenbalk: 1, toonhoogte: { stap: 'C', alter: 0, octaaf: 5 }, akkoord: false, overbinding: { begin: false, eind: false }, articulaties: [], legato: { begin: false, eind: false }, versiering: null, zekerheid: 1 });
 const rust = (start, duur, stem = 1) => ({ soort: 'rust', start, duur, stem, notenbalk: 1, heleMaat: false, zekerheid: 1 });
@@ -68,4 +69,85 @@ test('kwarten met een komma en enkelvoud, en meldingen per partij in volgorde', 
     ['P1', 'Maat 1 duurt 1 kwart, maar de maatsoort 3/8 vraagt er 1,5.'],
     ['P2', 'Maat 1 duurt 2 kwarten, maar de maatsoort 3/8 vraagt er 1,5.'],
   ]);
+});
+
+const nootVoorHerstel = (start, duur, stem = 1, akkoord = false) => ({
+  soort: 'noot', start, duur, stem, notenbalk: 1,
+  toonhoogte: { stap: 'C', alter: 0, octaaf: 5 }, akkoord,
+  overbinding: { begin: false, eind: false }, articulaties: [],
+  legato: { begin: false, eind: false }, versiering: null, zekerheid: 1,
+});
+const maatVoorHerstel = (index, elementen, maatsoort = vier) => ({
+  nummer: String(index + 1), index, opmaat: false, maatsoort,
+  toonsoort: { kwinten: 0, modus: 'majeur' },
+  sleutels: [{ teken: 'G', lijn: 2, notenbalk: 1, octaafVerschuiving: 0 }],
+  tempo: null, herhaling: { begin: false, eind: false, keer: 2 }, elementen,
+});
+
+test('een te korte maat wordt met standaardrusten aangevuld', () => {
+  const p = { partijen: [partij('P1', [maatVoorHerstel(0, [nootVoorHerstel(0, 720)])])] };
+
+  const hersteld = herstelMaatduur(p, 'P1', 0);
+
+  assert.deepEqual(hersteld.partijen[0].maten[0].elementen.slice(1).map(({ start, duur, soort }) => (
+    { start, duur, soort }
+  )), [
+    { start: 720, duur: 960, soort: 'rust' },
+    { start: 1680, duur: 240, soort: 'rust' },
+  ]);
+});
+
+test('een te lange maat wordt van achteren ingekort', () => {
+  const p = { partijen: [partij('P1', [maatVoorHerstel(0, [
+    nootVoorHerstel(0, 480), nootVoorHerstel(480, 1920),
+  ])])] };
+
+  const hersteld = herstelMaatduur(p, 'P1', 0);
+
+  assert.deepEqual(hersteld.partijen[0].maten[0].elementen.map(({ start, duur }) => ({ start, duur })), [
+    { start: 0, duur: 480 },
+    { start: 480, duur: 1440 },
+  ]);
+});
+
+test('een goede maat blijft ongewijzigd', () => {
+  const p = { partijen: [partij('P1', [maatVoorHerstel(0, [nootVoorHerstel(0, 1920)])])] };
+
+  assert.strictEqual(herstelMaatduur(p, 'P1', 0), p);
+});
+
+test('de oorspronkelijke partituur blijft ongewijzigd', () => {
+  const p = { partijen: [partij('P1', [maatVoorHerstel(0, [nootVoorHerstel(0, 480)])])] };
+  const origineel = structuredClone(p);
+
+  herstelMaatduur(p, 'P1', 0);
+
+  assert.deepEqual(p, origineel);
+});
+
+test('een maat in een andere partij blijft ongemoeid', () => {
+  const tweedePartij = partij('P2', [maatVoorHerstel(0, [nootVoorHerstel(0, 480)])]);
+  const p = { partijen: [
+    partij('P1', [maatVoorHerstel(0, [nootVoorHerstel(0, 480)])]),
+    tweedePartij,
+  ] };
+  const oorspronkelijkeMaat = structuredClone(tweedePartij.maten[0]);
+
+  const hersteld = herstelMaatduur(p, 'P1', 0);
+
+  assert.deepEqual(hersteld.partijen[1].maten[0], oorspronkelijkeMaat);
+  assert.notStrictEqual(hersteld.partijen[1].maten[0], tweedePartij.maten[0]);
+});
+
+test('akkoordnoten worden samen ingekort en een voorslag blijft staan', () => {
+  const voorslag = { ...nootVoorHerstel(1920, 0), voorslag: { schuin: true } };
+  const p = { partijen: [partij('P1', [maatVoorHerstel(0, [
+    nootVoorHerstel(0, 2160), nootVoorHerstel(0, 2160, 1, true), voorslag,
+  ])])] };
+
+  const hersteld = herstelMaatduur(p, 'P1', 0);
+  const elementen = hersteld.partijen[0].maten[0].elementen;
+
+  assert.deepEqual(elementen.map((element) => element.duur), [1920, 1920, 0]);
+  assert.deepEqual(elementen[2].voorslag, { schuin: true });
 });

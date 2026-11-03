@@ -10,6 +10,7 @@ Aanpassen met de knoppen
 - **Punt**: Maakt een noot (of rust) gepunteerd
 - **Rust**: Maakt een noot tot rust
 - **Goedkeuren**: Maakt een onzekere noot zeker
+- **Maatduur herstellen**: Vult de gekozen maat in alle partijen aan met rusten of kort de maat in tot de maatsoort klopt
 - **Ongedaan maken**: Herstelt de vorige bewerking
 - **Opnieuw**: Herstelt een ongedaan gemaakte bewerking
 
