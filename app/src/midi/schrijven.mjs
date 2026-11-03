@@ -240,7 +240,7 @@ function partijSpoor(partij, partijIndex, beginnen, volume) {
       }
       if (element.articulaties.includes('accent')) kracht += 15;
       if (element.articulaties.includes('marcato')) kracht += 25;
-      kracht = Math.min(kracht, 127);
+      kracht = Math.max(30, Math.min(kracht, 127));
       const noot = { begin, einde, toets, kracht };
       noten.push(noot);
       if (element.overbinding.begin) overbonden.set(toets, noot);
@@ -287,5 +287,5 @@ export function kanaalVan(partijIndex) {
   return { poort: Math.floor(partijIndex / 15), kanaal: plek >= 9 ? plek + 1 : plek };
 }
 
-const STERKTE = { ppp: 30, pp: 40, p: 55, mp: 68, mf: 80, f: 95, ff: 110, fff: 120 };
-const EENMALIG = { sf: 105, sfz: 110, fp: 90 };
+const STERKTE = { pppp: 20, ppp: 30, pp: 40, p: 55, mp: 68, mf: 80, f: 95, ff: 110, fff: 120, ffff: 127 };
+const EENMALIG = { fp: 90, sf: 105, sfz: 110, sfp: 100, rfz: 110 };
