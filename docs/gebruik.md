@@ -37,3 +37,9 @@ Zodra je een partituur hebt, staat bovenaan een balk met vijf tabbladen: Bestand
 
 ## Titel, componist en arrangeur aanpassen
 Onder het tabblad Bestand pas je de titel, de componist en de arrangeur aan. Ze staan daarna ook in de MusicXML en in de PDF.
+
+## Gecomprimeerd exporteren (.mxl)
+Onder Exporteren staat een knop voor een gecomprimeerd MusicXML-bestand (.mxl). Dat bestand is kleiner en opent in de meeste notatieprogramma's.
+
+## Je wachtwoord wijzigen
+Als je bent ingelogd, staat bovenaan een knop Wachtwoord wijzigen. Vul je huidige en je nieuwe wachtwoord in (minstens 10 tekens).
