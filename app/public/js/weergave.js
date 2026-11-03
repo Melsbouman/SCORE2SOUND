@@ -97,10 +97,13 @@ export function start(app) {
     }
     if (nummer !== tekenNummer) return; // er kwam intussen een nieuwere partituur
     const breedte = Math.max(320, vlak.clientWidth - 48);
-    const vasteRegels = window.innerWidth >= 700 && musicxml.includes('new-system=');
+    const vasteRegels = false; // Mels, 3 november 2026: regels gelijkmatig vullen in plaats van de afbrekingen van het origineel
     const schaal = vasteRegels ? vasteSchaal(breedte, zoom) : Math.round(schaalVoor(breedte) * zoom);
     const paginaBreedte = vasteRegels ? VASTE_PAGINABREEDTE : Math.round((breedte * 100) / schaal);
     const gegevens = app.stand?.partituur ?? {};
+    {
+      const heeftPaginavorm = false;
+    }
     const bladbron = gegevens.bron?.bladen?.[0];
     const heeftPaginabegin = gegevens.partijen?.some((partij) => partij.maten?.some((maat) => maat.paginabegin)) ?? false;
     const heeftPaginavorm = heeftPaginabegin
