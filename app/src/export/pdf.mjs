@@ -40,6 +40,8 @@ function toolkit() {
 export async function maakPdf(musicxml, { watermerk = 'SCORE2SOUND', comprimeer = true, titelblok } = {}) {
   const tk = await toolkit();
   tk.setOptions({
+    header: 'none',
+    footer: 'none',
     pageWidth: 2100,
     pageHeight: 2970,
     scale: 40,

@@ -106,7 +106,7 @@ export function start(app) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            musicxml: naarMusicXML(app.stand.partituur),
+            musicxml: naarMusicXML(app.stand.partituur, { zonderPartijnamen: app.stand.partituur.partijen.length === 1 }),
             titelblok: {
               titel: app.stand.partituur.titel,
               componist: app.stand.partituur.componist,
