@@ -1,5 +1,5 @@
 import { AANDUIDINGEN } from '/src/model/aanduidingen.mjs';
-import { voegAanwijzingToe, verwijderAanwijzing, leesId, zoekElement } from '/src/model/corrigeren.mjs';
+import { voegAanwijzingToe, verwijderAanwijzing, leesId, zoekElement, voegHaakToe } from '/src/model/corrigeren.mjs';
 
 const groepsnamen = {
   tempo: 'Tempo',
@@ -13,6 +13,7 @@ const dynamiekTermen = ['pp', 'p', 'mp', 'mf', 'f', 'ff', 'fff', 'sf', 'sfz', 'f
 export function start(app) {
   let gekozenNoot = null;
   let gekozenMaat = null;
+  let gekozenTot = null;
 
   function teken() {
     const vlak = document.getElementById('aanduidingen');
@@ -117,6 +118,46 @@ export function start(app) {
       return element;
     });
 
+    const haakGroep = document.createElement('div');
+    haakGroep.className = 'aanduidingen__groep';
+    const haakKop = document.createElement('div');
+    haakKop.className = 'aanduidingen__kop';
+    haakKop.textContent = 'Haak';
+    haakGroep.append(haakKop);
+    for (const [label, type] of [['Crescendo', 'crescendo'], ['Decrescendo', 'decrescendo']]) {
+      const knop = document.createElement('button');
+      knop.type = 'button';
+      knop.className = 'knop aanduidingen__knop';
+      knop.textContent = label;
+      knop.disabled = !app.stand.partituur || (gekozenNoot == null && gekozenMaat == null);
+      knop.addEventListener('click', () => {
+        const partituur = app.stand.partituur;
+        if (!partituur) return;
+
+        let partijId;
+        let vanMaat;
+        if (gekozenNoot != null) {
+          const plaats = leesId(gekozenNoot);
+          if (!plaats) return;
+          ({ partijId, maatIndex: vanMaat } = plaats);
+        } else {
+          partijId = partituur.partijen[0]?.id;
+          vanMaat = gekozenMaat;
+        }
+
+        if (partijId == null || vanMaat == null) return;
+        const totMaat = gekozenTot ?? vanMaat;
+        const partij = partituur.partijen.find((item) => item.id === partijId);
+        const elementen = partij?.maten[totMaat]?.elementen;
+        if (!elementen?.length) return;
+        const totStart = Math.max(...elementen.map((element) => element.start));
+        app.zet({
+          partituur: voegHaakToe(partituur, partijId, vanMaat, 0, totMaat, totStart, type),
+        });
+      });
+      haakGroep.append(knop);
+    }
+
     const partituur = app.stand.partituur;
     let partijId;
     let maatIndex;
@@ -161,15 +202,16 @@ export function start(app) {
       }
     }
 
-    vlak.replaceChildren(tekst, tempo, ...groepen, ...(lijst ? [lijst] : []));
+    vlak.replaceChildren(tekst, tempo, ...groepen, haakGroep, ...(lijst ? [lijst] : []));
   }
 
   app.op('kies-noot', ({ id }) => {
     gekozenNoot = id ?? null;
     teken();
   });
-  app.op('kies-maat', ({ maat }) => {
+  app.op('kies-maat', ({ maat, tot }) => {
     gekozenMaat = maat ?? null;
+    gekozenTot = tot ?? null;
     teken();
   });
   app.op('partituur', teken);
