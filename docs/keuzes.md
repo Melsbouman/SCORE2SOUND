@@ -89,3 +89,6 @@ De server maakt de PDF met pdfkit en svg-to-pdfkit (akkoord van Mels op 3 novemb
 
 ## Lint en vaste speler
 Het lint met tabbladen staat boven de partituur. De speler staat buiten het lint, vast onderaan, zodat hij blijft zichtbaar als je van tabblad wisselt (gevonden en opgelost op 3 november 2026).
+
+## Lettertypen en kleuren (merk-PDF van Mels)
+Logo: Archivo Black, met de 2 in het groen. Hoofdteksten: Bodoni (Bodoni Moda met optische grootte 6, zodat de haarlijnen stevig blijven). Overige tekst: Poppins. Kleuren: #1C4A14, #2B6A1F, #F0EDE1, #0D150B, #FFFFFF en #C7E3B0.
