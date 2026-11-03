@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Score2Sound voorbeeld 4</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Urbanist:wght@400;500;600&display=swap">
+<style>
+/* Stijl van melss-ultra-awesome-site: #12181a, wit, #929292, Playfair Display + Urbanist, pilknoppen, ruime witruimte. Zijbalk links, lijsten in plaats van kaarten. */
+:root{--dark:#12181a;--dark-900:#12181ae6;--white:#ffffff;--secondary:#929292;--line:#ffffff24;--hover:#dbdcdd;--rounded:10px;--serif:"Playfair Display",Georgia,serif;--sans:"Urbanist",system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--dark);color:var(--white);font:400 17px/1.55 var(--sans);letter-spacing:.03em}
+a{color:inherit}
+.app{display:grid;grid-template-columns:250px 1fr;min-height:100vh;padding-bottom:90px}
+nav{border-right:1px solid var(--line);padding:32px 28px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh}
+.logo{font:500 1.5rem var(--serif);margin-bottom:36px;letter-spacing:0}
+nav a{text-decoration:none;color:var(--secondary);padding:8px 0;transition:color .2s}
+nav a:hover,nav a.on{color:var(--white)}
+nav a.on::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--white);margin-right:10px;vertical-align:middle}
+nav h4{margin:30px 0 6px;font:500 .75rem var(--sans);text-transform:uppercase;letter-spacing:.14em;color:var(--secondary)}
+nav .grow{flex:1}
+main{padding:56px max(24px,5vw);display:flex;flex-direction:column;gap:96px;min-width:0}
+h1{margin:0;font:400 clamp(2.6rem,6vw,4.6rem)/1.05 var(--serif);letter-spacing:-.01em;max-width:14ch}
+h1 em{font-style:italic;color:var(--secondary)}
+h2{margin:0;font:400 2rem/1.2 var(--serif);letter-spacing:0}
+.btn{display:inline-block;border:1px solid var(--white);border-radius:50px;padding:12px 26px;background:var(--white);color:var(--dark);font:500 1rem var(--sans);letter-spacing:.03em;text-decoration:none;cursor:pointer;transition:background .2s}
+.btn:hover{background:var(--hover)}
+.btn.ghost{background:transparent;color:var(--white);border-color:var(--line)}
+.btn.ghost:hover{border-color:var(--white)}
+button:focus-visible,a:focus-visible{outline:2px solid var(--white);outline-offset:3px}
+.hero{display:flex;flex-direction:column;gap:32px;align-items:flex-start}
+.hero p{margin:0;color:var(--secondary);max-width:44ch}
+.hero .row{display:flex;gap:12px;flex-wrap:wrap}
+.head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+.list{list-style:none;margin:0;padding:0}
+.list li{display:grid;grid-template-columns:1fr 180px 120px 90px;gap:16px;align-items:baseline;padding:20px 0;border-top:1px solid var(--line)}
+.list li:last-child{border-bottom:1px solid var(--line)}
+.list b{font:400 1.4rem var(--serif);letter-spacing:0}
+.list span{color:var(--secondary)}
+.list .st{color:var(--white);text-align:right}
+.score{background:var(--white);border-radius:var(--rounded);padding:20px;overflow-x:auto}
+.score svg{display:block;min-width:620px;width:100%;height:auto}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.tools .btn{padding:9px 20px;font-size:.92rem}
+.player{position:fixed;left:0;right:0;bottom:0;background:var(--dark-900);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:14px max(24px,5vw);display:grid;grid-template-columns:250px 1fr 250px;gap:24px;align-items:center}
+.player .t{min-width:0}.player b{display:block;font:400 1.1rem var(--serif);letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.player small{color:var(--secondary)}
+.mid{display:flex;flex-direction:column;gap:8px;align-items:center}
+.ctrl{display:flex;gap:18px;align-items:center}
+.ctrl button{background:none;border:0;color:var(--white);font-size:1.1rem;cursor:pointer;padding:4px 8px}
+.ctrl .play{width:44px;height:44px;border-radius:50%;background:var(--white);color:var(--dark);padding:0}
+.bar{width:100%;height:3px;background:var(--line);position:relative}.bar::after{content:"";position:absolute;inset:0 62% 0 0;background:var(--white)}
+.right{display:flex;gap:20px;justify-content:flex-end;color:var(--secondary);font-size:.92rem}
+@media(max-width:860px){
+ .app{grid-template-columns:1fr}
+ nav{position:static;height:auto;flex-direction:row;flex-wrap:wrap;gap:4px 22px;padding:18px 24px;border-right:0;border-bottom:1px solid var(--line)}
+ nav h4,nav .grow{display:none}.logo{margin:0 100% 6px 0}
+ main{gap:64px;padding-block:40px}
+ .list li{grid-template-columns:1fr auto}.list li span.c,.list li span.d{display:none}
+ .player{grid-template-columns:1fr}.player .t,.right{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<nav aria-label="Hoofdmenu">
+ <div class="logo">Score2Sound</div>
+ <a class="on" href="#">Bibliotheek</a>
+ <a href="#">Uploaden</a>
+ <a href="#">Editor</a>
+ <h4>Mappen</h4>
+ <a href="#">Piano</a>
+ <a href="#">Koor</a>
+ <a href="#">Les</a>
+ <div class="grow"></div>
+ <a href="#">Account</a>
+</nav>
+
+<main>
+ <section class="hero">
+  <h1>Bladmuziek die je <em>kunt horen.</em></h1>
+  <p>Upload een pdf of foto. Score2Sound herkent de noten, laat je ze aanpassen en speelt ze direct af.</p>
+  <div class="row"><a class="btn" href="#">Bladmuziek uploaden</a><a class="btn ghost" href="#">Voorbeeld openen</a></div>
+ </section>
+
+ <section aria-label="Recent">
+  <div class="head"><h2>Recent</h2><a class="btn ghost" href="#">Alles bekijken</a></div>
+  <ul class="list">
+   <li><b>Für Elise</b><span class="c">Beethoven</span><span class="d">3 min</span><span class="st">Klaar</span></li>
+   <li><b>Gymnopédie nr. 1</b><span class="c">Satie</span><span class="d">3 min</span><span class="st">Controleren</span></li>
+   <li><b>Ode an die Freude</b><span class="c">Beethoven</span><span class="d">2 min</span><span class="st">Klaar</span></li>
+   <li><b>Menuet in G</b><span class="c">Bach</span><span class="d">2 min</span><span class="st">Wordt herkend</span></li>
+  </ul>
+ </section>
+
+ <section aria-label="Partituur">
+  <div class="head"><h2>Für Elise, maat 1 tot 4</h2></div>
+  <div class="score">
+   <svg viewBox="0 0 700 150" role="img" aria-label="Voorbeeld van een notenbalk met acht noten">
+    <g stroke="#12181a" stroke-width="1.2">
+     <line x1="20" x2="690" y1="40" y2="40"/><line x1="20" x2="690" y1="52" y2="52"/><line x1="20" x2="690" y1="64" y2="64"/><line x1="20" x2="690" y1="76" y2="76"/><line x1="20" x2="690" y1="88" y2="88"/>
+     <line x1="20" x2="20" y1="40" y2="88"/><line x1="690" x2="690" y1="40" y2="88"/><line x1="360" x2="360" y1="40" y2="88"/>
+    </g>
+    <text x="30" y="82" font-size="54" fill="#12181a" font-family="serif">&#119070;</text>
+    <rect x="395" y="30" width="80" height="66" rx="4" fill="#12181a" opacity=".12"/>
+    <g fill="#12181a">
+     <ellipse cx="130" cy="46" rx="7" ry="5.2"/><ellipse cx="180" cy="52" rx="7" ry="5.2"/><ellipse cx="230" cy="46" rx="7" ry="5.2"/><ellipse cx="280" cy="52" rx="7" ry="5.2"/>
+     <ellipse cx="420" cy="58" rx="7" ry="5.2"/><ellipse cx="480" cy="64" rx="7" ry="5.2"/><ellipse cx="540" cy="58" rx="7" ry="5.2"/><ellipse cx="600" cy="70" rx="7" ry="5.2"/>
+    </g>
+    <g stroke="#12181a" stroke-width="1.5">
+     <line x1="137" x2="137" y1="46" y2="12"/><line x1="187" x2="187" y1="52" y2="18"/><line x1="237" x2="237" y1="46" y2="12"/><line x1="287" x2="287" y1="52" y2="18"/>
+     <line x1="427" x2="427" y1="58" y2="24"/><line x1="487" x2="487" y1="64" y2="30"/><line x1="547" x2="547" y1="58" y2="24"/><line x1="607" x2="607" y1="70" y2="36"/>
+    </g>
+    <text x="30" y="130" font-size="12" fill="#929292" font-family="sans-serif">Maat 3 geselecteerd</text>
+   </svg>
+  </div>
+  <div class="tools"><a class="btn ghost" href="#">Noot toevoegen</a><a class="btn ghost" href="#">Rust</a><a class="btn ghost" href="#">Maatduur herstellen</a><a class="btn" href="#">Opslaan</a></div>
+ </section>
+</main>
+</div>
+
+<div class="player" role="region" aria-label="Afspelen">
+ <div class="t"><b>Für Elise</b><small>Beethoven · piano</small></div>
+ <div class="mid">
+  <div class="ctrl"><button aria-label="Vorige">&#9198;</button><button class="play" aria-label="Afspelen">&#9654;</button><button aria-label="Volgende">&#9197;</button></div>
+  <div class="bar" role="progressbar" aria-valuenow="38" aria-valuemin="0" aria-valuemax="100"></div>
+ </div>
+ <div class="right"><span>Tempo 72</span><span>Volume 80%</span><span>Piano</span></div>
+</div>
+</body>
+</html>
