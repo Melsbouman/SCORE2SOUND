@@ -190,6 +190,11 @@ function leesNoot(knoop, start, duur, akkoord, stand, schuinVoorslag = null) {
   const ongestemd = kind(knoop, 'unpitched');
   const toonhoogte = ongestemd ?? kind(knoop, 'pitch');
   const notaties = leesNotaties(knoop);
+  const teksten = kinderen(knoop, 'lyric').map((lyric) => ({
+    couplet: Number(lyric.attr.number) || 1,
+    lettergreep: tekst(lyric, 'text'),
+    soort: { single: 'single', begin: 'begin', middle: 'midden', end: 'eind' }[tekst(lyric, 'syllabic', 'single')] ?? 'single',
+  }));
   return {
     soort: 'noot',
     start: gemeen.start,
@@ -209,5 +214,6 @@ function leesNoot(knoop, start, duur, akkoord, stand, schuinVoorslag = null) {
     zekerheid,
     ...(balk ? { balk } : {}),
     ...details,
+    ...(teksten.length ? { teksten } : {}),
   };
 }
