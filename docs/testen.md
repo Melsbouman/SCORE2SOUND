@@ -68,3 +68,6 @@ Nieuw zijn onder meer eerste-account.test.mjs, speelvolgorde-herhaling.test.mjs,
 
 ## Bestanden die ook in de browser draaien
 app/test/browser-import.test.mjs controleert dat bestanden die de browser laadt geen server-only bibliotheek (fast-xml-parser) binnenhalen, ook niet via een ander bestand. Anders tekent de app geen partituur meer.
+
+## Tests voor de Noteflight-editor en de pdf
+Nieuw zijn onder meer verschuif-halvetoon, noot-bij-letter, kopieer-maten, aanduidingen, stemming, aanwijzing-toevoegen, haak-toevoegen, aanduiding-plaatsing, dynamiek-als-zangtekst, instrumentnamen-weergave, partijnaam-weergave, pdf-lijnen, pdf-meer-systemen, pdf-titelblok en pdf-zonder-extra-tekst. Draai ze met npm test in de map app.
