@@ -7,6 +7,7 @@ import { vulBeginRust } from '../src/model/beginrust.mjs';
 import { vulOntbrekendeMaten } from '../src/model/ontbrekend.mjs';
 import { markeerVerdachteNoten } from '../src/model/verdacht.mjs';
 import { herstelHerkenning } from '../src/model/herstel.mjs';
+import { herstelTitel } from '../src/model/titel.mjs';
 
 const lees = async () => leesMusicXML(await readFile(new URL('./fixtures/sand-and-stars-begin.xml', import.meta.url), 'utf8'));
 
