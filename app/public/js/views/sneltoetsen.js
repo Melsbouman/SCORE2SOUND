@@ -27,6 +27,9 @@ export function start(app) {
     ['← / →', 'Ga naar de vorige of volgende noot.'],
     ['N', 'Ga naar de volgende onzekere noot.'],
     ['Enter', 'Keur de geselecteerde noot goed.'],
+    ['Escape', 'Hef de gekozen noot of maat op.'],
+    ['Alt + 1 tot 5', 'Kies een tabblad van het lint.'],
+    ['Delete', 'Maak van de geselecteerde noot een rust.'],
   ]) {
     const item = document.createElement('li');
     const kbd = document.createElement('kbd');
