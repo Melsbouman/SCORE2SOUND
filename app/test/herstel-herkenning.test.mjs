@@ -23,3 +23,4 @@ test('herstelHerkenning verandert de invoer niet en is een veilige tweede keer',
   assert.deepEqual(gelezen, kopie);
   assert.equal(herstelHerkenning(eerste).partijen[0].maten.length, eerste.partijen[0].maten.length);
 });
+import { ruimZangtekstOp } from '../src/model/zangtekst.mjs';

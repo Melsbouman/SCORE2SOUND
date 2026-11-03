@@ -11,3 +11,4 @@ export function herstelHerkenning(partituur) {
   hersteldePartituren.add(hersteld);
   return hersteld;
 }
+import { ruimZangtekstOp } from './zangtekst.mjs';
