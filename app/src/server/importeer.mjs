@@ -1,6 +1,27 @@
 import { leesMusicXML } from '../musicxml/lezen.mjs';
+import { kinderen, leesXml, tekst } from '../musicxml/xml.mjs';
 import { controleerMaatduur } from '../controle/maatduur.mjs';
+import { instrumentBijNaam } from '../model/instrumenten.mjs';
 import { leesZip } from './zip.mjs';
+
+function vulPartijnamenAan(partituur, xml) {
+  const creditWoorden = kinderen(leesXml(xml), 'credit')
+    .flatMap((credit) => kinderen(credit, 'credit-words').map((woord) => tekst(woord).trim()));
+  for (const partij of partituur.partijen) {
+    if (!['', 'Voice', 'MusicXML Part'].includes(partij.naam)) continue;
+    const gevonden = creditWoorden.map((waarde) => ({ waarde, instrument: instrumentBijNaam(waarde) }))
+      .find(({ instrument }) => instrument);
+    if (!gevonden) continue;
+
+    const volgnummer = gevonden.waarde.match(/\s+(\d+)\s*$/)?.[1];
+    const instrumentNaam = gevonden.instrument.id === 'bugel' ? 'Flugelhorn' : gevonden.instrument.naam;
+    partij.naam = `${instrumentNaam}${volgnummer ? ` ${volgnummer}` : ''}`;
+    Object.assign(partij.instrument, {
+      midiProgramma: gevonden.instrument.midiProgramma,
+      transpositie: gevonden.instrument.transpositie,
+    });
+  }
+}
 
 async function importeerOngecomprimeerd(verzoek) {
   if (verzoek.methode !== 'POST') {
@@ -25,6 +46,7 @@ async function importeerOngecomprimeerd(verzoek) {
   try {
     const xml = verzoek.body.toString('utf8').replace(/^\uFEFF/, '');
     const partituur = leesMusicXML(xml);
+    vulPartijnamenAan(partituur, xml);
     return { status: 200, body: { partituur, meldingen: controleerMaatduur(partituur) } };
   } catch (fout) {
     return { status: 422, body: { fout: fout.message } };
