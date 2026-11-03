@@ -35,3 +35,6 @@ De server tekent de partituur met Verovio en zet elke pagina in een PDF met pdfk
 
 ## Titelblok en kopiëren
 |Boven het stuk staat links de partijnaam met de stemming, zoals Flugelhorn 1 in B♭, en rechts de componist met daaronder arr. en de naam van de arrangeur. Je kunt een reeks maten kiezen met Shift-klik of alle maten met Ctrl en A en ze kopiëren en plakken.
+
+## Toetsenbord en schermlezer
+Alles in de editor kan met het toetsenbord: tabbladen met Alt en een cijfer van 1 tot en met 6, noten met letters en pijlen, maten met Shift-klik en Ctrl+A, en zoomen met Ctrl en plus, min of nul. De knoppen hebben een zichtbare focusrand en een naam voor schermlezers.
