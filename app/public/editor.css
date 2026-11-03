@@ -242,3 +242,17 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
 .lint__paneel:has(> #editor) { flex-wrap: wrap; }
 .lint__paneel > #editor { flex: 1 1 100%; width: 100%; min-width: 0; }
 .editor__balk.editor-knoppenbalk { overflow: visible; top: auto; }
+
+/* Merkletters: Archivo Black voor het logo, Bodoni Moda alleen groot en in gewone hoofdletters en kleine letters, Poppins voor de rest. */
+.werkvlak h2 { font-family: var(--letter); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+#upload h2 {
+  font-family: var(--letter-kop);
+  font-size: clamp(1.9rem, 3vw, 2.6rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0;
+  text-transform: none;
+  text-rendering: geometricPrecision;
+}
+#hulp ol { list-style-position: inside; padding-left: 0; }
+#hulp li { margin: 0; padding: 0; }
