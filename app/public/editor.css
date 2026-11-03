@@ -219,3 +219,4 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
 .editor-knoppenbalk button[aria-pressed="true"] .muzieksymbool, .editor-knoppenbalk button.actief .muzieksymbool { color: #ffffff; }
 .editor-knoppengroep__kop { color: #0d150b99; font-size: 0.65rem; letter-spacing: 0.05em; text-transform: uppercase; }
 @media (min-width: 900px) { .lint__paneel { max-height: none; overflow: visible; } }
+.bladmuziek g.tempo tspan[font-family="Leland"] { font-size: 470px; }
