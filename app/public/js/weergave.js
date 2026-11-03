@@ -101,14 +101,9 @@ export function start(app) {
     const schaal = vasteRegels ? vasteSchaal(breedte, zoom) : Math.round(schaalVoor(breedte) * zoom);
     const paginaBreedte = vasteRegels ? VASTE_PAGINABREEDTE : Math.round((breedte * 100) / schaal);
     const gegevens = app.stand?.partituur ?? {};
-    {
-      const heeftPaginavorm = false;
-    }
     const bladbron = gegevens.bron?.bladen?.[0];
     const heeftPaginabegin = gegevens.partijen?.some((partij) => partij.maten?.some((maat) => maat.paginabegin)) ?? false;
-    const heeftPaginavorm = heeftPaginabegin
-      && Number.isFinite(bladbron?.breedte) && bladbron.breedte > 0
-      && Number.isFinite(bladbron?.hoogte) && bladbron.hoogte > 0;
+    const heeftPaginavorm = false; // Mels, 3 november 2026: regels automatisch afbreken en gelijkmatig vullen
     tk.setOptions({
       scale: schaal,
       pageWidth: paginaBreedte,
