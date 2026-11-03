@@ -74,6 +74,36 @@ function aanwijzing(start, type, waarde, getoond) {
   };
 }
 
+export function leesAkkoord(harmonyKnoop, start) {
+  const root = kind(harmonyKnoop, 'root');
+  const kindKnoop = kind(harmonyKnoop, 'kind');
+  const naam = tekst(kindKnoop);
+  const suffixen = {
+    major: '',
+    minor: 'm',
+    dominant: '7',
+    'minor-seventh': 'm7',
+    'major-seventh': 'maj7',
+    diminished: 'dim',
+    augmented: 'aug',
+    'suspended-fourth': 'sus4',
+  };
+  const stapTekst = (stap, alter) => `${stap}${alter > 0 ? '#'.repeat(alter) : 'b'.repeat(-alter)}`;
+  if (!root) {
+    const waarde = kindKnoop?.attr.text ?? naam;
+    return waarde ? aanwijzing(start, 'akkoord', waarde) : null;
+  }
+  const rootStap = tekst(root, 'root-step');
+  if (!rootStap) return null;
+  const rootAlter = getal(root, 'root-alter', 0);
+  const suffix = suffixen[naam] ?? kindKnoop?.attr.text ?? naam;
+  let waarde = stapTekst(rootStap, rootAlter) + suffix;
+  const bass = kind(harmonyKnoop, 'bass');
+  const bassStap = tekst(bass, 'bass-step');
+  if (bassStap) waarde += `/${stapTekst(bassStap, getal(bass, 'bass-alter', 0))}`;
+  return aanwijzing(start, 'akkoord', waarde);
+}
+
 export function leesRichting(directionKnoop, start, vorigeWig = 'crescendo') {
   const aanwijzingen = [];
   const sprong = {};
