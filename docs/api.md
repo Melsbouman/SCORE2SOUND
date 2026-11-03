@@ -151,3 +151,10 @@ De SCORE2SOUND-app biedt de volgende API-adressen voor uitbreiding en testen. Di
 - Bij SCORE2SOUND_ACCOUNTS=aan hebben alleen accountgerelateerde endpoints en CORS-verificatie nodig
 - Serveronderbrekingen leveren 500 "Er ging iets mis op de server." op
 - Totaal maximale uploadgrootte: 100 MB
+
+## /api/pdf
+
+- POST met een MusicXML-tekst als body.
+- Antwoord 200: een pdf (application/pdf) met het watermerk SCORE2SOUND op elke pagina, als bijlage partituur.pdf.
+- 400: lege body. 405: een andere methode dan POST. 422: de pdf kon niet worden gemaakt.
+- Bij SCORE2SOUND_ACCOUNTS=aan is een geldige sessie nodig.
