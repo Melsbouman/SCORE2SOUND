@@ -84,7 +84,10 @@ export function start(app) {
     panelen.push(paneel);
   }
 
+  lint.dataset.tab = tabbladen[geselecteerd].naam;
+
   function selecteer(index, focus = false) {
+    lint.dataset.tab = tabbladen[index].naam;
     knoppen.forEach((knop, knopIndex) => {
       const gekozen = knopIndex === index;
       knop.setAttribute('aria-selected', String(gekozen));
