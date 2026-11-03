@@ -98,3 +98,6 @@ In een partituur met meer dan een partij staan de instrumentnamen voor elke rege
 
 ## De pdf van de server (stand 3 november 2026)
 De pdf bevat notenbalken, noten, stokken en balken, een schuin watermerk, paginanummers en bovenaan het titelblok (titel, partijnaam met stemming, componist en arr.). Bij een losse partij staat de partijnaam niet voor de balk. De standaardlettertypen kennen het teken voor mol niet; daarom staat daar een b.
+
+## Wat de herkenning achteraf herstelt
+Audiveris leest soms de verkeerde maatsoort (9/8 of 5/4 als 6/8 of 4/4) en slaat maten rust aan het begin over. We herstellen de maatsoort uit de inhoud van de maat (herstelMaatsoorten) en zetten de maten rust voor het eerste repetitiecijfer terug (vulBeginRust). Dat gebeurt alleen bij herkende bladmuziek, niet bij een MusicXML-bestand dat je zelf opent.
