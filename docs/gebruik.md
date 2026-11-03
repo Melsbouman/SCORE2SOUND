@@ -58,3 +58,6 @@ Kies een rode noot en klik op Suggestie toepassen in het blok Onzekere noten. De
 
 ## Een maat kopiëren
 Tik een maat aan en kies in het tabblad Noten Maat kopiëren. Tik daarna de maat aan waar de noten heen moeten en kies Maat plakken.
+
+## Noten invoeren met het toetsenbord
+Kies een noot of een rust en tik een letter van A tot en met G: de noot krijgt die toon, in het octaaf dat het dichtst bij de vorige noot ligt. Met de pijl omhoog of omlaag ga je een halve toon hoger of lager (omhoog met kruisen, omlaag met mollen); met Shift een octaaf. Delete maakt van een noot een rust. Shift+A is een accent en Shift+F een fermate.
