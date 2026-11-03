@@ -227,7 +227,33 @@ function dynamiekVanTekst(tekst) {
   return dynamiekUitTekst(genormaliseerd);
 }
 
-function schrijfNoot(element, meerdereBalken, partij, maat, weergave, markering, verborgen, openBogen) {
+function alterUitToonsoort(stap, kwinten) {
+  const kruisen = ['F', 'C', 'G', 'D', 'A', 'E', 'B'];
+  const mollen = ['B', 'E', 'A', 'D', 'G', 'C', 'F'];
+  if (kwinten > 0) return kruisen.slice(0, kwinten).includes(stap) ? 1 : 0;
+  if (kwinten < 0) return mollen.slice(0, -kwinten).includes(stap) ? -1 : 0;
+  return 0;
+}
+
+function maakAccidentalen(maat) {
+  const huidig = new Map();
+  const accidentalen = new Map();
+  const namen = { 1: 'sharp', 0: 'natural', '-1': 'flat', 2: 'double-sharp', '-2': 'flat-flat' };
+  const noten = maat.elementen
+    .filter((element) => element.soort === 'noot' && !element.ongestemd)
+    .sort((a, b) => a.start - b.start);
+  for (const element of noten) {
+    const toon = element.toonhoogte;
+    const sleutel = `${toon.stap}:${toon.octaaf}`;
+    const geldend = huidig.has(sleutel) ? huidig.get(sleutel) : alterUitToonsoort(toon.stap, maat.toonsoort.kwinten);
+    const accidental = element.overbinding?.eind || geldend === toon.alter ? null : namen[toon.alter];
+    if (accidental) accidentalen.set(element, accidental);
+    huidig.set(sleutel, toon.alter);
+  }
+  return accidentalen;
+}
+
+function schrijfNoot(element, meerdereBalken, partij, maat, weergave, markering, verborgen, openBogen, accidental) {
   const info = element.voorslag ? { type: 'eighth', punten: 0, triool: false } : duurInfo(element.duur);
   let inhoud = element.voorslag ? leeg('grace', element.voorslag.schuin ? { slash: 'yes' } : {}) : element.akkoord ? leeg('chord') : '';
   if (element.soort === 'rust') inhoud += leeg('rest', element.heleMaat ? { measure: 'yes' } : {});
@@ -243,6 +269,7 @@ function schrijfNoot(element, meerdereBalken, partij, maat, weergave, markering,
   inhoud += tag('voice', element.stem);
   if (!(element.soort === 'rust' && element.heleMaat) && info.type) inhoud += tag('type', info.type);
   inhoud += leeg('dot').repeat(info.punten);
+  if (accidental) inhoud += tag('accidental', accidental);
   const tuplet = element.tuplet ?? (info.triool ? { aantal: 3, normaal: 2 } : null);
   if (tuplet) inhoud += tag('time-modification', tag('actual-notes', tuplet.aantal) + tag('normal-notes', tuplet.normaal));
   if (meerdereBalken) inhoud += tag('staff', element.notenbalk);
@@ -263,7 +290,7 @@ function schrijfNoot(element, meerdereBalken, partij, maat, weergave, markering,
   return tag('note', inhoud, attributen);
 }
 
-function schrijfStemmen(maat, partij, weergave, openBogen) {
+function schrijfStemmen(maat, partij, weergave, openBogen, accidentalen) {
   const elementen = maat.elementen.filter((element) => element.soort === 'noot' || element.soort === 'rust');
   const stemmen = [...new Set(elementen.map((element) => element.stem))].sort((a, b) => a - b);
   const balken = Math.max(1, ...maat.sleutels.map((sleutel) => sleutel.notenbalk || 1));
@@ -278,7 +305,7 @@ function schrijfStemmen(maat, partij, weergave, openBogen) {
         const dynamiek = dynamiekVanTekst(tekst.lettergreep);
         if (dynamiek) xml += tag('direction', tag('direction-type', tag('dynamics', leeg(dynamiek))), { placement: 'below' });
       }
-      xml += schrijfNoot(element, balken > 1, partij, maat, weergave, markeringen.get(element), maat.verborgen, openBogen);
+      xml += schrijfNoot(element, balken > 1, partij, maat, weergave, markeringen.get(element), maat.verborgen, openBogen, accidentalen.get(element));
       if (!element.voorslag && !element.akkoord) positie = Math.max(positie, element.start + element.duur);
     }
     if (index < stemmen.length - 1 && positie > 0) xml += tag('backup', tag('duration', positie));
@@ -288,6 +315,7 @@ function schrijfStemmen(maat, partij, weergave, openBogen) {
 
 function schrijfMaat(maat, vorige, instrument, partij, weergave, openBogen) {
   let inhoud = schrijfAttributes(maat, vorige, instrument);
+  const accidentalen = maakAccidentalen(maat);
   if (maat.regelbegin || maat.paginabegin) {
     inhoud += leeg('print', {
       ...(maat.regelbegin ? { 'new-system': 'yes' } : {}),
@@ -306,7 +334,7 @@ function schrijfMaat(maat, vorige, instrument, partij, weergave, openBogen) {
     if (maat.herhaling?.begin) streep += leeg('repeat', { direction: 'forward' });
     inhoud += tag('barline', streep, { location: 'left' });
   } else if (maat.herhaling?.begin) inhoud += tag('barline', leeg('repeat', { direction: 'forward' }), { location: 'left' });
-  inhoud += schrijfStemmen(maat, partij, weergave, openBogen);
+  inhoud += schrijfStemmen(maat, partij, weergave, openBogen, accidentalen);
   if (maat.volta?.eind) {
     const nummer = maat.volta.nummers.join(',');
     let streep = leeg('ending', { number: nummer, type: 'stop' });
