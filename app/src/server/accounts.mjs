@@ -199,6 +199,29 @@ export function maakAccounts({ map, codes, nu = Date.now }) {
     return gebruiker ? { id: gebruiker.id, email: gebruiker.email } : null;
   }
 
+  async function wijzigWachtwoord(gebruikerId, oud, nieuw, houdToken) {
+    const gebruiker = (await gebruikers()).find((item) => item.id === gebruikerId);
+    let klopt = false;
+    if (gebruiker && typeof oud === 'string') {
+      const hash = await wachtwoordHash(oud, gebruiker.zout);
+      klopt = gelijkHex(hash, gebruiker.wachtwoordHash);
+    }
+    if (!klopt) throw new Error('Het huidige wachtwoord klopt niet.');
+    if (typeof nieuw !== 'string' || nieuw.length < 10 || nieuw === oud) {
+      throw new Error('Kies een nieuw wachtwoord van minstens 10 tekens.');
+    }
+
+    const zout = randomBytes(16).toString('hex');
+    gebruiker.wachtwoordHash = await wachtwoordHash(nieuw, zout);
+    gebruiker.zout = zout;
+    await schrijfAtomair(bestand(map, gebruikerId), `${JSON.stringify(gebruiker, null, 2)}\n`);
+
+    const behoudenHash = typeof houdToken === 'string' ? tokenHash(houdToken) : null;
+    for (const [hash, sessie] of sessies) {
+      if (sessie.gebruikerId === gebruikerId && hash !== behoudenHash) sessies.delete(hash);
+    }
+  }
+
   function logUit(token) {
     if (typeof token !== 'string') return;
     sessies.delete(tokenHash(token));
@@ -218,5 +241,5 @@ export function maakAccounts({ map, codes, nu = Date.now }) {
     return true;
   }
 
-  return { registreer, logIn, gebruikerVan, logUit, verwijder, ruimSessiesOp };
+  return { registreer, logIn, gebruikerVan, wijzigWachtwoord, logUit, verwijder, ruimSessiesOp };
 }
