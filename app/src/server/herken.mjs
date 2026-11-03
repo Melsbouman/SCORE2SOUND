@@ -402,3 +402,4 @@ function verbeterTekstaanwijzingen(project) {
 }
 
 import { voegSplitsingenSamen } from './samenvoegen.mjs';
+import { herstelHerkenning } from '../model/herstel.mjs';
