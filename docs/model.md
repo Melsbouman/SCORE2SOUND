@@ -126,6 +126,7 @@ Een noot of rust kan ook deze velden hebben, alleen als ze op het blad staan: `b
 ### Aanwijzing
 
 - `'letter'`: een repetitieletter of -getal in een kader, `waarde` is de tekst zelf, zoals `'A'` of `'104'`.
+- `'akkoord'`: een akkoordsymbool boven de balk, `waarde` is de korte naam, zoals `'C'`, `'Am'`, `'G7/B'` of `'F#m'`.
 ```js
 { soort: 'aanwijzing', start: 0, type: 'dynamiek', waarde: 'mf', zekerheid: 1 }
 ```

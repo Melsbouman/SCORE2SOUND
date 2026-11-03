@@ -1,7 +1,7 @@
 // Leest een MusicXML-bestand (score-partwise) en geeft de partituur in de vorm van docs/model.md.
 // Alleen op de server: de XML-hulp gebruikt fast-xml-parser.
 import { leesXml, kind, kinderen, tekst, getal } from './xml.mjs';
-import { leesAttributen, leesMaatrust, leesRichting, leesNotaties, leesDetails, leesMaatstreep } from './aanwijzingen.mjs';
+import { leesAttributen, leesMaatrust, leesRichting, leesAkkoord, leesNotaties, leesDetails, leesMaatstreep } from './aanwijzingen.mjs';
 import { naarTikken, maatLengte } from '../model/duur.mjs';
 
 const LEGE_ATTRIBUTEN = { naam: 'attributes', attr: {}, kinderen: [], tekst: '' };
@@ -135,6 +135,11 @@ function leesMaat(maat, index, voortgang) {
         elementen.push(aanwijzing);
       }
       if (richting.tempo !== null && tempo === null) tempo = richting.tempo;
+    } else if (knoop.naam === 'harmony') {
+      const offset = kind(knoop, 'offset');
+      const start = cursor + (offset ? naarTikken(getal(knoop, 'offset'), voortgang.stand.deelwaarden).tikken : 0);
+      const akkoord = leesAkkoord(knoop, start);
+      if (akkoord) elementen.push(akkoord);
     } else if (knoop.naam === 'note' && !kind(knoop, 'cue')) {
       const grace = kind(knoop, 'grace');
       const duur = grace ? { tikken: 0, exact: true } : tikken(knoop);

@@ -90,6 +90,43 @@ function schrijfAanwijzing(aanwijzing, weergave) {
   return tag('direction', tag('direction-type', type) + offset + sound, { placement });
 }
 
+function schrijfAkkoord(aanwijzing) {
+  const naam = String(aanwijzing.waarde);
+  const delen = naam.match(/^([A-G])([#b]?)(.*)$/);
+  const suffixen = {
+    '': 'major',
+    m: 'minor',
+    '7': 'dominant',
+    m7: 'minor-seventh',
+    maj7: 'major-seventh',
+    dim: 'diminished',
+    aug: 'augmented',
+    sus4: 'suspended-fourth',
+  };
+  let inhoud = '';
+  let suffix = naam;
+  let bas = null;
+  if (delen) {
+    suffix = delen[3];
+    const basDelen = suffix.match(/^(.*)\/([A-G])([#b]?)$/);
+    if (basDelen) {
+      suffix = basDelen[1];
+      bas = { stap: basDelen[2], alter: basDelen[3] };
+    }
+    inhoud += tag('root', tag('root-step', delen[1])
+      + (delen[2] ? tag('root-alter', delen[2] === '#' ? 1 : -1) : ''));
+  }
+  const kindNaam = suffixen[suffix] ?? 'other';
+  const kindTekst = suffixen[suffix] === undefined ? suffix : null;
+  inhoud += tag('kind', kindNaam, kindTekst === null ? {} : { text: kindTekst });
+  if (bas) {
+    inhoud += tag('bass', tag('bass-step', bas.stap)
+      + (bas.alter ? tag('bass-alter', bas.alter === '#' ? 1 : -1) : ''));
+  }
+  if (aanwijzing.start > 0) inhoud += tag('offset', aanwijzing.start);
+  return tag('harmony', inhoud);
+}
+
 function schrijfSprongen(sprong = {}) {
   const richtingen = [
     ['segno', sprong.segno, leeg('segno')],
@@ -223,7 +260,9 @@ function schrijfMaat(maat, vorige, instrument, partij, weergave) {
   }
   const aanwijzingen = maat.elementen.filter((element) => element.soort === 'aanwijzing');
   if (maat.tempo != null && !aanwijzingen.some((item) => item.type === 'tempo')) aanwijzingen.unshift({ start: 0, type: 'tempo', waarde: maat.tempo });
-  inhoud += aanwijzingen.map((aanwijzing) => schrijfAanwijzing(aanwijzing, weergave)).join('');
+  inhoud += aanwijzingen.map((aanwijzing) => aanwijzing.type === 'akkoord'
+    ? schrijfAkkoord(aanwijzing)
+    : schrijfAanwijzing(aanwijzing, weergave)).join('');
   inhoud += schrijfSprongen(maat.sprong);
   if (maat.volta?.begin) {
     const nummer = maat.volta.nummers.join(',');
