@@ -195,3 +195,14 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
   #speler > span, #speler > p { margin: 0; white-space: nowrap; }
   body:has(#speler) .werkvlak { padding-bottom: 110px; }
 }
+
+@media (min-width: 900px) {
+  #speler .speler__knoppen .knop { width: auto; height: auto; min-height: 0; aspect-ratio: auto; border-radius: 999px; padding: 8px 16px; white-space: nowrap; }
+  #speler .speler__veld input[type="range"] { flex-basis: 100px; width: 100px; }
+  #speler .speler__veld input[type="number"], #speler .speler__veld input[type="text"] { width: 3.5em; }
+  #speler { gap: 14px; font-size: 0.9rem; }
+}
+@media (min-width: 900px) and (max-width: 1600px) {
+  #speler > span { display: none; }
+  #speler .speler__passage legend { display: none; }
+}
