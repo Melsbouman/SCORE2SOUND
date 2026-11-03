@@ -13,7 +13,10 @@ import { telPdfPaginas } from './pdfpaginas.mjs';
 import { bladenUitOmr, koppelOmr, voegPaginasSamen } from './omr.mjs';
 import { leesMusicXML } from '../musicxml/lezen.mjs';
 import { herstelMaatsoorten as herstelMaatsoortenZonderBeginrust } from '../model/maatsoorten.mjs';
-import { vulBeginRust } from '../model/beginrust.mjs';
+import { vulBeginRust as vulOorspronkelijkeBeginRust } from '../model/beginrust.mjs';
+import { vulOntbrekendeMaten } from '../model/ontbrekend.mjs';
+
+const vulBeginRust = (partituur) => vulOntbrekendeMaten(vulOorspronkelijkeBeginRust(partituur));
 
 const herstelMaatsoorten = (partituur) => vulBeginRust(herstelMaatsoortenZonderBeginrust(partituur));
 import { kinderen, leesXml, tekst } from '../musicxml/xml.mjs';
