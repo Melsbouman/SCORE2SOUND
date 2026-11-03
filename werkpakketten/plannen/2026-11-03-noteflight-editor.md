@@ -39,4 +39,7 @@ Mels wil dat de editor aanvoelt als Noteflight: een noot aantikken en meteen kun
 Pakketten 5 tot en met 9 hebben elk een testbestand dat in de taak staat. Pakket 14 en 18 krijgen een test in de taak.
 
 ## Open vragen
-Geen; Mels is er overdag en kijkt mee.
+|Geen; Mels is er overdag en kijkt mee.
+
+## Stand (3 november 2026)
+|Pakketten 1 tot en met 18 zijn gedaan of in uitvoering. Onderweg gevonden en hersteld: de weergave startte niet door de zoom (#785), de knoppenbalk klapte dicht (#768), de regelafbrekingen van het origineel bleven gelden (#764), en mf stond als zangtekst in plaats van als dynamiek (#798).
