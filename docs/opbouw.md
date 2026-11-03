@@ -89,3 +89,6 @@ Dit document beschrijft de structuur van de SCORE2SOUND-codebase in eenvoudige N
 - **Testbestanden** (.test.mjs) voeren unit- en integratietests uit met node:test.
 
 Verwijs naar docs/model.md voor het model en naar docs/online.md voor online zetten.
+
+## PDF met watermerk
+app/src/export/pdf.mjs maakt de PDF uit MusicXML (Verovio, pdfkit en svg-to-pdfkit) en de route /api/pdf in app/src/server/pdf.mjs levert hem. De knop PDF downloaden gebruikt die route.
