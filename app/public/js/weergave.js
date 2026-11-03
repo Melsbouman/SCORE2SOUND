@@ -1,12 +1,17 @@
 // Notatie tekenen met Verovio in #weergave.
 // Tekent opnieuw bij een nieuwe partituur (via naarMusicXML uit /src/musicxml/schrijven.mjs) of bij app.meld('musicxml', tekst).
 // Luistert naar 'naar-maat' ({ maat }: markeert en toont die maat) en 'speel-maat' ({ maat } of null: de maat die nu klinkt).
-import { zetTitelgegevens } from '/src/model/titelgegevens.mjs';
+import { zetTitelgegevens } from '../../src/model/titelgegevens.mjs';
 
+const VASTE_PAGINABREEDTE = 2100;
 const schaalVoor = (breedte) => (breedte < 500 ? 70 : breedte <= 1200 ? 60 : 75); // op een telefoon zijn de noten anders te klein.
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
 let toolkitBelofte = null;
+
+export function vasteSchaal(breedte, zoom) {
+  return Math.min(140, Math.max(35, Math.round(breedte * 100 / VASTE_PAGINABREEDTE * zoom)));
+}
 
 // Verovio is groot (WebAssembly); hij wordt pas geladen als er iets te tekenen is.
 function toolkit() {
@@ -93,8 +98,8 @@ export function start(app) {
     if (nummer !== tekenNummer) return; // er kwam intussen een nieuwere partituur
     const breedte = Math.max(320, vlak.clientWidth - 48);
     const vasteRegels = window.innerWidth >= 700 && musicxml.includes('new-system=');
-    const schaal = vasteRegels ? Math.min(100, Math.max(35, Math.round(breedte * 100 / 2400 * zoom))) : Math.round(schaalVoor(breedte) * zoom);
-    const paginaBreedte = vasteRegels ? 2400 : Math.round((breedte * 100) / schaal);
+    const schaal = vasteRegels ? vasteSchaal(breedte, zoom) : Math.round(schaalVoor(breedte) * zoom);
+    const paginaBreedte = vasteRegels ? VASTE_PAGINABREEDTE : Math.round((breedte * 100) / schaal);
     const gegevens = app.stand?.partituur ?? {};
     const bladbron = gegevens.bron?.bladen?.[0];
     const heeftPaginabegin = gegevens.partijen?.some((partij) => partij.maten?.some((maat) => maat.paginabegin)) ?? false;
