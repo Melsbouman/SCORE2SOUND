@@ -92,3 +92,6 @@ Het lint met tabbladen staat boven de partituur. De speler staat buiten het lint
 
 ## Lettertypen en kleuren (merk-PDF van Mels)
 Logo: Archivo Black, met de 2 in het groen. Hoofdteksten: Bodoni (Bodoni Moda met optische grootte 6, zodat de haarlijnen stevig blijven). Overige tekst: Poppins. Kleuren: #1C4A14, #2B6A1F, #F0EDE1, #0D150B, #FFFFFF en #C7E3B0.
+
+## Instrumentnamen voor de regel
+In een partituur met meer dan een partij staan de instrumentnamen voor elke regel. In een losse partij hoeft dat niet; daar staat de naam met de stemming linksboven (Mels, 3 november 2026).
