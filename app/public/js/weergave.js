@@ -25,9 +25,9 @@ function toolkit() {
   return toolkitBelofte;
 }
 
-async function naarMusicXML(partituur) {
+async function naarMusicXML(partituur, app) {
   const { naarMusicXML: omzetten } = await import('/src/musicxml/schrijven.mjs');
-  return omzetten(partituur, { weergave: true });
+  return omzetten(partituur, { weergave: true, verberg: app.stand.verborgen ?? [] });
 }
 
 export function start(app) {
@@ -477,6 +477,15 @@ const vlak = document.getElementById('weergave');
     for (const index of verschil) maten()[index]?.classList.add('verschilt');
   }
 
+  async function tekenPartituur(partituur) {
+    try {
+      await teken(await naarMusicXML(partituur, app), { meteen: true });
+    } catch (fout) {
+      console.error(fout);
+      status('De partituur kon niet worden omgezet om te tekenen.');
+    }
+  }
+
   app.op('partituur', async (partituur) => {
     if (!partituur) {
       huidige = null;
@@ -489,12 +498,10 @@ const vlak = document.getElementById('weergave');
       return vlak.replaceChildren();
     }
     gekozenMaat = null;
-    try {
-      await teken(await naarMusicXML(partituur), { meteen: true });
-    } catch (fout) {
-      console.error(fout);
-      status('De partituur kon niet worden omgezet om te tekenen.');
-    }
+    await tekenPartituur(partituur);
+  });
+  app.op('verborgen', () => {
+    if (app.stand.partituur) return tekenPartituur(app.stand.partituur);
   });
   app.op('musicxml', (tekst) => teken(tekst));
   app.op('naar-maat', (doel) => markeer(doel?.maat, 'gemarkeerd', true));

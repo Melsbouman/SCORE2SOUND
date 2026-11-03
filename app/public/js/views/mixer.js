@@ -28,6 +28,20 @@ export function start(app) {
       const naam = document.createElement('span');
       naam.textContent = partij.naam;
 
+      const tonenLabel = document.createElement('label');
+      const tonen = Object.assign(document.createElement('input'), {
+        type: 'checkbox',
+        checked: !(app.stand.verborgen ?? []).includes(partij.id),
+      });
+      tonen.setAttribute('aria-label', `Tonen in de notatie: ${partij.naam}`);
+      tonen.addEventListener('change', () => {
+        const verborgen = new Set(app.stand.verborgen ?? []);
+        if (tonen.checked) verborgen.delete(partij.id);
+        else verborgen.add(partij.id);
+        app.zet({ verborgen: [...verborgen] });
+      });
+      tonenLabel.append(tonen, document.createTextNode('Tonen in de notatie'));
+
       const volume = Object.assign(document.createElement('input'), {
         type: 'range',
         min: 0,
@@ -72,7 +86,7 @@ export function start(app) {
         solo.setAttribute('aria-pressed', String(soloActief));
       });
 
-      rij.append(naam, volume, dempen, solo);
+      rij.append(naam, tonenLabel, volume, dempen, solo);
       return rij;
     });
 
