@@ -83,3 +83,6 @@ Claude plant, Codex schrijft logica en tests, Copilot doet interface, Hermes doe
 
 ## Accounts met uitnodigingscode
 Er zijn accounts, maar ze worden aangeboden via een uitnodigingscode. Dit controleert de toegang.
+
+## PDF met watermerk
+De server maakt de PDF met pdfkit en svg-to-pdfkit (akkoord van Mels op 3 november 2026). Elke pagina krijgt het watermerk SCORE2SOUND. Lukt dat niet, dan opent de browser het afdrukvenster.
