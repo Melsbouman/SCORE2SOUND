@@ -1,5 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#14161a"/>
-  <path d="M22 40V18l26-5v22M22 24l26-5" fill="none" stroke="#9ac3ed" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M12 43c0-4 5-7 11-7s11 3 11 7-5 7-11 7-11-3-11-7Zm26-5c0-4 5-7 11-7s11 3 11 7-5 7-11 7-11-3-11-7Z" fill="#f2f2ef"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 290 290" role="img" aria-label="SCORE2SOUND">
+  <rect width="290" height="290" rx="56" fill="#1c4a14"/>
+  <g fill="#f0ede1">
+    <rect x="31" y="63" width="152" height="14" rx="5"/>
+    <rect x="31" y="100" width="152" height="14" rx="5"/>
+    <rect x="31" y="138" width="152" height="14" rx="5"/>
+    <rect x="31" y="176" width="76" height="14" rx="5"/>
+    <ellipse cx="158" cy="210" rx="48" ry="42" transform="rotate(-14 158 210)"/>
+    <rect x="189" y="38" width="19" height="170" rx="9"/>
+    <path d="M198 36c14 0 24 8 44 24 22 17 36 34 33 52-2 18-10 33-20 46 3-24-6-44-30-56-10-5-19-7-27-8z"/>
+  </g>
+  <path d="M142 192l36 19-36 19z" fill="#1c4a14" stroke="#1c4a14" stroke-width="6" stroke-linejoin="round"/>
 </svg>
