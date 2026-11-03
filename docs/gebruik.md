@@ -91,3 +91,6 @@ Heeft je stuk meer dan een partij, dan staat in het tabblad Bestand de knop Alle
 
 ## Paginanummers in de pdf
 Onderaan elke pagina van de pdf staat het paginanummer, bijvoorbeeld pagina 1 van 2.
+
+## De startpagina
+Wie de website opent, ziet eerst een startpagina met uitleg over hoe SCORE2SOUND werkt. Met de knop Inloggen ga je naar de editor. Ben je al ingelogd, dan opent de website meteen de editor. De editor staat ook altijd op /app.
