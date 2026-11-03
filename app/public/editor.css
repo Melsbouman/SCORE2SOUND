@@ -103,3 +103,11 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
   .lint #speler > span, .lint #speler > p { margin: 0; white-space: nowrap; }
   .lint #tempo:has(> p:only-of-type) { display: none; }
 }
+
+@media (max-width: 600px) {
+  .kop { padding: 8px 12px; }
+  .kop p { display: none; }
+  .lint__paneel { max-height: 120px; overflow: auto; }
+  .lint__tab { padding: 6px 10px; }
+  .werkvlak { padding: 8px; gap: 8px; }
+}
