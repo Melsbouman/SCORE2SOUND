@@ -1,7 +1,8 @@
 .app { display: grid; grid-template-columns: 250px minmax(0, 1fr); min-height: 100vh; }
 .zijbalk { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 2px; padding: 28px 24px 20px; background: var(--kleur-zijbalk); color: var(--kleur-wit); }
-.zijbalk__logo { margin-bottom: 22px; font: 800 1.15rem/1.1 var(--letter); font-stretch: 125%; text-transform: uppercase; }
-.zijbalk__nieuw { display: block; margin-bottom: 18px; padding: 11px 16px; border-radius: 50px; background: var(--kleur-wit); color: var(--kleur-zijbalk); text-align: center; text-decoration: none; font-weight: 700; }
+.zijbalk__logo { margin-bottom: 22px; font: 400 1.15rem/1.1 var(--letter-logo); text-transform: uppercase; }
+.zijbalk__logo .logo__2 { color: var(--kleur-licht); }
+.zijbalk__nieuw { display: block; margin-bottom: 18px; padding: 11px 16px; border-radius: 50px; background: var(--kleur-wit); color: var(--kleur-zijbalk); text-align: center; text-decoration: none; font-weight: 600; }
 .zijbalk__nieuw:hover { background: var(--kleur-achtergrond); }
 .zijbalk__item { padding: 8px 0; color: var(--kleur-wit); text-decoration: none; }
 .zijbalk__item:hover { text-decoration: underline; text-underline-offset: 4px; }
