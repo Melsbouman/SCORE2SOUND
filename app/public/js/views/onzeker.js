@@ -72,7 +72,8 @@ export function start(app) {
   }
 
   document.addEventListener('keydown', (gebeurtenis) => {
-    if (gebeurtenis.target.matches('input, select, textarea') || gebeurtenis.target.isContentEditable) return;
+    const doel = gebeurtenis.target instanceof Element ? gebeurtenis.target : null;
+    if (doel?.matches('input, select, textarea') || doel?.isContentEditable) return;
     if (gebeurtenis.altKey || gebeurtenis.ctrlKey || gebeurtenis.metaKey) return;
     const toets = gebeurtenis.key.toLowerCase();
     if (toets === 'n' || toets === 'p') {
