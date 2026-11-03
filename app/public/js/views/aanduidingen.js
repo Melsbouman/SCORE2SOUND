@@ -1,5 +1,5 @@
 import { AANDUIDINGEN } from '/src/model/aanduidingen.mjs';
-import { voegAanwijzingToe, leesId, zoekElement } from '/src/model/corrigeren.mjs';
+import { voegAanwijzingToe, verwijderAanwijzing, leesId, zoekElement } from '/src/model/corrigeren.mjs';
 
 const groepsnamen = {
   tempo: 'Tempo',
@@ -72,7 +72,51 @@ export function start(app) {
       return element;
     });
 
-    vlak.replaceChildren(tekst, ...groepen);
+    const partituur = app.stand.partituur;
+    let partijId;
+    let maatIndex;
+    if (gekozenNoot != null) {
+      const plaats = leesId(gekozenNoot);
+      if (plaats) ({ partijId, maatIndex } = plaats);
+    } else if (gekozenMaat != null) {
+      partijId = partituur?.partijen[0]?.id;
+      maatIndex = gekozenMaat;
+    }
+
+    const maat = partituur?.partijen.find((partij) => partij.id === partijId)?.maten[maatIndex];
+    const aanwijzingen = maat?.elementen
+      .map((element, index) => ({ element, index }))
+      .filter(({ element }) => element.soort === 'aanwijzing') ?? [];
+    const lijst = aanwijzingen.length > 0 ? document.createElement('div') : null;
+    if (lijst) {
+      lijst.className = 'aanduidingen__lijst';
+      const kop = document.createElement('div');
+      kop.className = 'aanduidingen__kop';
+      kop.textContent = 'In deze maat';
+      lijst.append(kop);
+
+      for (const { element, index } of aanwijzingen) {
+        const waarde = element.type === 'tempo' ? `♩ = ${element.waarde}` : element.waarde;
+        const regel = document.createElement('div');
+        regel.className = 'aanduidingen__regel';
+        const inhoud = document.createElement('span');
+        inhoud.textContent = waarde;
+        const knop = document.createElement('button');
+        knop.type = 'button';
+        knop.className = 'knop aanduidingen__knop';
+        knop.setAttribute('aria-label', `Verwijder ${waarde}`);
+        knop.textContent = 'Verwijderen';
+        knop.addEventListener('click', () => {
+          app.zet({
+            partituur: verwijderAanwijzing(app.stand.partituur, `n-${partijId}-${maatIndex}-${index}`),
+          });
+        });
+        regel.append(inhoud, knop);
+        lijst.append(regel);
+      }
+    }
+
+    vlak.replaceChildren(tekst, ...groepen, ...(lijst ? [lijst] : []));
   }
 
   app.op('kies-noot', ({ id }) => {
