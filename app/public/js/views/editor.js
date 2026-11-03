@@ -6,6 +6,7 @@ import {
   zetDuur,
   maakRust,
   keurGoed,
+  keurMaatGoed,
 } from '/src/model/corrigeren.mjs';
 import {
   zetFermate,
@@ -47,6 +48,7 @@ const PICTOGRAMMEN = {
 export function start(app) {
   const vlak = document.getElementById('editor');
   let gekozen = null;
+  let gekozenMaat = null;
   let statusBalk = null;
   let vorigePartituur = app.stand.partituur;
   let bezigMetGeschiedenis = false;
@@ -137,6 +139,21 @@ export function start(app) {
       maakKnop('Wordt rust', PICTOGRAMMEN.rust, () => pas(maakRust(app.stand.partituur, gekozen)), !isNoot),
       maakKnop('Goedkeuren', PICTOGRAMMEN.goedkeuren, () => pas(keurGoed(app.stand.partituur, gekozen)), !heeftKeuze),
     ]);
+    if (gekozenMaat !== null) {
+      const knop = document.createElement('button');
+      knop.type = 'button';
+      knop.className = 'knop editor__knop';
+      knop.textContent = 'Maat klopt';
+      knop.setAttribute('aria-label', 'Keur alle noten in de gekozen maat goed');
+      knop.addEventListener('click', () => {
+        let nieuw = app.stand.partituur;
+        for (const partij of app.stand.partituur.partijen) {
+          nieuw = keurMaatGoed(nieuw, partij.id, gekozenMaat);
+        }
+        pas(nieuw);
+      });
+      groep([knop]);
+    }
     groep([
       maakKnop(
         'Fermate',
@@ -270,6 +287,11 @@ export function start(app) {
   });
   app.op('kies-noot', ({ id }) => {
     gekozen = id;
+    if (id) gekozenMaat = null;
+    teken();
+  });
+  app.op('kies-maat', ({ maat }) => {
+    gekozenMaat = maat;
     teken();
   });
   document.addEventListener('keydown', (gebeurtenis) => {
