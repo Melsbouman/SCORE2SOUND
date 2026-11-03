@@ -9,10 +9,14 @@ Aanpassen met de knoppen
 - **Voortekens**: Kruis, Mol, Herstellingsteken, Dubbelkruis, Dubbelmol
 - **Duur**: Heel, Half, Kwart, Achtste, Zestiende
 - **Punt**: Maakt een noot (of rust) gepunteerd
+- **Triool**: Verdeelt de gekozen noot of rust in drie gelijke delen; nogmaals kiezen maakt de triool weer los
 - **Rust**: Maakt een noot tot rust
 - **Goedkeuren**: Maakt een onzekere noot zeker
 - **Verwijderen**: Maakt de gekozen noot of noten tot rusten
 - **Maatduur herstellen**: Vult de gekozen maat in alle partijen aan met rusten of kort de maat in tot de maatsoort klopt
+- **Maat invoegen**: Voegt na de gekozen maat een lege maat toe in alle partijen
+- **Maat verwijderen**: Verwijdert de gekozen maat uit alle partijen
+- **Maatsoort**: Wijzigt de maatsoort vanaf de gekozen maat; kies 2/4, 3/4, 4/4, 6/8 of voer een eigen teller en noemer in
 - **Ongedaan maken**: Herstelt de vorige bewerking
 - **Opnieuw**: Herstelt een ongedaan gemaakte bewerking
 
@@ -26,6 +30,8 @@ Sneltoetsen
 - **1-5**: Duur (heel/half/kwart/achtste/zestiende)
 - **. **: Punt (maakt noot gepunteerd)
 - **R**: Wordt rust (voor een noot)
+- **T**: Triool maken of losmaken
+- **N**: Tenuto
 - **Delete**: Verwijdert de gekozen noot of noten (maakt er rusten van)
 - **Enter**: Goedkeuren (of in corrigeren: klopt)
 
