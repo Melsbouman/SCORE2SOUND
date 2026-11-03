@@ -8,7 +8,13 @@ const GELDIG_ID = /^[a-f0-9]{12}$/;
 
 export async function ruimTussenbestandenOp(uitmap) {
   for (const naam of await readdir(uitmap)) {
-    if (!/^blad-\d+\.png$/.test(naam)) await rm(join(uitmap, naam), { recursive: true, force: true });
+    if (naam === 'resultaat.json') {
+      const resultaat = JSON.parse(await readFile(join(uitmap, naam), 'utf8'));
+      if (resultaat.gebruiker) continue;
+    } else if (/^blad-\d+\.png$/.test(naam)) {
+      continue;
+    }
+    await rm(join(uitmap, naam), { recursive: true, force: true });
   }
 }
 

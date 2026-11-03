@@ -243,7 +243,14 @@ export function maakHerken({ map, draaier }) {
       ...(uit.nietGekoppeld > 0 ? [herkenMelding(`${uit.nietGekoppeld} noten konden niet aan het origineel worden gekoppeld.`)] : []),
     ...maatMeldingen,
     ];
-    Object.assign(taak, { stand: 'klaar', tekst: 'Klaar', procent: 100, partituur: uit.partituur, meldingen });
+  await writeFile(join(taak.uitmap, 'resultaat.json'), JSON.stringify({
+    id: taak.id,
+    gebruiker: taak.gebruiker,
+    naam: taak.naam,
+    partituur: uit.partituur,
+    meldingen,
+  }));
+  Object.assign(taak, { stand: 'klaar', tekst: 'Klaar', procent: 100, partituur: uit.partituur, meldingen });
   }
 
   async function werk(taak) {
@@ -314,18 +321,42 @@ export function maakHerken({ map, draaier }) {
     return { status: 200, body: { id, stand: huidig, tekst, procent, ...(fout ? { fout } : {}), ...(partituur ? { partituur, meldingen } : {}) } };
   }
 
+  async function leesResultaat(id) {
+    let resultaat;
+    try {
+      resultaat = JSON.parse(await readFile(join(map, id, 'resultaat.json'), 'utf8'));
+    } catch (fout) {
+      if (fout.code === 'ENOENT') return null;
+      throw fout;
+    }
+    if (
+      !resultaat
+      || typeof resultaat !== 'object'
+      || resultaat.id !== id
+      || (resultaat.gebruiker !== null && typeof resultaat.gebruiker !== 'string')
+      || typeof resultaat.naam !== 'string'
+      || !resultaat.partituur
+      || !Array.isArray(resultaat.meldingen)
+    ) return null;
+    return resultaat;
+  }
+
   return async function afhandelaar(verzoek) {
     const { methode, rest = '' } = verzoek;
     if (methode === 'POST' && !rest) return start(verzoek);
 
     const pagina = rest.match(/^([a-f0-9]{12})\/blad\/(\d+)$/);
     if (pagina && methode === 'GET') {
-      const taak = taken.get(pagina[1]);
+      const taak = taken.get(pagina[1]) ?? await leesResultaat(pagina[1]);
       if (!taak || taak.gebruiker !== (verzoek.gebruiker || null)) return { status: 404, body: { fout: 'Onbekende herkenning.' } };
       return blad(pagina[1], pagina[2]);
     }
 
-    const taak = GELDIG_ID.test(rest) ? taken.get(rest) : null;
+    let taak = GELDIG_ID.test(rest) ? taken.get(rest) : null;
+    if (!taak && methode === 'GET' && GELDIG_ID.test(rest)) {
+      const resultaat = await leesResultaat(rest);
+      if (resultaat) taak = { ...resultaat, stand: 'klaar', tekst: 'Klaar', procent: 100 };
+    }
     if (!taak || taak.gebruiker !== (verzoek.gebruiker || null)) return { status: 404, body: { fout: 'Onbekende herkenning.' } };
     if (methode === 'GET') return stand(taak);
     if (methode === 'DELETE') {
