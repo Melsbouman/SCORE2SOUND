@@ -22,7 +22,7 @@ export function vulOntbrekendeMaten(partituur) {
       const leeg = [];
       for (let maatIndex = vorige.index; maatIndex < huidige.index; maatIndex += 1) {
         const maat = eerstePartij.maten[maatIndex];
-        if (maat && !maat.elementen.some((element) => ['noot', 'rust'].includes(element.soort))) {
+        if (maat && !maat.verborgen && !maat.elementen.some((element) => ['noot', 'rust'].includes(element.soort))) {
           leeg.push(maatIndex);
         }
       }
@@ -60,23 +60,28 @@ export function vulOntbrekendeMaten(partituur) {
       const nummerVolgende = Number(volgende.nummer);
       const eerderIngevoegd = extraVoorIndex(gaten, gat.index);
       const nieuweMaten = Array.from({ length: gat.aantal }, (_, index) => {
-        const nieuweMaat = structuredClone(volgende);
-        nieuweMaat.nummer = Number.isInteger(nummerVolgende)
-          ? String(nummerVolgende + eerderIngevoegd + index)
-          : volgende.nummer;
-        nieuweMaat.opmaat = false;
-        nieuweMaat.herhaling = { ...nieuweMaat.herhaling, begin: false, eind: false };
-        nieuweMaat.sleutels = [];
-        nieuweMaat.tempo = null;
-        nieuweMaat.elementen = [{
-          soort: 'rust',
-          start: 0,
-          duur: Math.round(nieuweMaat.maatsoort.teller * 1920 / nieuweMaat.maatsoort.noemer),
-          stem: 1,
-          notenbalk: 1,
-          heleMaat: true,
-          zekerheid: 0.3,
-        }];
+        const maatsoort = structuredClone(volgende.maatsoort);
+        const nieuweMaat = {
+          nummer: Number.isInteger(nummerVolgende)
+            ? String(nummerVolgende + eerderIngevoegd + index)
+            : volgende.nummer,
+          index: gat.index + index,
+          opmaat: false,
+          maatsoort,
+          toonsoort: structuredClone(volgende.toonsoort),
+          sleutels: [],
+          tempo: null,
+          herhaling: { begin: false, eind: false, keer: 2 },
+          elementen: [{
+            soort: 'rust',
+            start: 0,
+            duur: Math.round(maatsoort.teller * 1920 / maatsoort.noemer),
+            stem: 1,
+            notenbalk: 1,
+            heleMaat: true,
+            zekerheid: 0.3,
+          }],
+        };
         ingevoegdeMaten.set(nieuweMaat, true);
         return nieuweMaat;
       });
