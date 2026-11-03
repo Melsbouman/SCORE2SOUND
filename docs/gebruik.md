@@ -82,3 +82,6 @@ Kies een maat of, met Shift-klik, een reeks maten en open het tabblad Aanduiding
 
 ## Partituur of losse partij
 Heeft een stuk meer dan een partij, dan staan de instrumentnamen voor elke regel (de volle naam bij de eerste regel, daarna de afkorting). Bij een losse partij staat de partijnaam met de stemming linksboven en niet voor de balk.
+
+## De kop van de pdf
+Bovenaan de pdf staan de titel, links de partijnaam met stemming (bij een losse partij), rechts de componist en daaronder arr. met de arrangeur. Een teken voor b (mol) staat in de pdf als de letter b.
