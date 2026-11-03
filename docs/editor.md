@@ -86,3 +86,6 @@ Houd Ctrl ingedrukt en scroll boven het muziekstuk om alleen het stuk in of uit 
 
 ## Zoomen met het toetsenbord
 Ctrl en plus zoomt het muziekstuk in, Ctrl en min zoomt uit en Ctrl en 0 zet het terug op 80 procent. Alleen het stuk verandert; de pagina zelf blijft hetzelfde.
+
+## Haken en de bibliotheek met aanduidingen
+In het tabblad Aanduidingen staan tempo-, expressie-, spelwijze- en sterktetermen, en onder Haak de knoppen Crescendo en Decrescendo die een haak over de gekozen maten zetten. De lijst In deze maat laat zien wat er al staat en heeft een knop Verwijderen.
