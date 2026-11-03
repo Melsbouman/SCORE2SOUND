@@ -186,7 +186,9 @@ function cookieToken(verzoek) {
 async function bestand(verzoek, antwoord, url) {
   const [voorvoegsel, map] = MAPPEN.find(([p]) => url.pathname.startsWith(p));
   let relatief = decodeURIComponent(url.pathname.slice(voorvoegsel.length));
-  if (relatief === '' || relatief.endsWith('/')) relatief += 'index.html';
+  if (url.pathname === '/app' || url.pathname === '/app/') relatief = 'index.html';
+  else if (url.pathname === '/') relatief = (verzoek.headers.cookie || '').includes('score2sound=') ? 'index.html' : 'welkom.html';
+  else if (relatief === '' || relatief.endsWith('/')) relatief += 'index.html';
   const volledig = normalize(join(map, relatief));
   // Nooit buiten de map: ../ in de URL levert een 404 op, geen bestand van elders.
   if (volledig !== map && !volledig.startsWith(map + sep)) return stuur(antwoord, 404, { fout: 'Niet gevonden.' }, undefined, {}, verzoek.headers['accept-encoding']);

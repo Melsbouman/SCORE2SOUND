@@ -22,7 +22,7 @@ test('de server levert de app, de bibliotheken en de lege API-paden', async (t) 
   t.after(() => server.close());
   const poort = server.address().port;
 
-  const start = await vraag(poort, 'GET', '/');
+  const start = await vraag(poort, 'GET', '/app');
   assert.equal(start.status, 200);
   assert.match(start.koppen['content-type'], /text\/html/);
   assert.match(start.koppen['content-security-policy'], /default-src 'self'/);
