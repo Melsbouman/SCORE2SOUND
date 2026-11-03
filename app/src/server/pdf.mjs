@@ -1,7 +1,7 @@
 import { maakPdf } from '../export/pdf.mjs';
 
 export default async function pdf(verzoek) {
-  if (verzoek.method !== 'POST') {
+  if (verzoek.methode !== 'POST') {
     return { status: 405, body: { fout: 'Gebruik POST om een pdf te maken.' } };
   }
 
