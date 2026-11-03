@@ -89,3 +89,6 @@ Ctrl en plus zoomt het muziekstuk in, Ctrl en min zoomt uit en Ctrl en 0 zet het
 
 ## Haken en de bibliotheek met aanduidingen
 In het tabblad Aanduidingen staan tempo-, expressie-, spelwijze- en sterktetermen, en onder Haak de knoppen Crescendo en Decrescendo die een haak over de gekozen maten zetten. De lijst In deze maat laat zien wat er al staat en heeft een knop Verwijderen.
+
+## Slepen en onzekere noten uit de herkenning
+Pak een noot vast en sleep hem omhoog of omlaag: hij verspringt per notenbalklijn of tussenruimte. Noten die de herkenning verdacht vindt (heel ver van hun buren) en maten die ontbreken tussen twee repetitiecijfers staan rood, zodat je ze kunt nakijken.
