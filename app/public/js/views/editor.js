@@ -6,6 +6,7 @@ import {
   zetAlter,
   zetDuur,
   maakRust,
+  nootBijLetter,
   keurGoed,
   keurMaatGoed,
   kopieerMaten,
@@ -615,17 +616,21 @@ export function start(app) {
         const nieuweDuur = GESTIPTE_DUUR.get(gekozenElement.duur) ?? Math.round(gekozenElement.duur * 1.5);
         return zetDuur(huidigePartituur, id, nieuweDuur);
       });
+    } else if (['a', 'b', 'c', 'd', 'e', 'f', 'g'].includes(toets)
+      && !gebeurtenis.ctrlKey && !gebeurtenis.metaKey && !gebeurtenis.altKey
+      && !gebeurtenis.shiftKey) {
+      actie = () => pasAlle((partituur, id) => nootBijLetter(partituur, id, toets.toUpperCase()));
     } else if (toets.toLowerCase() === 'r') {
       actie = pasMaakRustAlle;
     } else if (toets.toLowerCase() === 's') {
       actie = () => pasAlle((partituur, id) => zetArticulatie(partituur, id, 'staccato'));
-    } else if (toets.toLowerCase() === 'a') {
+    } else if (toets.toLowerCase() === 'a' && gebeurtenis.shiftKey) {
       actie = () => pasAlle((partituur, id) => zetArticulatie(partituur, id, 'accent'));
     } else if (toets.toLowerCase() === 't') {
       actie = pasTriool;
     } else if (toets.toLowerCase() === 'n') {
       actie = () => pasAlle((partituur, id) => zetArticulatie(partituur, id, 'tenuto'));
-    } else if (toets.toLowerCase() === 'f') {
+    } else if (toets.toLowerCase() === 'f' && gebeurtenis.shiftKey) {
       actie = () => pasAlle((partituur, id) => zetFermate(partituur, id, !zoekElement(partituur, id).fermate));
     } else if (toets === '~') {
       actie = () => {
