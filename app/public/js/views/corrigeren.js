@@ -210,8 +210,9 @@ export function start(app) {
   }
 
   document.addEventListener('keydown', (gebeurtenis) => {
-    if (gebeurtenis.key === 'Enter' && gebeurtenis.target.matches('button')) return;
-    if (gebeurtenis.target.matches('input, select, textarea')) return;
+    const doel = gebeurtenis.target instanceof Element ? gebeurtenis.target : null;
+    if (gebeurtenis.key === 'Enter' && doel?.matches('button')) return;
+    if (doel?.matches('input, select, textarea')) return;
     const partituur = app.stand.partituur;
     if (!partituur) return;
 
