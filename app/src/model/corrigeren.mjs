@@ -181,3 +181,13 @@ export function suggestieToonhoogte(partituur, id) {
   }
   return null;
 }
+
+export function zetToonhoogte(partituur, id, toonhoogte) {
+  const { kopie } = kopieMetPlaats(partituur, id);
+  const element = zoekElement(kopie, id);
+  if (element?.soort === 'noot') {
+    element.toonhoogte = { ...toonhoogte };
+    element.zekerheid = 1;
+  }
+  return kopie;
+}
