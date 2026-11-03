@@ -451,3 +451,4 @@ main:has(#weergave g.measure) #upload label:not(.knop) {
   main:has(#weergave g.measure) #upload label:not(.knop) { display: none; }
   .lint__paneel { max-height: 160px; }
 }
+body:has(#weergave g.measure) .kop p { display: none; }
