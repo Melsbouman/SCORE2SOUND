@@ -271,3 +271,25 @@ export function nootBijLetter(partituur, id, letter) {
   return kopie;
 }
 
+
+export function kopieerMaten(partituur, vanBegin, vanEinde, naarBegin) {
+  const aantalMaten = Math.max(0, ...partituur.partijen.map((partij) => partij.maten.length));
+  if (vanBegin < 0 || vanBegin > vanEinde || vanEinde >= aantalMaten || naarBegin < 0 || naarBegin >= aantalMaten) {
+    return partituur;
+  }
+
+  const bronnen = partituur.partijen.map((partij) => partij.maten
+    .slice(vanBegin, vanEinde + 1)
+    .map((maat) => maat.elementen));
+  const resultaat = structuredClone(partituur);
+  for (let partijIndex = 0; partijIndex < resultaat.partijen.length; partijIndex += 1) {
+    const partij = resultaat.partijen[partijIndex];
+    for (let i = 0; i <= vanEinde - vanBegin; i += 1) {
+      if (!partij.maten[naarBegin + i]) break;
+      if (bronnen[partijIndex][i]) {
+        partij.maten[naarBegin + i].elementen = structuredClone(bronnen[partijIndex][i]);
+      }
+    }
+  }
+  return resultaat;
+}
