@@ -82,8 +82,8 @@ const vlak = document.getElementById('weergave');
   let tekenTimer = null;
   let eersteTekeningGestart = false;
   let gekozen = null;
-let gekozenMaat = null;
-let gekozenTot = null;
+  let gekozenMaat = null;
+  let gekozenTot = null;
   let zoom = 1;
   try {
     const opgeslagenZoom = Number(localStorage.getItem('score2sound-zoom'));
@@ -371,22 +371,20 @@ let gekozenTot = null;
   // De maten in volgorde; Verovio tekent elke maat als <g class="measure">, over alle partijen heen.
   const maten = () => [...vlak.querySelectorAll('g.measure')];
 
-function markeerMaat(index, tot) {
-  if (tot !== undefined && tot !== null) {
-    const markeringen = [];
-    let ouder = null;
-    for (let maatIndex = index; maatIndex <= tot; maatIndex += 1) {
-      markeerMaat(maatIndex);
-      const markering = document.querySelector('rect.maat-markering');
-      if (markering) {
-        ouder = markering.parentNode;
-        markeringen.push(markering.cloneNode(true));
+  function markeerMaat(index, tot) {
+    if (tot !== undefined && tot !== null) {
+      const markeringen = [];
+      for (let maatIndex = index; maatIndex <= tot; maatIndex += 1) {
+        markeerMaat(maatIndex);
+        const markering = vlak.querySelector('rect.maat-markering');
+        if (markering) {
+          markeringen.push({ ouder: markering.parentNode, markering: markering.cloneNode(true) });
+        }
       }
+      vlak.querySelectorAll('rect.maat-markering').forEach((markering) => markering.remove());
+      for (const item of markeringen) item.ouder.append(item.markering);
+      return;
     }
-    document.querySelectorAll('rect.maat-markering').forEach((markering) => markering.remove());
-    ouder?.append(...markeringen);
-    return;
-  }
     for (const rect of vlak.querySelectorAll('rect.maat-markering')) rect.remove();
     if (index === null || index === undefined) return;
     const g = maten()[index];
@@ -448,8 +446,8 @@ function markeerMaat(index, tot) {
   });
   app.op('kies-maat', (keuze) => {
     gekozenMaat = keuze?.maat ?? null;
-  gekozenTot = keuze?.tot ?? null;
-  markeerMaat(gekozenMaat, gekozenTot);
+    gekozenTot = keuze?.tot ?? null;
+    markeerMaat(gekozenMaat, gekozenTot);
   });
 
   // Opnieuw tekenen als de breedte echt verandert, zodat de regels passen.
