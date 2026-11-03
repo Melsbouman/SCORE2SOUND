@@ -57,10 +57,14 @@ export function start(app) {
   });
 const vlak = document.getElementById('weergave');
 
-  function wijzigZoom(stap) {
-    zoom = Math.min(2, Math.max(0.3, Math.round((zoom + stap) * 10) / 10));
+  function zetZoom(waarde) {
+    zoom = waarde;
     localStorage.setItem('score2sound-zoom', String(zoom));
     teken(huidige, { meteen: true, opnieuw: true });
+  }
+
+  function wijzigZoom(stap) {
+    zetZoom(Math.min(2, Math.max(0.3, Math.round((zoom + stap) * 10) / 10)));
   }
 
   function voegZoombalkToe() {
@@ -96,6 +100,34 @@ const vlak = document.getElementById('weergave');
     gebeurtenis.preventDefault();
     if (gebeurtenis.deltaY !== 0) wijzigZoom(gebeurtenis.deltaY < 0 ? 0.1 : -0.1);
   }, { passive: false });
+
+  let beginAfstand;
+  let beginZoom;
+
+  vlak.addEventListener('touchstart', (event) => {
+    if (event.touches.length !== 2) return;
+    beginAfstand = Math.hypot(
+      event.touches[1].clientX - event.touches[0].clientX,
+      event.touches[1].clientY - event.touches[0].clientY,
+    );
+    beginZoom = zoom;
+  });
+
+  vlak.addEventListener('touchmove', (event) => {
+    if (event.touches.length !== 2 || beginAfstand === undefined) return;
+    event.preventDefault();
+    const afstand = Math.hypot(
+      event.touches[1].clientX - event.touches[0].clientX,
+      event.touches[1].clientY - event.touches[0].clientY,
+    );
+    const nieuweZoom = Math.min(2, Math.max(0.3,
+      Math.round(beginZoom * afstand / beginAfstand * 10) / 10));
+    if (nieuweZoom !== zoom) zetZoom(nieuweZoom);
+  }, { passive: false });
+
+  vlak.addEventListener('touchend', (event) => {
+    if (event.touches.length < 2) beginAfstand = undefined;
+  });
 
   new MutationObserver(voegZoombalkToe).observe(vlak, { childList: true });
   voegZoombalkToe();
