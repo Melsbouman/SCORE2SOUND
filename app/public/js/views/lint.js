@@ -7,6 +7,13 @@ const tabbladen = [
 ];
 
 export function start(app) {
+  let geselecteerd = 1;
+  try {
+    const opgeslagen = localStorage.getItem('score2sound-lint-tab');
+    const index = tabbladen.findIndex((tabblad) => tabblad.naam === opgeslagen);
+    if (index !== -1) geselecteerd = index;
+  } catch {}
+
   const weergave = document.getElementById('weergave');
   const lint = document.createElement('section');
   lint.id = 'lint';
@@ -29,9 +36,9 @@ export function start(app) {
     knop.className = 'lint__tab';
     knop.id = `${id}-tab`;
     knop.setAttribute('role', 'tab');
-    knop.setAttribute('aria-selected', String(index === 1));
+    knop.setAttribute('aria-selected', String(index === geselecteerd));
     knop.setAttribute('aria-controls', `${id}-paneel`);
-    knop.tabIndex = index === 1 ? 0 : -1;
+    knop.tabIndex = index === geselecteerd ? 0 : -1;
     knop.textContent = tabblad.naam;
 
     const paneel = document.createElement('div');
@@ -39,7 +46,7 @@ export function start(app) {
     paneel.id = `${id}-paneel`;
     paneel.setAttribute('role', 'tabpanel');
     paneel.setAttribute('aria-labelledby', knop.id);
-    paneel.hidden = index !== 1;
+    paneel.hidden = index !== geselecteerd;
 
     for (const vlakId of tabblad.vlakken) {
       const element = document.getElementById(vlakId);
@@ -65,6 +72,9 @@ export function start(app) {
       knop.tabIndex = gekozen ? 0 : -1;
       panelen[knopIndex].hidden = !gekozen;
     });
+    try {
+      localStorage.setItem('score2sound-lint-tab', tabbladen[index].naam);
+    } catch {}
     if (focus) knoppen[index].focus();
   }
 
