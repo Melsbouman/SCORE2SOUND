@@ -100,3 +100,6 @@ Onderaan elke pagina van de pdf staat het paginanummer, bijvoorbeeld pagina 1 va
 
 ## De startpagina
 Wie de website opent, ziet eerst een startpagina met uitleg over hoe SCORE2SOUND werkt. Met de knop Inloggen ga je naar de editor. Ben je al ingelogd, dan opent de website meteen de editor. De editor staat ook altijd op /app.
+
+## Maten leegmaken
+Kies een maat of een reeks maten (Shift-klik) en druk op Delete, of kies Maten leegmaken in het tabblad Noten. De noten verdwijnen en er blijft een hele maat rust over, voor alle partijen.
