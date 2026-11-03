@@ -44,3 +44,9 @@ Waarom een noot rood is
 - Tik een noot aan om hem te kiezen (ook een klik vlak ernaast telt). Tik op een lege plek in een maat om de maat te kiezen.
 - Onder Bestand pas je de titel, de componist en de arrangeur aan.
 - PDF downloaden opent het afdrukvenster; kies Opslaan als PDF. Elke pagina krijgt het watermerk SCORE2SOUND.
+
+## Nieuwe toetsen en afspelen vanaf een maat
+- Pijl links en rechts kiest de vorige of volgende noot in dezelfde partij.
+- Shift met pijl omhoog of omlaag verschuift de gekozen noot een octaaf.
+- Tik een maat aan om hem te kiezen: het afspelen begint dan bij die maat.
+- Het lint onthoudt het tabblad dat je laatst gebruikte.
