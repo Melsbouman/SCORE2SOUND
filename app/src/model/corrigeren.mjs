@@ -130,3 +130,17 @@ export function keurGoed(partituur, id) {
   if (plaats) plaats.element.zekerheid = 1;
   return kopie;
 }
+export function keurMaatGoed(partituur, partijId, maatIndex) {
+  const kopie = structuredClone(partituur);
+  const partij = kopie.partijen.find((item) => item.id === partijId);
+  const maat = partij?.maten.find((item) => item.index === maatIndex);
+
+  if (maat) {
+    for (const element of maat.elementen) {
+      if (element.soort === 'noot' || element.soort === 'rust') element.zekerheid = 1;
+    }
+  }
+
+  return kopie;
+}
+
