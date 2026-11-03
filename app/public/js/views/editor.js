@@ -300,6 +300,14 @@ export function start(app) {
     const partituur = app.stand.partituur;
     const element = gekozen && partituur ? zoekElement(partituur, gekozen) : null;
     const toets = gebeurtenis.key;
+    if (toets === 'Escape') {
+      if (gebeurtenis.ctrlKey || gebeurtenis.metaKey) return;
+      gebeurtenis.preventDefault();
+      gebeurtenis.stopImmediatePropagation();
+      app.meld('kies-noot', { id: null });
+      app.meld('kies-maat', { maat: null });
+      return;
+    }
     if (toets === 'ArrowLeft' || toets === 'ArrowRight') {
       if (gebeurtenis.ctrlKey || gebeurtenis.metaKey || (element?.soort !== 'noot' && element?.soort !== 'rust')) return;
       const gelezen = leesId(gekozen);
