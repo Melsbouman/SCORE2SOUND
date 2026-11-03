@@ -1,6 +1,8 @@
 // Notatie tekenen met Verovio in #weergave.
 // Tekent opnieuw bij een nieuwe partituur (via naarMusicXML uit /src/musicxml/schrijven.mjs) of bij app.meld('musicxml', tekst).
 // Luistert naar 'naar-maat' ({ maat }: markeert en toont die maat) en 'speel-maat' ({ maat } of null: de maat die nu klinkt).
+import { zetTitelgegevens } from '/src/model/titelgegevens.mjs';
+
 const schaalVoor = (breedte) => (breedte < 500 ? 70 : breedte <= 1200 ? 60 : 75); // op een telefoon zijn de noten anders te klein.
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -125,12 +127,14 @@ export function start(app) {
     const ondertitel = typeof gegevens.ondertitel === 'string' ? gegevens.ondertitel.trim() : '';
     const partijnaam = typeof gegevens.partijen?.[0]?.naam === 'string' ? gegevens.partijen[0].naam.trim() : '';
     const componist = typeof gegevens.componist === 'string' ? gegevens.componist.trim() : '';
-    if (titel || ondertitel || partijnaam || componist) {
+    const arrangeur = typeof gegevens.arrangeur === 'string' ? gegevens.arrangeur.trim() : '';
+    if (titel || ondertitel || partijnaam || componist || arrangeur) {
       const titelblok = document.createElement('header');
       titelblok.className = 'bladmuziek__titelblok';
       if (titel) {
         const kop = document.createElement('h1');
         kop.textContent = titel;
+        maakAanpasbaar(kop, 'titel');
         titelblok.append(kop);
       }
       if (ondertitel) {
@@ -139,7 +143,7 @@ export function start(app) {
         kop.textContent = ondertitel;
         titelblok.append(kop);
       }
-      if (partijnaam || componist) {
+      if (partijnaam || componist || arrangeur) {
         const details = document.createElement('div');
         details.className = 'bladmuziek__details';
         if (partijnaam) {
@@ -150,7 +154,14 @@ export function start(app) {
         if (componist) {
           const maker = document.createElement('span');
           maker.textContent = componist;
+          maakAanpasbaar(maker, 'componist');
           details.append(maker);
+        }
+        if (arrangeur) {
+          const bewerker = document.createElement('span');
+          bewerker.textContent = arrangeur;
+          maakAanpasbaar(bewerker, 'arrangeur');
+          details.append(bewerker);
         }
         titelblok.append(details);
       }
@@ -190,6 +201,68 @@ export function start(app) {
     markeerGekozen(false);
     markeerVerschil();
     markeerMaat(gekozenMaat);
+  }
+
+  function maakAanpasbaar(element, veldnaam) {
+    element.tabIndex = 0;
+    element.setAttribute('role', 'button');
+    element.setAttribute('aria-label', 'Titel aanpassen');
+    element.classList.add('bladmuziek__aanpasbaar');
+    element.addEventListener('click', (gebeurtenis) => {
+      gebeurtenis.stopPropagation();
+      pasTitelgegevenAan(element, veldnaam);
+    });
+    element.addEventListener('keydown', (gebeurtenis) => {
+      if (gebeurtenis.key !== 'Enter') return;
+      gebeurtenis.preventDefault();
+      gebeurtenis.stopPropagation();
+      pasTitelgegevenAan(element, veldnaam);
+    });
+  }
+
+  function pasTitelgegevenAan(element, veldnaam) {
+    const oud = element.textContent;
+    const invoer = document.createElement('input');
+    invoer.type = 'text';
+    invoer.className = 'bladmuziek__titel-invoer';
+    invoer.setAttribute('aria-label', 'Titel aanpassen');
+    invoer.value = oud;
+    invoer.size = Math.max(1, oud.length);
+    let afgerond = false;
+
+    function herstel() {
+      if (afgerond) return;
+      afgerond = true;
+      invoer.replaceWith(element);
+      element.focus();
+    }
+
+    function bewaar() {
+      if (afgerond) return;
+      afgerond = true;
+      const waarde = invoer.value;
+      element.textContent = waarde;
+      invoer.replaceWith(element);
+      if (waarde === oud) return;
+      const nieuw = zetTitelgegevens(app.stand.partituur, { [veldnaam]: waarde });
+      app.zet({ partituur: nieuw });
+    }
+
+    invoer.addEventListener('click', (gebeurtenis) => gebeurtenis.stopPropagation());
+    invoer.addEventListener('keydown', (gebeurtenis) => {
+      gebeurtenis.stopPropagation();
+      if (gebeurtenis.key === 'Enter') {
+        gebeurtenis.preventDefault();
+        bewaar();
+      } else if (gebeurtenis.key === 'Escape') {
+        gebeurtenis.preventDefault();
+        herstel();
+      }
+    });
+    invoer.addEventListener('blur', bewaar);
+    element.replaceWith(invoer);
+    invoer.focus();
+    invoer.select();
   }
 
   function markeerGekozen(tonen) {
