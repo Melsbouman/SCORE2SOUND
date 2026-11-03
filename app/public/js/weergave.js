@@ -33,6 +33,22 @@ export function start(app) {
   let gekozen = null;
   let gekozenMaat = null;
   let zoom = 1;
+  try {
+    const opgeslagenZoom = Number(localStorage.getItem('score2sound-zoom'));
+    if (opgeslagenZoom >= 0.6 && opgeslagenZoom <= 2) zoom = opgeslagenZoom;
+  } catch {}
+  document.addEventListener('click', (gebeurtenis) => {
+    if (gebeurtenis.target.textContent.trim() !== 'Kleiner') return;
+    try {
+      localStorage.setItem('score2sound-zoom', String(zoom));
+    } catch {}
+  });
+  document.addEventListener('click', (gebeurtenis) => {
+    if (gebeurtenis.target.textContent.trim() !== 'Groter') return;
+    try {
+      localStorage.setItem('score2sound-zoom', String(zoom));
+    } catch {}
+  });
   let verschil = []; // maten die anders zijn dan in de gekozen versie
 
   function status(tekst) {
