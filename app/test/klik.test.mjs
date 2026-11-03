@@ -74,8 +74,8 @@ test('een voorinteller geeft vier klikken voor het begin en schuift de muziek ee
   assert.deepEqual(klikTikken.slice(0, 4), [0, 480, 960, 1440]);
 });
 
-test('zonder klik blijven de MIDI-bytes gelijk aan de bestaande aanroep', () => {
-  assert.deepEqual(schrijfMidi(partituur, { klik: false, voorinteller: 2 }), schrijfMidi(partituur));
+test('zonder klik en zonder voorinteller blijven de MIDI-bytes gelijk', () => {
+  assert.deepEqual(schrijfMidi(partituur, { klik: false, voorinteller: 0 }), schrijfMidi(partituur));
 });
 
 test('het klikspoor gebruikt percussiekanaal 9', () => {

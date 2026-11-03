@@ -163,7 +163,6 @@ let doelMaat = null;
     if (typeof keuze?.metronoom === 'boolean') metronoom.checked = keuze.metronoom;
     if (['0', '1', '2'].includes(keuze?.voorinteller)) voorinteller.value = keuze.voorinteller;
   } catch {}
-  voorinteller.disabled = !metronoom.checked;
   const van = Object.assign(document.createElement('input'), { type: 'text', value: '1', inputMode: 'numeric', size: 4 });
   const tot = Object.assign(document.createElement('input'), { type: 'text', value: '1', inputMode: 'numeric', size: 4 });
   const herhaal = Object.assign(document.createElement('input'), { type: 'checkbox' });
@@ -235,7 +234,7 @@ let doelMaat = null;
     const passage = document.createElement('fieldset');
     passage.className = 'speler__passage';
     passage.append(Object.assign(document.createElement('legend'), { textContent: 'Passage herhalen' }), veld('Van maat ', van), veld('tot en met maat ', tot), veld(herhaal, document.createTextNode(' Herhalen')));
-    rechts.append(veld('Tempo ', tempo, tempoPercentage), tempoTekst, veld(metronoom, document.createTextNode(' Metronoom')), veld('Voorinteller ', voorinteller));
+    rechts.append(veld('Tempo ', tempo, tempoPercentage), tempoTekst, veld(metronoom, document.createTextNode(' Metronoom')), veld('Maten vooraf ', voorinteller));
     if (passageVlak) passageVlak.replaceChildren(passage);
     else rechts.append(passage);
     vlak.replaceChildren(links, midden, rechts, status);
@@ -277,7 +276,7 @@ let doelMaat = null;
     return i;
   };
   const voorintellerSeconden = () => {
-    if (!metronoom.checked || Number(voorinteller.value) === 0) return 0;
+    if (Number(voorinteller.value) === 0) return 0;
     const eersteMaat = maten()[0];
     const maatsoort = eersteMaat?.maatsoort ?? { teller: 4, noemer: 4 };
     const tikken = maatsoort.teller * 1920 / maatsoort.noemer;
@@ -344,7 +343,7 @@ let doelMaat = null;
     const { schrijfMidi } = await import('/src/midi/schrijven.mjs');
     const midi = schrijfMidi(metDynamiek(luisterNaar ?? app.stand.partituur), {
       klik: metronoom.checked,
-      voorinteller: metronoom.checked ? Number(voorinteller.value) : 0,
+      voorinteller: Number(voorinteller.value),
     });
     geluid.seq.loadNewSongList([{ binary: midi.buffer.slice(midi.byteOffset, midi.byteOffset + midi.byteLength), fileName: 'partituur.mid' }]);
     geluid.seq.pause();
@@ -352,7 +351,6 @@ let doelMaat = null;
   }
 
   async function wijzigMetronoom() {
-    voorinteller.disabled = !metronoom.checked;
     try {
       localStorage.setItem('speler-metronoom', JSON.stringify({
         metronoom: metronoom.checked,
