@@ -9,11 +9,25 @@ export default async function pdf(verzoek) {
     return { status: 400, body: { fout: 'Er is geen MusicXML meegestuurd.' } };
   }
 
+  const inhoud = verzoek.body.toString('utf8');
+  let musicxml = inhoud;
+  let titelblok;
+  if (inhoud.trimStart().startsWith('{')) {
+    let aanvraag;
+    try {
+      aanvraag = JSON.parse(inhoud);
+    } catch {
+      return { status: 400, body: { fout: 'De aanvraag is geen geldige JSON.' } };
+    }
+    musicxml = aanvraag.musicxml;
+    titelblok = aanvraag.titelblok;
+  }
+
   try {
     return {
       status: 200,
       soort: 'application/pdf',
-      body: await maakPdf(verzoek.body.toString('utf8')),
+      body: await maakPdf(musicxml, { titelblok }),
       koppen: { 'Content-Disposition': 'attachment; filename="partituur.pdf"' },
     };
   } catch {

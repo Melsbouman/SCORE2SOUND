@@ -96,13 +96,26 @@ export function start(app) {
     printKnop.addEventListener('click', async () => {
       status.textContent = 'De pdf wordt gemaakt...'
       try {
-        const { naarMusicXML } = await import('/src/musicxml/schrijven.mjs')
+        const [{ naarMusicXML }, { partijTitel }] = await Promise.all([
+          import('/src/musicxml/schrijven.mjs'),
+          import('/src/model/stemming.mjs'),
+        ])
         printKnop.disabled = true
         printKnop.setAttribute('aria-busy', 'true')
         const antwoord = await fetch('/api/pdf', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/xml' },
-          body: naarMusicXML(app.stand.partituur),
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            musicxml: naarMusicXML(app.stand.partituur),
+            titelblok: {
+              titel: app.stand.partituur.titel,
+              componist: app.stand.partituur.componist,
+              arrangeur: app.stand.partituur.arrangeur,
+              partij: app.stand.partituur.partijen.length === 1
+                ? partijTitel(app.stand.partituur.partijen[0])
+                : '',
+            },
+          }),
         })
         if (!antwoord.ok) {
           afdrukken()
