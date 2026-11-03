@@ -304,3 +304,13 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
 .aanduidingen__knop:hover:not(:disabled) { background: #0d150b14; }
 .aanduidingen__knop:disabled { opacity: 0.4; }
 #corrigeren { display: none; }
+
+/* Tabblad Bestand: projecten, titelgegevens en export netjes naast en onder elkaar in plaats van een rij die buiten beeld loopt. */
+.lint__paneel:has(> #projecten) { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 16px 24px; align-items: start; max-height: none; overflow: visible; }
+.lint__paneel:has(> #projecten) > .knop:first-child { grid-column: 1 / -1; justify-self: start; }
+.lint__paneel:has(> #projecten) > section { min-width: 0; width: 100%; }
+#titel form, #titel .titel__velden { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px 12px; align-items: end; }
+#titel label { display: grid; gap: 4px; font-size: 0.8rem; }
+#titel input { width: 100%; min-width: 0; }
+#export { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+@media (max-width: 700px) { .lint__paneel:has(> #projecten) { grid-template-columns: minmax(0, 1fr); } }
