@@ -52,3 +52,6 @@ Is er nog geen account, dan kies je Registreren met je e-mailadres en een wachtw
 
 ## Een rode noot verbeteren
 Een rode noot is een noot waar de herkenning aan twijfelt. Tik hem aan en verschuif hem met de pijl omhoog of omlaag, zet er een kruis of mol voor, of keur hem goed met Enter. Met Maat klopt keur je alle noten van een maat in een keer goed.
+
+## Suggestie bij een rode noot
+Kies een rode noot en klik op Suggestie toepassen in het blok Onzekere noten. De noot krijgt dan de toonhoogte van de dichtstbijzijnde noot waar de herkenning zeker van was. Klopt dat niet, verschuif de noot dan zelf met de pijlen.
