@@ -32,3 +32,5 @@ De muziektermen in SCORE2SOUND, met de term uit MusicXML. Gebruik in teksten van
 || vaste speler | (geen) | de balk onderaan het scherm met afspelen, tempo, metronoom en voorinteller |
 || haak | (geen) | een crescendo- of decrescendoteken (< of >) onder de balk |
 || aanduiding | (geen) | een term bij de noten, zoals Andante, dolce, mf of cresc., met een vaste plek boven of onder de balk |
+| startpagina | (geen) | de pagina die je ziet als je de website opent, met uitleg en de knop Inloggen |
+| maten vooraf | voorinteller | het aantal maten tikken dat voor het stuk klinkt |
