@@ -41,10 +41,15 @@ export function start(app) {
     mxlKnop.className = 'knop'
     mxlKnop.textContent = 'Gecomprimeerd (.mxl) downloaden'
 
-    const partijenZipKnop = document.createElement('button')
+  const partijenZipKnop = document.createElement('button')
+  const pdfZipKnop = document.createElement('button')
     partijenZipKnop.type = 'button'
-    partijenZipKnop.className = 'knop'
-    partijenZipKnop.textContent = 'Alle partijen (zip)'
+  partijenZipKnop.className = 'knop'
+  partijenZipKnop.textContent = 'Alle partijen (zip)'
+  pdfZipKnop.className = 'knop'
+  pdfZipKnop.textContent = 'Alle partijen (PDF zip)'
+  pdfZipKnop.hidden = partituur.partijen.length <= 1
+  queueMicrotask(() => partijenZipKnop.after(pdfZipKnop))
 
     const midiKnop = document.createElement('button')
     midiKnop.type = 'button'
@@ -136,7 +141,57 @@ export function start(app) {
       partijAudioKnop.disabled = !partijKeuze.value
     })
 
-    partijenZipKnop.addEventListener('click', async () => {
+  pdfZipKnop.addEventListener('click', async () => {
+    pdfZipKnop.disabled = true
+    status.textContent = 'De PDF-bestanden worden gemaakt. Dit kan even duren.'
+    try {
+      const { partijUitnemen } = await import('/src/model/partijen.mjs')
+      const { naarMusicXML } = await import('/src/musicxml/schrijven.mjs')
+      const { maakZip } = await import('/src/model/zipschrijven.mjs')
+      const { partijTitel } = await import('/src/model/stemming.mjs')
+      const bestanden = []
+      for (let index = 0; index < partituur.partijen.length; index += 1) {
+        const partij = partituur.partijen[index]
+        const antwoord = await fetch('/api/pdf', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            musicxml: naarMusicXML(partijUitnemen(partituur, partij.id), { zonderPartijnamen: true }),
+            titelblok: {
+              titel: partituur.titel,
+              componist: partituur.componist,
+              arrangeur: partituur.arrangeur,
+              partij: partijTitel(partij)
+            }
+          })
+        })
+        if (!antwoord.ok) {
+          status.textContent = 'Exporteren lukte niet. Probeer het opnieuw.'
+          return
+        }
+        bestanden.push({
+          naam: String(index + 1).padStart(2, '0') + ' - ' + partij.naam.replace(/[/:]/g, '-') + '.pdf',
+          inhoud: new Uint8Array(await antwoord.arrayBuffer())
+        })
+      }
+      const zip = new Blob([maakZip(bestanden)], { type: 'application/zip' })
+      const naam = bestandsnaam({
+        titel: (partituur.titel?.trim() || 'partituur') + ' - partijen (pdf)'
+      }, 'zip')
+      const link = document.createElement('a')
+      link.href = URL.createObjectURL(zip)
+      link.download = naam
+      link.click()
+      URL.revokeObjectURL(link.href)
+      status.textContent = 'Gedownload: ' + naam
+    } catch {
+      status.textContent = 'Exporteren lukte niet. Probeer het opnieuw.'
+    } finally {
+      pdfZipKnop.disabled = false
+    }
+  })
+
+  partijenZipKnop.addEventListener('click', async () => {
       partijenZipKnop.disabled = true
       status.textContent = 'De partijen worden geëxporteerd. Dit kan even duren.'
       try {
