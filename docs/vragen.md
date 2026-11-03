@@ -29,3 +29,6 @@ Ga naar de instellingenpagina, selecteer 'Account verwijderen', bevestig uw acti
 
 ## Welke bestanden kan ik exporteren?
 U kunt exporteren naar MusicXML, MIDI, WAV en PDF. Gebruik de knop 'Exporteer als MusicXML', 'Exporteer als MIDI', 'Exporteer als WAV' of 'Print' om een PDF te maken.
+
+## Kan ik mijn partituur als PDF krijgen?
+Ja. Kies in het tabblad Bestand de knop PDF downloaden. Op elke pagina staat het watermerk SCORE2SOUND.
