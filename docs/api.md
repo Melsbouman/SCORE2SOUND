@@ -157,4 +157,7 @@ De SCORE2SOUND-app biedt de volgende API-adressen voor uitbreiding en testen. Di
 - POST met een MusicXML-tekst als body.
 - Antwoord 200: een pdf (application/pdf) met het watermerk SCORE2SOUND op elke pagina, als bijlage partituur.pdf.
 - 400: lege body. 405: een andere methode dan POST. 422: de pdf kon niet worden gemaakt.
-- Bij SCORE2SOUND_ACCOUNTS=aan is een geldige sessie nodig.
+|- Bij SCORE2SOUND_ACCOUNTS=aan is een geldige sessie nodig.
+
+## Inhoud van de pdf
+De pdf bevat de notenbalken, noten, stokken en balken, een schuin watermerk SCORE2SOUND op elke pagina en geen voetregel van Verovio.
