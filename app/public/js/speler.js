@@ -221,6 +221,16 @@ export function start(app) {
     teken();
   });
   app.op('mixer', pasMixerToe);
+  app.op('kies-maat', ({ maat }) => {
+    if (typeof maat !== 'number' || !Number.isFinite(maat)) return;
+    const nummer = maat + 1;
+    if (nummer > Number(tot.value)) {
+      tot.value = String(nummer);
+      tot.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    van.value = String(nummer);
+    van.dispatchEvent(new Event('input', { bubbles: true }));
+  });
   // Om en om luisteren: de andere versie laden en op dezelfde tijd verder gaan.
   app.op('luister-versie', async (partituur) => {
     luisterNaar = partituur;
