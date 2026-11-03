@@ -8,7 +8,7 @@ import {
   maakRust,
   keurGoed,
   keurMaatGoed,
-  kopieerMaat,
+  kopieerMaten,
 } from '/src/model/corrigeren.mjs';
 import { herstelMaatduur } from '/src/model/maatduur.mjs';
 import {
@@ -55,7 +55,8 @@ export function start(app) {
   let gekozen = null;
   let gekozenIds = [];
   let gekozenMaat = null;
-  let gekopieerdeMaat = null;
+  let gekozenTot = null;
+  let gekopieerdeReeks = null;
   let statusBalk = null;
   let vorigePartituur = app.stand.partituur;
   let bezigMetGeschiedenis = false;
@@ -74,6 +75,20 @@ export function start(app) {
 
   function pasAlle(bewerking) {
     pas(opAlle(app.stand.partituur, idsVoorBewerking(), bewerking));
+  }
+
+  function onthoudGekozenMaten() {
+    gekopieerdeReeks = { van: gekozenMaat, tot: gekozenTot ?? gekozenMaat };
+    teken();
+  }
+
+  function plakGekopieerdeReeks() {
+    pas(kopieerMaten(
+      app.stand.partituur,
+      gekopieerdeReeks.van,
+      gekopieerdeReeks.tot,
+      gekozenMaat,
+    ));
   }
 
   function maakRustAlle(partituur, ids) {
@@ -249,11 +264,8 @@ export function start(app) {
         }
         pas(nieuw);
       });
-      const kopieerKnop = maakTekstKnop('Maat kopiëren', () => {
-        gekopieerdeMaat = gekozenMaat;
-        teken();
-      });
-      kopieerKnop.setAttribute('aria-label', 'Onthoud de gekozen maat om te plakken');
+      const kopieerKnop = maakTekstKnop('Kopiëren', onthoudGekozenMaten);
+      kopieerKnop.setAttribute('aria-label', 'Onthoud de gekozen maten om te plakken');
       const herstelKnop = document.createElement('button');
       herstelKnop.type = 'button';
       herstelKnop.className = 'knop editor__knop';
@@ -267,15 +279,9 @@ export function start(app) {
         pas(nieuw);
       });
       const maatGroep = [knop, kopieerKnop, herstelKnop];
-      if (gekopieerdeMaat !== null) {
-        const plakKnop = maakTekstKnop('Maat plakken', () => {
-          let nieuw = app.stand.partituur;
-          for (const partij of nieuw.partijen) {
-            nieuw = kopieerMaat(nieuw, partij.id, gekopieerdeMaat, gekozenMaat);
-          }
-          pas(nieuw);
-        });
-        plakKnop.setAttribute('aria-label', 'Plak de gekopieerde maat in de gekozen maat');
+      if (gekopieerdeReeks !== null) {
+        const plakKnop = maakTekstKnop('Plakken', plakGekopieerdeReeks);
+        plakKnop.setAttribute('aria-label', 'Plak de gekopieerde maten vanaf de gekozen maat');
         maatGroep.push(plakKnop);
       }
       const bronMaat = app.stand.partituur.partijen
@@ -435,7 +441,9 @@ export function start(app) {
     const selectieStatus = document.createElement('span');
     selectieStatus.className = 'editor__selectie';
     selectieStatus.setAttribute('role', 'status');
-    selectieStatus.textContent = gekozenMaat === null ? '' : `Maat ${gekozenMaat + 1} gekozen`;
+    selectieStatus.textContent = gekozenMaat === null ? '' : gekozenTot === null
+      ? `Maat ${gekozenMaat + 1} gekozen`
+      : `Maat ${gekozenMaat + 1} tot ${gekozenTot + 1} gekozen`;
     selectieStatus.hidden = gekozenMaat === null;
     balk.append(selectieStatus);
     vlak.replaceChildren(balk);
@@ -522,8 +530,9 @@ export function start(app) {
     if (id) gekozenMaat = null;
     teken();
   });
-  app.op('kies-maat', ({ maat }) => {
+  app.op('kies-maat', ({ maat, tot }) => {
     gekozenMaat = maat;
+    gekozenTot = tot ?? null;
     teken();
   });
   document.addEventListener('keydown', (gebeurtenis) => {
@@ -568,6 +577,20 @@ export function start(app) {
         return;
       }
       return;
+    }
+    if (gebeurtenis.ctrlKey || gebeurtenis.metaKey) {
+      if (toets.toLowerCase() === 'c' && gekozenMaat !== null) {
+        gebeurtenis.preventDefault();
+        gebeurtenis.stopImmediatePropagation();
+        onthoudGekozenMaten();
+        return;
+      }
+      if (toets.toLowerCase() === 'v' && gekozenMaat !== null && gekopieerdeReeks !== null) {
+        gebeurtenis.preventDefault();
+        gebeurtenis.stopImmediatePropagation();
+        plakGekopieerdeReeks();
+        return;
+      }
     }
     if (gekozenIds.length === 0) return;
 
