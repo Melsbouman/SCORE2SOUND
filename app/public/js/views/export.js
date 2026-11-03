@@ -88,11 +88,64 @@ export function start(app) {
     status.className = 'zacht'
     status.setAttribute('role', 'status')
 
-    const afdrukken = () => {
+    const afdrukken = (maakPartijTitel) => {
       const titel = document.title
-      document.title = app.stand.partituur.titel?.trim() || 'SCORE2SOUND'
+      const partituur = app.stand.partituur
+      const titeltekst = partituur.titel?.trim() || ''
+      const componist = partituur.componist?.trim() || ''
+      const arrangeur = partituur.arrangeur?.trim() || ''
+      const partij = partituur.partijen.length === 1 ? partituur.partijen[0] : null
+      const muziek = document.querySelector('#weergave .bladmuziek')
+      let oudTitelblok
+      let nieuwTitelblok
+      if (titeltekst || partij || componist || arrangeur) {
+        nieuwTitelblok = document.createElement('header')
+        nieuwTitelblok.className = 'bladmuziek__titelblok'
+        if (titeltekst) {
+          const kop = document.createElement('h1')
+          kop.textContent = titeltekst
+          nieuwTitelblok.append(kop)
+        }
+        if (partij || componist || arrangeur) {
+          const details = document.createElement('div')
+          details.className = 'bladmuziek__details'
+          if (partij) {
+            const partijNaam = document.createElement('span')
+            partijNaam.textContent = maakPartijTitel(partij)
+            details.append(partijNaam)
+          }
+          const maker = document.createElement('div')
+          maker.className = 'bladmuziek__maker'
+          if (componist) {
+            const componistNaam = document.createElement('span')
+            componistNaam.textContent = componist
+            maker.append(componistNaam)
+          }
+          if (arrangeur) {
+            const arrangeurRegel = document.createElement('div')
+            const label = document.createElement('span')
+            label.textContent = 'arr. '
+            const arrangeurNaam = document.createElement('span')
+            arrangeurNaam.textContent = arrangeur
+            arrangeurRegel.append(label, arrangeurNaam)
+            maker.append(arrangeurRegel)
+          }
+          details.append(maker)
+          nieuwTitelblok.append(details)
+        }
+        if (muziek) {
+          oudTitelblok = muziek.querySelector('.bladmuziek__titelblok')
+          if (oudTitelblok) oudTitelblok.replaceWith(nieuwTitelblok)
+          else muziek.prepend(nieuwTitelblok)
+        }
+      }
+      document.title = titeltekst || 'SCORE2SOUND'
       window.addEventListener('afterprint', () => {
         document.title = titel
+        if (nieuwTitelblok?.parentNode === muziek) {
+          if (oudTitelblok) nieuwTitelblok.replaceWith(oudTitelblok)
+          else nieuwTitelblok.remove()
+        }
       }, { once: true })
       status.textContent = 'Kies in het venster Opslaan als PDF. Op elke pagina staat het watermerk SCORE2SOUND.'
       window.print()
@@ -100,11 +153,13 @@ export function start(app) {
 
     printKnop.addEventListener('click', async () => {
       status.textContent = 'De pdf wordt gemaakt...'
+      let maakPartijTitel = (partij) => partij.naam
       try {
         const [{ naarMusicXML }, { partijTitel }] = await Promise.all([
           import('/src/musicxml/schrijven.mjs'),
           import('/src/model/stemming.mjs'),
         ])
+        maakPartijTitel = partijTitel
         printKnop.disabled = true
         printKnop.setAttribute('aria-busy', 'true')
         const antwoord = await fetch('/api/pdf', {
@@ -123,14 +178,14 @@ export function start(app) {
           }),
         })
         if (!antwoord.ok) {
-          afdrukken()
+          afdrukken(maakPartijTitel)
           return
         }
         const naam = bestandsnaam(app.stand.partituur, 'pdf')
         download(await antwoord.blob(), naam)
         status.textContent = 'Gedownload: ' + naam
       } catch {
-        afdrukken()
+        afdrukken(maakPartijTitel)
       } finally {
         printKnop.disabled = false
         printKnop.removeAttribute('aria-busy')
