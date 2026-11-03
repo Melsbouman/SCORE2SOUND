@@ -26,3 +26,6 @@ Is er nog geen account en zijn er geen uitnodigingscodes ingesteld, dan kun je j
 
 ## De PDF lukt niet
 Lukt PDF downloaden niet, dan opent de browser het afdrukvenster: kies daar Opslaan als PDF. Controleer ook of je bent ingelogd en of de server draait.
+
+## Het stuk is te groot of te klein
+Houd Ctrl ingedrukt en scroll boven het stuk, of gebruik de knoppen rechtsboven in het stuk. Ctrl en 0 zet het terug op 80 procent. De app onthoudt je keuze.
