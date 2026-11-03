@@ -204,10 +204,20 @@ let doelMaat = null;
     werkTempoTekstBij();
   }
 
-  const begintempo = () => app.stand.partituur?.partijen[0]?.maten[0]?.tempo ?? 120;
+  function tempoVan(maatIndex) {
+    const maten = app.stand.partituur?.partijen[0]?.maten ?? [];
+    for (let i = Math.min(maatIndex, maten.length - 1); i >= 0; i--) {
+      const maat = maten[i];
+      if (maat.tempo !== null && maat.tempo !== undefined) return maat.tempo;
+      const aanwijzing = maat.elementen.find((element) => element.soort === 'aanwijzing' && element.type === 'tempo');
+      if (aanwijzing) return Number(aanwijzing.waarde);
+    }
+    return 120;
+  }
+
   function werkTempoTekstBij() {
     const percentage = Number(tempoPercentage.value);
-    tempoTekst.textContent = ` ${percentage}% (${Math.round(begintempo() * percentage / 100)} bpm)`;
+    tempoTekst.textContent = ` ${percentage}% (${Math.round(tempoVan(speelMaat ?? 0) * percentage / 100)} bpm)`;
   }
 
   function pasTempoToe(percentage) {
@@ -415,6 +425,7 @@ let doelMaat = null;
     teken();
   });
   app.op('speel-maat', ({ maat }) => {
+    werkTempoTekstBij();
     const aantalMaten = app.stand.partituur?.partijen[0]?.maten.length ?? 0;
     const percentage = maat === null || !aantalMaten ? 0 : (maat + 1) / aantalMaten * 100;
     if (!voortgangVulling) return;
