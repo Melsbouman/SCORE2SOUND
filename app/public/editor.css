@@ -326,3 +326,4 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
 @media (max-width: 700px) {
   .lint__paneel:has(> #projecten) { grid-template-columns: minmax(0, 1fr); grid-template-areas: "open" "projecten" "titel" "export"; }
 }
+@media (max-width: 600px) { .lint__paneel:has(> #aanduidingen) { max-height: 280px; overflow-y: auto; } .aanduidingen__groep { flex-wrap: wrap; } .aanduidingen__kop { flex: 1 0 100%; } .aanduidingen__knop { padding: 6px 12px; } }
