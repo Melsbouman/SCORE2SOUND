@@ -2,7 +2,18 @@ import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import PDFDocument from 'pdfkit';
-import SVGtoPDF from 'svg-to-pdfkit';
+import schrijfSvgNaarPdf from 'svg-to-pdfkit';
+
+const verovioOpties = { footer: 'none', header: 'none' };
+
+function SVGtoPDF(document, svg, ...opties) {
+  void verovioOpties;
+  const svgMetLijnen = svg.replace(
+    /<(path|rect|ellipse|polygon|polyline)\b([^>]*\bstroke-width=(?:"[^"]*"|'[^']*')[^>]*)>/g,
+    '<$1 fill="none" stroke="#000000"$2>',
+  );
+  return schrijfSvgNaarPdf(document, svgMetLijnen, ...opties);
+}
 
 const require = createRequire(import.meta.url);
 let toolkitBelofte;
