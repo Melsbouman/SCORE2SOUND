@@ -34,10 +34,10 @@
 .lint__paneel {
   display: flex;
   flex-wrap: nowrap;
-  align-items: flex-start;
-  gap: 12px;
+  align-items: center;
+  gap: 4px;
   min-width: 0;
-  max-height: 190px;
+  min-height: 64px;
   overflow: auto;
   padding: 8px 0;
 }
@@ -46,11 +46,15 @@
 .lint__paneel > section {
   flex: 0 0 auto;
   min-width: 0;
-  padding: 0 8px;
+  padding: 0 12px;
   background: transparent;
-  border: 0;
+  border-left: 1px solid var(--kleur-lijn);
   box-shadow: none;
 }
+.lint__paneel > section:first-child { border-left: 0; }
+.lint button, .lint input, .lint select { font-size: 13px; padding: 4px 10px; min-height: 30px; }
+.lint input[type="range"] { width: 140px; padding: 0; }
+.lint label { font-size: 13px; }
 .lint__paneel > #speler, .lint__paneel > #tempo, .lint__paneel > #editor { flex: 1 1 auto; }
 .lint__paneel > #export, .lint__paneel > #projecten, .lint__paneel > #titel { flex: 0 0 auto; }
 @media (min-width: 700px) {
@@ -67,6 +71,11 @@
     gap: 12px;
     border: 0;
     padding: 0;
+  }
+}
+@media (min-width: 900px) {
+  .lint__paneel #speler, .lint__paneel #tempo, .lint__paneel #speler .speler__passage {
+    flex-wrap: nowrap;
   }
 }
 main:has(#weergave g.measure) #tempo > p { display: none; }
