@@ -85,15 +85,28 @@ export function start(app) {
   let lus = 0;
   let luisterNaar = null; // een bewaarde versie die klinkt in plaats van de huidige partituur
 
-  const knop = (tekst, klasse = 'knop') => Object.assign(document.createElement('button'), { type: 'button', className: klasse, textContent: tekst });
+  const knop = (klasse = 'knop') => Object.assign(document.createElement('button'), { type: 'button', className: klasse });
   const veld = (label, ...invoeren) => {
     const l = document.createElement('label');
     l.className = 'speler__veld';
     l.append(label, ...invoeren);
     return l;
   };
-  const speel = knop('Afspelen', 'knop knop--hoofd');
-  const stop = knop('Naar het begin');
+  const speel = knop('knop knop--hoofd speler__spelen');
+  const stop = knop('knop speler__begin');
+  const volgende = knop('knop speler__volgende');
+  stop.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg>';
+  stop.setAttribute('aria-label', 'Naar het begin');
+  volgende.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg>';
+  volgende.setAttribute('aria-label', 'Volgende maat');
+  function zetSpeelKnop(speelt) {
+    speel.innerHTML = speelt
+      ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>'
+      : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
+    speel.setAttribute('aria-label', speelt ? 'Pauze' : 'Afspelen');
+  }
+  zetSpeelKnop(false);
+  let voortgangVulling = null;
   const tempo = Object.assign(document.createElement('input'), { type: 'range', min: 25, max: 150, step: 5, value: 100 });
   const tempoPercentage = Object.assign(document.createElement('input'), { type: 'number', min: 10, max: 300, step: 1, value: 100 });
   tempoPercentage.setAttribute('aria-label', 'Tempo in procenten');
@@ -118,16 +131,43 @@ export function start(app) {
   status.setAttribute('role', 'status');
 
   function teken() {
-    if (!app.stand.partituur) return vlak.replaceChildren();
-    const kop = document.createElement('h2');
-    kop.textContent = 'Afspelen';
+    const passageVlak = document.getElementById('passage');
+    if (!app.stand.partituur) {
+      passageVlak?.replaceChildren();
+      voortgangVulling = null;
+      return vlak.replaceChildren();
+    }
+    const links = document.createElement('div');
+    links.className = 'speler__links';
+    links.append(
+      Object.assign(document.createElement('span'), { className: 'speler__titel', textContent: app.stand.partituur.titel || 'SCORE2SOUND' }),
+      Object.assign(document.createElement('span'), { className: 'speler__partij', textContent: app.stand.partituur.partijen[0]?.naam ?? '' })
+    );
+    const midden = document.createElement('div');
+    midden.className = 'speler__midden';
     const knoppen = document.createElement('div');
     knoppen.className = 'speler__knoppen';
-    knoppen.append(speel, stop);
+    knoppen.append(stop, speel, volgende);
+    const voortgang = document.createElement('div');
+    voortgang.className = 'speler__voortgang';
+    voortgang.setAttribute('role', 'progressbar');
+    voortgang.setAttribute('aria-label', 'Voortgang');
+    voortgang.setAttribute('aria-valuemin', '0');
+    voortgang.setAttribute('aria-valuemax', '100');
+    voortgang.setAttribute('aria-valuenow', '0');
+    voortgangVulling = document.createElement('span');
+    voortgangVulling.style.width = '0%';
+    voortgang.append(voortgangVulling);
+    midden.append(knoppen, voortgang);
+    const rechts = document.createElement('div');
+    rechts.className = 'speler__rechts';
     const passage = document.createElement('fieldset');
     passage.className = 'speler__passage';
     passage.append(Object.assign(document.createElement('legend'), { textContent: 'Passage herhalen' }), veld('Van maat ', van), veld('tot en met maat ', tot), veld(herhaal, document.createTextNode(' Herhalen')));
-    vlak.replaceChildren(kop, knoppen, veld('Tempo ', tempo, tempoPercentage), tempoTekst, veld(metronoom, document.createTextNode(' Metronoom')), veld('Voorinteller ', voorinteller), passage, status);
+    rechts.append(veld('Tempo ', tempo, tempoPercentage), tempoTekst, veld(metronoom, document.createTextNode(' Metronoom')), veld('Voorinteller ', voorinteller));
+    if (passageVlak) passageVlak.replaceChildren(passage);
+    else rechts.append(passage);
+    vlak.replaceChildren(links, midden, rechts, status);
     werkTempoTekstBij();
   }
 
@@ -256,7 +296,7 @@ export function start(app) {
       if (herhaal.checked) geluid.seq.currentTime = tijden[eersteKeer(geldigeMaat(van))] + voorintellerSeconden();
       geluid.seq.play();
       pasMixerToe();
-      speel.textContent = 'Pauze';
+      zetSpeelKnop(true);
       speel.setAttribute('aria-pressed', 'true');
       status.textContent = '';
       cancelAnimationFrame(lus);
@@ -273,7 +313,7 @@ export function start(app) {
   function pauze() {
     geluid?.seq.pause();
     cancelAnimationFrame(lus);
-    speel.textContent = 'Afspelen';
+    zetSpeelKnop(false);
     speel.setAttribute('aria-pressed', 'false');
   }
 
@@ -283,6 +323,12 @@ export function start(app) {
     if (geluid && geladen) geluid.seq.currentTime = 0;
     speelMaat = null;
     app.meld('speel-maat', { maat: null });
+  });
+  volgende.addEventListener('click', () => {
+    const aantalMaten = app.stand.partituur?.partijen[0]?.maten.length ?? 0;
+    if (!aantalMaten) return;
+    const huidige = speelMaat ?? 0;
+    app.meld('naar-maat', { maat: Math.min(huidige + 1, aantalMaten - 1) });
   });
   document.addEventListener('keydown', (event) => {
     const doel = event.target;
@@ -315,6 +361,13 @@ export function start(app) {
     tot.value = maten().at(-1)?.nummer ?? '1';
     status.textContent = '';
     teken();
+  });
+  app.op('speel-maat', ({ maat }) => {
+    const aantalMaten = app.stand.partituur?.partijen[0]?.maten.length ?? 0;
+    const percentage = maat === null || !aantalMaten ? 0 : (maat + 1) / aantalMaten * 100;
+    if (!voortgangVulling) return;
+    voortgangVulling.style.width = `${percentage}%`;
+    voortgangVulling.parentElement.setAttribute('aria-valuenow', String(percentage));
   });
   app.op('mixer', pasMixerToe);
   app.op('kies-maat', ({ maat }) => {
@@ -349,4 +402,3 @@ export function start(app) {
 }
 import { maatIndexVanNummer, speelVolgorde } from '/src/model/maten.mjs';
 import { maatTijden } from '/src/midi/tijdlijn.mjs';
-// speler__volgende
