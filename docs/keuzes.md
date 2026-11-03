@@ -107,3 +107,6 @@ Na het lezen van de uitvoer van Audiveris volgen vier stappen in vaste volgorde:
 
 ## Zangtekst-ruis uit de herkenning
 Audiveris leest soms paginatekst (de regel van de uitgever), tuplethaakjes of dynamiektekens als zangtekst. Heeft een partij zangtekst bij minder dan 40 procent van de noten, dan is het geen zangpartij en wordt alle zangtekst weggehaald.
+
+## Partijnaam en titel uit de herkenning
+Audiveris noemt een partij Voice. De herkenning zoekt in de kopregels van de pagina een regel met een instrument en gebruikt die als partijnaam, zonder het toonsoort-voorvoegsel (Bb Solo Cornet 3, 4 wordt Solo Cornet 3, 4; de stemming staat apart). Een titel in hoofdletters met een losse medeklinker midden erin (SAN D AND STARS) wordt samengevoegd tot SAND AND STARS.
