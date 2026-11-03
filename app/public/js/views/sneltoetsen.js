@@ -22,12 +22,17 @@ export function start(app) {
   titel.textContent = 'Sneltoetsen';
   const lijst = document.createElement('ul');
   for (const [toets, omschrijving] of [
-    ['↑ / ↓', 'Verschuif de geselecteerde noot omhoog of omlaag.'],
     ['Shift + ↑ / ↓', 'Verschuif de geselecteerde noot een octaaf omhoog of omlaag.'],
     ['← / →', 'Ga naar de vorige of volgende noot.'],
     ['Shift + klik', 'Voeg een noot toe aan de keuze of haal hem eruit.'],
     ['N', 'Ga naar de volgende onzekere noot.'],
     ['Enter', 'Keur de geselecteerde noot goed.'],
+    ['A tot en met G', 'Voer een noot in of vervang de gekozen noot door die toon.'],
+    ['↑ / ↓', 'Een halve toon hoger of lager (Shift: een octaaf).'],
+    ['Shift + A / Shift + F', 'Accent en fermate.'],
+    ['Ctrl + C / Ctrl + V', 'Kopieer en plak de gekozen maten.'],
+    ['Shift + klik', 'Kies een reeks maten.'],
+    ['Ctrl + scrollen', 'Zoom het muziekstuk in of uit.'],
     ['Escape', 'Hef de gekozen noten of maat op.'],
     ['Alt + 1 tot 5', 'Kies een tabblad van het lint.'],
     ['Delete', 'Maak van de gekozen noot of noten een rust.'],
