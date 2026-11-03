@@ -74,3 +74,6 @@ De knop PDF downloaden (tabblad Bestand) haalt een PDF met het watermerk SCORE2S
 
 ## Maten kopiëren en plakken
 Tik een maat aan en kies Maat kopiëren. Tik daarna de maat aan waar de noten moeten komen en kies Maat plakken. De noten van alle partijen worden gekopieerd; de oude noten in die maat verdwijnen.
+
+## De speler onderaan
+De speler staat vast onderaan het scherm, ook als je een ander tabblad van het lint kiest. Daar start en stopt je het afspelen en stel je het tempo, de metronoom en de voorinteller in.
