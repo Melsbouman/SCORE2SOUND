@@ -492,3 +492,17 @@ main:has(#weergave g.measure) #upload label:not(.knop) {
 }
 body:has(#weergave g.measure) .kop p { display: none; }
 body:has(#speler) .werkvlak { padding-bottom: calc(40vh + var(--ruimte-4)); }
+.projecten__miniatuur {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: var(--ruimte-3);
+  background: var(--kleur-vlak);
+  border-radius: 3px;
+  line-height: 0;
+}
+
+.projecten__miniatuur svg {
+  display: block;
+  width: 128px;
+  height: 46px;
+}
