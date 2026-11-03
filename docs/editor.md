@@ -92,3 +92,17 @@ In het tabblad Aanduidingen staan tempo-, expressie-, spelwijze- en sterkteterme
 
 ## Slepen en onzekere noten uit de herkenning
 Pak een noot vast en sleep hem omhoog of omlaag: hij verspringt per notenbalklijn of tussenruimte. Noten die de herkenning verdacht vindt (heel ver van hun buren) en maten die ontbreken tussen twee repetitiecijfers staan rood, zodat je ze kunt nakijken.
+
+## Fermate, haken en het PDF-titelblok
+
+### Fermate
+- Een fermate verlengt de noot tijdens het afspelen.
+- De verlenging is hoorbaar in de speler.
+
+### Crescendo- en decrescendohaken
+- Kies Crescendo of Decrescendo onder Haak in het tabblad Aanduidingen.
+- De haak loopt over de gekozen maat of de gekozen reeks maten.
+
+### Titelblok in de PDF
+- De PDF toont de titel, componist en arrangeur uit de partituur.
+- Bij een PDF van één partij staat ook de naam van die partij in het titelblok.
