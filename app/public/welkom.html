@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SCORE2SOUND: van bladmuziek naar muziek</title>
+    <link rel="stylesheet" href="welkom.css">
+    <link rel="icon" href="favicon.svg">
+  </head>
+  <body>
+    <header class="w-kop">
+      <a class="w-logo" href="/" aria-label="SCORE2SOUND startpagina">
+        <img src="favicon.svg" width="36" height="36" alt="">
+        <span>SCORE<span class="w-twee">2</span>SOUND</span>
+      </a>
+      <nav class="w-nav" aria-label="Hoofdnavigatie">
+        <a href="#hoe">Hoe het werkt</a>
+        <a href="#exporteren">Exporteren</a>
+        <a class="w-knop" href="/app">Inloggen</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="w-held" aria-labelledby="w-titel">
+        <span class="w-kapsel">BLADMUZIEK NAAR MUZIEK</span>
+        <h1 id="w-titel">Zet bladmuziek om in bewerkbare, afspeelbare muziek.</h1>
+        <p>SCORE2SOUND leest je PDF, scan of foto, laat je alles controleren en verbeteren zoals in een echte muziekeditor, en laat het horen. Daarna exporteer je naar MusicXML, MIDI of PDF.</p>
+        <div class="w-acties">
+          <a class="w-knop" href="/app">Inloggen</a>
+          <a class="w-knop w-knop--licht" href="#hoe">Zo werkt het</a>
+        </div>
+        <p class="w-uitnodiging">Gratis proberen met een uitnodigingscode.</p>
+
+        <div class="w-voorbeeld" aria-label="Van gedrukte bladmuziek naar een bewerkbare partituur">
+          <figure class="w-kaart">
+            <svg class="w-partituur" viewBox="0 0 320 210" role="img" aria-label="Gedrukte muzieknotatie op papier">
+              <rect x="26" y="12" width="268" height="186" rx="4" fill="#fff" stroke="#d7d9cf" stroke-width="2"/>
+              <path d="M56 59H264M56 71H264M56 83H264M56 95H264M56 107H264" stroke="#394035" stroke-width="1.5"/>
+              <path d="M73 60V108M124 72V120M168 60V108M218 84V132M249 72V120" stroke="#394035" stroke-width="2"/>
+              <path d="M64 82c0-14 17-17 17-4 0 7-6 10-12 8 6 9 2 19-4 24M72 85v29" fill="none" stroke="#252b22" stroke-width="2.5"/>
+              <ellipse cx="104" cy="94" rx="7" ry="4.5" transform="rotate(-20 104 94)" fill="#252b22"/>
+              <path d="M110 92V54" stroke="#252b22" stroke-width="2"/>
+              <ellipse cx="146" cy="78" rx="7" ry="4.5" transform="rotate(-20 146 78)" fill="#252b22"/>
+              <path d="M152 76V39" stroke="#252b22" stroke-width="2"/>
+              <ellipse cx="190" cy="100" rx="7" ry="4.5" transform="rotate(-20 190 100)" fill="#252b22"/>
+              <path d="M196 98V61" stroke="#252b22" stroke-width="2"/>
+              <ellipse cx="238" cy="88" rx="7" ry="4.5" transform="rotate(-20 238 88)" fill="#252b22"/>
+              <path d="M244 86V49" stroke="#252b22" stroke-width="2"/>
+              <path d="M56 145H264M56 157H264M56 169H264M56 181H264M56 193H264" stroke="#394035" stroke-width="1.5"/>
+              <ellipse cx="99" cy="178" rx="7" ry="4.5" transform="rotate(-20 99 178)" fill="#252b22"/>
+              <path d="M105 176V139" stroke="#252b22" stroke-width="2"/>
+              <ellipse cx="151" cy="162" rx="7" ry="4.5" transform="rotate(-20 151 162)" fill="#252b22"/>
+              <path d="M157 160V123" stroke="#252b22" stroke-width="2"/>
+              <ellipse cx="207" cy="174" rx="7" ry="4.5" transform="rotate(-20 207 174)" fill="#252b22"/>
+              <path d="M213 172V135" stroke="#252b22" stroke-width="2"/>
+            </svg>
+            <figcaption>GEDRUKTE PAGINA</figcaption>
+          </figure>
+          <div class="w-pijl" aria-hidden="true">
+            <svg viewBox="0 0 32 32">
+              <path d="M6 16h19m-8-8 8 8-8 8" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"/>
+            </svg>
+          </div>
+          <figure class="w-kaart">
+            <svg class="w-partituur" viewBox="0 0 320 210" role="img" aria-label="Bewerkbare partituur met onzekere en gecontroleerde noten">
+              <rect x="18" y="12" width="284" height="186" rx="4" fill="#fff" stroke="#d7d9cf" stroke-width="2"/>
+              <path d="M42 67H278M42 79H278M42 91H278M42 103H278M42 115H278" stroke="#70786c" stroke-width="1.5"/>
+              <path d="M59 68V116M119 80V128M176 68V116M232 92V140M265 80V128" stroke="#70786c" stroke-width="2"/>
+              <path d="M49 89c0-14 17-17 17-4 0 7-6 10-12 8 6 9 2 19-4 24M57 92v29" fill="none" stroke="#394035" stroke-width="2.5"/>
+              <ellipse cx="94" cy="102" rx="7" ry="4.5" transform="rotate(-20 94 102)" fill="#cf4439"/>
+              <path d="M100 100V63" stroke="#cf4439" stroke-width="2"/>
+              <ellipse cx="143" cy="86" rx="7" ry="4.5" transform="rotate(-20 143 86)" fill="#2b6a1f"/>
+              <path d="M149 84V47" stroke="#2b6a1f" stroke-width="2"/>
+              <ellipse cx="201" cy="108" rx="7" ry="4.5" transform="rotate(-20 201 108)" fill="#cf4439"/>
+              <path d="M207 106V69" stroke="#cf4439" stroke-width="2"/>
+              <ellipse cx="251" cy="96" rx="7" ry="4.5" transform="rotate(-20 251 96)" fill="#cf4439"/>
+              <path d="M257 94V57" stroke="#cf4439" stroke-width="2"/>
+              <path d="M42 151H278M42 163H278M42 175H278M42 187H278M42 199H278" stroke="#70786c" stroke-width="1.5"/>
+              <ellipse cx="102" cy="184" rx="7" ry="4.5" transform="rotate(-20 102 184)" fill="#2b6a1f"/>
+              <path d="M108 182V145" stroke="#2b6a1f" stroke-width="2"/>
+              <ellipse cx="160" cy="168" rx="7" ry="4.5" transform="rotate(-20 160 168)" fill="#cf4439"/>
+              <path d="M166 166V129" stroke="#cf4439" stroke-width="2"/>
+              <ellipse cx="221" cy="180" rx="7" ry="4.5" transform="rotate(-20 221 180)" fill="#2b6a1f"/>
+              <path d="M227 178V141" stroke="#2b6a1f" stroke-width="2"/>
+            </svg>
+            <figcaption>BEWERKBARE PARTITUUR</figcaption>
+            <div class="w-bestanden" aria-label="Bestandsformaten">
+              <span class="musicxml">.musicxml</span>
+              <span class="midi">.midi</span>
+            </div>
+          </figure>
+        </div>
+      </section>
+
+      <section class="w-sectie" id="hoe" aria-labelledby="w-hoe-titel">
+        <span class="w-kapsel">ZO WERKT HET</span>
+        <h2 id="w-hoe-titel">In drie stappen van papier naar muziek</h2>
+        <div class="w-raster">
+          <article class="w-stap">
+            <span class="w-nummer">01</span>
+            <h3>Open je bladmuziek</h3>
+            <p>Sleep een PDF, scan, foto of MusicXML-bestand in de app; de herkenning leest de noten, maten en tekens.</p>
+          </article>
+          <article class="w-stap">
+            <span class="w-nummer">02</span>
+            <h3>Controleer en verbeter</h3>
+            <p>Onzekere noten zijn rood. Tik een noot of maat aan en verander hem met de pijltjes, de letters A tot en met G, kruisen en mollen, of zet er aanduidingen als Andante, dolce of mf bij.</p>
+          </article>
+          <article class="w-stap">
+            <span class="w-nummer">03</span>
+            <h3>Luister en exporteer</h3>
+            <p>Speel af vanaf elke maat, pas het tempo in procenten aan, en download MusicXML, MIDI, audio of een pdf met watermerk.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="w-sectie w-sectie--groen" aria-labelledby="w-editor-titel">
+        <div class="w-sectie-binnen">
+          <span class="w-kapsel">JOUW MUZIEK, JOUW REGIE</span>
+          <h2 id="w-editor-titel">Gemaakt als een echte editor</h2>
+          <div class="w-raster">
+            <article class="w-punt">
+              <h3>Aantikken en bewerken</h3>
+              <p>Pas noten en maten direct aan in de partituur.</p>
+            </article>
+            <article class="w-punt">
+              <h3>Maten kopiëren en plakken</h3>
+              <p>Herhaal passages zonder ze opnieuw in te voeren.</p>
+            </article>
+            <article class="w-punt">
+              <h3>Tempo, expressie en sterkte altijd op de juiste plek</h3>
+              <p>Voeg muzikale aanwijzingen toe waar ze horen.</p>
+            </article>
+            <article class="w-punt">
+              <h3>Alle partijen apart</h3>
+              <p>Luister naar elke partij en bewerk ze afzonderlijk.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="w-sectie" id="exporteren" aria-labelledby="w-export-titel">
+        <span class="w-kapsel">KLAAR OM TE DELEN</span>
+        <h2 id="w-export-titel">Exporteer en geef door</h2>
+        <div class="w-raster">
+          <article class="w-exportkaart">
+            <h3>MusicXML</h3>
+            <p>Open en bewerk je partituur in andere muzieksoftware.</p>
+          </article>
+          <article class="w-exportkaart">
+            <h3>MIDI</h3>
+            <p>Neem je noten mee naar je favoriete muziekprogramma.</p>
+          </article>
+          <article class="w-exportkaart">
+            <h3>PDF met watermerk</h3>
+            <p>Bewaar of deel een afdrukbare versie van je bladmuziek.</p>
+          </article>
+          <article class="w-exportkaart">
+            <h3>Audio (WAV)</h3>
+            <p>Luister terug of deel een opname van je muziek.</p>
+          </article>
+        </div>
+        <a class="w-knop" href="/app">Inloggen</a>
+      </section>
+    </main>
+
+    <footer class="w-voet">
+      <span>© SCORE2SOUND</span>
+      <nav aria-label="Voettekst">
+        <a href="voorwaarden.html">Voorwaarden en privacy</a>
+        <a href="/app">Inloggen</a>
+      </nav>
+    </footer>
+  </body>
+</html>

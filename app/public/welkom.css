@@ -1,0 +1,416 @@
+@font-face {
+  font-family: 'Archivo Black';
+  src: url('fonts/ArchivoBlack-latin.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Bodoni Moda';
+  src: url('fonts/BodoniModa-latin.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Poppins';
+  src: url('fonts/Poppins-400-latin.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Poppins';
+  src: url('fonts/Poppins-600-latin.woff2') format('woff2');
+  font-weight: 600;
+  font-display: swap;
+}
+
+:root {
+  --groen-donker: #1c4a14;
+  --groen: #2b6a1f;
+  --creme: #f0ede1;
+  --zwart: #0d150b;
+  --wit: #ffffff;
+  --lichtgroen: #c7e3b0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--creme);
+  color: var(--zwart);
+  font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  line-height: 1.65;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid var(--groen);
+  outline-offset: 3px;
+}
+
+.w-kop {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1rem max(1.5rem, 5vw);
+  border-bottom: 1px solid #0d150b22;
+  background: var(--creme);
+}
+
+.w-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: .65rem;
+  color: var(--zwart);
+  font-family: 'Archivo Black', 'Arial Black', sans-serif;
+  font-size: 1.2rem;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.w-logo img {
+  display: block;
+}
+
+.w-twee {
+  color: var(--groen);
+}
+
+.w-nav,
+.w-voet nav {
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+}
+
+.w-nav > a:not(.w-knop) {
+  color: var(--zwart);
+  text-decoration: none;
+}
+
+.w-nav > a:not(.w-knop):hover,
+.w-voet a:hover {
+  text-decoration: underline;
+  text-underline-offset: .2em;
+}
+
+.w-knop {
+  display: inline-block;
+  padding: .85rem 1.6rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--groen);
+  color: var(--wit);
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color .2s ease;
+}
+
+.w-knop:hover {
+  background: var(--groen-donker);
+}
+
+.w-knop--licht {
+  border: 2px solid var(--groen);
+  background: transparent;
+  color: var(--groen);
+}
+
+.w-knop--licht:hover {
+  background: var(--groen);
+  color: var(--wit);
+}
+
+h1,
+h2 {
+  font-family: 'Bodoni Moda', 'Bodoni 72', Didot, Georgia, serif;
+  font-optical-sizing: none;
+  font-variation-settings: 'opsz' 6;
+  line-height: 1.1;
+}
+
+h1 {
+  max-width: 900px;
+  margin: 1.25rem auto 1rem;
+  font-size: clamp(2.2rem, 5.5vw, 4rem);
+}
+
+h2 {
+  margin: 1rem 0 2rem;
+  font-size: clamp(1.7rem, 3.4vw, 2.6rem);
+}
+
+.w-kapsel {
+  display: inline-block;
+  padding: .45rem 1rem;
+  border-radius: 999px;
+  background: var(--groen);
+  color: var(--wit);
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: .12em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.w-held {
+  padding: 4rem max(1.5rem, 5vw) 2rem;
+  background: linear-gradient(180deg, var(--creme), #e6e9d3);
+  text-align: center;
+}
+
+.w-held > p {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.w-acties {
+  display: flex;
+  justify-content: center;
+  gap: .9rem;
+  margin-top: 1.75rem;
+}
+
+.w-uitnodiging {
+  margin-top: 1rem !important;
+  font-size: .9rem;
+}
+
+.w-voorbeeld {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.w-kaart {
+  position: relative;
+  width: min(360px, 90vw);
+  margin: 0;
+  padding: 1rem;
+  border-radius: 18px;
+  background: var(--wit);
+  box-shadow: 0 20px 50px #1c4a1422;
+}
+
+.w-partituur {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.w-kaart figcaption {
+  margin-top: .75rem;
+  color: var(--groen);
+  font-size: .75rem;
+  letter-spacing: .15em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.w-pijl {
+  display: grid;
+  flex: 0 0 64px;
+  width: 64px;
+  height: 64px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--groen);
+  color: var(--wit);
+}
+
+.w-pijl svg {
+  width: 32px;
+  height: 32px;
+}
+
+.w-bestanden {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  display: flex;
+  gap: .35rem;
+  font-size: .65rem;
+  font-weight: 600;
+}
+
+.w-bestanden span {
+  padding: .2rem .45rem;
+  border-radius: 999px;
+  background: var(--creme);
+  color: var(--groen-donker);
+}
+
+.w-bestanden .midi {
+  background: var(--lichtgroen);
+}
+
+.w-sectie {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 4rem max(1.5rem, 5vw);
+  text-align: center;
+}
+
+.w-raster {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+  text-align: left;
+}
+
+.w-stap,
+.w-punt,
+.w-exportkaart {
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: var(--wit);
+}
+
+.w-nummer {
+  color: var(--groen);
+  font-family: 'Bodoni Moda', 'Bodoni 72', Didot, Georgia, serif;
+  font-size: 2.6rem;
+  line-height: 1;
+}
+
+.w-stap h3,
+.w-punt h3,
+.w-exportkaart h3 {
+  margin: .9rem 0 .5rem;
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+
+.w-stap p,
+.w-punt p,
+.w-exportkaart p {
+  margin: 0;
+}
+
+.w-sectie--groen {
+  max-width: none;
+  background: var(--groen-donker);
+  color: var(--wit);
+}
+
+.w-sectie-binnen {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.w-sectie--groen .w-kapsel {
+  background: var(--wit);
+  color: var(--groen-donker);
+}
+
+.w-sectie--groen .w-punt {
+  background: #ffffff14;
+  color: var(--wit);
+}
+
+.w-punt h3 {
+  margin-top: 0;
+  font-family: 'Bodoni Moda', 'Bodoni 72', Didot, Georgia, serif;
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+.w-exportkaart {
+  border: 1px solid #2b6a1f33;
+}
+
+#exporteren > .w-knop {
+  margin-top: 2rem;
+}
+
+.w-voet {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 2rem max(1.5rem, 5vw);
+  background: var(--zwart);
+  color: var(--wit);
+  font-size: .9rem;
+}
+
+.w-voet nav {
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.w-voet a {
+  color: var(--wit);
+  text-decoration: none;
+}
+
+@media (max-width: 700px) {
+  .w-kop {
+    padding-right: 1rem;
+    padding-left: 1rem;
+  }
+
+  .w-logo {
+    gap: .45rem;
+    font-size: 1rem;
+  }
+
+  .w-logo img {
+    width: 32px;
+    height: 32px;
+  }
+
+  .w-nav {
+    gap: 0;
+  }
+
+  .w-nav > a:not(.w-knop) {
+    display: none;
+  }
+
+  .w-nav .w-knop {
+    padding: .7rem 1.15rem;
+  }
+
+  .w-held {
+    padding-top: 3rem;
+  }
+
+  .w-voorbeeld {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .w-pijl {
+    transform: rotate(90deg);
+  }
+
+  .w-voet {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
