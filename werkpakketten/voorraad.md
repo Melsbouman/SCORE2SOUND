@@ -29,6 +29,8 @@ Claude pakt hier werk uit als een nachtplan af is en de eindtijd nog niet bereik
 - [ ] OpenRouter-tegoed voor Hermes aanvullen. Wacht op Mels.
 - [ ] `corrigeren.js` en `onzeker.js`: controleer of het keydown-doel een Element is. (Claude)
 - [ ] Echte server-PDF met watermerk (vraagt een nieuwe bibliotheek, dus akkoord van Mels).
+
+- [x] Server-PDF met watermerk (/api/pdf), maten kopiëren en plakken, een toonhoogte voorstellen en zetten bij een rode noot, het eerste account zonder uitnodigingscode (3 november 2026).
 - [x] Fase 4 en 5 en de editor (3 november 2026, nacht): audio-export (WAV), Verovio ingepakt, versies, tweede ronde voor vastgelopen pagina's, regelindeling en meermaats-rusten, tempo per maat, letters in kaders, partijnaam uit de kop en samenvoegen van gesplitste partijen, voorslagen, volta's, sprongen (D.C., D.S.), rallentando en wiggen in het afspelen, accounts met uitnodigingscode, projecten en herkenningen per gebruiker, container met Docker, de editor (knoppenbalk, slepen, extra bewerkfuncties), een hartslag en automatische terugloop in het script (Claude)
 - [x] Notatie zoals het blad: waardestrepen, triolen, fermates en repetitieletters in kaders (2 november 2026); tweede ronde voor vastgelopen pagina's gemerged. (Claude)
 - [x] Audio-export als WAV, Verovio ingepakt en onthouden in de browser, herkenningen opruimen, tweede ronde voor een vastgelopen pagina, versies bewaren, vergelijken en om en om beluisteren (2 november 2026). (Claude)
