@@ -188,15 +188,23 @@ function tupletMarkeringen(elementen) {
   return uit;
 }
 
-function schrijfNotations(element, markering = {}) {
+function schrijfNotations(element, markering = {}, openBogen) {
   let inhoud = '';
   if (markering.start) inhoud += leeg('tuplet', { type: 'start', number: 1, placement: 'above', bracket: 'yes' });
   if (markering.stop) inhoud += leeg('tuplet', { type: 'stop', number: 1 });
   if (element.fermate) inhoud += leeg('fermata', { type: 'upright' });
   if (element.overbinding?.eind) inhoud += leeg('tied', { type: 'stop' });
   if (element.overbinding?.begin) inhoud += leeg('tied', { type: 'start' });
-  if (element.legato?.eind) inhoud += leeg('slur', { type: 'stop', number: 1 });
-  if (element.legato?.begin) inhoud += leeg('slur', { type: 'start', number: 1 });
+  if (element.legato?.eind && openBogen.length) {
+    const number = openBogen.pop();
+    inhoud += leeg('slur', { type: 'stop', number });
+  }
+  if (element.legato?.begin) {
+    let number = 1;
+    while (openBogen.includes(number)) number += 1;
+    openBogen.push(number);
+    inhoud += leeg('slur', { type: 'start', number });
+  }
   if (element.articulaties?.length) inhoud += tag('articulations', element.articulaties.map((naam) => leeg(naam === 'marcato' ? 'strong-accent' : naam)).join(''));
   let ornaments = '';
   if (element.versiering) {
@@ -219,7 +227,7 @@ function dynamiekVanTekst(tekst) {
   return dynamiekUitTekst(genormaliseerd);
 }
 
-function schrijfNoot(element, meerdereBalken, partij, maat, weergave, markering, verborgen) {
+function schrijfNoot(element, meerdereBalken, partij, maat, weergave, markering, verborgen, openBogen) {
   const info = element.voorslag ? { type: 'eighth', punten: 0, triool: false } : duurInfo(element.duur);
   let inhoud = element.voorslag ? leeg('grace', element.voorslag.schuin ? { slash: 'yes' } : {}) : element.akkoord ? leeg('chord') : '';
   if (element.soort === 'rust') inhoud += leeg('rest', element.heleMaat ? { measure: 'yes' } : {});
@@ -241,7 +249,7 @@ function schrijfNoot(element, meerdereBalken, partij, maat, weergave, markering,
   if (element.balk && ['eighth', '16th', '32nd', '64th'].includes(info.type)) {
     inhoud += tag('beam', { begin: 'begin', midden: 'continue', eind: 'end' }[element.balk], { number: 1 });
   }
-  inhoud += schrijfNotations(element, markering);
+  inhoud += schrijfNotations(element, markering, openBogen);
   for (const lyric of element.teksten ?? []) {
     if (dynamiekVanTekst(lyric.lettergreep)) continue;
     const syllabic = { single: 'single', begin: 'begin', midden: 'middle', eind: 'end' }[lyric.soort] ?? 'single';
@@ -255,7 +263,7 @@ function schrijfNoot(element, meerdereBalken, partij, maat, weergave, markering,
   return tag('note', inhoud, attributen);
 }
 
-function schrijfStemmen(maat, partij, weergave) {
+function schrijfStemmen(maat, partij, weergave, openBogen) {
   const elementen = maat.elementen.filter((element) => element.soort === 'noot' || element.soort === 'rust');
   const stemmen = [...new Set(elementen.map((element) => element.stem))].sort((a, b) => a - b);
   const balken = Math.max(1, ...maat.sleutels.map((sleutel) => sleutel.notenbalk || 1));
@@ -270,7 +278,7 @@ function schrijfStemmen(maat, partij, weergave) {
         const dynamiek = dynamiekVanTekst(tekst.lettergreep);
         if (dynamiek) xml += tag('direction', tag('direction-type', tag('dynamics', leeg(dynamiek))), { placement: 'below' });
       }
-      xml += schrijfNoot(element, balken > 1, partij, maat, weergave, markeringen.get(element), maat.verborgen);
+      xml += schrijfNoot(element, balken > 1, partij, maat, weergave, markeringen.get(element), maat.verborgen, openBogen);
       if (!element.voorslag && !element.akkoord) positie = Math.max(positie, element.start + element.duur);
     }
     if (index < stemmen.length - 1 && positie > 0) xml += tag('backup', tag('duration', positie));
@@ -278,7 +286,7 @@ function schrijfStemmen(maat, partij, weergave) {
   return xml;
 }
 
-function schrijfMaat(maat, vorige, instrument, partij, weergave) {
+function schrijfMaat(maat, vorige, instrument, partij, weergave, openBogen) {
   let inhoud = schrijfAttributes(maat, vorige, instrument);
   if (maat.regelbegin || maat.paginabegin) {
     inhoud += leeg('print', {
@@ -298,7 +306,7 @@ function schrijfMaat(maat, vorige, instrument, partij, weergave) {
     if (maat.herhaling?.begin) streep += leeg('repeat', { direction: 'forward' });
     inhoud += tag('barline', streep, { location: 'left' });
   } else if (maat.herhaling?.begin) inhoud += tag('barline', leeg('repeat', { direction: 'forward' }), { location: 'left' });
-  inhoud += schrijfStemmen(maat, partij, weergave);
+  inhoud += schrijfStemmen(maat, partij, weergave, openBogen);
   if (maat.volta?.eind) {
     const nummer = maat.volta.nummers.join(',');
     let streep = leeg('ending', { number: nummer, type: 'stop' });
@@ -361,9 +369,10 @@ function naarMusicXMLZonderArrangeur(partituur, opties = {}) {
   }).join(''));
   hoofd += partijen.map((partij) => {
     const ongeldigeMaatrusten = matenMetOngeldigeMaatrust(partij.maten);
+    const openBogen = [];
     return tag('part', partij.maten.map((maat, index) => {
       const schrijfbareMaat = ongeldigeMaatrusten.has(index) ? { ...maat, maatrust: undefined, verborgen: false } : maat;
-      return schrijfMaat(schrijfbareMaat, partij.maten[index - 1], partij.instrument, partij, opties.weergave);
+      return schrijfMaat(schrijfbareMaat, partij.maten[index - 1], partij.instrument, partij, opties.weergave, openBogen);
     }).join(''), { id: partij.id });
   }).join('');
   return `<?xml version="1.0" encoding="UTF-8"?>${tag('score-partwise', hoofd, { version: '4.0' })}`;
