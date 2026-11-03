@@ -21,6 +21,44 @@ async function maakGeluid() {
   return { context, synth, seq: new Sequencer(synth) };
 }
 
+export function start(app) {
+  startSpeler(app);
+
+  const voortgang = document.querySelector('.speler__voortgang');
+  const gevuld = voortgang.querySelector('span');
+  voortgang.tabIndex = 0;
+
+  function gaNaarMaat(maat) {
+    const aantalMaten = app.stand.partituur.partijen[0].maten.length;
+    const begrensdeMaat = Math.min(aantalMaten - 1, Math.max(0, maat));
+    app.meld('naar-maat', { maat: begrensdeMaat });
+    gevuld.style.width = `${(begrensdeMaat + 1) / aantalMaten * 100}%`;
+  }
+
+  function gaNaarPointer(gebeurtenis) {
+    const kader = voortgang.getBoundingClientRect();
+    const fractie = Math.min(1, Math.max(0, (gebeurtenis.clientX - kader.left) / kader.width));
+    const aantalMaten = app.stand.partituur.partijen[0].maten.length;
+    const maat = Math.round(fractie * (aantalMaten - 1));
+    gaNaarMaat(maat);
+  }
+
+  voortgang.addEventListener('pointerdown', (gebeurtenis) => {
+    voortgang.setPointerCapture(gebeurtenis.pointerId);
+    gaNaarPointer(gebeurtenis);
+  });
+  voortgang.addEventListener('pointermove', (gebeurtenis) => {
+    if (gebeurtenis.buttons) gaNaarPointer(gebeurtenis);
+  });
+  voortgang.addEventListener('keydown', (gebeurtenis) => {
+    if (gebeurtenis.key !== 'ArrowLeft' && gebeurtenis.key !== 'ArrowRight') return;
+    gebeurtenis.preventDefault();
+    const aantalMaten = app.stand.partituur.partijen[0].maten.length;
+    const huidigeMaat = Math.round((parseFloat(gevuld.style.width) || 0) / 100 * aantalMaten) - 1;
+    gaNaarMaat(huidigeMaat + (gebeurtenis.key === 'ArrowLeft' ? -1 : 1));
+  });
+}
+
 // Kanaal per partij, zoals in schrijfMidi: kanaal 9 (slagwerk) wordt overgeslagen.
 import { kanaalVan } from '/src/midi/schrijven.mjs';
 import { maatLengte } from '/src/model/duur.mjs';
@@ -77,7 +115,7 @@ function metDynamiek(partituur) {
   };
 }
 
-export function start(app) {
+function startSpeler(app) {
   const vlak = document.getElementById('speler');
   let tijden = []; // begin van elke gespeelde maat in seconden; herhaalde maten staan er meer keer in
   let volgorde = []; // welke maat op elke plek in tijden klinkt
