@@ -129,7 +129,8 @@ export function maakAccounts({ map, codes, nu = Date.now }) {
       throw new Error('Dit e-mailadres is al in gebruik.');
     }
 
-    const limiet = codeLimiet(codes, code);
+    const geenCodes = !codes || (Array.isArray(codes) ? codes.length === 0 : Object.keys(codes).length === 0);
+    const limiet = geenCodes && bestaand.length === 0 ? Infinity : codeLimiet(codes, code);
     const gebruikt = bestaand.filter((gebruiker) => gebruiker.code === code).length;
     if (!limiet || gebruikt >= limiet) throw new Error('Deze uitnodigingscode is niet geldig.');
 
