@@ -223,6 +223,10 @@ function schrijfNoot(element, meerdereBalken, partij, maat, weergave, markering,
     inhoud += tag('beam', { begin: 'begin', midden: 'continue', eind: 'end' }[element.balk], { number: 1 });
   }
   inhoud += schrijfNotations(element, markering);
+  for (const lyric of element.teksten ?? []) {
+    const syllabic = { single: 'single', begin: 'begin', midden: 'middle', eind: 'end' }[lyric.soort] ?? 'single';
+    inhoud += tag('lyric', tag('syllabic', syllabic) + tag('text', esc(lyric.lettergreep)), { number: lyric.couplet ?? 1 });
+  }
   const attributen = weergave ? {
     id: `n-${partij.id}-${maat.index}-${maat.elementen.indexOf(element)}`,
     color: element.zekerheid < 0.8 ? '#C0392B' : null,
