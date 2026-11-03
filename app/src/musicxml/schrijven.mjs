@@ -51,7 +51,7 @@ function schrijfAttributes(maat, vorige, instrument) {
   return tag('attributes', inhoud);
 }
 
-function schrijfAanwijzing(aanwijzing) {
+function schrijfAanwijzing(aanwijzing, weergave) {
   const offset = aanwijzing.start > 0 ? tag('offset', aanwijzing.start) : '';
   let type = '';
   let sound = '';
@@ -78,7 +78,13 @@ function schrijfAanwijzing(aanwijzing) {
   } else if (aanwijzing.type === 'tekst') {
     type = tag('words', esc(aanwijzing.waarde));
   } else if (aanwijzing.type === 'letter') {
-    type = tag('rehearsal', esc(aanwijzing.waarde), { enclosure: 'square' });
+    type = tag('rehearsal', esc(aanwijzing.waarde), {
+      enclosure: 'square',
+      color: weergave && aanwijzing.zekerheid < 0.8 ? '#C0392B' : null,
+    });
+  } else if (aanwijzing.type === 'pedaal') {
+    const waarde = aanwijzing.musicxmlType ?? { begin: 'start', eind: 'stop', wissel: 'change' }[aanwijzing.waarde];
+    if (waarde) type = leeg('pedal', { type: waarde });
   }
   const placement = ['tekst', 'tempo', 'letter', 'octaafteken'].includes(aanwijzing.type) ? 'above' : 'below';
   return tag('direction', tag('direction-type', type) + offset + sound, { placement });
@@ -215,7 +221,7 @@ function schrijfMaat(maat, vorige, instrument, partij, weergave) {
   }
   const aanwijzingen = maat.elementen.filter((element) => element.soort === 'aanwijzing');
   if (maat.tempo != null && !aanwijzingen.some((item) => item.type === 'tempo')) aanwijzingen.unshift({ start: 0, type: 'tempo', waarde: maat.tempo });
-  inhoud += aanwijzingen.map(schrijfAanwijzing).join('');
+  inhoud += aanwijzingen.map((aanwijzing) => schrijfAanwijzing(aanwijzing, weergave)).join('');
   inhoud += schrijfSprongen(maat.sprong);
   if (maat.volta?.begin) {
     const nummer = maat.volta.nummers.join(',');

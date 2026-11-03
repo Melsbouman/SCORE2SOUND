@@ -120,6 +120,11 @@ export function leesRichting(directionKnoop, start, vorigeWig = 'crescendo') {
     if (coda) sprong.coda = tekst(coda) || 'waar';
     const letter = kind(directionType, 'rehearsal');
     if (letter && tekst(letter)) aanwijzingen.push(aanwijzing(start, 'letter', tekst(letter)));
+    const pedal = kind(directionType, 'pedal');
+    if (pedal && ['start', 'stop', 'change', 'continue'].includes(pedal.attr.type)) {
+      const waarde = { start: 'begin', stop: 'eind', change: 'wissel', continue: 'wissel' }[pedal.attr.type];
+      aanwijzingen.push({ ...aanwijzing(start, 'pedaal', waarde), musicxmlType: pedal.attr.type });
+    }
     const metronome = kind(directionType, 'metronome');
     if (metronome) {
       const factoren = { whole: 4, half: 2, quarter: 1, eighth: 0.5, '16th': 0.25 };
