@@ -314,3 +314,15 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
 #titel input { width: 100%; min-width: 0; }
 #export { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 @media (max-width: 700px) { .lint__paneel:has(> #projecten) { grid-template-columns: minmax(0, 1fr); } }
+
+/* Tabblad Bestand, tweede versie: vaste vakken. Bovenaan Ander bestand openen, daaronder projecten en titelgegevens naast elkaar, daaronder de exportknoppen op een rij. */
+.lint__paneel:has(> #projecten) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "open open" "projecten titel" "export export"; gap: 16px 24px; align-items: start; max-height: none; overflow: visible; }
+.lint__paneel:has(> #projecten) > .knop:first-child { grid-area: open; justify-self: start; }
+.lint__paneel:has(> #projecten) > #projecten { grid-area: projecten; }
+.lint__paneel:has(> #projecten) > #titel { grid-area: titel; }
+.lint__paneel:has(> #projecten) > #export { grid-area: export; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-top: 12px; border-top: 1px solid var(--kleur-lijn); }
+.lint__paneel:has(> #projecten) > #export > * { margin: 0; }
+.lint__paneel:has(> #projecten) > #export button, .lint__paneel:has(> #projecten) > #export select { display: inline-flex; width: auto; }
+@media (max-width: 700px) {
+  .lint__paneel:has(> #projecten) { grid-template-columns: minmax(0, 1fr); grid-template-areas: "open" "projecten" "titel" "export"; }
+}
