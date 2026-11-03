@@ -183,3 +183,15 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
     gap: 0.35rem;
   }
 }
+
+@media (min-width: 900px) {
+  #speler { display: flex; flex-wrap: nowrap; align-items: center; gap: 18px; max-height: none; overflow-x: auto; overflow-y: hidden; padding-top: 10px; padding-bottom: 10px; }
+  #speler h2 { display: none; }
+  #speler .speler__knoppen { display: flex; flex-wrap: nowrap; gap: 6px; margin: 0; }
+  #speler .speler__veld { flex-wrap: nowrap; margin: 0; gap: 6px; white-space: nowrap; }
+  #speler .speler__veld input[type="range"] { flex: 0 0 140px; width: 140px; }
+  #speler .speler__passage { display: flex; flex-wrap: nowrap; align-items: center; gap: 10px; margin: 0; padding: 0; border: 0; }
+  #speler .speler__passage legend { float: left; margin: 0 6px 0 0; padding: 0; white-space: nowrap; }
+  #speler > span, #speler > p { margin: 0; white-space: nowrap; }
+  body:has(#speler) .werkvlak { padding-bottom: 110px; }
+}
