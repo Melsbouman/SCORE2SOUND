@@ -77,11 +77,20 @@ export function start(app) {
     const vasteRegels = window.innerWidth >= 700 && musicxml.includes('new-system=');
     const schaal = vasteRegels ? Math.min(100, Math.max(35, Math.round(breedte * 100 / 2400 * zoom))) : Math.round(schaalVoor(breedte) * zoom);
     const paginaBreedte = vasteRegels ? 2400 : Math.round((breedte * 100) / schaal);
+    const gegevens = app.stand?.partituur ?? {};
+    const bladbron = gegevens.bron?.bladen?.[0];
+    const heeftPaginabegin = gegevens.partijen?.some((partij) => partij.maten?.some((maat) => maat.paginabegin)) ?? false;
+    const heeftPaginavorm = heeftPaginabegin
+      && Number.isFinite(bladbron?.breedte) && bladbron.breedte > 0
+      && Number.isFinite(bladbron?.hoogte) && bladbron.hoogte > 0;
     tk.setOptions({
       scale: schaal,
       pageWidth: paginaBreedte,
-      adjustPageHeight: true,
-      breaks: vasteRegels ? 'encoded' : 'auto',
+      ...(heeftPaginavorm ? {
+        pageHeight: Math.round(paginaBreedte * bladbron.hoogte / bladbron.breedte),
+        adjustPageHeight: false,
+      } : { adjustPageHeight: true }),
+      breaks: vasteRegels || heeftPaginavorm ? 'encoded' : 'auto',
       footer: 'none',
       header: 'none',
       font: 'Leland',
@@ -96,7 +105,6 @@ export function start(app) {
     const blad = document.createElement('div');
     blad.className = 'bladmuziek';
     if (vasteRegels) blad.style.overflowX = 'auto';
-    const gegevens = app.stand?.partituur ?? {};
     const titel = typeof gegevens.titel === 'string' ? gegevens.titel.trim() : '';
     const ondertitel = typeof gegevens.ondertitel === 'string' ? gegevens.ondertitel.trim() : '';
     const partijnaam = typeof gegevens.partijen?.[0]?.naam === 'string' ? gegevens.partijen[0].naam.trim() : '';
