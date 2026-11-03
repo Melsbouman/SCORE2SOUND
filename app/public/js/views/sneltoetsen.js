@@ -33,6 +33,7 @@ export function start(app) {
     ['Ctrl + C / Ctrl + V', 'Kopieer en plak de gekozen maten.'],
     ['Shift + klik', 'Kies een reeks maten.'],
     ['Ctrl + scrollen', 'Zoom het muziekstuk in of uit.'],
+    ['Ctrl + + / Ctrl + − / Ctrl + 0', 'Zoom het muziekstuk in, uit of terug naar 80 procent.'],
     ['Escape', 'Hef de gekozen noten of maat op.'],
     ['Alt + 1 tot 6', 'Kies een tabblad van het lint.'],
     ['Delete', 'Maak van de gekozen noot of noten een rust.'],
