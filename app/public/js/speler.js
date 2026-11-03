@@ -81,7 +81,8 @@ export function start(app) {
   let tijden = []; // begin van elke gespeelde maat in seconden; herhaalde maten staan er meer keer in
   let volgorde = []; // welke maat op elke plek in tijden klinkt
   let geladen = false;
-  let speelMaat = null;
+let speelMaat = null;
+let doelMaat = null;
   let lus = 0;
   let luisterNaar = null; // een bewaarde versie die klinkt in plaats van de huidige partituur
 
@@ -276,6 +277,7 @@ export function start(app) {
     geluid.seq.currentTime = Math.max(0, tijd + voorintellerSeconden());
     geluid.seq.playbackRate = Number(tempoPercentage.value) / 100;
     speelMaat = null;
+    doelMaat = null;
     app.meld('speel-maat', { maat: null });
     if (speelde) {
       geluid.seq.play();
@@ -327,8 +329,10 @@ export function start(app) {
   volgende.addEventListener('click', () => {
     const aantalMaten = app.stand.partituur?.partijen[0]?.maten.length ?? 0;
     if (!aantalMaten) return;
-    const huidige = speelMaat ?? 0;
-    app.meld('naar-maat', { maat: Math.min(huidige + 1, aantalMaten - 1) });
+    const huidige = speelMaat ?? doelMaat ?? 0;
+    const volgende = Math.min(huidige + 1, aantalMaten - 1);
+    doelMaat = volgende;
+    app.meld('naar-maat', { maat: volgende });
   });
   document.addEventListener('keydown', (event) => {
     const doel = event.target;
@@ -351,6 +355,7 @@ export function start(app) {
   voorinteller.addEventListener('change', wijzigMetronoom);
 
   app.op('partituur', (partituur) => {
+    doelMaat = null;
     pauze();
     geladen = false;
     luisterNaar = null;
@@ -394,6 +399,7 @@ export function start(app) {
     }
   });
   app.op('naar-maat', (doel) => {
+    doelMaat = doel.maat;
     if (doel?.maat === null || doel?.maat === undefined || !tijden.length) return;
     van.value = maten()[doel.maat]?.nummer ?? van.value;
     if (geluid && geladen) geluid.seq.currentTime = tijden[eersteKeer(doel.maat)] + voorintellerSeconden();
