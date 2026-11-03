@@ -12,7 +12,7 @@ const lees = async () => leesMusicXML(await readFile(new URL('./fixtures/sand-an
 
 test('herstelHerkenning doet alle herstelstappen in vaste volgorde', async () => {
   const gelezen = await lees();
-  const verwacht = markeerVerdachteNoten(vulOntbrekendeMaten(vulBeginRust(herstelMaatsoorten(gelezen))));
+  const verwacht = markeerVerdachteNoten(vulOntbrekendeMaten(vulBeginRust(herstelMaatsoorten(ruimZangtekstOp(gelezen)))));
   assert.deepEqual(herstelHerkenning(gelezen), verwacht);
 });
 
