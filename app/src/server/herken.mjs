@@ -12,7 +12,10 @@ import { leesZip } from './zip.mjs';
 import { telPdfPaginas } from './pdfpaginas.mjs';
 import { bladenUitOmr, koppelOmr, voegPaginasSamen } from './omr.mjs';
 import { leesMusicXML } from '../musicxml/lezen.mjs';
-import { herstelMaatsoorten } from '../model/maatsoorten.mjs';
+import { herstelMaatsoorten as herstelMaatsoortenZonderBeginrust } from '../model/maatsoorten.mjs';
+import { vulBeginRust } from '../model/beginrust.mjs';
+
+const herstelMaatsoorten = (partituur) => vulBeginRust(herstelMaatsoortenZonderBeginrust(partituur));
 import { kinderen, leesXml, tekst } from '../musicxml/xml.mjs';
 import { controleerMaatduur } from '../controle/maatduur.mjs';
 import { vulLegeMaten, markeerFouteMaten } from '../controle/nabewerken.mjs';
