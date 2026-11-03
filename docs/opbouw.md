@@ -92,3 +92,6 @@ Verwijs naar docs/model.md voor het model en naar docs/online.md voor online zet
 
 ## PDF met watermerk
 app/src/export/pdf.mjs maakt de PDF uit MusicXML (Verovio, pdfkit en svg-to-pdfkit) en de route /api/pdf in app/src/server/pdf.mjs levert hem. De knop PDF downloaden gebruikt die route.
+
+## Aanduidingen en speler
+app/src/model/aanduidingen.mjs bevat de bibliotheek met termen en de regel voor boven of onder de balk. app/public/js/views/aanduidingen.js is het tabblad Aanduidingen. app/public/js/speler.js is de speler onderaan, met links de titel, in het midden de knoppen en de voortgangsbalk en rechts tempo en metronoom. app/src/model/stemming.mjs geeft de stemming van een instrument, zoals in B♭.
