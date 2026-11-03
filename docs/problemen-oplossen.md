@@ -29,3 +29,6 @@ Lukt PDF downloaden niet, dan opent de browser het afdrukvenster: kies daar Opsl
 
 ## Het stuk is te groot of te klein
 Houd Ctrl ingedrukt en scroll boven het stuk, of gebruik de knoppen rechtsboven in het stuk. Ctrl en 0 zet het terug op 80 procent. De app onthoudt je keuze.
+
+## Op een telefoon
+Het stuk begint op 50 procent. Knijp met twee vingers boven het stuk om in of uit te zoomen. De knoppenbalk in het lint scrolt opzij. De speler onderaan toont alleen de knoppen en de voortgangsbalk.
