@@ -87,6 +87,28 @@ export function start() {
       const foutElement = document.createElement('span');
       foutElement.className = 'inloggen__uitlogfout';
       foutElement.setAttribute('role', 'status');
+      const wijzigKnop = document.createElement('button');
+      wijzigKnop.className = 'knop';
+      wijzigKnop.type = 'button';
+      wijzigKnop.textContent = 'Wachtwoord wijzigen';
+      wijzigKnop.setAttribute('aria-expanded', 'false');
+      wijzigKnop.setAttribute('aria-controls', 'inloggen-wachtwoord-wijzigen');
+      const wijzigSectie = document.createElement('div');
+      wijzigSectie.id = 'inloggen-wachtwoord-wijzigen';
+      wijzigSectie.hidden = true;
+      wijzigSectie.innerHTML = `
+        <form class="inloggen__formulier">
+          <label>Huidig wachtwoord
+            <input name="oud" type="password" autocomplete="current-password" required>
+          </label>
+          <label>Nieuw wachtwoord
+            <input name="nieuw" type="password" autocomplete="new-password" required minlength="10">
+          </label>
+          <button class="knop" type="submit">Wachtwoord wijzigen</button>
+          <p class="melding--fout" role="status" aria-live="polite"></p>
+        </form>`;
+      const wijzigFormulier = wijzigSectie.querySelector('form');
+      const wijzigFout = wijzigSectie.querySelector('[role="status"]');
       const verwijderenKnop = document.createElement('button');
       verwijderenKnop.className = 'knop';
       verwijderenKnop.type = 'button';
@@ -107,8 +129,44 @@ export function start() {
         </form>`;
       const verwijderenFormulier = verwijderenSectie.querySelector('form');
       const verwijderenFout = verwijderenSectie.querySelector('[role="status"]');
-      gebruiker.append(email, uitloggen, foutElement, verwijderenKnop, verwijderenSectie);
+      gebruiker.append(email, uitloggen, foutElement, wijzigKnop, wijzigSectie, verwijderenKnop, verwijderenSectie);
       kop.append(gebruiker);
+
+      wijzigKnop.addEventListener('click', () => {
+        wijzigSectie.hidden = !wijzigSectie.hidden;
+        wijzigKnop.setAttribute('aria-expanded', String(!wijzigSectie.hidden));
+      });
+
+      wijzigFormulier.addEventListener('submit', async (gebeurtenis) => {
+        gebeurtenis.preventDefault();
+        const knop = wijzigFormulier.querySelector('[type="submit"]');
+        const formulierGegevens = new FormData(wijzigFormulier);
+        knop.disabled = true;
+        toonFout(wijzigFout, '');
+        try {
+          const resultaat = await fetch('/api/account/wachtwoord', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              oud: formulierGegevens.get('oud'),
+              nieuw: formulierGegevens.get('nieuw'),
+            }),
+          });
+          if (!resultaat.ok) {
+            const antwoordJson = await resultaat.json();
+            toonFout(wijzigFout, antwoordJson.fout || 'Het wachtwoord kon niet worden gewijzigd.');
+            return;
+          }
+          wijzigFormulier.reset();
+          wijzigSectie.hidden = true;
+          wijzigKnop.setAttribute('aria-expanded', 'false');
+          toonFout(wijzigFout, 'Je wachtwoord is gewijzigd.');
+        } catch {
+          toonFout(wijzigFout, 'Het wachtwoord kon niet worden gewijzigd. Controleer je verbinding en probeer het opnieuw.');
+        } finally {
+          knop.disabled = false;
+        }
+      });
 
       verwijderenKnop.addEventListener('click', () => {
         verwijderenSectie.hidden = !verwijderenSectie.hidden;
