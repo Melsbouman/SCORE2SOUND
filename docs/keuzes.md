@@ -104,3 +104,6 @@ Audiveris leest soms de verkeerde maatsoort (9/8 of 5/4 als 6/8 of 4/4) en slaat
 
 ## De herstelketen van de herkenning
 Na het lezen van de uitvoer van Audiveris volgen vier stappen in vaste volgorde: de maatsoort uit de inhoud van de maat afleiden, de maten rust aan het begin terugzetten uit het eerste repetitiecijfer, ontbrekende maten tussen repetitiecijfers vullen (een lege maat wordt een samengestelde rust, anders komen er onzekere rustmaten bij) en verdachte noten die ver van hun buren liggen rood maken. Alles wat onzeker is, staat rood.
+
+## Zangtekst-ruis uit de herkenning
+Audiveris leest soms paginatekst (de regel van de uitgever), tuplethaakjes of dynamiektekens als zangtekst. Heeft een partij zangtekst bij minder dan 40 procent van de noten, dan is het geen zangpartij en wordt alle zangtekst weggehaald.
