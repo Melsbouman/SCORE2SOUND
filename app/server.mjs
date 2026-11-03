@@ -52,6 +52,7 @@ const MAPPEN = [
 // (verzoek) => { status, body }, met verzoek = { methode, pad, rest, query, body }.
 // `rest` is wat er na het pad komt, bijvoorbeeld het id in /api/projecten/<id>.
 const API = [
+  ['/api/pdf', './src/server/pdf.mjs'],
   ['/api/account', './src/server/inloggen.mjs'],
   ['/api/importeer', './src/server/importeer.mjs'],
   ['/api/herken', './src/server/herken.mjs'],
