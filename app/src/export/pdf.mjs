@@ -58,7 +58,8 @@ export async function maakPdf(musicxml, { watermerk = 'SCORE2SOUND', comprimeer 
     doc.on('error', mislukken);
   });
 
-  for (let pagina = 1; pagina <= tk.getPageCount(); pagina += 1) {
+  const aantal = tk.getPageCount();
+  for (let pagina = 1; pagina <= aantal; pagina += 1) {
     if (pagina > 1) doc.addPage();
     SVGtoPDF(doc, tk.renderToSVG(pagina), 0, 0, {
       width: doc.page.width,
@@ -94,6 +95,10 @@ export async function maakPdf(musicxml, { watermerk = 'SCORE2SOUND', comprimeer 
     doc.fillColor('#888888').fillOpacity(0.15).fontSize(80);
     doc.rotate(-45, { origin: [doc.page.width / 2, doc.page.height / 2] });
     doc.text(watermerk, 0, doc.page.height / 2 - 40, { width: doc.page.width, align: 'center', lineBreak: false });
+    doc.restore();
+    doc.save();
+    doc.font('Times-Roman').fontSize(9).fillColor('#444444').fillOpacity(1);
+    doc.text('pagina ' + pagina + ' van ' + aantal, 0, doc.page.height - 30, { width: doc.page.width, align: 'center', lineBreak: false });
     doc.restore();
   }
 
