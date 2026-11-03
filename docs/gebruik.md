@@ -70,3 +70,6 @@ Onderaan staat de speler. Met de knop links ga je naar het begin, de ronde knop 
 
 ## Een tempo met een getal zetten
 Kies een noot of maat, open het tabblad Aanduidingen, typ bij Tempo (bpm) een getal van 20 tot en met 300 en klik op Zetten. Boven de balk verschijnt een kwartnoot met dat getal.
+
+## Een heel stuk of een reeks maten kopiëren
+Tik een maat aan en houd Shift ingedrukt terwijl je een andere maat aantikt: alle maten ertussen zijn gekozen. Ctrl en A kiest het hele stuk. Ctrl en C kopieert, daarna tik je de maat aan waar het moet komen en doe je Ctrl en V.
