@@ -254,9 +254,10 @@ function partijSpoor(partij, partijIndex, beginnen, volume) {
   return maakSpoor(events);
 }
 
-function klikSpoor(partituur, voorinteller, verschuiving) {
+function klikSpoor(partituur, voorinteller, verschuiving, alleenVoorinteller = false) {
   const events = [];
   for (const gebeurtenis of klikGebeurtenissen(partituur, { voorinteller })) {
+    if (alleenVoorinteller && gebeurtenis.tik >= 0) continue;
     const tik = gebeurtenis.tik + verschuiving;
     const toets = gebeurtenis.kracht === 110 ? 76 : 77;
     events.push({ tik, volgorde: 4, bytes: [0x99, toets, gebeurtenis.kracht] });
@@ -267,7 +268,7 @@ function klikSpoor(partituur, voorinteller, verschuiving) {
 
 export function schrijfMidi(partituur, { volume = {}, klik = false, voorinteller = 0 } = {}) {
   const gespeeld = uitgevouwen(partituur); // herhalingen klinken echt twee keer
-  const verschuiving = klik && voorinteller > 0
+  const verschuiving = voorinteller > 0
     ? voorinteller * maatLengte(gespeeld.partijen[0]?.maten[0]?.maatsoort ?? { teller: 4, noemer: 4 })
     : 0;
   const beginnen = maatBeginnen(gespeeld).map((tik) => tik + verschuiving);
@@ -275,7 +276,7 @@ export function schrijfMidi(partituur, { volume = {}, klik = false, voorinteller
   for (let index = 0; index < gespeeld.partijen.length; index += 1) {
     sporen.push(partijSpoor(gespeeld.partijen[index], index, beginnen, volume));
   }
-  if (klik) sporen.push(klikSpoor(partituur, voorinteller, verschuiving));
+  if (klik || voorinteller > 0) sporen.push(klikSpoor(partituur, voorinteller, verschuiving, !klik));
   return Uint8Array.from([
     ...blok('MThd', [...getal16(1), ...getal16(sporen.length), ...getal16(480)]),
     ...sporen.flat(),
