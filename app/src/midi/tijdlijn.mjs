@@ -1,13 +1,5 @@
-import { maatLengte } from '../model/duur.mjs';
 import { uitgevouwen } from '../model/maten.mjs';
-import { schrijfMidi } from './schrijven.mjs';
-
-function maatDuur(maat) {
-  if (!maat.opmaat) return maatLengte(maat.maatsoort);
-  return maat.elementen
-    .filter((element) => element.soort === 'noot' || element.soort === 'rust')
-    .reduce((einde, element) => Math.max(einde, element.start + element.duur), 0);
-}
+import { maakTijdlijn, schrijfMidi } from './schrijven.mjs';
 
 function tempoGebeurtenissen(bytes) {
   const leesGetal = (plek, lengte) => {
@@ -63,13 +55,7 @@ function secondenOpTik(tik, gebeurtenissen) {
 
 export function maatTijden(partituur) {
   const gespeeld = uitgevouwen(partituur);
-  const maten = gespeeld.partijen[0]?.maten ?? [];
-  const beginnen = [];
-  let tik = 0;
-  for (const maat of maten) {
-    beginnen.push(tik);
-    tik += maatDuur(maat);
-  }
+  const beginnen = maakTijdlijn(gespeeld).maatBeginnen;
   const tempi = tempoGebeurtenissen(schrijfMidi(gespeeld));
   return beginnen.map((begin) => secondenOpTik(begin, tempi));
 }
