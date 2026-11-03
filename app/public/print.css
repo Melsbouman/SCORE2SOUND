@@ -22,7 +22,32 @@
   #speler,
   #tempo,
   #mixer,
-  .origineel__knoppen {
+  .origineel__knoppen,
+  .zijbalk,
+  .kop,
+  #inloggen,
+  #upload,
+  #voorbeeld,
+  #projecten,
+  #titel,
+  #editor,
+  #corrigeren,
+  #bewerken,
+  #meldingen,
+  #export {
     display: none !important;
+  }
+
+  .app {
+    display: block !important;
+  }
+
+  .inhoud,
+  .werkvlak {
+    padding: 0 !important;
+  }
+
+  body:has(#speler) .werkvlak {
+    padding-bottom: 0 !important;
   }
 }
