@@ -338,7 +338,8 @@ function naarMusicXMLZonderArrangeur(partituur, opties = {}) {
   if (partituur.componist) hoofd += tag('identification', tag('creator', esc(partituur.componist), { type: 'composer' }));
   hoofd += tag('part-list', partijen.map((partij) => {
     let inhoud = tag('part-name', esc(partij.naam));
-    if (partij.afkorting) inhoud += tag('part-abbreviation', esc(partij.afkorting));
+    if (opties.weergave) inhoud += leeg('part-abbreviation-display', { 'print-object': 'no' });
+    else if (partij.afkorting) inhoud += tag('part-abbreviation', esc(partij.afkorting));
     inhoud += tag('midi-instrument', tag('midi-program', partij.instrument.midiProgramma + 1), { id: `${partij.id}-I1` });
     return tag('score-part', inhoud, { id: partij.id });
   }).join(''));

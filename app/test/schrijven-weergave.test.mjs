@@ -26,5 +26,9 @@ test('voor de weergave krijgt elke noot en rust een id, en onzekere een kleur', 
 
 test('een weergave leest terug als dezelfde muziek', async () => {
   const p = await voorbeeld();
-  assert.deepEqual(leesMusicXML(naarMusicXML(p, { weergave: true })), leesMusicXML(naarMusicXML(p)));
+  const weergave = leesMusicXML(naarMusicXML(p, { weergave: true }));
+  const exportbestand = leesMusicXML(naarMusicXML(p));
+  weergave.partijen[0].afkorting = '';
+  exportbestand.partijen[0].afkorting = '';
+  assert.deepEqual(weergave, exportbestand);
 });

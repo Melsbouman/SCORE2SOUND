@@ -119,9 +119,12 @@ export function start(app) {
       font: 'Leland',
       pageMarginLeft: 60,
       pageMarginRight: 60,
-      pageMarginTop: 40,
-      spacingStaff: 12,
-      spacingSystem: 14,
+      pageMarginTop: 60,
+      spacingStaff: 10,
+      spacingSystem: 12,
+      spacingLinear: 0.25,
+      spacingNonLinear: 0.6,
+      minLastJustification: 0,
       justifyVertically: false,
     });
     if (!tk.loadData(musicxml)) return status('Deze partituur kon niet worden getekend.');
