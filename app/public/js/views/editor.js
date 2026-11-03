@@ -2,6 +2,7 @@ import {
   leesId,
   zoekElement,
   verschuif,
+  verschuifHalvetoon,
   zetAlter,
   zetDuur,
   maakRust,
@@ -198,8 +199,8 @@ export function start(app) {
     const isNoot = heeftNoot;
     const heeftKeuze = elementen.length > 0;
     groep([
-      maakKnop('Hoger', PICTOGRAMMEN.hoger, () => pasAlle((partituur, id) => verschuif(partituur, id, 1)), !isNoot),
-      maakKnop('Lager', PICTOGRAMMEN.lager, () => pasAlle((partituur, id) => verschuif(partituur, id, -1)), !isNoot),
+      maakKnop('Halve toon hoger', PICTOGRAMMEN.hoger, () => pasAlle((partituur, id) => verschuifHalvetoon(partituur, id, 1)), !isNoot),
+      maakKnop('Halve toon lager', PICTOGRAMMEN.lager, () => pasAlle((partituur, id) => verschuifHalvetoon(partituur, id, -1)), !isNoot),
     ]);
     groep([
       maakKnop('Kruis', PICTOGRAMMEN.kruis, () => pasAlle((partituur, id) => zetAlter(partituur, id, 1)), !isNoot),
@@ -575,9 +576,9 @@ export function start(app) {
       if (toets.toLowerCase() === 'z') actie = gebeurtenis.shiftKey ? opnieuwMaken : ongedaanMaken;
       else if (toets.toLowerCase() === 'y') actie = opnieuwMaken;
     } else if (toets === 'ArrowUp') {
-      actie = () => pasAlle((partituur, id) => verschuif(partituur, id, gebeurtenis.shiftKey ? 7 : 1));
+      actie = () => pasAlle((partituur, id) => gebeurtenis.shiftKey ? verschuif(partituur, id, 7) : verschuifHalvetoon(partituur, id, 1));
     } else if (toets === 'ArrowDown') {
-      actie = () => pasAlle((partituur, id) => verschuif(partituur, id, gebeurtenis.shiftKey ? -7 : -1));
+      actie = () => pasAlle((partituur, id) => gebeurtenis.shiftKey ? verschuif(partituur, id, -7) : verschuifHalvetoon(partituur, id, -1));
     } else if (toets === '+') {
       actie = () => pasAlle((partituur, id) => zetAlter(partituur, id, 1));
     } else if (toets === '-') {
