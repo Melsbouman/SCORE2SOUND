@@ -76,3 +76,6 @@ Tik een maat aan en houd Shift ingedrukt terwijl je een andere maat aantikt: all
 
 ## Het tabblad Bestand
 Bovenaan open je een ander bestand. Daaronder staan je projecten en de titelgegevens (titel, componist en arrangeur). Onderaan staan de exportknoppen: MusicXML, gecomprimeerd (.mxl), alle partijen als zip, MIDI, audio en PDF met watermerk.
+
+## Een crescendo of decrescendo zetten
+Kies een maat of, met Shift-klik, een reeks maten en open het tabblad Aanduidingen. Klik bij Haak op Crescendo of Decrescendo. De haak loopt van het begin van de eerste maat tot de laatste noot van de laatste maat en staat onder de balk.
