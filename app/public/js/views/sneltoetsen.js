@@ -31,6 +31,8 @@ export function start(app) {
     ['↑ / ↓', 'Een halve toon hoger of lager (Shift: een octaaf).'],
     ['Shift + A / Shift + F', 'Accent en fermate.'],
     ['Ctrl + C / Ctrl + V', 'Kopieer en plak de gekozen maten.'],
+    ['Ctrl + A', 'Kies alle maten van het stuk.'],
+    ['Twee vingers knijpen', 'Zoom het muziekstuk in of uit op een aanraakscherm.'],
     ['Shift + klik', 'Kies een reeks maten.'],
     ['Ctrl + scrollen', 'Zoom het muziekstuk in of uit.'],
     ['Ctrl + + / Ctrl + − / Ctrl + 0', 'Zoom het muziekstuk in, uit of terug naar 80 procent.'],
