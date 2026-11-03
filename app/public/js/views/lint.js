@@ -1,6 +1,6 @@
 const tabbladen = [
   { naam: 'Bestand', vlakken: ['projecten', 'titel', 'export'] },
-  { naam: 'Start', vlakken: ['speler', 'tempo'] },
+  { naam: 'Start', vlakken: ['tempo'] },
   { naam: 'Noten', vlakken: ['editor', 'corrigeren', 'onzeker'] },
   { naam: 'Partij', vlakken: ['mixer', 'bewerken'] },
   { naam: 'Weergave', vlakken: ['zoom', 'versies', 'meldingen'] },
