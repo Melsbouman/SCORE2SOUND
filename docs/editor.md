@@ -83,3 +83,6 @@ Kies een onzekere noot en klik op Suggestie toepassen. De noot krijgt de toonhoo
 
 ## Zoomen en de speler
 Houd Ctrl ingedrukt en scroll boven het muziekstuk om alleen het stuk in of uit te zoomen, of gebruik de knoppen rechtsboven in het stuk. De pagina zelf zoomt niet mee. De speler onderaan heeft knoppen voor naar het begin, afspelen of pauze en de volgende maat, met een voortgangsbalk; het tempo en de metronoom staan rechts. Passage herhalen staat in het tabblad Start.
+
+## Zoomen met het toetsenbord
+Ctrl en plus zoomt het muziekstuk in, Ctrl en min zoomt uit en Ctrl en 0 zet het terug op 80 procent. Alleen het stuk verandert; de pagina zelf blijft hetzelfde.
