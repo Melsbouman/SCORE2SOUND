@@ -24,18 +24,22 @@ async function maakGeluid() {
 export function start(app) {
   startSpeler(app);
 
-  const voortgang = document.querySelector('.speler__voortgang');
-  const gevuld = voortgang.querySelector('span');
-  voortgang.tabIndex = 0;
+  const balk = () => document.querySelector('.speler__voortgang');
+  const vlak = document.getElementById('speler');
 
   function gaNaarMaat(maat) {
+    if (!app.stand.partituur) return;
     const aantalMaten = app.stand.partituur.partijen[0].maten.length;
     const begrensdeMaat = Math.min(aantalMaten - 1, Math.max(0, maat));
     app.meld('naar-maat', { maat: begrensdeMaat });
+    const gevuld = balk()?.querySelector('span');
+    if (!gevuld) return;
     gevuld.style.width = `${(begrensdeMaat + 1) / aantalMaten * 100}%`;
   }
 
   function gaNaarPointer(gebeurtenis) {
+    const voortgang = balk();
+    if (!voortgang || !app.stand.partituur) return;
     const kader = voortgang.getBoundingClientRect();
     const fractie = Math.min(1, Math.max(0, (gebeurtenis.clientX - kader.left) / kader.width));
     const aantalMaten = app.stand.partituur.partijen[0].maten.length;
@@ -43,20 +47,40 @@ export function start(app) {
     gaNaarMaat(maat);
   }
 
-  voortgang.addEventListener('pointerdown', (gebeurtenis) => {
-    voortgang.setPointerCapture(gebeurtenis.pointerId);
-    gaNaarPointer(gebeurtenis);
-  });
-  voortgang.addEventListener('pointermove', (gebeurtenis) => {
-    if (gebeurtenis.buttons) gaNaarPointer(gebeurtenis);
-  });
-  voortgang.addEventListener('keydown', (gebeurtenis) => {
-    if (gebeurtenis.key !== 'ArrowLeft' && gebeurtenis.key !== 'ArrowRight') return;
-    gebeurtenis.preventDefault();
-    const aantalMaten = app.stand.partituur.partijen[0].maten.length;
-    const huidigeMaat = Math.round((parseFloat(gevuld.style.width) || 0) / 100 * aantalMaten) - 1;
-    gaNaarMaat(huidigeMaat + (gebeurtenis.key === 'ArrowLeft' ? -1 : 1));
-  });
+  if (vlak) {
+    let sleept = false;
+    vlak.addEventListener('pointerdown', (gebeurtenis) => {
+      const voortgang = gebeurtenis.target.closest('.speler__voortgang');
+      if (!voortgang) return;
+      voortgang.tabIndex = 0;
+      voortgang.setPointerCapture(gebeurtenis.pointerId);
+      sleept = true;
+      gaNaarPointer(gebeurtenis);
+    });
+    vlak.addEventListener('pointermove', (gebeurtenis) => {
+      if (!gebeurtenis.target.closest('.speler__voortgang') || !sleept || !gebeurtenis.buttons) return;
+      gaNaarPointer(gebeurtenis);
+    });
+    vlak.addEventListener('pointerup', (gebeurtenis) => {
+      if (!gebeurtenis.target.closest('.speler__voortgang')) return;
+      sleept = false;
+    });
+    vlak.addEventListener('pointercancel', (gebeurtenis) => {
+      if (!gebeurtenis.target.closest('.speler__voortgang')) return;
+      sleept = false;
+    });
+    vlak.addEventListener('keydown', (gebeurtenis) => {
+      if (!gebeurtenis.target.closest('.speler__voortgang')) return;
+      if (gebeurtenis.key !== 'ArrowLeft' && gebeurtenis.key !== 'ArrowRight') return;
+      gebeurtenis.preventDefault();
+      if (!app.stand.partituur) return;
+      const aantalMaten = app.stand.partituur.partijen[0].maten.length;
+      const gevuld = balk()?.querySelector('span');
+      if (!gevuld) return;
+      const huidigeMaat = Math.round((parseFloat(gevuld.style.width) || 0) / 100 * aantalMaten) - 1;
+      gaNaarMaat(huidigeMaat + (gebeurtenis.key === 'ArrowLeft' ? -1 : 1));
+    });
+  }
 }
 
 // Kanaal per partij, zoals in schrijfMidi: kanaal 9 (slagwerk) wordt overgeslagen.
