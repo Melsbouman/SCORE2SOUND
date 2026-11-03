@@ -78,7 +78,7 @@ export function start(app) {
     status.className = 'zacht'
     status.setAttribute('role', 'status')
 
-    printKnop.addEventListener('click', () => {
+    const afdrukken = () => {
       const titel = document.title
       document.title = app.stand.partituur.titel?.trim() || 'SCORE2SOUND'
       window.addEventListener('afterprint', () => {
@@ -86,6 +86,27 @@ export function start(app) {
       }, { once: true })
       status.textContent = 'Kies in het venster Opslaan als PDF. Op elke pagina staat het watermerk SCORE2SOUND.'
       window.print()
+    }
+
+    printKnop.addEventListener('click', async () => {
+      status.textContent = 'De pdf wordt gemaakt...'
+      try {
+        const { naarMusicXML } = await import('/src/musicxml/schrijven.mjs')
+        const antwoord = await fetch('/api/pdf', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/xml' },
+          body: naarMusicXML(app.stand.partituur),
+        })
+        if (!antwoord.ok) {
+          afdrukken()
+          return
+        }
+        const naam = bestandsnaam(app.stand.partituur, 'pdf')
+        download(await antwoord.blob(), naam)
+        status.textContent = 'Gedownload: ' + naam
+      } catch {
+        afdrukken()
+      }
     })
 
     partijKeuze.addEventListener('change', () => {
