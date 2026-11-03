@@ -38,3 +38,6 @@ De server tekent de partituur met Verovio en zet elke pagina in een PDF met pdfk
 
 ## Toetsenbord en schermlezer
 Alles in de editor kan met het toetsenbord: tabbladen met Alt en een cijfer van 1 tot en met 6, noten met letters en pijlen, maten met Shift-klik en Ctrl+A, en zoomen met Ctrl en plus, min of nul. De knoppen hebben een zichtbare focusrand en een naam voor schermlezers.
+
+## Voortekens en samengestelde rusten
+Een mol, kruis of herstellingsteken wordt getekend als de toonhoogte afwijkt van de toonsoort of van een eerdere noot in dezelfde maat, op dezelfde plek op de balk. Een samengestelde rust (een blok met een cijfer erboven) telt als meerdere maten rust; de herkenning leest dat cijfer niet altijd en kan het aantal afleiden uit de repetitiecijfers.
