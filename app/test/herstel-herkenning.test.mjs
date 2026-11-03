@@ -12,7 +12,7 @@ const lees = async () => leesMusicXML(await readFile(new URL('./fixtures/sand-an
 
 test('herstelHerkenning doet alle herstelstappen in vaste volgorde', async () => {
   const gelezen = await lees();
-  const verwacht = markeerVerdachteNoten(vulOntbrekendeMaten(vulBeginRust(herstelMaatsoorten(gelezen))));
+  const verwacht = markeerVerdachteNoten(vulOntbrekendeMaten(vulBeginRust(herstelMaatsoorten(ruimZangtekstOp(gelezen)))));
   assert.deepEqual(herstelHerkenning(gelezen), verwacht);
 });
 
@@ -23,3 +23,4 @@ test('herstelHerkenning verandert de invoer niet en is een veilige tweede keer',
   assert.deepEqual(gelezen, kopie);
   assert.equal(herstelHerkenning(eerste).partijen[0].maten.length, eerste.partijen[0].maten.length);
 });
+import { ruimZangtekstOp } from '../src/model/zangtekst.mjs';
