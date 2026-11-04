@@ -98,3 +98,6 @@ app/src/model/aanduidingen.mjs bevat de bibliotheek met termen en de regel voor 
 
 ## De pdf in onderdelen
 app/src/export/pdf.mjs tekent de pagina's (Verovio, pdfkit en svg-to-pdfkit), het titelblok, het watermerk en de paginanummers. app/src/server/pdf.mjs is de route /api/pdf. app/public/js/views/export.js heeft de knoppen PDF downloaden en Alle partijen (PDF zip).
+
+## De herstelketen in onderdelen
+app/src/model/herstel.mjs doet in vaste volgorde de stappen uit zangtekst.mjs, tempotekst.mjs, maatsoorten.mjs, beginrust.mjs, ontbrekend.mjs en verdacht.mjs, plus titel.mjs voor de titel. herken.mjs roept hem aan na het lezen van Audiveris; de knop Herkenning herstellen in het blok Onzekere noten roept hem aan voor een al geopend stuk.
