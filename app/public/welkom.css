@@ -211,6 +211,63 @@ h2 {
   height: auto;
 }
 
+.w-blad {
+  position: relative;
+  overflow: hidden;
+  border-radius: 6px;
+  line-height: 0;
+  background: #fff;
+}
+
+.w-blad--scan .w-partituur {
+  filter: grayscale(1) contrast(.9) brightness(.96);
+}
+
+.w-scanlijn {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 22%;
+  background: linear-gradient(to bottom, #2b6a1f00, #2b6a1f33 70%, #2b6a1fcc 98%, #2b6a1f 100%);
+  box-shadow: 0 6px 18px #2b6a1f66;
+  transform: translateY(-100%);
+  animation: w-scan 4.5s ease-in-out infinite;
+}
+
+@keyframes w-scan {
+  0% { transform: translateY(-100%); }
+  70%, 100% { transform: translateY(455%); }
+}
+
+.w-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.w-blad--bewerk .w-partituur {
+  opacity: .9;
+}
+
+.w-noten .r { fill: #cf443988; stroke: #cf4439; stroke-width: 1.5; }
+.w-noten .g { fill: #2b6a1f77; stroke: #2b6a1f; stroke-width: 1.5; }
+.w-keuze { fill: none; stroke: #1b5fc9; stroke-width: 2.5; }
+.w-balk rect { fill: #252b22; }
+.w-balk path:last-child { fill: #252b22; }
+.w-balk text { fill: #fff; font: 700 17px/1 Poppins, sans-serif; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .w-keuze { animation: w-puls 1.8s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+}
+
+@keyframes w-puls {
+  50% { stroke-width: 4; opacity: .55; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .w-scanlijn { animation: none; transform: translateY(150%); }
+}
+
 .w-kaart figcaption {
   margin-top: .75rem;
   color: var(--groen);
