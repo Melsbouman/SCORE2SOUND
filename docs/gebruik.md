@@ -115,3 +115,6 @@ Druk op N om naar de volgende onzekere (rode) noot te gaan en op P voor de vorig
 
 ## Een noot of rust delen
 Kies een noot of rust en druk op S: hij wordt in twee gelijke helften gedeeld. Bij een noot staat er een overbinding tussen de twee helften. Is de duur niet te delen, dan gebeurt er niets.
+
+## Het tempo in procenten
+In de speler regel je het tempo in procenten van het tempo dat in het stuk staat: 100 procent is zoals geschreven, 50 procent is half zo snel. Kies Maten vooraf om eerst een of twee maten te laten tellen.
