@@ -357,3 +357,17 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
     scroll-behavior: auto !important;
   }
 }
+.skip {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip:focus {
+  left: 8px;
+  top: 8px;
+  padding: 8px;
+  background: var(--achtergrond);
+  color: var(--tekst);
+  z-index: 1000;
+}
+
