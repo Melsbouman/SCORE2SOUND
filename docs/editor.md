@@ -109,3 +109,6 @@ Pak een noot vast en sleep hem omhoog of omlaag: hij verspringt per notenbalklij
 
 ## Verplaatsen in de tijd
 Alt met de pijl naar rechts of links zet de gekozen noot op de volgende of vorige rust van dezelfde duur. Is er geen passende rust, dan gebeurt er niets.
+
+## Delen in tweeen
+Het model kan een rust of noot in twee helften delen (splitsRust en splitsNoot). Een knop in de editor volgt later.
