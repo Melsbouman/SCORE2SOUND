@@ -91,10 +91,16 @@ export async function maakPdf(musicxml, { watermerk = 'SCORE2SOUND', comprimeer 
         });
       }
     }
+    if (watermerk) {
+      doc.save();
+      doc.fillColor('#888888').fillOpacity(0.15).fontSize(80);
+      doc.rotate(-45, { origin: [doc.page.width / 2, doc.page.height / 2] });
+      doc.text(watermerk, 0, doc.page.height / 2 - 40, { width: doc.page.width, align: 'center', lineBreak: false });
+      doc.restore();
+    }
     doc.save();
-    doc.fillColor('#888888').fillOpacity(0.15).fontSize(80);
-    doc.rotate(-45, { origin: [doc.page.width / 2, doc.page.height / 2] });
-    doc.text(watermerk, 0, doc.page.height / 2 - 40, { width: doc.page.width, align: 'center', lineBreak: false });
+    doc.font('Times-Roman').fontSize(8).fillColor('#666666').fillOpacity(1);
+    doc.text('Gemaakt met SCORE2SOUND', 0, doc.page.height - 44, { width: doc.page.width, align: 'center', lineBreak: false });
     doc.restore();
     doc.save();
     doc.font('Times-Roman').fontSize(9).fillColor('#444444').fillOpacity(1);

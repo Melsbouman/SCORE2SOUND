@@ -27,7 +27,7 @@ export default async function pdf(verzoek) {
     return {
       status: 200,
       soort: 'application/pdf',
-      body: await maakPdf(musicxml, { titelblok }),
+      body: await maakPdf(musicxml, { titelblok, watermerk: verzoek.gebruiker ? false : 'SCORE2SOUND' }),
       koppen: { 'Content-Disposition': 'attachment; filename="partituur.pdf"' },
     };
   } catch {
