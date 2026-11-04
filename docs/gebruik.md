@@ -133,3 +133,9 @@ Je ziet de muziek daardoor in de editor verdeeld over de bladen van de export.
 Als je bent ingelogd, heeft de pdf geen watermerk.
 Onderaan staat dan `Gemaakt met SCORE2SOUND`.
 
+## Proberen zonder account
+
+Kies op het startscherm **Probeer een scan** om één pagina te proberen.
+Over de notatie staat een watermerk en exporteren is niet mogelijk.
+De beheerder moet deze mogelijkheid aanzetten met `SCORE2SOUND_PROEF=aan`.
+
