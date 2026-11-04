@@ -45,6 +45,27 @@ export function notatieDuur(type, punten = 0) {
   return duur;
 }
 
+// Herkent een te lange slotnoot van een gebalkte zestiende-reeks.
+export function duurGebalkteZestiende(elementen, elementIndex) {
+  const slot = elementen[elementIndex];
+  if (slot?.soort !== 'noot' || slot.balk !== 'eind') return null;
+
+  const reeks = [slot];
+  for (let index = elementIndex - 1; index >= 0; index -= 1) {
+    const element = elementen[index];
+    if (element.soort !== 'noot' || element.stem !== slot.stem
+      || element.notenbalk !== slot.notenbalk || !element.balk) break;
+    reeks.unshift(element);
+    if (element.balk === 'begin') break;
+  }
+
+  if (reeks.length < 2 || reeks[0].balk !== 'begin') return null;
+  const voorgaandeDuren = reeks.slice(0, -1).map((element) => element.duur);
+  const zestiende = notatieDuur('16th');
+  if (!voorgaandeDuren.every((duur) => duur === zestiende) || slot.duur <= zestiende) return null;
+  return zestiende;
+}
+
 // Rekent een onregelmatige notengroep om naar de gespeelde duur.
 export function triool(tikken, werkelijk = 3, normaal = 2) {
   return tikken * normaal / werkelijk;

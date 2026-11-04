@@ -1,4 +1,4 @@
-import { maatLengte } from './duur.mjs';
+import { duurGebalkteZestiende, maatLengte } from './duur.mjs';
 
 const STANDAARD_RUSTDUREN = [1920, 1440, 960, 720, 480, 360, 240, 180, 120, 90, 60, 45, 30];
 
@@ -22,14 +22,28 @@ export function herstelMaatduur(partituur, partijId, maatIndex) {
   const maat = partij?.maten.find((item) => item.index === maatIndex);
   if (!maat) return partituur;
 
-  const lengte = maat.elementen.reduce((max, element) => {
+  let kopie = null;
+  for (let index = 0; index < maat.elementen.length; index += 1) {
+    const duur = duurGebalkteZestiende(maat.elementen, index);
+    if (duur === null) continue;
+    kopie ??= structuredClone(partituur);
+    const gekopieerdePartij = kopie.partijen.find((item) => item.id === partijId);
+    const gekopieerdeMaat = gekopieerdePartij.maten.find((item) => item.index === maatIndex);
+    gekopieerdeMaat.elementen[index].duur = duur;
+  }
+
+  const werkMaat = kopie
+    ? kopie.partijen.find((item) => item.id === partijId).maten.find((item) => item.index === maatIndex)
+    : maat;
+
+  const lengte = werkMaat.elementen.reduce((max, element) => {
     if (element.soort !== 'noot' && element.soort !== 'rust') return max;
     return Math.max(max, element.start + element.duur);
   }, 0);
   const verwacht = maatLengte(maat.maatsoort);
-  if (lengte === verwacht) return partituur;
+  if (lengte === verwacht) return kopie ?? partituur;
 
-  const kopie = structuredClone(partituur);
+  kopie ??= structuredClone(partituur);
   const gekopieerdePartij = kopie.partijen.find((item) => item.id === partijId);
   const gekopieerdeMaat = gekopieerdePartij.maten.find((item) => item.index === maatIndex);
 
@@ -48,8 +62,8 @@ export function herstelMaatduur(partituur, partijId, maatIndex) {
   }
 
   let laatsteElement = null;
-  for (let index = maat.elementen.length - 1; index >= 0; index -= 1) {
-    const element = maat.elementen[index];
+  for (let index = werkMaat.elementen.length - 1; index >= 0; index -= 1) {
+    const element = werkMaat.elementen[index];
     if ((element.soort === 'noot' || element.soort === 'rust')
       && element.duur > 0 && element.start + element.duur === lengte) {
       laatsteElement = element;
