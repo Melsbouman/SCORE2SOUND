@@ -35,16 +35,19 @@ function schrijfSleutel(sleutel, meerdere) {
 
 function schrijfAttributes(maat, vorige, instrument) {
   const eerste = !vorige;
-  const keyVeranderd = eerste || !gelijk(maat.toonsoort, vorige.toonsoort);
-  const timeVeranderd = eerste || !gelijk(maat.maatsoort, vorige.maatsoort);
-  const clefVeranderd = eerste || !gelijk(maat.sleutels, vorige.sleutels);
+  const toonsoort = maat.toonsoort ?? { kwinten: 0, modus: 'majeur' };
+  const maatsoort = maat.maatsoort ?? { teller: 4, noemer: 4 };
+  const sleutels = maat.sleutels ?? [];
+  const keyVeranderd = eerste || !gelijk(toonsoort, vorige.toonsoort);
+  const timeVeranderd = eerste || !gelijk(maatsoort, vorige.maatsoort);
+  const clefVeranderd = eerste || !gelijk(sleutels, vorige.sleutels);
   if (!eerste && !keyVeranderd && !timeVeranderd && !clefVeranderd && !maat.maatrust) return '';
-  const balken = Math.max(1, ...maat.sleutels.map((sleutel) => sleutel.notenbalk || 1));
+  const balken = Math.max(1, ...sleutels.map((sleutel) => sleutel.notenbalk || 1));
   let inhoud = eerste ? tag('divisions', 480) : '';
   if (eerste && balken > 1) inhoud += tag('staves', balken);
-  if (keyVeranderd) inhoud += tag('key', tag('fifths', maat.toonsoort.kwinten) + tag('mode', modus(maat.toonsoort.modus)));
-  if (timeVeranderd) inhoud += tag('time', tag('beats', maat.maatsoort.teller) + tag('beat-type', maat.maatsoort.noemer));
-  if (clefVeranderd) inhoud += maat.sleutels.map((sleutel) => schrijfSleutel(sleutel, balken > 1)).join('');
+  if (keyVeranderd) inhoud += tag('key', tag('fifths', toonsoort.kwinten) + tag('mode', modus(toonsoort.modus)));
+  if (timeVeranderd) inhoud += tag('time', tag('beats', maatsoort.teller) + tag('beat-type', maatsoort.noemer));
+  if (clefVeranderd) inhoud += sleutels.map((sleutel) => schrijfSleutel(sleutel, balken > 1)).join('');
   const transpositie = instrument?.transpositie;
   if (eerste && transpositie && (transpositie.diatonisch || transpositie.chromatisch)) {
     inhoud += tag('transpose', tag('diatonic', transpositie.diatonisch) + tag('chromatic', transpositie.chromatisch));
@@ -245,7 +248,7 @@ function maakAccidentalen(maat) {
   for (const element of noten) {
     const toon = element.toonhoogte;
     const sleutel = `${toon.stap}:${toon.octaaf}`;
-    const geldend = huidig.has(sleutel) ? huidig.get(sleutel) : alterUitToonsoort(toon.stap, maat.toonsoort.kwinten);
+    const geldend = huidig.has(sleutel) ? huidig.get(sleutel) : alterUitToonsoort(toon.stap, (maat.toonsoort ?? { kwinten: 0, modus: 'majeur' }).kwinten);
     const accidental = element.overbinding?.eind || geldend === toon.alter ? null : namen[toon.alter];
     if (accidental) accidentalen.set(element, accidental);
     huidig.set(sleutel, toon.alter);
@@ -293,7 +296,7 @@ function schrijfNoot(element, meerdereBalken, partij, maat, weergave, markering,
 function schrijfStemmen(maat, partij, weergave, openBogen, accidentalen) {
   const elementen = maat.elementen.filter((element) => element.soort === 'noot' || element.soort === 'rust');
   const stemmen = [...new Set(elementen.map((element) => element.stem))].sort((a, b) => a - b);
-  const balken = Math.max(1, ...maat.sleutels.map((sleutel) => sleutel.notenbalk || 1));
+  const balken = Math.max(1, ...(maat.sleutels ?? []).map((sleutel) => sleutel.notenbalk || 1));
   let xml = '';
   stemmen.forEach((stem, index) => {
     let positie = 0;
