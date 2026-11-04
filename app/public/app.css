@@ -560,3 +560,10 @@ body.proef .proef-melding {
   text-align: center;
   background: #fff4cc;
 }
+.bladmuziek__colofon {
+  margin-top: 1rem;
+  color: #666;
+  font-size: 0.8rem;
+  text-align: center;
+}
+

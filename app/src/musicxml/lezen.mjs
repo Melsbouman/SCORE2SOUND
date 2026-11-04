@@ -10,11 +10,14 @@ function leesMusicXMLZonderArrangeur(xmlTekst) {
   const wortel = leesXml(xmlTekst);
   const delen = kinderen(kind(wortel, 'part-list'), 'score-part');
   if (delen.length === 0) throw new Error('Deze MusicXML heeft geen partijen.');
-  const componist = kinderen(kind(wortel, 'identification'), 'creator').find((c) => c.attr.type === 'composer');
+  const identification = kind(wortel, 'identification');
+  const componist = kinderen(identification, 'creator').find((c) => c.attr.type === 'composer');
+  const colofon = tekst(identification, 'rights');
   return {
     versie: 1,
     titel: tekst(kind(wortel, 'work'), 'work-title') || tekst(wortel, 'movement-title'),
     componist: componist ? componist.tekst : '',
+    ...(colofon ? { colofon } : {}),
     partijen: delen.map((deel) => leesPartij(deel, kinderen(wortel, 'part').find((p) => p.attr.id === deel.attr.id))),
   };
 }

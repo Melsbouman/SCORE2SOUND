@@ -309,6 +309,12 @@ percentage.textContent = Math.round((zoom / BEGINZOOM) * 100) + '%';
       svg.style.width = vasteRegels ? '100%' : `${paginaPixels}px`;
       blad.append(document.importNode(svg, true));
     }
+    if (typeof gegevens.colofon === 'string' && gegevens.colofon.length > 0) {
+      const colofon = document.createElement('p');
+      colofon.className = 'bladmuziek__colofon';
+      colofon.textContent = gegevens.colofon;
+      blad.append(colofon);
+    }
     vlak.replaceChildren(blad);
     laatstGetekend = musicxml;
     markeerGekozen(false);
