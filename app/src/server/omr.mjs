@@ -1,5 +1,6 @@
 // Haalt zekerheid, plek en pagina's uit een .omr-bestand van Audiveris (een zip met per blad xml en een afbeelding).
 // De MusicXML kent geen zekerheid; daarom koppelen we elke notenkop aan een noot, per maat, notenbalk en lijnpositie.
+import { stapelKaart } from '../model/stapels.mjs';
 import { leesXmlBoom, kind, kinderen } from '../musicxml/xml.mjs';
 import { instrumentBijNaam } from '../model/instrumenten.mjs';
 
@@ -140,6 +141,8 @@ export function koppelOmr(partituur, bladen) {
   let nietGekoppeld = 0;
   const redenen = { geenKopInMaat: 0, andereToonhoogte: 0, alGebruikt: 0 };
   let maatStart = 0;
+  const kaarten = uit.partijen.map((partij) => stapelKaart(partij.maten));
+  const maatBij = (partijIndex, stapel) => uit.partijen[partijIndex].maten[kaarten[partijIndex][stapel]];
 
   for (const blad of bladen) {
     for (const [systemIndex, system] of kinderen(kind(leesXmlBoom(blad.xml), 'page'), 'system').entries()) {
@@ -156,13 +159,13 @@ export function koppelOmr(partituur, bladen) {
       const tekstplekken = kinderen(inters, 'word').map(leesTekstplek).filter(Boolean);
       delen.forEach((deel, partijIndex) => {
         const balken = kinderen(deel, 'staff').map((staff) => Number(staff.attr.id));
-        const eersteMaat = uit.partijen[partijIndex].maten[maatStart];
+        const eersteMaat = maatBij(partijIndex, maatStart);
         if (stacks.length && eersteMaat) {
           eersteMaat.regelbegin = true;
           if (systemIndex === 0) eersteMaat.paginabegin = true;
         }
         stacks.forEach((stack, stackIndex) => {
-          const maat = uit.partijen[partijIndex].maten[maatStart + stackIndex];
+          const maat = maatBij(partijIndex, maatStart + stackIndex);
           if (maat) {
             const resultaat = koppelMaat(maat, balken, stack, koppen, rusten, blad.nummer);
             nietGekoppeld += resultaat.nietGekoppeld;

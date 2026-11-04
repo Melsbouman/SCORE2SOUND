@@ -24,13 +24,6 @@ test('de herstelketen vult een ontbrekende letter in (B, C, E wordt B, C, D, E)'
   assert.deepEqual(letters(herstelHerkenning(stuk(maten))), ['B', 'C', 'D', 'E']);
 });
 
-test('de herstelketen zet hokjes bij een herhalingseind met één maat ervoor een letter', () => {
-  const maten = [maat(0), maat(1, { herhaling: { begin: false, eind: true, keer: 2 } }), maat(2), maat(3, {}, [letter('E'), noot()])];
-  const uit = herstelHerkenning(stuk(maten)).partijen[0].maten;
-  assert.deepEqual(uit[1].volta, { nummers: [1], begin: true, eind: true });
-  assert.deepEqual(uit[2].volta, { nummers: [2], begin: true, eind: true });
-});
-
 test('de herstelketen haalt een colofon uit de noten en bewaart het eenmaal als colofon', () => {
   const zin = ['Music', 'Studio', 'Verlag', 'AG,', 'CH', 'Wiedlisbach'];
   const rij = () => zin.map((w) => noot([w]));

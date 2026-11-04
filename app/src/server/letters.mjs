@@ -1,6 +1,7 @@
 // Repetitieletters (A, B, C of een getal in een kader) uit de herkende bladen.
 // Audiveris leest zulke kaders niet als muziektekens; we zoeken ze in de zwart-witafbeelding van het blad,
 // lezen de letter uit het woord dat Audiveris erin vond, en anders nemen we de volgende letter van het alfabet.
+import { stapelKaart } from '../model/stapels.mjs';
 import { leesPng, vindKaders } from './kaders.mjs';
 import { leesXmlBoom, kind, kinderen } from '../musicxml/xml.mjs';
 
@@ -97,7 +98,8 @@ export function voegLettersToe(partituur, bladen) {
     if (letters.length > 0) {
       const aantalMaten = eerder.reduce((a, b) => a + b, 0);
       for (const partij of uit.partijen) {
-        for (const maat of partij.maten.slice(maatStart, maatStart + aantalMaten)) {
+        const kaart = stapelKaart(partij.maten);
+        for (const maat of partij.maten.slice(kaart[maatStart] ?? partij.maten.length, kaart[maatStart + aantalMaten] ?? partij.maten.length)) {
           maat.elementen = maat.elementen.filter((element) => element.type !== 'letter');
         }
       }
@@ -105,7 +107,7 @@ export function voegLettersToe(partituur, bladen) {
     for (const letter of letters) {
       const begin = maatStart + eerder.slice(0, letter.systeem).reduce((a, b) => a + b, 0) + letter.stack;
       for (const partij of uit.partijen) {
-        const maat = partij.maten[begin];
+        const maat = partij.maten[stapelKaart(partij.maten)[begin]];
         if (!maat || maat.elementen.some((e) => e.type === 'letter')) continue;
         maat.elementen.unshift({ soort: 'aanwijzing', start: 0, type: 'letter', waarde: letter.waarde, zekerheid: letter.zekerheid });
       }
