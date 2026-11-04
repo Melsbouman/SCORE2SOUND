@@ -55,7 +55,7 @@ done
 
 if [ "$VAST" != "-" ]; then
   echo "ACTIE NODIG: agent-vast bij #${VAST//,/, #}"
-elif [ "$OPEN" -lt "${AIFLOW_MIN_TAKEN:-6}" ]; then
+elif [ "$OPEN" -lt "${AIFLOW_MIN_TAKEN:-8}" ]; then
   echo "ACTIE NODIG: weinig taken ($OPEN open), maak er bij"
 else
   REVIEW=$(bash "$DIR/review.sh" 2>&1)

@@ -13,7 +13,7 @@ const lees = async () => leesMusicXML(await readFile(new URL('./fixtures/sand-an
 
 test('herstelHerkenning doet alle herstelstappen in vaste volgorde', async () => {
   const gelezen = await lees();
-  const verwacht = markeerVerdachteNoten(vulOntbrekendeMaten(vulBeginRust(herstelMaatsoorten(ruimZangtekstOp(gelezen)))));
+  const verwacht = markeerVerdachteNoten(vulOntbrekendeMaten(vulBeginRust(herstelMaatsoorten(herstelTeksten(ruimZangtekstOp(gelezen))))));
   assert.deepEqual(herstelHerkenning(gelezen), verwacht);
 });
 
@@ -29,3 +29,4 @@ import { tempoUitTekst } from '../src/model/tempotekst.mjs';
 
 const herstelMaatsoorten = (partituur) => herstelMaatsoortenZonderTempo(tempoUitTekst(partituur));
 import { vulLetterGaten } from '../src/model/lettergaten.mjs';
+import { herstelTeksten } from '../src/model/tekstherstel.mjs';
