@@ -98,3 +98,6 @@ verplaats-noot controleert dat een noot met een rust van dezelfde duur van plaat
 
 ## Tests van splitsen en het herstel
 splits-rust en splits-noot controleren dat een rust of noot in twee gelijke helften wordt gedeeld en dat een oneven duur niets verandert. herstel-fixture-maten controleert dat het herstel van Sand and Stars 58 maten zonder lege maat geeft en bij een tweede keer hetzelfde oplevert.
+
+## Tests van aanvullen en verplaatsen
+vul-maat-aan controleert dat een te korte maat een rust erbij krijgt en een volle maat niet verandert. verplaats-noot-fixture controleert verplaatsNoot op het herstelde Sand and Stars.
