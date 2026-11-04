@@ -60,17 +60,27 @@ export function scheidColofon(partituur) {
       aantallen.set(sleutel, (aantallen.get(sleutel) ?? 0) + 1);
     }
 
-    const colofonRegels = regels.filter((regel) => {
-      const sleutel = vergelijkbareTekst(regel.tekst);
+    const herhaald = (regel) => aantallen.get(vergelijkbareTekst(regel.tekst)) >= 2;
+    let colofonRegels = regels.filter((regel) => {
       const aantalLettergrepen = regel.noten.filter((noot) => noot.teksten[0].lettergreep !== '-').length;
-      return bevatColofonwoord(regel.tekst) || (aantalLettergrepen >= 3 && aantallen.get(sleutel) >= 2);
+      return bevatColofonwoord(regel.tekst) || (aantalLettergrepen >= 3 && herhaald(regel));
     });
+    // Een voetregel staat verspreid onder de noten van de laatste regel van de pagina: in een stuk zonder echte zangtekst
+    // (minder dan 40% van de noten heeft tekst) hoort alles vanaf de eerste regel met een colofonwoord erbij.
+    const noten = partij.maten.flatMap((maat) => maat.elementen).filter((e) => e.soort === 'noot' && !e.overbinding?.eind);
+    const metTekst = noten.filter((noot) => noot.teksten?.length).length;
+    const eerste = regels.findIndex((regel) => bevatColofonwoord(regel.tekst));
+    if (eerste >= 0 && noten.length > 0 && metTekst / noten.length < 0.4) {
+      const bekend = new Set([...colofonRegels, ...regels.slice(eerste)]);
+      colofonRegels = regels.filter((regel) => bekend.has(regel));
+    }
 
     for (const regel of colofonRegels) {
       for (const noot of regel.noten) delete noot.teksten;
     }
     if (colofon === null && colofonRegels.length > 0) {
-      colofon = colofonRegels.at(-1).tekst;
+      const unieke = [...new Set(colofonRegels.map((regel) => regel.tekst))];
+      colofon = colofonRegels.some(herhaald) ? colofonRegels.at(-1).tekst : unieke.join(' ');
     }
   }
 
