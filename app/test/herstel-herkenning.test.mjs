@@ -14,6 +14,8 @@ const lees = async () => leesMusicXML(await readFile(new URL('./fixtures/sand-an
 test('herstelHerkenning doet alle herstelstappen in vaste volgorde', async () => {
   const gelezen = await lees();
   const verwacht = markeerVerdachteNoten(vulLetterGaten(vulOntbrekendeMaten(vulBeginRust(herstelMaatsoorten(ruimZangtekstOp(teksttekensNaarAanduidingen(scheidColofon(gelezen).partituur)))))));
+  const { colofon } = scheidColofon(gelezen);
+  if (colofon) verwacht.colofon = colofon;
   assert.deepEqual(herstelHerkenning(gelezen), verwacht);
 });
 

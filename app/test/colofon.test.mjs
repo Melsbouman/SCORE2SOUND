@@ -53,3 +53,15 @@ test('twee verschillende korte zinnen die geen colofon zijn blijven staan', () =
   const p = stuk([maat(0, rij(0, ['Lo', 've', 'is', 'all'])), maat(1, rij(0, ['Sing', 'a', 'song', 'now']))]);
   assert.deepEqual(lettergrepen(scheidColofon(p).partituur), ['Lo', 've', 'is', 'all', 'Sing', 'a', 'song', 'now']);
 });
+
+test('een voetregel die verspreid onder de noten staat wordt één colofon (Galop: Copyright by Obrasso ... Switzerland)', () => {
+  const p = stuk([
+    maat(0, [noot(0, ['ff']), noot(480), noot(960)]),
+    maat(0, Array.from({ length: 12 }, (_, i) => noot(i * 480))),
+    maat(1, [noot(0, ['Copyright']), noot(480), noot(960, ['by']), noot(1440), noot(1920, ['Obrasso']), noot(2400, ['Verlag']), noot(2880), noot(3360, ['CH-4537'])]),
+    maat(2, [noot(0), noot(480, ['Wiedlisbach,']), noot(960), noot(1440, ['Switzerland'])]),
+  ]);
+  const uit = scheidColofon(p);
+  assert.equal(uit.colofon, 'Copyright by Obrasso Verlag CH-4537 Wiedlisbach, Switzerland');
+  assert.deepEqual(lettergrepen(uit.partituur), ['ff']);
+});
