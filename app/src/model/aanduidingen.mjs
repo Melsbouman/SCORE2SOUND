@@ -2,6 +2,8 @@ import { AANDUIDINGENLIJST } from './aanduidingenlijst.mjs';
 
 const GROEPEN_MET_AFKORTING = new Set(['Dynamiek', 'Volumeveranderingen']);
 
+export const SPELWIJZEN = ['open'];
+
 export const AANDUIDINGEN = Object.fromEntries(
   AANDUIDINGENLIJST.reduce((groepen, item) => {
     let groep = groepen.find(([naam]) => naam === item.groep);
