@@ -78,3 +78,9 @@ Gedaan met `VERGELIJK_UIT=<json> bash hermes/echte-controle.sh <pdf> 1`, daarna 
 - [ ] `open` boven de maat (spelwijze) en het tempo `Vivace` uit de kop ontbreken. (Claude)
 - [ ] De regelindeling van het origineel (new-system) staat op verkeerde maten (regelbegins vlak na elkaar); daarom staat `breaks: encoded` uit. Zoek uit waar `koppelOmr` de maten telt (samengestelde rust en ingevoegde maten). (Claude)
 - [ ] De titelkop, componist (Shoshtakowich in plaats van Shostakovich, OCR) en arr. Alan Fernie ontbreken in de uitkomst; het colofon (copyrightregel) moet onderaan komen. (Claude)
+
+## Onafhankelijk van Audiveris (vraag van Mels, 4 november 2026)
+- [ ] Vóór er geld voor gevraagd wordt: de licentie van Audiveris (AGPL-3.0, voor zover ik weet) laten nalopen. Online draait het op onze server als los programma; gebruikers hoeven niets te downloaden. Een gedownloade of meegeleverde versie (desktop, app) vraagt dat de broncode en licentie meegegeven worden. (Mels/Claude)
+- [ ] De herkenning achter één vaste koppeling zetten (een "motor" met dezelfde uitvoer), zodat een andere motor naast Audiveris kan: nu staat alles in `app/src/server/herken.mjs`, `omr.mjs` en `audiveris.mjs`. (Claude)
+- [ ] Audiveris leest meer dan het exporteert: in het blad-bestand staan woorden als `open` (Direction) en de hokjes 1. en 2. met hun plek, terwijl de MusicXML ze weglaat. Meer van zulke woorden zelf uit het blad-bestand halen (plaats en maat), zoals nu bij de letters en hokjes. (Claude)
+- [ ] Andere motoren naast Audiveris proberen en met `hermes/vergelijk.py` op onze oefenstukken vergelijken (bijvoorbeeld oemer en homr; licenties eerst nakijken). (Claude)
