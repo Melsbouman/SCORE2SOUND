@@ -1,13 +1,33 @@
 export function tempoUitTekst(partituur) {
   const nieuw = structuredClone(partituur);
+  const tempowoorden = new Map([
+    ['vivace', 140],
+    ['allegro', 120],
+    ['andante', 76],
+    ['moderato', 108],
+    ['adagio', 66],
+  ]);
   const patroon = /\(?\s*(?:[♩J]|𝅘𝅥)(\.?)\s*=\s*(?:c\.?|0\.)?\s*(\d{2,3})\s*\)?/;
 
   for (const partij of nieuw.partijen) {
-    for (const maat of partij.maten) {
+    for (const [maatIndex, maat] of partij.maten.entries()) {
       const elementen = [];
       for (const element of maat.elementen) {
         if (element.soort !== 'aanwijzing' || element.type !== 'tekst' || typeof element.waarde !== 'string') {
           elementen.push(element);
+          continue;
+        }
+
+        const woordtempo = maatIndex === 0 ? tempowoorden.get(element.waarde.trim().toLocaleLowerCase('nl')) : null;
+        if (woordtempo != null && maat.tempo == null) {
+          elementen.push({
+            soort: 'aanwijzing',
+            start: element.start,
+            type: 'tempo',
+            waarde: woordtempo,
+            zekerheid: 1,
+          });
+          if (element.start === 0) maat.tempo = woordtempo;
           continue;
         }
 
