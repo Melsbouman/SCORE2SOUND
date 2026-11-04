@@ -41,6 +41,8 @@ export function vulLetterGaten(stuk) {
   for (const partij of resultaat.partijen) {
     let letters = lettersVan(partij);
     if (letters.length === 0) continue;
+    // Alleen een reeks losse hoofdletters (A, B, C ...) is een strikte reeks. Repetitiecijfers (22, 26, 30, zoals in Distant Land) of een mengeling blijven ongemoeid.
+    if (!letters.every(({ element }) => /^[A-Z]$/.test(String(element.waarde)))) continue;
 
     let vorige = letterGetal(letters[0].element.waarde);
     for (const letter of letters.slice(1)) {
