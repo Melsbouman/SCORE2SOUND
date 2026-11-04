@@ -111,7 +111,124 @@ export function start(app) {
   lijst.append(...knoppen);
   lint.append(lijst, ...panelen);
   lint.hidden = app.stand.partituur == null;
-  app.op('partituur', (partituur) => {
-    lint.hidden = partituur == null;
+
+  const zoomSleutel = 'score2sound-zoom';
+  const zoomenPerPartituurSleutel = `${zoomSleutel}-partituren`;
+  let huidigePartituurSleutel = null;
+  let laatstWaargenomenZoom = null;
+  let teHerstellenZoom = null;
+
+  function geldigeZoom(waarde) {
+    return Number.isFinite(waarde) && waarde >= 0.3 && waarde <= 2;
+  }
+
+  function leesZoom() {
+    try {
+      const zoom = Number(localStorage.getItem(zoomSleutel));
+      return geldigeZoom(zoom) ? zoom : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function sleutelVoorPartituur(partituur) {
+    const projectId = app.stand.project?.id;
+    const identiteit = projectId
+      ? `project:${projectId}`
+      : JSON.stringify(partituur);
+    let hash = 2166136261;
+    for (let index = 0; index < identiteit.length; index++) {
+      hash = Math.imul(hash ^ identiteit.charCodeAt(index), 16777619);
+    }
+    return (projectId ? 'project:' : 'partituur:') + (hash >>> 0).toString(16);
+  }
+
+  function leesZoomenPerPartituur() {
+    try {
+      const opgeslagen = JSON.parse(localStorage.getItem(zoomenPerPartituurSleutel) || '{}');
+      return opgeslagen && typeof opgeslagen === 'object' && !Array.isArray(opgeslagen)
+        ? opgeslagen
+        : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function bewaarZoomPerPartituur(zoom) {
+    if (!huidigePartituurSleutel || !geldigeZoom(zoom)) return;
+    try {
+      const opgeslagen = leesZoomenPerPartituur();
+      opgeslagen[huidigePartituurSleutel] = zoom;
+      localStorage.setItem(zoomenPerPartituurSleutel, JSON.stringify(opgeslagen));
+    } catch {}
+  }
+
+  function zoomSneltoets(toets) {
+    document.dispatchEvent(new KeyboardEvent('keydown', {
+      key: toets,
+      ctrlKey: true,
+      bubbles: true,
+    }));
+  }
+
+  function stelZoomIn(zoom) {
+    if (!geldigeZoom(zoom)) return;
+    zoomSneltoets('0');
+    let huidigeZoom = leesZoom();
+    if (huidigeZoom === null) return;
+    while (huidigeZoom < zoom && zoom - huidigeZoom >= 0.05) {
+      zoomSneltoets('+');
+      huidigeZoom = leesZoom();
+      if (huidigeZoom === null) return;
+    }
+    while (huidigeZoom > zoom && huidigeZoom - zoom >= 0.05) {
+      zoomSneltoets('-');
+      huidigeZoom = leesZoom();
+      if (huidigeZoom === null) return;
+    }
+  }
+
+  function verwerkZoom() {
+    const zoom = leesZoom();
+    if (zoom === null) return;
+    if (teHerstellenZoom !== null) {
+      if (zoom !== teHerstellenZoom) return;
+      teHerstellenZoom = null;
+    }
+    if (zoom === laatstWaargenomenZoom) return;
+    laatstWaargenomenZoom = zoom;
+    bewaarZoomPerPartituur(zoom);
+  }
+
+  const zoomObserver = new MutationObserver(verwerkZoom);
+  zoomObserver.observe(document.getElementById('weergave'), {
+    childList: true,
+    characterData: true,
+    subtree: true,
   });
+
+  function veranderPartituur(partituur) {
+    lint.hidden = partituur == null;
+    if (partituur == null) {
+      huidigePartituurSleutel = null;
+      teHerstellenZoom = null;
+      return;
+    }
+
+    huidigePartituurSleutel = sleutelVoorPartituur(partituur);
+    const opgeslagenZoom = leesZoomenPerPartituur()[huidigePartituurSleutel];
+    const zoom = leesZoom();
+    if (geldigeZoom(opgeslagenZoom)) {
+      teHerstellenZoom = opgeslagenZoom;
+      laatstWaargenomenZoom = zoom;
+      stelZoomIn(opgeslagenZoom);
+    } else {
+      teHerstellenZoom = null;
+      laatstWaargenomenZoom = zoom;
+      bewaarZoomPerPartituur(zoom);
+    }
+  }
+
+  app.op('partituur', veranderPartituur);
+  veranderPartituur(app.stand.partituur);
 }
