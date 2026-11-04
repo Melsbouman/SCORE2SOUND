@@ -6,6 +6,8 @@ export function start() {
   const sectie = document.querySelector('#inloggen');
   const kop = document.querySelector('header.kop');
   if (!sectie || !kop) return;
+  // Proefmodus (?proef=1): geen inlog, de editor is zichtbaar; de rest staat onderaan dit bestand.
+  if (new URLSearchParams(window.location.search).get('proef') === '1') return;
 
   document.body.classList.add('inloggen-niet-ingelogd');
   fetch('/api/account')
