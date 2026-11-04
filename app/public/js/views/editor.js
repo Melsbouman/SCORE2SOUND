@@ -567,7 +567,42 @@ export function start(app) {
       pas(verwijderAlle(app.stand.partituur, idsVoorBewerking()));
       return;
     }
-    if (toets === 'ArrowLeft' || toets === 'ArrowRight') {
+    if ((toets === 'ArrowRight' || toets === 'ArrowLeft') && gebeurtenis.altKey && !gebeurtenis.ctrlKey && !gebeurtenis.metaKey && !gebeurtenis.shiftKey && gekozen !== null && gekozenIds.length === 1) {
+      const { partijId, maatIndex, elementIndex } = leesId(gekozen);
+      const noot = zoekElement(app.stand.partituur, gekozen);
+      const richting = toets === 'ArrowRight' ? 1 : -1;
+      const maten = app.stand.partituur.partijen.find((p) => p.id === partijId).maten;
+      let doelMaatIndex = maatIndex;
+      let doelElementIndex = elementIndex + richting;
+      let doel = null;
+      while (doelMaatIndex >= 0 && doelMaatIndex < maten.length && doel === null) {
+        const elementen = maten[doelMaatIndex].elementen;
+        while (doelElementIndex >= 0 && doelElementIndex < elementen.length) {
+          const element = elementen[doelElementIndex];
+          if (element.soort === 'rust' && element.duur === noot.duur) {
+            doel = { maatIndex: doelMaatIndex, elementIndex: doelElementIndex };
+            break;
+          }
+          doelElementIndex += richting;
+        }
+        if (doel === null) {
+          doelMaatIndex += richting;
+          doelElementIndex = richting === 1 ? 0 : maten[doelMaatIndex]?.elementen.length - 1;
+        }
+      }
+      if (doel !== null) {
+        const doelId = 'n-' + partijId + '-' + doel.maatIndex + '-' + doel.elementIndex;
+        pas(verplaatsNoot(app.stand.partituur, gekozen, doelId));
+        gekozen = doelId;
+        gekozenIds = [doelId];
+        app.meld('kies-noot', { id: doelId });
+      }
+      gebeurtenis.preventDefault();
+      gebeurtenis.stopImmediatePropagation();
+      return;
+    }
+
+    if ((toets === 'ArrowLeft' || toets === 'ArrowRight') && !gebeurtenis.altKey) {
       if (gebeurtenis.ctrlKey || gebeurtenis.metaKey || (element?.soort !== 'noot' && element?.soort !== 'rust')) return;
       const gelezen = leesId(gekozen);
       const partij = gelezen && partituur?.partijen.find((kandidaat) => kandidaat.id === gelezen.partijId);
@@ -781,3 +816,4 @@ if (typeof document !== "undefined") {
   document.addEventListener("DOMContentLoaded", groepeerEditorKnoppenbalk);
   new MutationObserver(groepeerEditorKnoppenbalk).observe(document.documentElement, { childList: true, subtree: true });
 }
+import { verplaatsNoot } from '/src/model/corrigeren.mjs';
