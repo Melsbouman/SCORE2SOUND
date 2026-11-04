@@ -196,3 +196,6 @@ splitsRust(partituur, id) verdeelt een rust in twee rusten met de halve duur; sp
 
 ## Een maat aanvullen
 vulMaatAan(partituur, partijId, maatIndex) vult een te korte maat aan het eind aan met een rust tot de maatduur (teller maal 1920 gedeeld door noemer). Een volle of te volle maat blijft ongewijzigd; een lege maat krijgt een rust voor de hele maat.
+
+## Waar de bewerkfuncties staan
+Alle bewerkingen op een stuk (verplaatsNoot, splitsRust, splitsNoot, vulMaatAan en de oudere zoals verschuif en zetDuur) staan in app/src/model/corrigeren.mjs. Elke functie geeft een nieuw stuk terug en laat de invoer ongemoeid.
