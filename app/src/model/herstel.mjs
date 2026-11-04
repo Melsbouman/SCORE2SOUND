@@ -2,6 +2,7 @@ import { herstelMaatsoorten as herstelMaatsoortenZonderTempo } from './maatsoort
 import { vulBeginRust } from './beginrust.mjs';
 import { vulOntbrekendeMaten } from './ontbrekend.mjs';
 import { markeerVerdachteNoten } from './verdacht.mjs';
+import { verwijderDubbeleSleutels } from './stapels.mjs';
 
 const hersteldePartituren = new WeakSet();
 
@@ -11,7 +12,7 @@ export function herstelHerkenning(partituur) {
   if (hersteldePartituren.has(partituur)) return partituur;
   partituur = { ...partituur, titel: herstelTitel(partituur.titel) };
   const { partituur: zonderColofon, colofon } = scheidColofon(partituur);
-  const hersteld = markeerVerdachteNoten(vulLetterGaten(vulOntbrekendeMaten(vulBeginRust(herstelMaatsoorten(ruimZangtekstOp(teksttekensNaarAanduidingen(zonderColofon)))))));
+  const hersteld = markeerVerdachteNoten(vulLetterGaten(vulOntbrekendeMaten(verwijderDubbeleSleutels(vulBeginRust(herstelMaatsoorten(ruimZangtekstOp(teksttekensNaarAanduidingen(zonderColofon))))))));
   if (colofon) hersteld.colofon = colofon;
   hersteldePartituren.add(hersteld);
   return hersteld;
