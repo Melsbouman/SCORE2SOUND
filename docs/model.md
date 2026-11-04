@@ -55,6 +55,14 @@ Na herkenning verwijst de partituur naar de pagina's waar hij vandaan komt. Zo v
 Een instrument in C heeft `{ chromatisch: 0, diatonisch: 0 }`. Een bugel in Bes: `{ chromatisch: -2, diatonisch: -1 }`. Een althoorn in Es: `{ chromatisch: -9, diatonisch: -5 }`.
 
 ## Maat
+
+`maatrust` is `true` als de maat als één maatrust is genoteerd.
+
+Bij een tempoaanwijzing bevat `getoond` de tekst waarmee de aanwijzing in de partituur wordt getoond.
+
+Bij een noot bevat `teksten` de zangteksten die bij de noot horen.
+
+In de stand is `verborgen` `true` als de stand niet wordt getoond.
 ```js
 {
   nummer: '1',                   // het maatnummer zoals op het blad (tekst: kan '0' of 'X1' zijn)
