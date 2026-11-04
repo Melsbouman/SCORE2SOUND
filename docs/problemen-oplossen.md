@@ -59,3 +59,12 @@ Gebruik bij voorkeur een schoon origineel of maak een rechte scan op 300 dpi.
 Scan in zwart-wit en zorg dat potloodstrepen niet door de notenbalken lopen.
 Kun je de kopie niet verbeteren, zoek dan naar een schone pdf van dezelfde muziek.
 Een bestaand MusicXML-bestand is de beste route als dat beschikbaar is.
+## Het geluid valt weg
+
+- Herlaad de pagina en wacht tot de klankbank van 40 MB is geladen.
+- Sluit andere tabbladen die geluid afspelen.
+- Kijk in de mixer of een partij niet op demp staat en of solo niet aanstaat.
+- Probeer de metronoom uit te zetten en zet **Maten vooraf** op **Geen**.
+- Probeer een ander stuk om te controleren of het probleem bij dit stuk hoort.
+- Blijft het geluid wegvallen? Meld dan aan Mels om welk stuk en welke maat het gaat.
+
