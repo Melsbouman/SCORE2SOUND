@@ -305,7 +305,12 @@ percentage.textContent = Math.round((zoom / BEGINZOOM) * 100) + '%';
     }
     for (let pagina = 1; pagina <= tk.getPageCount(); pagina++) {
       const svg = new DOMParser().parseFromString(tk.renderToSVG(pagina), 'image/svg+xml').documentElement;
-      svg.classList.add('bladmuziek__pagina');
+    svg.classList.add('bladmuziek__pagina');
+    svg.setAttribute('aria-label', `Pagina ${pagina}`);
+    const paginanummer = document.createElement('p');
+    paginanummer.className = 'bladmuziek__paginanr';
+    paginanummer.textContent = `pagina ${pagina} van ${tk.getPageCount()}`;
+    queueMicrotask(() => svg.after(paginanummer));
       svg.style.width = vasteRegels ? '100%' : `${paginaPixels}px`;
       blad.append(document.importNode(svg, true));
     }

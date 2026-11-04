@@ -421,6 +421,10 @@ select, input[type="text"], input[type="number"] { font: inherit; color: var(--k
 }
 
 @media print {
+  .bladmuziek__paginanr {
+    display: none;
+  }
+
   @page { margin: 15mm; }
   body { color: #000000; background: #ffffff; }
   .kop, main > :not(#weergave) { display: none !important; }
@@ -564,6 +568,13 @@ body.proef .proef-melding {
   margin-top: 1rem;
   color: #666;
   font-size: 0.8rem;
+  text-align: center;
+}
+
+.bladmuziek__paginanr {
+  color: #666;
+  font-size: 0.75rem;
+  margin: 0 0 24px;
   text-align: center;
 }
 
