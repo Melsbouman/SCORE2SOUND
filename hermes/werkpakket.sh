@@ -256,13 +256,13 @@ voer_uit() {
       timeout 900 node "$copilot_js" -p "$(cat "$WERK/prompt.txt")" --no-ask-user --allow-tool=write --deny-tool=shell $modelarg > "$WERK/agent.out" 2>&1
       ;;
     codex)
-      # Het Codex-programma via node, met de inlog van het ChatGPT-account. De shell staat uit (shell_tool en
-      # unified_exec), dus het kan alleen bestanden bewerken, en de sandbox houdt dat binnen de kloon.
+      # Het Codex-programma via node, met de inlog van het ChatGPT-account. Zonder shell zocht het naar Kladblok via computer use en
+      # veranderde niets; nu mag het de bestanden lezen, en de sandbox (workspace-write) houdt schrijven binnen de kloon.
       # De opdracht gaat via stdin, zodat een opdracht van meerdere regels heel aankomt.
       local codex_js modelarg=()
       codex_js="${AIFLOW_CODEX_JS:-$(npm root -g)/@openai/codex/bin/codex.js}"
       [ "$2" = "standaard" ] || modelarg=(-m "$2")
-      timeout 900 node "$codex_js" exec --ephemeral --json --color never -s workspace-write --disable shell_tool --disable unified_exec "${modelarg[@]}" -o "$WERK/laatste.txt" - < "$WERK/prompt.txt" > "$WERK/agent.out" 2>&1
+      timeout 900 node "$codex_js" exec --ephemeral --json --color never -s workspace-write "${modelarg[@]}" -o "$WERK/laatste.txt" - < "$WERK/prompt.txt" > "$WERK/agent.out" 2>&1
       ;;
   esac
   if [ "$(git rev-parse HEAD)" != "$BASIS_HEAD" ]; then
