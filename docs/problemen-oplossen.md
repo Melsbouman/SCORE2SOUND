@@ -45,3 +45,6 @@ Probeer eerst Herkenning herstellen in het tabblad Noten. Wat de herkenning niet
 6. Een cijfer boven een rustblok kan meerdere rustmaten aangeven; de herkenning leest dat cijfer niet altijd goed.
 7. Pas een maat aan met Maatduur herstellen, of voeg met Maat invoegen een ontbrekende maat toe; Maat verwijderen haalt een gekozen maat uit alle partijen.
 8. Maak een verkeerde bewerking ongedaan met Ctrl/Cmd + Z.
+
+## Ik zie de startpagina, maar wil de editor
+Klik op Inloggen of ga naar /app. Ben je ingelogd en zie je toch de startpagina, wis dan de cookies van de website en log opnieuw in.
