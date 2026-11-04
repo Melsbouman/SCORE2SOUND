@@ -1,6 +1,7 @@
 // Notatie tekenen met Verovio in #weergave.
 // Tekent opnieuw bij een nieuwe partituur (via naarMusicXML uit /src/musicxml/schrijven.mjs) of bij app.meld('musicxml', tekst).
 // Luistert naar 'naar-maat' ({ maat }: markeert en toont die maat) en 'speel-maat' ({ maat } of null: de maat die nu klinkt).
+import { heeftOrigineleRegels } from '../../src/musicxml/regels.mjs';
 import { zetTitelgegevens } from '../../src/model/titelgegevens.mjs';
 
 const VASTE_PAGINABREEDTE = 2100;
@@ -213,7 +214,7 @@ percentage.textContent = Math.round((zoom / BEGINZOOM) * 100) + '%';
         pageHeight: Math.round(paginaBreedte * bladbron.hoogte / bladbron.breedte),
         adjustPageHeight: false,
       } : { adjustPageHeight: true }),
-      breaks: !pdfVorm && (vasteRegels || heeftPaginavorm) ? 'encoded' : 'auto',
+      breaks: (pdfVorm && heeftOrigineleRegels(musicxml)) || (!pdfVorm && (vasteRegels || heeftPaginavorm)) ? 'encoded' : 'auto',
       footer: 'none',
       header: 'none',
       ...(pdfVorm ? {} : { font: 'Leland', pageMarginLeft: 60, pageMarginRight: 60, pageMarginTop: 60 }),
