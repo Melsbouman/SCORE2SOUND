@@ -1,6 +1,6 @@
 export function tempoUitTekst(partituur) {
   const nieuw = structuredClone(partituur);
-  const patroon = /\(?\s*(?:[♩J]|𝅘𝅥)(\.?)\s*=\s*(\d{2,3})\s*\)?/;
+  const patroon = /\(?\s*(?:[♩J]|𝅘𝅥)(\.?)\s*=\s*(?:c\.?|0\.)?\s*(\d{2,3})\s*\)?/;
 
   for (const partij of nieuw.partijen) {
     for (const maat of partij.maten) {

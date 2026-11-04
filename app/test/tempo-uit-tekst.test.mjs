@@ -55,3 +55,11 @@ test('de invoer verandert niet en het echte stuk krijgt tempo 222 bij Vivace ris
   assert.deepEqual(p, kopie);
   assert.deepEqual(tempi(nieuw).map((t) => t.waarde), [222]);
 });
+
+test('een tempo met c. of een als nul gelezen c. (J = c.63 en J = 0.63) wordt 63', () => {
+  for (const waarde of ['Poco più mosso ♩ = c.63', 'Poco più mosso J = 0.63', 'Andante misterioso ♩ = c.60']) {
+    const nieuw = tempoUitTekst(stuk([tekst(waarde), noot(0)]));
+    assert.equal(tempi(nieuw).length, 1, waarde);
+    assert.ok([63, 60].includes(tempi(nieuw)[0].waarde), waarde);
+  }
+});
