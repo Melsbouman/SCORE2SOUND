@@ -12,7 +12,7 @@ test('audiverisPad neemt AUDIVERIS, anders de standaardplek', () => {
 
 test('de eerste ronde herkent en bewaart, zonder te exporteren', () => {
   assert.deepEqual(transcribeerArgumenten({ invoer: 'a/in.pdf', uitmap: 'a/uit', paginas: '' }), [
-    '-batch', '-transcribe', '-save', '-constant', 'org.audiveris.omr.Main.sheetStepTimeOut=240', '-output', 'a/uit', '--', 'a/in.pdf',
+    '-batch', '-transcribe', '-save', '-constant', 'org.audiveris.omr.Main.sheetStepTimeOut=240', '-constant', 'org.audiveris.omr.sheet.ProcessingSwitches.indentations=false', '-output', 'a/uit', '--', 'a/in.pdf',
   ]);
   assert.deepEqual(transcribeerArgumenten({ invoer: 'in.pdf', uitmap: 'uit', paginas: '1-4 7' }).slice(0, 7), [
     '-batch', '-transcribe', '-save', '-sheets', '1-4', '7', '-constant',

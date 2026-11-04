@@ -36,6 +36,8 @@ export function transcribeerArgumenten({ invoer, uitmap, paginas, limiet = 240 }
   return [
     '-batch', '-transcribe', '-save', ...bladen,
     '-constant', `org.audiveris.omr.Main.sheetStepTimeOut=${limiet}`,
+    // Eén partituur per boek: zonder dit splitst Audiveris een pagina met korte oefeningen in meerdere scores die elkaar overschrijven.
+    '-constant', 'org.audiveris.omr.sheet.ProcessingSwitches.indentations=false',
     '-output', uitmap, '--', invoer,
   ];
 }
