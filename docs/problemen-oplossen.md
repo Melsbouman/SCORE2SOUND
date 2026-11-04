@@ -32,3 +32,6 @@ Houd Ctrl ingedrukt en scroll boven het stuk, of gebruik de knoppen rechtsboven 
 
 ## Op een telefoon
 Het stuk begint op 50 procent. Knijp met twee vingers boven het stuk om in of uit te zoomen. De knoppenbalk in het lint scrolt opzij. De speler onderaan toont alleen de knoppen en de voortgangsbalk.
+
+## De herkenning mist maten of noten
+Probeer eerst Herkenning herstellen in het tabblad Noten. Wat de herkenning niet kon lezen, blijft fout; kies daarvoor een scherpere scan of foto, of geef een MusicXML-bestand op als dat er is. Maten die ontbreken tussen repetitiecijfers staan als rode rust.
