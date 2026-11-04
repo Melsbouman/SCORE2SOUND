@@ -128,3 +128,11 @@ In de editor deelt S de gekozen noot of rust in twee gelijke helften, met splits
 
 ## Maten kiezen en kopieren
 Ctrl+A kiest alle maten, Ctrl+C kopieert de gekozen maten en Ctrl+V plakt ze vanaf de gekozen maat. Delete maakt de gekozen maten leeg.
+## Aanduidingen
+
+De aanduidingen zijn verdeeld in acht groepen: sterkte, tempo, speelwijze, karakter, techniek, versiering, herhaling en navigatie.
+De herkenning vervangt tekst door de aanduiding uit de lijst die er het meest op lijkt.
+Als die herkenning onzeker is, wordt de aanduiding rood weergegeven.
+Een sterkte zoals `f` of `mf` en een speelwijze zoals Marcato staan los van elkaar.
+Woorden die niet duidelijk op een aanduiding uit de lijst lijken, blijven staan.
+
