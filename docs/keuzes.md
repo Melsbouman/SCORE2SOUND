@@ -113,3 +113,6 @@ Audiveris noemt een partij Voice. De herkenning zoekt in de kopregels van de pag
 
 ## Tempo uit de tekst
 Audiveris leest een tempoaanduiding als Vivace risoluto (J. = 148) als gewone tekst, waarbij het notenteken als J wordt gelezen. De herkenning haalt het getal eruit, rekent een punt-kwart om naar kwarten per minuut (148 wordt 222) en zet het als tempo in het stuk. Het afspelen volgt dan het tempo van het stuk, en het percentage in de speler past dat aan.
+
+## Een pagina die te zwaar is
+Audiveris geeft een pagina soms op na een tijdslimiet (bij Extreme Make-over blad 3 en 6). De herkenning slaat zo'n pagina dan over met de melding Pagina N is overgeslagen en kan hervatten bij de stap waar de pagina vastliep. De rest van het stuk blijft bruikbaar.
