@@ -95,7 +95,12 @@ function dichtstbij(woord) {
     for (const naam of namen) {
       const volledig = afstand(woord, naam);
       const begin = naam.length > woord.length ? afstand(woord, naam.slice(0, woord.length)) + 0.5 : Infinity;
-      const score = Math.min(volledig, begin);
+      // Een gelezen woord waarvan het begin ontbreekt of fout is (slent. voor rallentando) lijkt op een stuk uit het midden of einde van de naam.
+      let midden = Infinity;
+      if (woord.length >= 4 && naam.length > woord.length) {
+        for (let van = 1; van + woord.length <= naam.length; van += 1) midden = Math.min(midden, afstand(woord, naam.slice(van, van + woord.length)) + 0.75);
+      }
+      const score = Math.min(volledig, begin, midden);
       if (!beste || score < beste.score) beste = { item, score };
     }
   }

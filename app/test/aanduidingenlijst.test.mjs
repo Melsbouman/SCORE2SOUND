@@ -59,3 +59,8 @@ test('herstelTeksten werkt op de echte maten: een tekstaanwijzing wordt een of t
   ]);
   assert.equal(elementen(nieuw).filter((e) => e.soort === 'noot').length, 1);
 });
+
+test('een woord met een fout begin (slent.) wordt het woord uit de lijst waar het in zit (Rallentando)', () => {
+  assert.deepEqual(leesAanduidingen('slent.'), [{ type: 'tekst', waarde: 'Rallentando' }]);
+  assert.deepEqual(leesAanduidingen('open'), [{ type: 'tekst', waarde: 'open' }]);
+});
