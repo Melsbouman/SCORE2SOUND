@@ -12,3 +12,9 @@ test('behoudt correcte en onbekende tekst', () => {
   assert.equal(herstelMuziekterm('dolce'), 'dolce');
   assert.equal(herstelMuziekterm('xyzqwerty'), 'xyzqwerty');
 });
+
+test('marc. (speelwijze: marcato) wordt hersteld uit mare en marc', () => {
+  assert.equal(herstelMuziekterm('mare'), 'marc.');
+  assert.equal(herstelMuziekterm('marc'), 'marc.');
+  assert.equal(herstelMuziekterm('marc.'), 'marc.');
+});
