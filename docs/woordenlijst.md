@@ -36,3 +36,5 @@ De muziektermen in SCORE2SOUND, met de term uit MusicXML. Gebruik in teksten van
 | maten vooraf | voorinteller | het aantal maten tikken dat voor het stuk klinkt |
 | voorteken | (geen) | het mol-, kruis- of herstellingsteken vlak voor een noot |
 | samengestelde rust | meermaats-rust | een blok met een cijfer erboven dat meerdere maten rust voorstelt |
+| herstelketen | (geen) | de vaste stappen die bekende leesfouten van de herkenning herstellen |
+| verdachte noot | (geen) | een noot die ver van haar buren ligt en daarom rood wordt gemarkeerd |
