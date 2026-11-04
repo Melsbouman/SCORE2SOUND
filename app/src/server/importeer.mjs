@@ -1,7 +1,8 @@
 import { leesMusicXML } from '../musicxml/lezen.mjs';
-import { kinderen, leesXml, tekst } from '../musicxml/xml.mjs';
+import { kind, kinderen, leesXml, tekst } from '../musicxml/xml.mjs';
 import { controleerMaatduur } from '../controle/maatduur.mjs';
 import { instrumentBijNaam } from '../model/instrumenten.mjs';
+import { verwijderValseTweedeStemmen } from '../model/corrigeren.mjs';
 import { leesZip } from './zip.mjs';
 
 function vulPartijnamenAan(partituur, xml) {
@@ -21,6 +22,12 @@ function vulPartijnamenAan(partituur, xml) {
       transpositie: gevonden.instrument.transpositie,
     });
   }
+}
+
+function isAudiveris(xml) {
+  const identificatie = kind(leesXml(xml), 'identification');
+  const encoding = kind(identificatie, 'encoding');
+  return kinderen(encoding, 'software').some((software) => /Audiveris/i.test(tekst(software)));
 }
 
 async function importeerOngecomprimeerd(verzoek) {
@@ -45,9 +52,16 @@ async function importeerOngecomprimeerd(verzoek) {
 
   try {
     const xml = verzoek.body.toString('utf8').replace(/^\uFEFF/, '');
-    const partituur = leesMusicXML(xml);
+    let partituur = leesMusicXML(xml);
     vulPartijnamenAan(partituur, xml);
-    return { status: 200, body: { partituur, meldingen: controleerMaatduur(partituur) } };
+    let meldingen = [];
+    if (isAudiveris(xml)) {
+      const correctie = verwijderValseTweedeStemmen(partituur);
+      partituur = correctie.partituur;
+      meldingen = correctie.meldingen;
+    }
+    meldingen.push(...controleerMaatduur(partituur));
+    return { status: 200, body: { partituur, meldingen } };
   } catch (fout) {
     return { status: 422, body: { fout: fout.message } };
   }
