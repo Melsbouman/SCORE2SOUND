@@ -46,3 +46,7 @@ Het eerste account kan zich zonder uitnodigingscode registreren zolang er geen c
 
 ## De startpagina en /app
 De website opent op de startpagina (welkom.html) zolang je geen sessie hebt. De knop Inloggen gaat naar /app, waar de editor staat. Met een sessiecookie opent / meteen de editor. Zet de uitnodigingscodes (SCORE2SOUND_CODES) altijd aan voordat je de website openbaar maakt.
+# Proefscan
+
+De proefscan is standaard uit en is gepland. Met `SCORE2SOUND_PROEF=aan` zet je hem aan. De proefscan werkt zonder account, voor één pagina van maximaal 2 MB, met maximaal drie proeven per IP-adres per dag en één proef tegelijk. Over de notatie komt een watermerk. Houd er rekening mee dat de proefscan rekenkracht van de server kost.
+
