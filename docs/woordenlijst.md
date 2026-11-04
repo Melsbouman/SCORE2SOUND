@@ -42,3 +42,7 @@ De muziektermen in SCORE2SOUND, met de term uit MusicXML. Gebruik in teksten van
 | overgeslagen pagina | (geen) | een pagina die de herkenning niet kon lezen en die daarom ontbreekt, met een melding |
 | splitsen | (geen) | een rust of noot in twee gelijke helften delen |
 | aanvullen | (geen) | een te korte maat met een rust opvullen tot de maatduur |
+| colofon | (geen) | regel met copyright of adres onder een pagina |
+| proefscan | (geen) | een gratis proef van een pagina met watermerk |
+| S2S-bestandsnaam | (geen) | de vaste naam van een export: S2S - Titel - Componist (arr. Arrangeur) - Partij |
+| letterreeks | (geen) | repetitieletters lopen altijd A, B, C op volgorde |
