@@ -89,3 +89,6 @@ roundtrip-fixture controleert dat schrijven en lezen elkaar niet tegenspreken, z
 
 ## Tests voor titel, partijnaam en tempo uit de herkenning
 titel-ocr controleert dat SAN D AND STARS weer SAND AND STARS wordt, partijnaam-uit-kop dat Bb Solo Cornet 3, 4 de partijnaam Solo Cornet 3, 4 geeft, en tempo-uit-tekst dat een punt-kwart (J. = 148) wordt omgerekend naar 222 kwarten per minuut.
+
+## Extra tests van de nacht
+ontbrekend-nummering controleert dat de maatnummers na de herstelketen strikt oplopen, lege-partij dat schrijfMidi en naarMusicXML een partij zonder noten aankunnen, en speelvolgorde-volta-gewoon dat een volta gevolgd door een gewone maat goed wordt afgespeeld.
