@@ -22,6 +22,14 @@
 - De GitHub-pagina van de repository voor taken en pull requests.
 - `hermes/review.sh` en `hermes/hartslag.sh`.
 
+## Van pdf tot geluid
+1. De server verwerkt de aangeleverde pdf met Audiveris via `app/src/server/audiveris.mjs`.
+2. De herkende MusicXML wordt gelezen door `app/src/musicxml/lezen.mjs`.
+3. De herstelketen verbetert de herkenning in `app/src/model/herstel.mjs`.
+4. Je bewerkt noten in `app/public/js/views/editor.js`.
+5. De browser speelt de muziek af met `app/src/midi/hoorbaar.mjs`.
+6. Je exporteert de partituur via `app/public/js/views/export.js`.
+
 ## Wat te doen als er niets gebeurt
 - 1. Kijk of de laptop wakker is.
 - 2. Draai `bash hermes/hartslag.sh`.
