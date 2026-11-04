@@ -101,3 +101,6 @@ splits-rust en splits-noot controleren dat een rust of noot in twee gelijke helf
 
 ## Tests van aanvullen en verplaatsen
 vul-maat-aan controleert dat een te korte maat een rust erbij krijgt en een volle maat niet verandert. verplaats-noot-fixture controleert verplaatsNoot op het herstelde Sand and Stars.
+
+## Test van splitsen op het echte stuk
+splits-fixture deelt een rust en een noot van het herstelde Sand and Stars en controleert dat de duren samen gelijk blijven en dat de noot een overbinding krijgt.
