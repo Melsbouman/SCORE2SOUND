@@ -10,6 +10,7 @@ Claude pakt hier werk uit als een nachtplan af is en de eindtijd nog niet bereik
 - [ ] Editor, vervolg: meerdere noten kiezen (shift of een rechthoek om te slepen) en samen verplaatsen of verwijderen; een klik op een rust om er een noot in te voeren met het toetsenbord (letters A tot en met G); maten kopiëren en plakken; een knop Maatduur herstellen die een maat vult of inkort met rusten; een suggestie bij een onzekere noot: de toonhoogte die het best bij de omringende noten of de toonsoort past (Claude)
 
 - [ ] Editor uitbreiden: noten toevoegen op een lege plek van de balk, horizontaal verplaatsen, maten toevoegen/verwijderen, versieringen en articulaties aanklikken (na `2026-11-02-echte-editor.md`). (Claude)
+- [ ] Knoppen in de editor voor splitsen (splitsRust, splitsNoot) en Maatduur herstellen (vulMaatAan of herstelMaatduur); de toets S bestaat al. (Claude)
 
 ## Open
 - [ ] Scherm voor het wijzigen van het wachtwoord in app/public/js/views/inloggen.js, met POST /api/account/wachtwoord; pas maken als de taak voor wijzigWachtwoord gemerged is (Claude)
@@ -27,7 +28,7 @@ Claude pakt hier werk uit als een nachtplan af is en de eindtijd nog niet bereik
 - [ ] Telefoonlayout: de partituur begint op 375 px nog op 507 px; lint en upload compacter. (Claude)
 - [ ] Dependabot-PR's (#522 tot #527) beoordelen en beslissen of Dependabot aan blijft. Wacht op Mels.
 - [ ] OpenRouter-tegoed voor Hermes aanvullen. Wacht op Mels.
-- [ ] `corrigeren.js` en `onzeker.js`: controleer of het keydown-doel een Element is. (Claude)
+- [x] `corrigeren.js` en `onzeker.js`: keydown-doel is al een Element-controle (opgelost).
 - [ ] Echte server-PDF met watermerk (vraagt een nieuwe bibliotheek, dus akkoord van Mels).
 
 - [x] Server-PDF met watermerk (/api/pdf), maten kopiëren en plakken, een toonhoogte voorstellen en zetten bij een rode noot, het eerste account zonder uitnodigingscode (3 november 2026).
