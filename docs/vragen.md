@@ -41,3 +41,11 @@ Een fermate verlengt de noot tijdens het afspelen. Daardoor hoor je de verlengin
 
 ## Waarom staan er maten met een rust die ik niet speel?
 De herkenning kan ontbrekende maten afleiden uit sprongen tussen repetitiecijfers en deze als rust invoegen of als samengestelde rust markeren. Een blok met een cijfer erboven telt als meerdere maten rust; de herkenning leest dat cijfer niet altijd.
+## Hoe verplaats ik een noot?
+
+Selecteer de noot en houd Alt ingedrukt terwijl je op een pijltoets drukt. Met Alt+pijl links of rechts verplaats je de noot in de tijd; met Alt+pijl omhoog of omlaag verander je de toonhoogte.
+
+## Hoe splits ik een noot?
+
+Zet de afspeelkop op de plek waar je de noot wilt splitsen en selecteer de noot. Kies daarna Splitsen; de editor maakt er twee aansluitende noten van.
+
