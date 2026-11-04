@@ -60,3 +60,6 @@ Claude pakt hier werk uit als een nachtplan af is en de eindtijd nog niet bereik
 - [ ] Herkenning: fermate herkennen waar Audiveris hem mist, en het tempo-getal van een metronoomteken lezen als Audiveris het als losse tekst bewaart (staat nu in tempo-uit-tekst voor tekstaanwijzingen, niet voor credit-words).
 
 - [ ] Oefenmateriaal in `C:\Brassmuziek PDF` (herkenning met `bash hermes/echte-controle.sh <pdf>`, nacht 3 op 4 november): *Suite Gothique 2nd Cornet* geeft "De bladmuziek is niet herkend" (PDF van 2,5 MB, waarschijnlijk een slechte scan: uitzoeken wat Audiveris ziet); *Devils Galop* leest repetitiecijfers 11, 19, 29 ... als letters, geeft 71 niet-gekoppelde noten en twee maten van 3,5 kwart; *Renaissance* heeft 86 onzekere noten en 16 maatrusten; *Galop* en *Distant Land/Masque/African Symphony/Arban/Integrated Warm Up* nog niet bekeken. Een pagina bekijken kan pas met poppler (pdftoppm). (Claude)
+
+- [x] Nacht 3 op 4 november 2026 (zie `werkpakketten/nacht/rapport-2026-11-04.md`): herstelketen (beginrust, verdachte noten, ontbrekende maten, zangtekst, tempo uit tekst, muziektermen, letterreeks), knop Herkenning herstellen, verplaatsen/delen/aanvullen van noten en maten, toegankelijkheid, tests en docs. (Claude)
+- [ ] De editor in de browser doorlopen met een testaccount (focusrand, link naar de partituur, S, Alt + pijlen) en op 375 px. (Claude)
