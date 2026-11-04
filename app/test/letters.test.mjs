@@ -105,8 +105,8 @@ test('de letters komen als aanwijzing aan het begin van de maat, in elke partij'
     assert.equal(partij.maten[1].elementen[1].soort, 'noot');
   }
   assert.equal(partituur.partijen[0].maten[1].elementen.length, 1, 'het origineel blijft ongemoeid');
-  assert.equal(meldingen.length, 2);
-  assert.match(meldingen[0], /pagina 2.*letter A.*aangenomen/);
+  assert.equal(meldingen.length, 1);
+  assert.match(meldingen[0], /Op pagina 2 zijn de letters A, B aangenomen/);
 });
 
 test('kaders vervangen de Audiveris-letters op het blad in elke partij', () => {

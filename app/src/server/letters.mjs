@@ -92,6 +92,7 @@ export function voegLettersToe(partituur, bladen) {
     } catch {
       meldingen.push(`Op pagina ${blad.nummer} konden de letters niet worden gezocht.`);
     }
+    const aangenomen = [];
     const eerder = systemen.map((s) => s.stacks.length);
     if (letters.length > 0) {
       const aantalMaten = eerder.reduce((a, b) => a + b, 0);
@@ -108,8 +109,10 @@ export function voegLettersToe(partituur, bladen) {
         if (!maat || maat.elementen.some((e) => e.type === 'letter')) continue;
         maat.elementen.unshift({ soort: 'aanwijzing', start: 0, type: 'letter', waarde: letter.waarde, zekerheid: letter.zekerheid });
       }
-      if (letter.zekerheid < 0.8) meldingen.push(`Op pagina ${blad.nummer} is de letter ${letter.waarde} aangenomen: de app kon hem niet lezen.`);
+      if (letter.zekerheid < 0.8) aangenomen.push(letter.waarde);
     }
+    if (aangenomen.length === 1) meldingen.push(`Op pagina ${blad.nummer} is de letter ${aangenomen[0]} aangenomen: de app kon hem niet lezen.`);
+    if (aangenomen.length > 1) meldingen.push(`Op pagina ${blad.nummer} zijn de letters ${aangenomen.join(', ')} aangenomen: de app kon ze niet lezen.`);
     maatStart += eerder.reduce((a, b) => a + b, 0);
   }
   return { partituur: uit, meldingen };
