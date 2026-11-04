@@ -38,3 +38,16 @@ test('de herstelketen haalt een colofon uit de noten en bewaart het eenmaal als 
   assert.equal(uit.colofon, 'Music Studio Verlag AG, CH Wiedlisbach');
   assert.equal(uit.partijen[0].maten.flatMap((m) => m.elementen.filter((e) => e.teksten?.length)).length, 0);
 });
+
+test('de herstelketen zet FL. Mare om in de sterkte ff en de speelwijze Marcato (alleen aanduidingen uit de lijst)', () => {
+  const tekst = { soort: 'aanwijzing', start: 480, type: 'tekst', waarde: 'FL. Mare', zekerheid: 1 };
+  const uit = herstelHerkenning(stuk([maat(0, {}, [noot(), tekst]), maat(1)]));
+  const aanwijzingen = uit.partijen[0].maten[0].elementen.filter((e) => e.soort === 'aanwijzing').map((e) => [e.type, e.waarde, e.zekerheid]);
+  assert.deepEqual(aanwijzingen, [['dynamiek', 'ff', 0.5], ['tekst', 'Marcato', 0.5]]);
+});
+
+test('de herstelketen laat een lange of onbekende tekst zoals hij is (cup mute, een zin met een getal)', () => {
+  const teksten = ['All, cup mute', '* Optional cut to bar 65'].map((waarde) => ({ soort: 'aanwijzing', start: 0, type: 'tekst', waarde, zekerheid: 1 }));
+  const uit = herstelHerkenning(stuk([maat(0, {}, [noot(), ...teksten])]));
+  assert.deepEqual(uit.partijen[0].maten[0].elementen.filter((e) => e.type === 'tekst').map((e) => e.waarde), ['All, cup mute', '* Optional cut to bar 65']);
+});
