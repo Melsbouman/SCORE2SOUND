@@ -118,3 +118,18 @@ Kies een noot of rust en druk op S: hij wordt in twee gelijke helften gedeeld. B
 
 ## Het tempo in procenten
 In de speler regel je het tempo in procenten van het tempo dat in het stuk staat: 100 procent is zoals geschreven, 50 procent is half zo snel. Kies Maten vooraf om eerst een of twee maten te laten tellen.
+## Namen van exports
+
+Een export krijgt de naam `S2S - Titel - Componist (arr. Arrangeur) - Partij`.
+De arrangeur en partij staan alleen in de naam als die gegevens beschikbaar zijn.
+
+## Notatie in de editor
+
+De editor toont de notatie op A4-bladen, met dezelfde paginavorm als de pdf.
+Je ziet de muziek daardoor in de editor verdeeld over de bladen van de export.
+
+## Pdf zonder watermerk
+
+Als je bent ingelogd, heeft de pdf geen watermerk.
+Onderaan staat dan `Gemaakt met SCORE2SOUND`.
+
