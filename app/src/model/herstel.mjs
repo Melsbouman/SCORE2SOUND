@@ -23,3 +23,4 @@ function tempoUitTekst(partituur) {
 }
 
 const herstelMaatsoorten = (partituur) => herstelMaatsoortenZonderTempo(tempoUitTekst(partituur));
+import { vulLetterGaten } from './lettergaten.mjs';
