@@ -16,6 +16,11 @@ export function herstelTeksten(partituur) {
           nieuw.push(element);
           continue;
         }
+        // Niets veranderd (bijvoorbeeld Vivace risoluto): het element blijft zoals het is.
+        if (gelezen.every((deel) => deel.type === 'tekst') && gelezen.map((deel) => deel.waarde).join(' ') === element.waarde.trim().replace(/\s+/g, ' ')) {
+          nieuw.push(element);
+          continue;
+        }
         const gelijk = gelezen.length === 1 && gelezen[0].type === 'tekst'
           && gelezen[0].waarde.toLowerCase() === element.waarde.trim().toLowerCase();
         for (const { type, waarde } of gelezen) {

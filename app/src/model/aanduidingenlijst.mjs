@@ -130,6 +130,8 @@ export function leesAanduidingen(tekst) {
     }
   }
 
+  if (rest.length > 2) return null; // een zin, geen aanduiding
+
   for (const woord of rest) {
     const sleutel = schoon(woord);
     if (VERBINDINGSWOORDEN.has(sleutel) || sleutel.length <= 2) {
@@ -137,8 +139,8 @@ export function leesAanduidingen(tekst) {
       continue;
     }
     const gevonden = dichtstbij(sleutel);
-    // Een lang, duidelijk ander woord (bijvoorbeeld risoluto of fuoco) is geen leesfout: dat blijft staan.
-    if (!gevonden || (sleutel.length >= 5 && gevonden.score > sleutel.length * 0.4)) {
+    // Een woord dat niet duidelijk op de lijst lijkt (open, mute, risoluto, fuoco) is geen leesfout: dat blijft zoals het is.
+    if (!gevonden || gevonden.score > sleutel.length * 0.4) {
       uit.push({ type: 'tekst', waarde: woord });
       continue;
     }
