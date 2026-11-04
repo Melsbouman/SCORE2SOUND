@@ -340,3 +340,10 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
   #speler .speler__titel, #speler .speler__partij { max-width: 14ch; }
 }
 .lint__paneel[hidden], .lint__paneel:has(> #projecten)[hidden] { display: none !important; }
+#editor button:focus-visible,
+#editor select:focus-visible,
+#editor input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
