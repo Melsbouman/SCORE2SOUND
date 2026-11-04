@@ -11,6 +11,30 @@ export function maatIndexVanNummer(maten, tekst) {
 // De maten in de volgorde waarin ze klinken, met herhaalstrepen. Een herhaling zonder beginstreep gaat terug naar het begin
 // of naar het einde van de vorige herhaling.
 export function speelVolgorde(maten) {
+  let volgorde = speelVolgordeZonderStandaardVolta(maten);
+
+  for (let i = 0; i < maten.length - 1; i += 1) {
+    const eersteNummers = maten[i].volta?.nummers ?? [];
+    const tweedeNummers = maten[i + 1].volta?.nummers ?? [];
+    if (maten[i].herhaling?.eind !== true
+      || !eersteNummers.includes(1)
+      || maten[i].volta?.begin !== true
+      || maten[i].volta?.eind !== true
+      || !tweedeNummers.includes(2)
+      || maten[i + 1].volta?.begin !== true
+      || maten[i + 1].volta?.eind !== true) {
+      continue;
+    }
+
+    volgorde = volgorde.filter((index) => index !== i + 1);
+    const invoegplek = volgorde.lastIndexOf(i - 1) + 1;
+    volgorde.splice(invoegplek, 0, i + 1);
+  }
+
+  return volgorde;
+}
+
+function speelVolgordeZonderStandaardVolta(maten) {
   const basis = [];
   let begin = 0;
   const nummersVoorKeer = (einde) => {
