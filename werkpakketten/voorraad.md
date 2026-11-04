@@ -63,3 +63,5 @@ Claude pakt hier werk uit als een nachtplan af is en de eindtijd nog niet bereik
 
 - [x] Nacht 3 op 4 november 2026 (zie `werkpakketten/nacht/rapport-2026-11-04.md`): herstelketen (beginrust, verdachte noten, ontbrekende maten, zangtekst, tempo uit tekst, muziektermen, letterreeks), knop Herkenning herstellen, verplaatsen/delen/aanvullen van noten en maten, toegankelijkheid, tests en docs. (Claude)
 - [ ] De editor in de browser doorlopen met een testaccount (focusrand, link naar de partituur, S, Alt + pijlen) en op 375 px. (Claude)
+
+- [ ] Integrated Warm Up (C:\Brassmuziek PDF): pagina 3 wordt nu herkend (mvtnull gefixt, PR #1205), maar Audiveris maakt drie scores per pagina die elkaar overschrijven (taak #1206 loopt); nog uitzoeken wat er met kopjes (PART I, Chromatics, Noodle, Lip Slur) en de ringbandgaten links gebeurt op pagina 4 en 6, en of tekstpagina's (1, 2) netjes worden overgeslagen. (Claude)
