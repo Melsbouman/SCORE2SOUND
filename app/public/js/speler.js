@@ -174,6 +174,17 @@ let doelMaat = null;
   const tempo = Object.assign(document.createElement('input'), { type: 'range', min: 25, max: 150, step: 5, value: 100 });
   const tempoPercentage = Object.assign(document.createElement('input'), { type: 'number', min: 10, max: 300, step: 1, value: 100 });
   tempoPercentage.setAttribute('aria-label', 'Tempo in procenten');
+  try {
+    const bewaardTempo = Number(localStorage.getItem('speler-tempo'));
+    if (Number.isFinite(bewaardTempo) && bewaardTempo >= 10 && bewaardTempo <= 300) {
+      if (bewaardTempo < 25 || bewaardTempo > 150) {
+        tempo.min = 10;
+        tempo.max = 300;
+      }
+      tempo.value = String(bewaardTempo);
+      tempoPercentage.value = String(bewaardTempo);
+    }
+  } catch {}
   const tempoTekst = document.createElement('span');
   const metronoom = Object.assign(document.createElement('input'), { type: 'checkbox' });
   const voorinteller = document.createElement('select');
@@ -291,6 +302,13 @@ let doelMaat = null;
     tempoPercentage.value = String(percentage);
     werkTempoTekstBij();
     if (geluid) geluid.seq.playbackRate = percentage / 100;
+  }
+
+  function bewaarTempo(percentage) {
+    if (!Number.isFinite(percentage) || percentage < 10 || percentage > 300) return;
+    try {
+      localStorage.setItem('speler-tempo', String(percentage));
+    } catch {}
   }
 
   const maatIndex = (seconden) => {
@@ -465,9 +483,15 @@ let doelMaat = null;
     }
   });
   tempo.addEventListener('input', () => {
-    pasTempoToe(Number(tempo.value));
+    const percentage = Number(tempo.value);
+    pasTempoToe(percentage);
+    bewaarTempo(percentage);
   });
-  tempoPercentage.addEventListener('input', () => pasTempoToe(Number(tempoPercentage.value)));
+  tempoPercentage.addEventListener('input', () => {
+    const percentage = Number(tempoPercentage.value);
+    pasTempoToe(percentage);
+    bewaarTempo(percentage);
+  });
   metronoom.addEventListener('change', wijzigMetronoom);
   voorinteller.addEventListener('change', wijzigMetronoom);
 
