@@ -87,6 +87,7 @@ function normaliseer(tekst) {
     .replaceAll('0', 'o')
     .replaceAll('1', 'l')
     .replaceAll('5', 's')
+    .replaceAll('rn', 'm')
     .replace(/^[.\-]+|[.\-]+$/g, '');
 }
 
