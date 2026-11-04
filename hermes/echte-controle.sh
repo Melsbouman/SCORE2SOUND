@@ -88,6 +88,7 @@ async function main() {
   } while (true);
 
   const partituur = resultaat.partituur || {};
+  if (process.env.VERGELIJK_UIT && resultaat.partituur) await fs.writeFile(process.env.VERGELIJK_UIT, JSON.stringify(resultaat.partituur));
   const partijen = partituur.partijen || [];
   const letters = [];
   let onzekereNoten = 0;

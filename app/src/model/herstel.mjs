@@ -11,7 +11,7 @@ export function herstelHerkenning(partituur) {
   if (hersteldePartituren.has(partituur)) return partituur;
   partituur = { ...partituur, titel: herstelTitel(partituur.titel) };
   const { partituur: zonderColofon, colofon } = scheidColofon(partituur);
-  const hersteld = markeerVerdachteNoten(vulVoltas(vulLetterGaten(vulOntbrekendeMaten(vulBeginRust(herstelMaatsoorten(ruimZangtekstOp(zonderColofon)))))));
+  const hersteld = markeerVerdachteNoten(vulVoltas(vulLetterGaten(vulOntbrekendeMaten(vulBeginRust(herstelMaatsoorten(ruimZangtekstOp(teksttekensNaarAanduidingen(zonderColofon))))))));
   if (colofon) hersteld.colofon = colofon;
   hersteldePartituren.add(hersteld);
   return hersteld;
@@ -28,3 +28,4 @@ const herstelMaatsoorten = (partituur) => herstelMaatsoortenZonderTempo(tempoUit
 import { vulLetterGaten } from './lettergaten.mjs';
 import { vulVoltas } from './voltaherstel.mjs';
 import { scheidColofon } from './colofon.mjs';
+import { teksttekensNaarAanduidingen } from './teksttekens.mjs';
