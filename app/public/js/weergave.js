@@ -310,9 +310,8 @@ percentage.textContent = Math.round((zoom / BEGINZOOM) * 100) + '%';
     const paginanummer = document.createElement('p');
     paginanummer.className = 'bladmuziek__paginanr';
     paginanummer.textContent = `pagina ${pagina} van ${tk.getPageCount()}`;
-    queueMicrotask(() => svg.after(paginanummer));
       svg.style.width = vasteRegels ? '100%' : `${paginaPixels}px`;
-      blad.append(document.importNode(svg, true));
+      blad.append(document.importNode(svg, true), paginanummer);
     }
     if (typeof gegevens.colofon === 'string' && gegevens.colofon.length > 0) {
       const colofon = document.createElement('p');
