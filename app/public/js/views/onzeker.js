@@ -4,11 +4,14 @@ import {
   suggestieToonhoogte,
   zetToonhoogte,
 } from '/src/model/corrigeren.mjs';
+import { herstelHerkenning } from '/src/model/herstel.mjs';
+import { controleerMaatduur } from '/src/controle/maatduur.mjs';
 
 export function start(app) {
   const vlak = document.getElementById('onzeker');
   let gekozen = null;
   let bevestigen = false;
+  let laatsteMelding = null;
 
   function kiesOnzeker(richting) {
     const partituur = app.stand.partituur;
@@ -61,6 +64,10 @@ export function start(app) {
     status.textContent = ids.length === 0
       ? 'Alle noten zijn gecontroleerd'
       : `Nog ${ids.length} onzekere ${ids.length === 1 ? 'noot' : 'noten'}`;
+    if (laatsteMelding !== null) {
+      status.textContent = laatsteMelding;
+      laatsteMelding = null;
+    }
 
     const knoppen = document.createElement('div');
     knoppen.className = 'onzeker__knoppen';
@@ -75,10 +82,20 @@ export function start(app) {
       gekozen === null || suggestieToonhoogte(partituur, gekozen) === null,
     );
     suggestieKnop.setAttribute('aria-label', 'Pas de voorgestelde toonhoogte toe op de gekozen noot');
+    const herstelKnop = maakKnop('Herkenning herstellen', () => {
+      const nieuw = herstelHerkenning(app.stand.partituur);
+      app.zet({ partituur: nieuw, meldingen: controleerMaatduur(nieuw) });
+      app.meld('kies-noot', { id: null });
+      laatsteMelding = `Herkenning hersteld: ${nieuw.partijen[0].maten.length} maten.`;
+      const status = vlak.querySelector('p.onzeker__status');
+      if (status) status.textContent = laatsteMelding;
+    });
+    herstelKnop.setAttribute('aria-label', 'Herstel bekende leesfouten van de herkenning in dit stuk');
     knoppen.append(
       maakKnop('Vorige', () => kiesOnzeker(-1), ids.length === 0),
       maakKnop('Volgende', () => kiesOnzeker(1), ids.length === 0),
       suggestieKnop,
+      herstelKnop,
       maakKnop(
         bevestigen ? 'Bevestig alles goedkeuren' : 'Alles goedkeuren',
         keurAllesGoed,
