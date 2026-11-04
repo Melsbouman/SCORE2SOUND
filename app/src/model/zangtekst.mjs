@@ -1,9 +1,10 @@
-const COLOFONWOORDEN = ['copyright', 'copyr', '©', 'verlag', 'publishing', 'publishers', 'rights', 'reserved', 'music',
-  'obrasso', 'switzerland', 'wiedlisbach', 'printed', 'edition', 'ag'];
+// Begin van een woord telt; korte of gewone woorden (ag, music, rights, edition, printed) alleen als het hele woord.
+const COLOFONWOORDEN = ['copyright', 'copyr', '©', 'verlag', 'publishing', 'publishers', 'reserved', 'obrasso', 'switzerland', 'wiedlisbach'];
+const COLOFONWOORDEN_EXACT = ['ag', 'music', 'rights', 'edition', 'printed'];
 
 const isColofonwoord = (lettergreep) => {
   const woord = lettergreep.toLowerCase().replace(/[^a-z©]/g, '');
-  return COLOFONWOORDEN.some((colofonwoord) => woord.startsWith(colofonwoord));
+  return COLOFONWOORDEN_EXACT.includes(woord) || COLOFONWOORDEN.some((colofonwoord) => woord.startsWith(colofonwoord));
 };
 
 export function ruimZangtekstOp(partituur) {
