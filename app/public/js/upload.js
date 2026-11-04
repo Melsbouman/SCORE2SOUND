@@ -315,3 +315,23 @@ export function start(app) {
     openBestanden(Array.from(gebeurtenis.dataTransfer.files));
   });
 }
+
+const gewoneFetch = window.fetch.bind(window);
+
+if (document.body.classList.contains('proef')) {
+  window.fetch = async (invoer, opties = {}) => {
+    let url = typeof invoer === 'string' ? invoer : invoer.url;
+    url = url.replace('/api/herken', '/api/proef');
+
+    if (opties.body instanceof FormData) {
+      opties.body.delete('paginas');
+    }
+
+    const antwoord = await gewoneFetch(url, opties);
+    if ([404, 429, 503].includes(antwoord.status)) {
+      const body = await antwoord.clone().json().catch(() => ({}));
+      if (body.fout) window.alert(body.fout);
+    }
+    return antwoord;
+  };
+}
