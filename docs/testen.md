@@ -1,5 +1,14 @@
 # Overzicht van tests voor wie een nieuwe wil schrijven
 
+## Snel beginnen
+
+Voer de opdrachten uit vanuit de map `app`:
+- Alle tests: `npm test`
+- Eén testbestand: `npm test -- test/duur.test.mjs`
+
+Fixtures in `app/test/fixtures/`:
+- `sand-and-stars-begin.xml` – bevat de eerste 30 maten van de ruwe uitvoer van Audiveris voor Sand and Stars.
+
 ## Hoe je de tests draait
 
 - Voer de tests uit vanuit de hoofdmap van de repo met `bash hermes/tests.sh`
