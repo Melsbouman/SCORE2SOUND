@@ -104,3 +104,6 @@ vul-maat-aan controleert dat een te korte maat een rust erbij krijgt en een voll
 
 ## Test van splitsen op het echte stuk
 splits-fixture deelt een rust en een noot van het herstelde Sand and Stars en controleert dat de duren samen gelijk blijven en dat de noot een overbinding krijgt.
+
+## Test van aanvullen op het echte stuk
+vul-maat-aan-fixture loopt over alle maten van het herstelde Sand and Stars en controleert dat vulMaatAan de invoer niet verandert en een maat nooit korter maakt.
