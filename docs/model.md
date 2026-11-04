@@ -193,3 +193,6 @@ verplaatsNoot(partituur, id, doelId) in app/src/model/corrigeren.mjs laat een no
 
 ## Een rust of noot splitsen
 splitsRust(partituur, id) verdeelt een rust in twee rusten met de halve duur; splitsNoot(partituur, id) verdeelt een noot in twee even lange noten met een overbinding ertussen. Is de duur oneven of is het element van de verkeerde soort, dan blijft het stuk ongewijzigd.
+
+## Een maat aanvullen
+vulMaatAan(partituur, partijId, maatIndex) vult een te korte maat aan het eind aan met een rust tot de maatduur (teller maal 1920 gedeeld door noemer). Een volle of te volle maat blijft ongewijzigd; een lege maat krijgt een rust voor de hele maat.
