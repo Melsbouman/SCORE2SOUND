@@ -8,3 +8,15 @@ export function stapelKaart(maten) {
   }
   return kaart;
 }
+
+export function aantalUitSamengesteldeRust(maat) {
+  const heeftHeleMaatrust = maat.elementen.some((element) => element.soort === 'rust' && element.heleMaat);
+  if (!heeftHeleMaatrust || maat.elementen.some((element) => element.soort === 'noot')) return null;
+  const cijfer = maat.elementen.find((element) => (
+    element.soort === 'aanwijzing'
+    && element.type === 'letter'
+    && /^\d+$/.test(String(element.waarde ?? '').trim())
+  ));
+  const aantal = Number(String(cijfer?.waarde ?? '').trim());
+  return Number.isInteger(aantal) && aantal > 1 && aantal <= 40 ? aantal : null;
+}
