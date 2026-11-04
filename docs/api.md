@@ -9,6 +9,9 @@ De SCORE2SOUND-app biedt de volgende API-adressen voor uitbreiding en testen. Di
 | /api/account | GET | Token | Haalt het huidige ingelogde gebruiker-object op |
 | /api/account | POST | - | Registreert een nieuwe gebruiker |
 | /api/account | DELETE | Token | Verwijdert het huidige account |
+| /api/account/registreer | POST | - | Registreert een nieuwe gebruiker |
+| /api/account/login | POST | - | Logt een gebruiker in |
+| /api/account/wachtwoord | POST | Token | Wijzigt het wachtwoord van de huidige gebruiker |
 | /api/account/uit | POST | - | Logt de huidige gebruiker uit |
 | /api/importeer | POST | - | Importeert een MusicXML-bestand of -zip |
 | /api/herken | POST | - | Start bladmuziekherkenning |
@@ -20,6 +23,7 @@ De SCORE2SOUND-app biedt de volgende API-adressen voor uitbreiding en testen. Di
 | /api/projecten/<id> | GET | - | Krijgt een specifiek project op |
 | /api/projecten/<id> | DELETE | - | Verwijdert een specifiek project |
 | /api/gezond | GET | - | Health-check-endpoint |
+| /api/pdf | POST | - | Maakt een PDF van MusicXML |
 
 ## /api/account
 
