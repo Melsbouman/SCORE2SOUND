@@ -18,17 +18,27 @@ export function speelVolgorde(maten) {
     const tweedeNummers = maten[i + 1].volta?.nummers ?? [];
     if (maten[i].herhaling?.eind !== true
       || !eersteNummers.includes(1)
-      || maten[i].volta?.begin !== true
       || maten[i].volta?.eind !== true
       || !tweedeNummers.includes(2)
-      || maten[i + 1].volta?.begin !== true
-      || maten[i + 1].volta?.eind !== true) {
+      || maten[i + 1].volta?.begin !== true) {
       continue;
     }
 
-    volgorde = volgorde.filter((index) => index !== i + 1);
-    const invoegplek = volgorde.lastIndexOf(i - 1) + 1;
-    volgorde.splice(invoegplek, 0, i + 1);
+    let eersteBegin = i;
+    while (eersteBegin > 0 && maten[eersteBegin].volta?.begin !== true) eersteBegin -= 1;
+    if (maten[eersteBegin].volta?.begin !== true) continue;
+
+    let tweedeEind = i + 1;
+    while (tweedeEind < maten.length && maten[tweedeEind].volta?.eind !== true) tweedeEind += 1;
+    if (tweedeEind === maten.length) continue;
+    const tweedeHokje = Array.from(
+      { length: tweedeEind - i },
+      (_, index) => i + 1 + index,
+    );
+
+    volgorde = volgorde.filter((index) => !tweedeHokje.includes(index));
+    const invoegplek = volgorde.lastIndexOf(eersteBegin - 1) + 1;
+    volgorde.splice(invoegplek, 0, ...tweedeHokje);
   }
 
   return volgorde;
