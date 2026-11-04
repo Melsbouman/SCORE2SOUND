@@ -13,4 +13,4 @@ const { naarMusicXML } = await import(pathToFileURL(resolve(app, 'src/musicxml/s
 const { maakPdf } = await import(pathToFileURL(resolve(app, 'src/export/pdf.mjs')).href);
 const { herstelHerkenning } = await import(pathToFileURL(resolve(app, 'src/model/herstel.mjs')).href);
 const partituur = herstelHerkenning(JSON.parse(await readFile(invoer, 'utf8')));
-await writeFile(uit, await maakPdf(naarMusicXML(partituur), { watermerk: false }));
+await writeFile(uit, await maakPdf(naarMusicXML(partituur, { zonderPartijnamen: partituur.partijen.length === 1 }), { watermerk: false }));
