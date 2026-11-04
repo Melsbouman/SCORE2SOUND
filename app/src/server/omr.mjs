@@ -96,7 +96,7 @@ function leesTekstplek(woord) {
   const bounds = kind(woord, 'bounds')?.attr;
   if (!bounds) return null;
   const [x, y, breedte, hoogte] = [bounds.x, bounds.y, bounds.w, bounds.h].map(Number);
-  return { waarde: kind(woord, 'value')?.tekst ?? '', x, y, breedte, hoogte };
+  return { waarde: woord.attr?.value ?? kind(woord, 'value')?.tekst ?? '', x, y, breedte, hoogte };
 }
 
 function koppelMaat(maat, balken, stack, koppen, rusten, nummer) {
@@ -134,12 +134,41 @@ function koppelMaat(maat, balken, stack, koppen, rusten, nummer) {
   return { nietGekoppeld, redenen };
 }
 
+// De hokjes 1. en 2. bij een herhaling leest Audiveris wel als tekst (1. en 2_) maar niet altijd als hokje: bouw ze uit die woorden.
+// Een 1. met direct daarna een 2. (hoogstens vier maten verder) geeft het eerste hokje (tot het tweede) en het tweede hokje (één maat).
+export function zetHokjes(partituur, kaarten, kandidaten) {
+  const gesorteerd = [...kandidaten].sort((a, b) => a.stapel - b.stapel);
+  for (let i = 0; i < gesorteerd.length - 1; i += 1) {
+    const een = gesorteerd[i];
+    const twee = gesorteerd[i + 1];
+    if (een.nummer !== 1 || twee.nummer !== 2 || twee.stapel <= een.stapel || twee.stapel - een.stapel > 4) continue;
+    partituur.partijen.forEach((partij, partijIndex) => {
+      const kaart = kaarten[partijIndex];
+      const eerste = kaart[een.stapel];
+      const tweede = kaart[twee.stapel];
+      if (eerste === undefined || tweede === undefined || partij.maten.slice(eerste, tweede + 1).some((maat) => maat.volta)) return;
+      const bereik = [[1, eerste, tweede - 1], [2, tweede, Math.max(tweede, (kaart[twee.stapel + 1] ?? tweede + 1) - 1)]];
+      for (const [nummer, van, tot] of bereik) {
+        for (let index = van; index <= tot && partij.maten[index]; index += 1) {
+          partij.maten[index].volta = { nummers: [nummer], begin: index === van, eind: index === tot };
+        }
+      }
+      // Het eerste hokje sluit af met de herhalingsstreep, ook als Audiveris die miste.
+      let begin = eerste - 1;
+      while (begin >= 0 && !partij.maten[begin].herhaling?.begin) begin -= 1;
+      const dichtbij = partij.maten.slice(Math.max(begin, 0), tweede).some((maat) => maat.herhaling?.eind);
+      if (begin >= 0 && !dichtbij) partij.maten[tweede - 1].herhaling = { ...partij.maten[tweede - 1].herhaling, eind: true, keer: 2 };
+    });
+  }
+}
+
 export function koppelOmr(partituur, bladen) {
   const uit = structuredClone(partituur);
   uit.bron = { herkenning: null, bladen: bladen.map(({ nummer, breedte, hoogte }) => ({ nummer, breedte, hoogte })) };
   const overgeslagen = [];
   let nietGekoppeld = 0;
   const redenen = { geenKopInMaat: 0, andereToonhoogte: 0, alGebruikt: 0 };
+  const voltaKandidaten = [];
   let maatStart = 0;
   const kaarten = uit.partijen.map((partij) => stapelKaart(partij.maten));
   const maatBij = (partijIndex, stapel) => uit.partijen[partijIndex].maten[kaarten[partijIndex][stapel]];
@@ -175,6 +204,10 @@ export function koppelOmr(partituur, bladen) {
               const rechts = Number(stack.attr.right) + MARGE;
               const inStack = (woord) => woord.x + woord.breedte / 2 >= links && woord.x + woord.breedte / 2 <= rechts;
               const woordenInMaat = tekstplekken.filter(inStack).sort((a, b) => a.x - b.x);
+              for (const woord of woordenInMaat) {
+                const hokje = /^([12])\s*[._,:;-]?$/.exec(woord.waarde.trim());
+                if (hokje) voltaKandidaten.push({ nummer: Number(hokje[1]), stapel: maatStart + stackIndex });
+              }
               for (const element of maat.elementen) {
                 if (element.soort !== 'aanwijzing' || element.type !== 'tekst') continue;
                 delete element.plek;
@@ -200,5 +233,6 @@ export function koppelOmr(partituur, bladen) {
       maatStart += stacks.length;
     }
   }
+  zetHokjes(uit, kaarten, voltaKandidaten);
   return { partituur: uit, nietGekoppeld, redenen, overgeslagen };
 }
