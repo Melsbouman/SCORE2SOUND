@@ -28,3 +28,4 @@ import { ruimZangtekstOp } from '../src/model/zangtekst.mjs';
 import { tempoUitTekst } from '../src/model/tempotekst.mjs';
 
 const herstelMaatsoorten = (partituur) => herstelMaatsoortenZonderTempo(tempoUitTekst(partituur));
+import { vulLetterGaten } from '../src/model/lettergaten.mjs';
