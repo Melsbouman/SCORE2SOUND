@@ -245,11 +245,19 @@ export function maakHerken({ map, draaier }) {
   uit.partituur = nagekeken;
   const letters = voegLettersToe(uit.partituur, bladenGoed);
   uit.partituur = markeerVerdachteNoten(letters.partituur);
+  const koppelRedenen = [
+    [uit.redenen.geenKopInMaat, 'geen kop in de maat'],
+    [uit.redenen.andereToonhoogte, 'andere toonhoogte'],
+    [uit.redenen.alGebruikt, 'al aan een andere noot gekoppeld'],
+  ].filter(([aantal]) => aantal > 0);
+  const koppelRedenenTekst = koppelRedenen.length > 0
+    ? ` (${koppelRedenen.map(([aantal, reden]) => `${aantal} ${reden}`).join(', ')})`
+    : '';
   const meldingen = [
     ...letters.meldingen.map(herkenMelding),
       ...mislukt.map((nummer) => herkenMelding(`Pagina ${nummer} is overgeslagen: daar kon de app geen muziek lezen.`)),
       ...uit.overgeslagen.map((nummer) => herkenMelding(`Op pagina ${nummer} is de zekerheid per noot onbekend.`)),
-      ...(uit.nietGekoppeld > 0 ? [herkenMelding(`${uit.nietGekoppeld} noten konden niet aan het origineel worden gekoppeld.`)] : []),
+      ...(uit.nietGekoppeld > 0 ? [herkenMelding(`${uit.nietGekoppeld} noten konden niet aan het origineel worden gekoppeld${koppelRedenenTekst}.`)] : []),
     ...maatMeldingen,
     ];
   await writeFile(join(taak.uitmap, 'resultaat.json'), JSON.stringify({
