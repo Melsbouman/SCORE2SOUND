@@ -1,7 +1,46 @@
+import { aantalUitSamengesteldeRust } from './stapels.mjs';
+
 export function vulOntbrekendeMaten(partituur) {
   const kopie = structuredClone(partituur);
   const eerstePartij = kopie.partijen?.[0];
   if (!eerstePartij) return kopie;
+
+  const samengesteldeRusten = eerstePartij.maten.flatMap((maat, index) => {
+    const aantal = aantalUitSamengesteldeRust(maat);
+    return aantal === null ? [] : [{ index, aantal }];
+  });
+  for (const partij of kopie.partijen) {
+    for (const { index, aantal } of samengesteldeRusten.toReversed()) {
+      const maat = partij.maten[index];
+      if (!maat) continue;
+      maat.maatrust = aantal;
+      maat.elementen = maat.elementen.filter((element) => !(
+        element.soort === 'aanwijzing'
+        && element.type === 'letter'
+        && String(element.waarde ?? '').trim() === String(aantal)
+      ));
+      const nummer = Number(maat.nummer);
+      const verborgenMaten = Array.from({ length: aantal - 1 }, (_, positie) => {
+        const verborgen = {
+          ...structuredClone(maat),
+          ...(Number.isInteger(nummer) ? { nummer: String(nummer + positie + 1) } : {}),
+          verborgen: true,
+        };
+        delete verborgen.maatrust;
+        return verborgen;
+      });
+      partij.maten.splice(index + 1, 0, ...verborgenMaten);
+      if (Number.isInteger(nummer)) {
+        for (const volgende of partij.maten.slice(index + aantal)) {
+          const volgendNummer = Number(volgende.nummer);
+          if (Number.isInteger(volgendNummer)) volgende.nummer = String(volgendNummer + aantal - 1);
+        }
+      }
+    }
+    partij.maten.forEach((maat, index) => {
+      maat.index = index;
+    });
+  }
 
   const cijfers = eerstePartij.maten.flatMap((maat, index) => {
     const aanwijzing = maat.elementen.find((element) => (
