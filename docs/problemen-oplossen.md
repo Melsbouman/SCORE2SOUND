@@ -51,3 +51,11 @@ Klik op Inloggen of ga naar /app. Ben je ingelogd en zie je toch de startpagina,
 
 ## Pagina N is overgeslagen
 Die pagina was te zwaar voor de herkenning. Probeer alleen die pagina opnieuw met een scherpere scan, of kies bij het openen alleen de pagina's die je nodig hebt. De rest van het stuk is gewoon te gebruiken.
+
+## Een fotokopie met handschrift
+
+Bij een scheve, donkere of beschreven fotokopie mislukt de herkenning vaak.
+Gebruik bij voorkeur een schoon origineel of maak een rechte scan op 300 dpi.
+Scan in zwart-wit en zorg dat potloodstrepen niet door de notenbalken lopen.
+Kun je de kopie niet verbeteren, zoek dan naar een schone pdf van dezelfde muziek.
+Een bestaand MusicXML-bestand is de beste route als dat beschikbaar is.
