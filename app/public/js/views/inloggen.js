@@ -216,3 +216,15 @@ export function start() {
       toonFout(sectie.querySelector('[role="status"]'), fout.message || 'Het account kon niet worden gecontroleerd.');
     });
 }
+
+const proefmodus = new URLSearchParams(window.location.search).get('proef') === '1';
+
+if (proefmodus) {
+  document.body.classList.add('proef');
+  document.body.classList.remove('inloggen-niet-ingelogd');
+
+  const proefmelding = document.createElement('p');
+  proefmelding.className = 'proef-melding';
+  proefmelding.textContent = 'Dit is een proef: één pagina, met watermerk. Log in om alles te gebruiken.';
+  document.body.prepend(proefmelding);
+}
