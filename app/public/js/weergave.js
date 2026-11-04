@@ -82,7 +82,7 @@ const vlak = document.getElementById('weergave');
     const percentage = document.createElement('button');
     percentage.type = 'button';
     percentage.className = 'knop';
-    percentage.textContent = Math.round(zoom * 100) + '%';
+percentage.textContent = Math.round((zoom / BEGINZOOM) * 100) + '%';
     percentage.setAttribute('aria-label', 'Zoom terugzetten');
     percentage.addEventListener('click', () => wijzigZoom(BEGINZOOM - zoom));
     const groter = document.createElement('button');
