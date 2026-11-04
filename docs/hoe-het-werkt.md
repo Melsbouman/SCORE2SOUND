@@ -50,3 +50,6 @@ Een mol, kruis of herstellingsteken wordt getekend als de toonhoogte afwijkt van
 5. Voeg aan alle partijen beginmaten met rusten toe als een genummerde aanwijzing in de eerste acht maten van de eerste partij op ontbrekende beginmaten wijst.
 6. Vul ontbrekende maten op basis van sprongen tussen genummerde aanwijzingen door lege maten als samengestelde rust te markeren of ontbrekende maten met een rust in te voegen.
 7. Markeer noten die sterk afwijken van hun buren als verdacht en verlaag hun zekerheid tot maximaal 0,5.
+
+## Rood betekent: kijk even na
+Een rode noot of maat is iets waar de herkenning of de herstelketen niet zeker van is: een noot die ver van haar buren ligt, of een maat die is ingevuld omdat het repetitiecijfer niet klopte met het aantal maten. Controleer ze en keur ze goed met Enter of met Maat klopt.
