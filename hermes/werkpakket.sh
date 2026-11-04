@@ -219,7 +219,7 @@ status_zet bezig "#$ISSUE $TITEL" 0.15 "voorbereiden"
 # 3. Opdracht voor het model: alleen bewerken.
 {
   echo "Je bewerkt bestanden in deze map (een kloon van het SCORE2SOUND-project). Je hoeft AGENTS.md en andere projectbestanden niet te lezen: het script controleert de regels."
-  echo "Draai zelf geen tests, syntaxcontroles of andere commando's: dat doet het script na jou. Alleen bestanden bewerken."
+  echo "Draai zelf geen tests of syntaxcontroles: dat doet het script na jou. Bestanden lezen met een commando mag wel (bijvoorbeeld Get-Content of rg); bewerken doe je met de bestandseditor."
   echo "Wijzig alleen deze bestanden: $TOEGESTAAN. Behoud het regeleinde aan het einde van elk bestand en verander verder niets."
   echo "Draai GEEN git-commando's, maak geen commit en open geen PR: dat doet het script na jou."
   echo "Je rapport mag kort zijn. Zeg alleen wat je daadwerkelijk hebt gewijzigd."
