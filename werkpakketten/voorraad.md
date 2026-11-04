@@ -65,3 +65,5 @@ Claude pakt hier werk uit als een nachtplan af is en de eindtijd nog niet bereik
 - [ ] De editor in de browser doorlopen met een testaccount (focusrand, link naar de partituur, S, Alt + pijlen) en op 375 px. (Claude)
 
 - [ ] Integrated Warm Up (C:\Brassmuziek PDF): pagina 3 wordt nu herkend (mvtnull gefixt, PR #1205), maar Audiveris maakt drie scores per pagina die elkaar overschrijven (taak #1206 loopt); nog uitzoeken wat er met kopjes (PART I, Chromatics, Noodle, Lip Slur) en de ringbandgaten links gebeurt op pagina 4 en 6, en of tekstpagina's (1, 2) netjes worden overgeslagen. (Claude)
+
+- [ ] Geluid valt weg na een paar maten (Mels, 4 november 2026): offline gerenderd (`hermes/geluidscheck.mjs`, vanuit app/ draaien omdat spessasynth_core daar staat) klinken alle noten van *A Time for Peace* en *The Irish Blessing*; in de browser niet na te bootsen. Vraag Mels om het stuk en de maat; mogelijke oorzaken: AudioContext, klankbank nog aan het laden, mixer op demp/solo. Taak voor een melding bij gestopt geluid staat klaar. (Claude)
