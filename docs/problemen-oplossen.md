@@ -48,3 +48,6 @@ Probeer eerst Herkenning herstellen in het tabblad Noten. Wat de herkenning niet
 
 ## Ik zie de startpagina, maar wil de editor
 Klik op Inloggen of ga naar /app. Ben je ingelogd en zie je toch de startpagina, wis dan de cookies van de website en log opnieuw in.
+
+## Pagina N is overgeslagen
+Die pagina was te zwaar voor de herkenning. Probeer alleen die pagina opnieuw met een scherpere scan, of kies bij het openen alleen de pagina's die je nodig hebt. De rest van het stuk is gewoon te gebruiken.
