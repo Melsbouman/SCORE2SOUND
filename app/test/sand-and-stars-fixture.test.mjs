@@ -19,11 +19,10 @@ test('de ruwe herkenning heeft 30 maten, waarvan 10 te vol door een verkeerde ma
   assert.equal(tel(partituur), 10);
 });
 
-test('herstelMaatsoorten haalt bijna alle te volle maten weg en vindt 5/4 en 9/8', async () => {
-  const herstel = herstelMaatsoorten(await lees());
-  assert.ok(tel(herstel) <= 1);
-  const soorten = herstel.partijen[0].maten.map((maat) => `${maat.maatsoort.teller}/${maat.maatsoort.noemer}`);
-  assert.ok(soorten.includes('5/4'));
-  assert.ok(soorten.includes('9/8'));
+test('herstelMaatsoorten verzint geen wisselingen van maatsoort: de maatsoorten blijven zoals Audiveris ze las', async () => {
+  const gelezen = await lees();
+  const herstel = herstelMaatsoorten(gelezen);
+  const soorten = (p) => p.partijen[0].maten.map((maat) => `${maat.maatsoort.teller}/${maat.maatsoort.noemer}`);
+  assert.deepEqual(soorten(herstel), soorten(gelezen));
   assert.equal(herstel.partijen[0].maten.length, 30);
 });
