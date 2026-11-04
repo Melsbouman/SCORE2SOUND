@@ -92,3 +92,6 @@ titel-ocr controleert dat SAN D AND STARS weer SAND AND STARS wordt, partijnaam-
 
 ## Extra tests van de nacht
 ontbrekend-nummering controleert dat de maatnummers na de herstelketen strikt oplopen, lege-partij dat schrijfMidi en naarMusicXML een partij zonder noten aankunnen, en speelvolgorde-volta-gewoon dat een volta gevolgd door een gewone maat goed wordt afgespeeld.
+
+## Test van verplaatsNoot
+verplaats-noot controleert dat een noot met een rust van dezelfde duur van plaats wisselt, ook naar een andere maat, en dat een andere duur, een doel dat geen rust is en onbekende id's niets veranderen.
