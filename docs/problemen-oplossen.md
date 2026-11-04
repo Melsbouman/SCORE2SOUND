@@ -35,3 +35,13 @@ Het stuk begint op 50 procent. Knijp met twee vingers boven het stuk om in of ui
 
 ## De herkenning mist maten of noten
 Probeer eerst Herkenning herstellen in het tabblad Noten. Wat de herkenning niet kon lezen, blijft fout; kies daarvoor een scherpere scan of foto, of geef een MusicXML-bestand op als dat er is. Maten die ontbreken tussen repetitiecijfers staan als rode rust.
+
+## Veel onzekere plekken
+1. Een rode noot of maat is onzeker; kies die in de partituur of via Vorige onzekere / Volgende onzekere in het corrigeren-venster.
+2. Controleer de noot in de scan en pas zo nodig de toonhoogte of duur aan met de knoppen in Noten.
+3. Klopt de noot al, kies dan Goedkeuren om de onzekerheid weg te halen.
+4. Suggestie toepassen kiest de toonhoogte van de dichtstbijzijnde zekere noot in dezelfde partij en keurt de noot goed; controleer of die toon klopt.
+5. Een rode rust kan een door de herkenning afgeleide ontbrekende maat zijn, bijvoorbeeld tussen repetitiecijfers; controleer de bron.
+6. Een cijfer boven een rustblok kan meerdere rustmaten aangeven; de herkenning leest dat cijfer niet altijd goed.
+7. Pas een maat aan met Maatduur herstellen, of voeg met Maat invoegen een ontbrekende maat toe; Maat verwijderen haalt een gekozen maat uit alle partijen.
+8. Maak een verkeerde bewerking ongedaan met Ctrl/Cmd + Z.
