@@ -118,3 +118,6 @@ Het model kan een te korte maat met een rust aanvullen (vulMaatAan). Een knop Ma
 
 ## De toets S
 In de editor deelt S de gekozen noot of rust in twee gelijke helften, met splitsNoot en splitsRust uit het model.
+
+## Maten kiezen en kopieren
+Ctrl+A kiest alle maten, Ctrl+C kopieert de gekozen maten en Ctrl+V plakt ze vanaf de gekozen maat. Delete maakt de gekozen maten leeg.
