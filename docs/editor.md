@@ -106,3 +106,6 @@ Pak een noot vast en sleep hem omhoog of omlaag: hij verspringt per notenbalklij
 ### Titelblok in de PDF
 - De PDF toont de titel, componist en arrangeur uit de partituur.
 - Bij een PDF van één partij staat ook de naam van die partij in het titelblok.
+
+## Verplaatsen in de tijd
+Alt met de pijl naar rechts of links zet de gekozen noot op de volgende of vorige rust van dezelfde duur. Is er geen passende rust, dan gebeurt er niets.
