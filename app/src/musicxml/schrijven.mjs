@@ -362,19 +362,16 @@ function matenMetOngeldigeMaatrust(maten) {
 
 export function naarMusicXML(partituur, opties = {}) {
   const xml = naarMusicXMLZonderArrangeur(partituur, opties);
-  if (!partituur.arrangeur) return xml;
-
-  const arrangeur = String(partituur.arrangeur)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
-  const creator = `<creator type="arranger">${arrangeur}</creator>`;
-  if (xml.includes('</identification>')) {
-    return xml.replace('</identification>', `${creator}</identification>`);
+  let identification = '';
+  if (partituur.arrangeur) identification += tag('creator', esc(partituur.arrangeur), { type: 'arranger' });
+  if (typeof partituur.colofon === 'string' && partituur.colofon.length > 0) {
+    identification += tag('rights', esc(partituur.colofon));
   }
-  return xml.replace('<part-list>', `<identification>${creator}</identification><part-list>`);
+  if (!identification) return xml;
+  if (xml.includes('</identification>')) {
+    return xml.replace('</identification>', `${identification}</identification>`);
+  }
+  return xml.replace('<part-list>', `<identification>${identification}</identification><part-list>`);
 }
 
 function naarMusicXMLZonderArrangeur(partituur, opties = {}) {

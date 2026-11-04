@@ -6,6 +6,18 @@ import schrijfSvgNaarPdf from 'svg-to-pdfkit';
 
 const verovioOpties = { footer: 'none', header: 'none' };
 
+function leesColofon(musicxml) {
+  const gevonden = musicxml.match(/<rights\b[^>]*>([\s\S]*?)<\/rights>/i);
+  if (!gevonden) return '';
+  return gevonden[1]
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .trim();
+}
+
 function voegAttribuutToe(tag, naam, waarde) {
   const attribuut = new RegExp(`(\\s${naam}\\s*=\\s*)(?:"[^"]*"|'[^']*')`);
   if (attribuut.test(tag)) return tag.replace(attribuut, `$1"${waarde}"`);
@@ -39,6 +51,7 @@ function toolkit() {
 
 export async function maakPdf(musicxml, { watermerk = 'SCORE2SOUND', comprimeer = true, titelblok } = {}) {
   const tk = await toolkit();
+  const colofon = leesColofon(musicxml);
   tk.setOptions({
     header: 'none',
     footer: 'none',
@@ -96,6 +109,13 @@ export async function maakPdf(musicxml, { watermerk = 'SCORE2SOUND', comprimeer 
       doc.fillColor('#888888').fillOpacity(0.15).fontSize(80);
       doc.rotate(-45, { origin: [doc.page.width / 2, doc.page.height / 2] });
       doc.text(watermerk, 0, doc.page.height / 2 - 40, { width: doc.page.width, align: 'center', lineBreak: false });
+      doc.restore();
+    }
+    if (pagina === aantal && colofon) {
+      doc.save();
+      doc.font('Times-Roman').fontSize(8).fillColor('#666666').fillOpacity(1);
+      doc.addContent(`% ${Buffer.from(colofon).toString('hex')}`);
+      doc.text(colofon, 0, doc.page.height - 56, { width: doc.page.width, align: 'center', lineBreak: false });
       doc.restore();
     }
     doc.save();
