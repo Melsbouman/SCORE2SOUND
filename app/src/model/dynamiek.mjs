@@ -5,7 +5,30 @@ const DYNAMIEKTEKENS = new Set([
   'fp', 'sf', 'sfz', 'sfp', 'rfz',
 ]);
 
+const SAMENGESTELDE_TEKENS = new Set(['fp', 'sfz', 'sfp', 'mf']);
+
 export function dynamiekUitTekst(waarde) {
   const naam = String(waarde).trim().toLowerCase();
   return DYNAMIEKTEKENS.has(naam) ? naam : null;
+}
+
+export function combineerDynamiektekens(tekens) {
+  if (tekens.length <= 1) return { teken: tekens[0] ?? null, conflict: false };
+
+  const combinatie = tekens.map((teken) => teken.waarde).join('').toLowerCase();
+  if (SAMENGESTELDE_TEKENS.has(combinatie)) {
+    return {
+      teken: {
+        ...tekens[0],
+        waarde: combinatie,
+        zekerheid: Math.max(...tekens.map((teken) => teken.zekerheid ?? 0)),
+      },
+      conflict: false,
+    };
+  }
+
+  const teken = tekens.reduce((beste, kandidaat) =>
+    (kandidaat.zekerheid ?? 0) > (beste.zekerheid ?? 0) ? kandidaat : beste
+  );
+  return { teken, conflict: true };
 }
