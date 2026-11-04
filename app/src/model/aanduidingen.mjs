@@ -1,15 +1,31 @@
-export const AANDUIDINGEN = {
-  tempo: ['Largo', 'Adagio', 'Andante', 'Moderato', 'Allegretto', 'Allegro', 'Vivace', 'Presto', 'rit.', 'rall.', 'accel.', 'a tempo', 'Tempo I', 'Grave', 'Lento', 'Larghetto', 'Andantino', 'Allegro moderato', 'Molto allegro', 'Prestissimo', 'molto rit.', 'poco rit.', 'Tempo primo', 'accelerando', 'ritardando', 'stringendo', 'meno mosso', 'più mosso', 'fermata'],
-  expressie: ['dolce', 'cantabile', 'espress.', 'con brio', 'maestoso', 'legato', 'marcato', 'sostenuto', 'tranquillo', 'agitato', 'espressivo', 'con espressione', 'con fuoco', 'leggiero', 'grazioso', 'giocoso', 'pesante', 'risoluto', 'misterioso', 'poco a poco', 'sempre', 'molto', 'subito'],
-  spelwijze: ['pizz.', 'arco', 'con sord.', 'senza sord.', 'open', 'muted', 'solo', 'tutti', 'staccato', 'tenuto', 'portato', 'legato', 'sul ponticello', 'sul tasto', 'col legno', 'con sordino', 'senza sordino', 'flutter', 'gestopt', 'half open', 'D.C. al Fine', 'D.S. al Coda', 'Fine', 'Coda', 'Segno', 'tacet'],
-  dynamiek: ['pp', 'p', 'mp', 'mf', 'f', 'ff', 'fff', 'sf', 'sfz', 'fp', 'cresc.', 'dim.', 'ppp', 'pppp', 'ffff', 'sffz', 'rfz', 'sfp', 'decresc.', 'poco cresc.', 'poco dim.'],
-};
+import { AANDUIDINGENLIJST } from './aanduidingenlijst.mjs';
 
-export function plaatsingVan(tekst) {
-  const aanduiding = tekst.trim().toLowerCase();
-  const dynamiek = ['pp', 'p', 'mp', 'mf', 'f', 'ff', 'fff', 'ppp', 'ffff', 'pppp', 'sf', 'sfz', 'sfp', 'fp', 'rfz', 'sffz'];
+const GROEPEN_MET_AFKORTING = new Set(['Dynamiek', 'Volumeveranderingen']);
 
-  return dynamiek.includes(aanduiding) || aanduiding.includes('cresc') || aanduiding.includes('dim')
-    ? 'below'
-    : 'above';
+export const AANDUIDINGEN = Object.fromEntries(
+  AANDUIDINGENLIJST.reduce((groepen, item) => {
+    let groep = groepen.find(([naam]) => naam === item.groep);
+    if (!groep) {
+      groep = [item.groep, []];
+      groepen.push(groep);
+    }
+    groep[1].push(GROEPEN_MET_AFKORTING.has(item.groep) ? item.afkorting : item.naam);
+    return groepen;
+  }, []),
+);
+
+export function uitlegVan(term) {
+  const gezocht = String(term).toLocaleLowerCase('nl');
+  const item = AANDUIDINGENLIJST.find(({ naam, afkorting }) =>
+    naam.toLocaleLowerCase('nl') === gezocht || afkorting?.toLocaleLowerCase('nl') === gezocht,
+  );
+  return item?.uitleg ?? '';
+}
+
+export function plaatsingVan(term) {
+  const gezocht = String(term).toLocaleLowerCase('nl');
+  const item = AANDUIDINGENLIJST.find(({ naam, afkorting }) =>
+    naam.toLocaleLowerCase('nl') === gezocht || afkorting?.toLocaleLowerCase('nl') === gezocht,
+  );
+  return item && GROEPEN_MET_AFKORTING.has(item.groep) ? 'below' : 'above';
 }

@@ -1,4 +1,4 @@
-import { AANDUIDINGEN } from '/src/model/aanduidingen.mjs';
+import { AANDUIDINGEN, uitlegVan } from '/src/model/aanduidingen.mjs';
 import { voegAanwijzingToe, verwijderAanwijzing, leesId, zoekElement, voegHaakToe } from '/src/model/corrigeren.mjs';
 
 const groepsnamen = {
@@ -88,6 +88,11 @@ export function start(app) {
         knop.type = 'button';
         knop.className = 'knop aanduidingen__knop';
         knop.textContent = term;
+    const uitleg = uitlegVan(term);
+    if (uitleg) {
+      knop.title = uitleg;
+      knop.setAttribute('aria-label', term + ': ' + uitleg);
+    }
         knop.disabled = !app.stand.partituur || (gekozenNoot == null && gekozenMaat == null);
         knop.addEventListener('click', () => {
           const partituur = app.stand.partituur;
