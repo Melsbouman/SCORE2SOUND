@@ -1,5 +1,5 @@
 @media print {
-  body::before {
+  body.inloggen-niet-ingelogd::before {
     content: 'SCORE2SOUND';
     position: fixed;
     top: 50%;
@@ -12,6 +12,17 @@
     white-space: nowrap;
     pointer-events: none;
     z-index: 9999;
+  }
+
+  body:not(.inloggen-niet-ingelogd)::after {
+    content: 'Gemaakt met SCORE2SOUND';
+    position: fixed;
+    bottom: 6mm;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 8pt;
+    color: #666;
   }
 
   #lint,

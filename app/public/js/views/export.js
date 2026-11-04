@@ -147,7 +147,9 @@ export function start(app) {
           else nieuwTitelblok.remove()
         }
       }, { once: true })
-      status.textContent = 'Kies in het venster Opslaan als PDF. Op elke pagina staat het watermerk SCORE2SOUND.'
+      status.textContent = document.body.classList.contains('inloggen-niet-ingelogd')
+        ? 'Kies in het venster Opslaan als PDF. Op elke pagina staat het watermerk SCORE2SOUND.'
+        : 'Kies in het venster Opslaan als PDF. Onderaan elke pagina staat dat de pdf met SCORE2SOUND is gemaakt.'
       window.print()
     }
 
