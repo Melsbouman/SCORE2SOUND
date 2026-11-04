@@ -190,3 +190,6 @@ Ontbreken maten aan het begin of tussen twee repetitiecijfers, dan voegt de herk
 
 ## Een noot naar een rust verplaatsen
 verplaatsNoot(partituur, id, doelId) in app/src/model/corrigeren.mjs laat een noot en een rust van dezelfde duur in dezelfde partij van plaats wisselen. De noot behoudt zijn toonhoogte, zekerheid en tekens; de plek waar hij stond wordt een rust.
+
+## Een rust of noot splitsen
+splitsRust(partituur, id) verdeelt een rust in twee rusten met de halve duur; splitsNoot(partituur, id) verdeelt een noot in twee even lange noten met een overbinding ertussen. Is de duur oneven of is het element van de verkeerde soort, dan blijft het stuk ongewijzigd.
