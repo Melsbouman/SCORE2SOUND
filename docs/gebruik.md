@@ -112,3 +112,6 @@ Kies een noot en druk op Alt en de pijl naar rechts of links: de noot springt na
 
 ## Onzekere noten nalopen
 Druk op N om naar de volgende onzekere (rode) noot te gaan en op P voor de vorige. Zo loop je alleen langs wat de herkenning niet zeker wist.
+
+## Een noot of rust delen
+Kies een noot of rust en druk op S: hij wordt in twee gelijke helften gedeeld. Bij een noot staat er een overbinding tussen de twee helften. Is de duur niet te delen, dan gebeurt er niets.
