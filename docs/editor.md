@@ -112,3 +112,6 @@ Alt met de pijl naar rechts of links zet de gekozen noot op de volgende of vorig
 
 ## Delen in tweeen
 Het model kan een rust of noot in twee helften delen (splitsRust en splitsNoot). Een knop in de editor volgt later.
+
+## Maat aanvullen
+Het model kan een te korte maat met een rust aanvullen (vulMaatAan). Een knop Maatduur herstellen in de editor volgt later.
