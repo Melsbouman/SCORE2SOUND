@@ -15,6 +15,11 @@ export function herstelHerkenning(partituur) {
   return hersteld;
 }
 import { ruimZangtekstOp } from './zangtekst.mjs';
-import { tempoUitTekst } from './tempotekst.mjs';
+import { tempoUitTekst as leesTempoUitTekst } from './tempotekst.mjs';
+import { herstelTeksten } from './tekstherstel.mjs';
+
+function tempoUitTekst(partituur) {
+  return herstelTeksten(leesTempoUitTekst(partituur));
+}
 
 const herstelMaatsoorten = (partituur) => herstelMaatsoortenZonderTempo(tempoUitTekst(partituur));
