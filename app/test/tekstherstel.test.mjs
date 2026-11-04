@@ -3,25 +3,20 @@ import assert from 'node:assert/strict';
 
 import { herstelTeksten } from '../src/model/tekstherstel.mjs';
 
-test('herstelt verkeerd gelezen muziektermen in tekstaanwijzingen', () => {
-  const partituur = {
-    aanwijzingen: [
-      { type: 'tekst', waarde: 'poco agitate' },
-      { type: 'tekst', waarde: 'dolce' },
-      { type: 'letter', waarde: 'poco agitate' },
-    ],
-  };
+const stuk = (elementen) => ({
+  partijen: [{ maten: [{ elementen }] }],
+});
 
-  const hersteld = herstelTeksten(partituur);
-
-  assert.deepEqual(hersteld.aanwijzingen, [
-    { type: 'tekst', waarde: 'poco agitato' },
-    { type: 'tekst', waarde: 'dolce' },
-    { type: 'letter', waarde: 'poco agitate' },
+test('herstelt verkeerd gelezen tekstaanwijzingen tot aanduidingen uit de lijst', () => {
+  const oud = stuk([
+    { soort: 'aanwijzing', start: 0, type: 'tekst', waarde: 'poco agitate', zekerheid: 1 },
+    { soort: 'aanwijzing', start: 0, type: 'tekst', waarde: 'dolce', zekerheid: 1 },
+    { soort: 'aanwijzing', start: 0, type: 'letter', waarde: 'poco agitate', zekerheid: 1 },
   ]);
-  assert.deepEqual(partituur.aanwijzingen, [
-    { type: 'tekst', waarde: 'poco agitate' },
-    { type: 'tekst', waarde: 'dolce' },
-    { type: 'letter', waarde: 'poco agitate' },
+  const kopie = structuredClone(oud);
+  const nieuw = herstelTeksten(oud);
+  assert.deepEqual(oud, kopie);
+  assert.deepEqual(nieuw.partijen[0].maten[0].elementen.map((e) => [e.type, e.waarde]), [
+    ['tekst', 'poco'], ['tekst', 'Agitato'], ['tekst', 'Dolce'], ['letter', 'poco agitate'],
   ]);
 });
