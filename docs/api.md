@@ -164,3 +164,6 @@ De pdf bevat de notenbalken, noten, stokken en balken, een schuin watermerk SCOR
 
 ## /api/pdf met een titelblok
 De body mag ook JSON zijn: { "musicxml": "...", "titelblok": { "titel": "", "componist": "", "arrangeur": "", "partij": "" } }. Dan staan de titel, de partijnaam, de componist en arr. met de arrangeur bovenaan de pdf. Een ongeldige JSON geeft 400.
+
+## /api/herken en de herstelketen
+Het resultaat van /api/herken is al door de herstelketen gegaan: maatsoort uit de inhoud, maten rust aan het begin, ontbrekende maten, verdachte noten, zangtekst-ruis, tempo uit tekst en de titel. Wat nog onzeker is, heeft zekerheid onder 0,8.
