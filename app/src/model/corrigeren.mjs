@@ -345,3 +345,36 @@ export function leegMaten(partituur, van, tot) {
   }
   return nieuw;
 }
+
+export function verplaatsNoot(partituur, id, doelId) {
+  if (id === doelId) return partituur;
+
+  const plaats = leesId(id);
+  const doelPlaats = leesId(doelId);
+  if (!plaats || !doelPlaats) return partituur;
+
+  const partijIndex = partituur.partijen.findIndex((partij) => partij.id === plaats.partijId);
+  const doelPartijIndex = partituur.partijen.findIndex((partij) => partij.id === doelPlaats.partijId);
+  if (partijIndex < 0 || doelPartijIndex < 0 || partijIndex !== doelPartijIndex) return partituur;
+
+  const noot = partituur.partijen[partijIndex].maten[plaats.maatIndex]?.elementen[plaats.elementIndex];
+  const rust = partituur.partijen[doelPartijIndex].maten[doelPlaats.maatIndex]?.elementen[doelPlaats.elementIndex];
+  if (!noot || !rust) return partituur;
+  if (noot.soort !== 'noot' || rust.soort !== 'rust' || noot.duur !== rust.duur) return partituur;
+
+  const nieuw = structuredClone(partituur);
+  nieuw.partijen[doelPartijIndex].maten[doelPlaats.maatIndex].elementen[doelPlaats.elementIndex] = {
+    ...structuredClone(noot),
+    start: rust.start,
+  };
+  nieuw.partijen[partijIndex].maten[plaats.maatIndex].elementen[plaats.elementIndex] = {
+    soort: 'rust',
+    start: noot.start,
+    duur: noot.duur,
+    stem: noot.stem,
+    notenbalk: noot.notenbalk,
+    heleMaat: false,
+    zekerheid: 1,
+  };
+  return nieuw;
+}
