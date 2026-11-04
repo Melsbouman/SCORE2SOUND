@@ -51,3 +51,10 @@ test('de herstelketen laat een lange of onbekende tekst zoals hij is (cup mute, 
   const uit = herstelHerkenning(stuk([maat(0, {}, [noot(), ...teksten])]));
   assert.deepEqual(uit.partijen[0].maten[0].elementen.filter((e) => e.type === 'tekst').map((e) => e.waarde), ['All, cup mute', '* Optional cut to bar 65']);
 });
+
+test('repetitiecijfers (22, 26, 30) en een mengeling met een letter blijven ongemoeid: dat is geen letterreeks', () => {
+  const cijfers = [maat(0, {}, [letter('22'), noot()]), maat(1), maat(2, {}, [letter('26'), noot()]), maat(3, {}, [letter('30'), noot()]), maat(4, {}, [letter('30'), noot()])];
+  assert.deepEqual(letters(herstelHerkenning(stuk(cijfers))), ['22', '26', '30', '30']);
+  const gemengd = [maat(0, {}, [letter('A'), noot()]), maat(1), maat(2, {}, [letter('21'), noot()]), maat(3, {}, [letter('29'), noot()])];
+  assert.deepEqual(letters(herstelHerkenning(stuk(gemengd))), ['A', '21', '29']);
+});
