@@ -421,7 +421,29 @@ let doelMaat = null;
         status.textContent = 'De klanken worden geladen…';
         geluid = await maakGeluid();
       }
-      await geluid.context.resume();
+    await geluid.context.resume();
+    clearInterval(geluid.contextControle);
+    let hervattenGeprobeerd = false;
+    geluid.contextControle = setInterval(async () => {
+      if (geluid.context.state === "running") {
+        if (status.textContent === "Het geluid is gestopt. Druk op afspelen om verder te gaan.") {
+          status.textContent = "";
+        }
+        hervattenGeprobeerd = false;
+        return;
+      }
+
+      status.textContent = "Het geluid is gestopt. Druk op afspelen om verder te gaan.";
+      if (!hervattenGeprobeerd) {
+        hervattenGeprobeerd = true;
+        await geluid.context.resume();
+      }
+    }, 1000);
+    for (const knop of document.querySelectorAll("button")) {
+      if (["Pauze", "Stop"].includes(knop.textContent.trim())) {
+        knop.addEventListener("click", () => clearInterval(geluid.contextControle), { once: true });
+      }
+    }
       if (!geladen) await laad();
       geluid.seq.playbackRate = Number(tempoPercentage.value) / 100;
       if (doelMaat !== null) {
