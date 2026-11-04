@@ -397,3 +397,31 @@ export function splitsRust(partituur, id) {
   );
   return kopie;
 }
+export function splitsNoot(partituur, id) {
+  const delen = id.match(/^n-(.+)-(\d+)-(\d+)$/);
+  if (!delen) return partituur;
+
+  const partijIndex = partituur.partijen.findIndex((partij) => partij.id === delen[1]);
+  const maatIndex = Number(delen[2]);
+  const elementIndex = Number(delen[3]);
+  const noot = partituur.partijen[partijIndex]?.maten[maatIndex]?.elementen[elementIndex];
+  if (noot?.soort !== 'noot' || noot.duur < 2 || noot.duur % 2 !== 0) return partituur;
+
+  const kopie = structuredClone(partituur);
+  const halveDuur = noot.duur / 2;
+  const eerste = {
+    ...structuredClone(noot),
+    duur: halveDuur,
+    overbinding: { begin: true, eind: noot.overbinding.eind },
+  };
+  const tweede = {
+    ...structuredClone(noot),
+    start: noot.start + halveDuur,
+    duur: halveDuur,
+    overbinding: { begin: noot.overbinding.begin, eind: true },
+    versiering: null,
+  };
+  delete tweede.teksten;
+  kopie.partijen[partijIndex].maten[maatIndex].elementen.splice(elementIndex, 1, eerste, tweede);
+  return kopie;
+}
