@@ -74,5 +74,6 @@ export function scheidColofon(partituur) {
     }
   }
 
-  return { partituur: kopie, colofon };
+  // Een los teken zoals © is geen bruikbaar colofon: wel weghalen, niet bewaren.
+  return { partituur: kopie, colofon: colofon && colofon.length >= 6 ? colofon : null };
 }
