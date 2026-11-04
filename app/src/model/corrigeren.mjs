@@ -378,3 +378,22 @@ export function verplaatsNoot(partituur, id, doelId) {
   };
   return nieuw;
 }
+export function splitsRust(partituur, id) {
+  const plek = leesId(id);
+  if (!plek) return partituur;
+  const partijIndex = partituur.partijen.findIndex((partij) => partij.id === plek.partijId);
+  if (partijIndex < 0) return partituur;
+  const rust = partituur.partijen[partijIndex].maten[plek.maatIndex]?.elementen[plek.elementIndex];
+  if (!rust) return partituur;
+  if (rust.soort !== 'rust' || rust.duur < 2 || rust.duur % 2 !== 0) return partituur;
+  const kopie = structuredClone(partituur);
+  const elementen = kopie.partijen[partijIndex].maten[plek.maatIndex].elementen;
+  const duur = rust.duur;
+  elementen.splice(
+    plek.elementIndex,
+    1,
+    { ...rust, duur: duur / 2, heleMaat: false },
+    { ...rust, start: rust.start + duur / 2, duur: duur / 2, heleMaat: false },
+  );
+  return kopie;
+}
