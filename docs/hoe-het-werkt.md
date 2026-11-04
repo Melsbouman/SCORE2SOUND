@@ -52,12 +52,15 @@ Een mol, kruis of herstellingsteken wordt getekend als de toonhoogte afwijkt van
 
 ## De herstelketen
 1. Herstel de titel door samengevoegde hoofdletterafkortingen na een woord weer aan dat woord te koppelen.
-2. Verwijder zangtekst uit noten in een partij als minder dan 40% van de niet-overgebonden noten tekst heeft.
-3. Haal tempo uit tekstuele tempo-aanduidingen en zet die om in tempo-aanwijzingen als de waarde tussen 20 en 300 ligt.
-4. Pas een maatsoort aan wanneer de inhoudsduur van een maat groter is dan de opgegeven maatlengte en precies overeenkomt met een bekende maatsoort.
-5. Voeg aan alle partijen beginmaten met rusten toe als een genummerde aanwijzing in de eerste acht maten van de eerste partij op ontbrekende beginmaten wijst.
-6. Vul ontbrekende maten op basis van sprongen tussen genummerde aanwijzingen door lege maten als samengestelde rust te markeren of ontbrekende maten met een rust in te voegen.
-7. Markeer noten die sterk afwijken van hun buren als verdacht en verlaag hun zekerheid tot maximaal 0,5.
+2. Haal een herhaald colofon uit de noten en bewaar bruikbare colofontekst eenmaal bij de partituur.
+3. Verwijder zangtekst uit noten in een partij als minder dan 40% van de niet-overgebonden noten tekst heeft.
+4. Haal tempo uit tekstuele tempo-aanduidingen en zet die om in tempo-aanwijzingen als de waarde tussen 20 en 300 ligt.
+5. Pas een maatsoort aan wanneer de inhoudsduur van een maat groter is dan de opgegeven maatlengte en precies overeenkomt met een bekende maatsoort.
+6. Voeg aan alle partijen beginmaten met rusten toe als een genummerde aanwijzing in de eerste acht maten van de eerste partij op ontbrekende beginmaten wijst.
+7. Vul ontbrekende maten op basis van sprongen tussen genummerde aanwijzingen door lege maten als samengestelde rust te markeren of ontbrekende maten met een rust in te voegen.
+8. Vul ontbrekende letters in een letterreeks aan.
+9. Zet eerste- en tweede-eindehokjes bij een herhalingseind met één maat ervoor een letter.
+10. Markeer noten die sterk afwijken van hun buren als verdacht en verlaag hun zekerheid tot maximaal 0,5.
 
 ## Rood betekent: kijk even na
 Een rode noot of maat is iets waar de herkenning of de herstelketen niet zeker van is: een noot die ver van haar buren ligt, of een maat die is ingevuld omdat het repetitiecijfer niet klopte met het aantal maten. Controleer ze en keur ze goed met Enter of met Maat klopt.

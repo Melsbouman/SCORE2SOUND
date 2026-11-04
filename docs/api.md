@@ -18,6 +18,8 @@ De SCORE2SOUND-app biedt de volgende API-adressen voor uitbreiding en testen. Di
 | /api/herken/<id> | GET | - | Krijgt de herkenningsstatus op |
 | /api/herken/<id>/blad/<nummer> | GET | - | Krijgt een pagina als PNG terug |
 | /api/herken/<id> | DELETE | - | Breekt een lopende herkenning af |
+| /api/proef | POST | SCORE2SOUND_PROEF=aan | Start een proefscan zonder login |
+| /api/proef/<id> | GET | SCORE2SOUND_PROEF=aan | Krijgt de status van een proefscan op |
 | /api/projecten | GET | - | List alle projecten van de gebruiker |
 | /api/projecten | POST | - | Maakt een nieuw project of opslaat een partituur |
 | /api/projecten/<id> | GET | - | Krijgt een specifiek project op |
@@ -109,6 +111,22 @@ De SCORE2SOUND-app biedt de volgende API-adressen voor uitbreiding en testen. Di
 - Vereist: SCORE2SOUND_ACCOUNTS=aan + origin-header + dezelfde gebruiker OR - (nee)
 - Verstuurt: - (nee)
 - Antwoord: 200 met herkenningsstatus
+
+## /api/proef
+
+Deze route bestaat alleen als `SCORE2SOUND_PROEF=aan` en vraagt geen login. Een proefscan verwerkt altijd alleen pagina 1, ook als de aanvraag een ander paginabereik bevat.
+
+**POST /api/proef**
+- Verstuurt: Raw bytes (PDF, PNG of JPG), zoals bij `/api/herken`
+- Antwoord: het antwoord van `/api/herken`, met gebruiker `proef`
+- Limieten: maximaal 2 MB per bestand, maximaal drie proefscans per IP-adres per 24 uur en maximaal één lopende proefscan tegelijk
+- Fouten: 404 als de proefroute uitstaat, 413 bij meer dan 2 MB, 429 na drie proefscans en 503 als al een proefscan loopt
+
+**GET /api/proef/<id>**
+- Verstuurt: - (nee)
+- Antwoord: de herkenningsstatus voor een id dat door `POST /api/proef` is gemaakt
+- Fouten: 404 als de proefroute uitstaat of het id niet bij een proefscan hoort
+- Een lopende proefscan wordt vrijgegeven zodra de stand `klaar`, `fout` of `afgebroken` is, en anders uiterlijk na drie minuten
 
 ## /api/projecten
 
