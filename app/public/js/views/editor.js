@@ -1,5 +1,7 @@
 import {
   leesId,
+  splitsNoot,
+  splitsRust,
   verplaatsNoot,
   zoekElement,
   verschuif,
@@ -553,6 +555,12 @@ export function start(app) {
       gebeurtenis.stopImmediatePropagation();
       app.meld('kies-noot', { id: null });
       app.meld('kies-maat', { maat: null });
+      return;
+    }
+    if ((toets === 's' || toets === 'S') && !gebeurtenis.ctrlKey && !gebeurtenis.metaKey && !gebeurtenis.altKey && gekozen !== null && gekozenIds.length === 1 && element) {
+      gebeurtenis.preventDefault();
+      gebeurtenis.stopImmediatePropagation();
+      pas(element.soort === 'noot' ? splitsNoot(app.stand.partituur, gekozen) : splitsRust(app.stand.partituur, gekozen));
       return;
     }
     if (toets === 'Delete' || toets === 'Backspace') {
