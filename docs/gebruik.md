@@ -106,3 +106,6 @@ Kies een maat of een reeks maten (Shift-klik) en druk op Delete, of kies Maten l
 
 ## Herkenning herstellen
 In het tabblad Noten staat bij Onzekere noten de knop Herkenning herstellen. Die verbetert bekende leesfouten van de herkenning in het geopende stuk: de maatsoort, de maten rust aan het begin, ontbrekende maten, verdachte noten, zangtekst die geen zangtekst is en het tempo uit de tekst. Handig voor stukken die je eerder liet herkennen. Wat daarna nog onzeker is, staat rood. Je kunt het ongedaan maken.
+
+## Een noot verplaatsen
+Kies een noot en druk op Alt en de pijl naar rechts of links: de noot springt naar de volgende of vorige rust van dezelfde duur, en de rust komt op de oude plek. Omhoog of omlaag slepen verandert de toonhoogte, Alt met de pijlen de plek in de tijd.
