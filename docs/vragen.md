@@ -49,3 +49,11 @@ Selecteer de noot en houd Alt ingedrukt terwijl je op een pijltoets drukt. Met A
 
 Zet de afspeelkop op de plek waar je de noot wilt splitsen en selecteer de noot. Kies daarna Splitsen; de editor maakt er twee aansluitende noten van.
 
+## Waar vind ik meldingen?
+
+Open in de app het scherm **Meldingen** om te zien welke aandachtspunten bij je partituur zijn gevonden. De meldingen helpen je gericht terug te gaan naar wat je in de editor wilt controleren of aanpassen.
+
+## Wat betekenen de meldingen?
+
+Een melding beschrijft wat er is gevonden en waar in de muziek dat speelt. Gebruik de tekst van de melding als aanwijzing; niet iedere melding betekent dat je partituur onbruikbaar is.
+
