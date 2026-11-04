@@ -1,23 +1,21 @@
-# Een demo delen via internet
+# Demo
 
-## Voorbereiden
+Deze demo laat de volledige route zien: van inloggen en bladmuziek herkennen tot afspelen, herstellen en teruggaan naar een eerdere versie.
 
-Herken de projecten die je wilt laten zien en bewaar ze alvast op deze laptop. Sluit de laptop aan op de lader en zorg dat hij niet in slaapstand gaat. De laptop moet tijdens de demo aan en verbonden met internet blijven.
+## Voorbereiding
 
-## Starten en delen
+- Zorg dat je een geldige uitnodigingscode hebt.
+- Kies een duidelijk leesbare PDF of afbeelding van bladmuziek.
 
-Start vanuit de hoofdmap van de repository:
+## Stappen
 
-```bash
-bash scripts/demo-online.sh
-```
-
-Het script toont een uitnodigingscode. Zodra `cloudflared` is gestart, verschijnt de tijdelijke https-link in de uitvoer. Deel de link en de code met je bezoekers. De link is tijdelijk en werkt alleen zolang het script draait en de laptop aan blijft.
-
-## Wat bezoekers zien
-
-Bezoekers openen de app via de link. Ze kunnen alleen met de uitnodigingscode een account registreren.
-
-## Stoppen
-
-Druk in het terminalvenster op Ctrl-C. De app en de tunnel stoppen; de gegevens in `demo-data/` blijven op de laptop bewaard.
+1. Open SCORE2SOUND.
+2. Vul je uitnodigingscode in en log in.
+3. Maak een nieuw project en voeg de PDF of afbeelding met bladmuziek toe.
+4. Start de herkenning en wacht tot de verwerking klaar is.
+5. Open het resultaat en controleer de bladmuziek en de gemelde aandachtspunten.
+6. Speel de muziek af. Gebruik de afspeelknoppen om te starten, te pauzeren en opnieuw te beginnen.
+7. Pas waar nodig de muziek aan en luister opnieuw naar het resultaat.
+8. Gaat de herkenning mis, open dan de herstelmogelijkheid. Voeg een geschikter bestand toe of start de herkenning opnieuw en controleer daarna het nieuwe resultaat.
+9. Open de versies van het project. Bekijk een eerdere versie en zet die terug wanneer je die weer als uitgangspunt wilt gebruiken.
+10. Ga terug naar het projectenoverzicht om het opgeslagen project later opnieuw te openen.
