@@ -56,6 +56,7 @@ const API = [
   ['/api/account', './src/server/inloggen.mjs'],
   ['/api/importeer', './src/server/importeer.mjs'],
   ['/api/herken', './src/server/herken.mjs'],
+  ['/api/proef', './src/server/proef.mjs'],
   ['/api/projecten', './src/server/projecten.mjs'],
 ];
 
@@ -229,7 +230,7 @@ export function maakServer() {
           if (['POST', 'PUT', 'DELETE'].includes(verzoek.method) && !geldigeOrigin(verzoek)) {
             return await stuur(antwoord, 403, { fout: 'Deze aanvraag is niet toegestaan.' }, undefined, {}, verzoek.headers['accept-encoding']);
           }
-          if (route[0] !== '/api/account') {
+if (route[0] !== '/api/account' && route[0] !== '/api/proef') {
             const { gebruikerVan } = await import(pathToFileURL(join(HIER, './src/server/inloggen.mjs')).href);
             gebruiker = await gebruikerVan(cookieToken(verzoek));
             if (!gebruiker) return await stuur(antwoord, 401, { fout: 'Log eerst in.' }, undefined, {}, verzoek.headers['accept-encoding']);
