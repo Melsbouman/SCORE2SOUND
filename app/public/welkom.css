@@ -213,6 +213,8 @@ h2 {
 
 .w-blad {
   position: relative;
+  width: min(100%, 290px);
+  margin: 0 auto;
   overflow: hidden;
   border-radius: 6px;
   line-height: 0;
@@ -226,7 +228,7 @@ h2 {
 .w-scanlijn {
   position: absolute;
   inset: 0 0 auto 0;
-  height: 22%;
+  height: 14%;
   background: linear-gradient(to bottom, #2b6a1f00, #2b6a1f33 70%, #2b6a1fcc 98%, #2b6a1f 100%);
   box-shadow: 0 6px 18px #2b6a1f66;
   transform: translateY(-100%);
@@ -235,7 +237,7 @@ h2 {
 
 @keyframes w-scan {
   0% { transform: translateY(-100%); }
-  70%, 100% { transform: translateY(455%); }
+  70%, 100% { transform: translateY(720%); }
 }
 
 .w-overlay {
@@ -265,7 +267,7 @@ h2 {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .w-scanlijn { animation: none; transform: translateY(150%); }
+  .w-scanlijn { animation: none; transform: translateY(300%); }
 }
 
 .w-kaart figcaption {
