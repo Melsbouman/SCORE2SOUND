@@ -197,9 +197,11 @@ const vlak = document.getElementById('weergave');
     }
     if (nummer !== tekenNummer) return; // er kwam intussen een nieuwere partituur
     const breedte = Math.max(320, vlak.clientWidth - 48);
+    const pdfVorm = true; // Mels, 4 november 2026: dezelfde staande A4-pagina's als de pdf
     const vasteRegels = false; // Mels, 3 november 2026: regels gelijkmatig vullen in plaats van de afbrekingen van het origineel
-    const schaal = vasteRegels ? vasteSchaal(breedte, zoom) : Math.round(schaalVoor(breedte) * zoom);
-    const paginaBreedte = vasteRegels ? VASTE_PAGINABREEDTE : Math.round((breedte * 100) / schaal);
+    const schaal = pdfVorm ? 40 : vasteRegels ? vasteSchaal(breedte, zoom) : Math.round(schaalVoor(breedte) * zoom);
+    const paginaBreedte = pdfVorm ? 2100 : vasteRegels ? VASTE_PAGINABREEDTE : Math.round((breedte * 100) / schaal);
+    const paginaPixels = pdfVorm ? Math.round(Math.min(breedte, 794) * (zoom / BEGINZOOM)) : Math.round((paginaBreedte * schaal) / 100);
     const gegevens = app.stand?.partituur ?? {};
     const bladbron = gegevens.bron?.bladen?.[0];
     const heeftPaginabegin = gegevens.partijen?.some((partij) => partij.maten?.some((maat) => maat.paginabegin)) ?? false;
@@ -207,17 +209,14 @@ const vlak = document.getElementById('weergave');
     tk.setOptions({
       scale: schaal,
       pageWidth: paginaBreedte,
-      ...(heeftPaginavorm ? {
+      ...(pdfVorm ? { pageHeight: 2970, adjustPageHeight: false } : heeftPaginavorm ? {
         pageHeight: Math.round(paginaBreedte * bladbron.hoogte / bladbron.breedte),
         adjustPageHeight: false,
       } : { adjustPageHeight: true }),
-      breaks: vasteRegels || heeftPaginavorm ? 'encoded' : 'auto',
+      breaks: !pdfVorm && (vasteRegels || heeftPaginavorm) ? 'encoded' : 'auto',
       footer: 'none',
       header: 'none',
-      font: 'Leland',
-      pageMarginLeft: 60,
-      pageMarginRight: 60,
-      pageMarginTop: 60,
+      ...(pdfVorm ? {} : { font: 'Leland', pageMarginLeft: 60, pageMarginRight: 60, pageMarginTop: 60 }),
       spacingStaff: 10,
       spacingSystem: 12,
       spacingLinear: 0.25,
@@ -307,7 +306,7 @@ const vlak = document.getElementById('weergave');
     for (let pagina = 1; pagina <= tk.getPageCount(); pagina++) {
       const svg = new DOMParser().parseFromString(tk.renderToSVG(pagina), 'image/svg+xml').documentElement;
       svg.classList.add('bladmuziek__pagina');
-      svg.style.width = vasteRegels ? '100%' : `${Math.round((paginaBreedte * schaal) / 100)}px`;
+      svg.style.width = vasteRegels ? '100%' : `${paginaPixels}px`;
       blad.append(document.importNode(svg, true));
     }
     vlak.replaceChildren(blad);
