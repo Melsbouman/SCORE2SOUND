@@ -39,6 +39,57 @@ export function onzekereElementen(partituur) {
   return ids;
 }
 
+const toonafstanden = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+
+function toonnummer(noot) {
+  const toonhoogte = noot.toonhoogte;
+  if (!toonhoogte || !(toonhoogte.stap in toonafstanden)) return null;
+  return (toonhoogte.octaaf + 1) * 12 + toonafstanden[toonhoogte.stap] + toonhoogte.alter;
+}
+
+export function verwijderValseTweedeStemmen(partituur) {
+  const nieuw = structuredClone(partituur);
+  const meldingen = [];
+
+  for (const partij of nieuw.partijen) {
+    const noten = partij.maten.flatMap((maat, maatIndex) => maat.elementen
+      .filter((element) => element.soort === 'noot')
+      .map((noot) => ({ noot, maatIndex })));
+    const eersteStem = noten.filter(({ noot }) => noot.stem === 1);
+    const extraStemmen = [...new Set(noten.map(({ noot }) => noot.stem).filter((stem) => stem !== 1))];
+
+    for (const stem of extraStemmen) {
+      const extraNoten = noten.filter(({ noot }) => noot.stem === stem);
+      const bijnaGelijk = extraNoten.length > 0 && extraNoten.every(({ noot, maatIndex }) => {
+        const nummer = toonnummer(noot);
+        return nummer !== null && eersteStem.some(({ noot: eerste, maatIndex: eersteMaatIndex }) => {
+          const eersteNummer = toonnummer(eerste);
+          return eersteMaatIndex === maatIndex && eerste.start === noot.start && eerste.notenbalk === noot.notenbalk
+            && eersteNummer !== null && Math.abs(eersteNummer - nummer) <= 2;
+        });
+      });
+      if (extraNoten.length <= 2 || bijnaGelijk) {
+        for (const maat of partij.maten) {
+          maat.elementen = maat.elementen.filter((element) => (
+            element.stem !== stem || (element.soort !== 'noot' && element.soort !== 'rust')
+          ));
+        }
+        continue;
+      }
+
+      meldingen.push({
+        soort: 'herkenning',
+        ernst: 'waarschuwing',
+        partij: partij.id,
+        maat: null,
+        tekst: `${partij.naam || partij.id} bevat mogelijk een tweede stem. Controleer of die op het blad staat.`,
+      });
+    }
+  }
+
+  return { partituur: nieuw, meldingen };
+}
+
 function kopieMetPlaats(partituur, id) {
   const kopie = structuredClone(partituur);
   return { kopie, plaats: zoekPlaats(kopie, id) };
