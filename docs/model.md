@@ -179,3 +179,6 @@ leegMaten(partituur, van, tot) in app/src/model/corrigeren.mjs vervangt alle ele
 
 ## Herstelde maten uit de herkenning
 Ontbreken maten aan het begin of tussen twee repetitiecijfers, dan voegt de herkenning maten rust in. De maten rust aan het begin zijn een samengestelde maat (maatrust op de eerste, verborgen op de rest). Tussen repetitiecijfers zijn het hele maten rust met zekerheid 0.3, dus rood.
+
+## Een noot naar een rust verplaatsen
+verplaatsNoot(partituur, id, doelId) in app/src/model/corrigeren.mjs laat een noot en een rust van dezelfde duur in dezelfde partij van plaats wisselen. De noot behoudt zijn toonhoogte, zekerheid en tekens; de plek waar hij stond wordt een rust.
