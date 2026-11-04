@@ -115,3 +115,6 @@ Het model kan een rust of noot in twee helften delen (splitsRust en splitsNoot).
 
 ## Maat aanvullen
 Het model kan een te korte maat met een rust aanvullen (vulMaatAan). Een knop Maatduur herstellen in de editor volgt later.
+
+## De toets S
+In de editor deelt S de gekozen noot of rust in twee gelijke helften, met splitsNoot en splitsRust uit het model.
