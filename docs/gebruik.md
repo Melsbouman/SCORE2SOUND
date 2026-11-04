@@ -109,3 +109,6 @@ In het tabblad Noten staat bij Onzekere noten de knop Herkenning herstellen. Die
 
 ## Een noot verplaatsen
 Kies een noot en druk op Alt en de pijl naar rechts of links: de noot springt naar de volgende of vorige rust van dezelfde duur, en de rust komt op de oude plek. Omhoog of omlaag slepen verandert de toonhoogte, Alt met de pijlen de plek in de tijd.
+
+## Onzekere noten nalopen
+Druk op N om naar de volgende onzekere (rode) noot te gaan en op P voor de vorige. Zo loop je alleen langs wat de herkenning niet zeker wist.
