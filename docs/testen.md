@@ -95,3 +95,6 @@ ontbrekend-nummering controleert dat de maatnummers na de herstelketen strikt op
 
 ## Test van verplaatsNoot
 verplaats-noot controleert dat een noot met een rust van dezelfde duur van plaats wisselt, ook naar een andere maat, en dat een andere duur, een doel dat geen rust is en onbekende id's niets veranderen.
+
+## Tests van splitsen en het herstel
+splits-rust en splits-noot controleren dat een rust of noot in twee gelijke helften wordt gedeeld en dat een oneven duur niets verandert. herstel-fixture-maten controleert dat het herstel van Sand and Stars 58 maten zonder lege maat geeft en bij een tweede keer hetzelfde oplevert.
