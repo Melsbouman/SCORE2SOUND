@@ -1,27 +1,21 @@
-# Nachtplan 3 op 4 november 2026
+# Nachtplan 4 op 5 november 2026
 
-Eindtijd: 07:00. Eindcontrole vanaf 06:15. Mels slaapt; Claude stelt geen vragen en maakt zelf nieuwe taken bij (minstens 6 open) uit dit plan en `werkpakketten/voorraad.md`.
+Eindtijd 07:00, eindcontrole vanaf 06:15. Focus (Mels): de inhoudelijke werking, dus dat de uitkomst klopt met het origineel.
 
-## Wat Mels vandaag aanleverde (en nog openligt)
-1. **Herkenning niet waterdicht** (Sand and Stars): maten gaan verloren, beginrust ontbreekt, wisselingen van maatsoort, bogen, noten boven de balk te laag gelezen.
-2. **Noten klinken niet** (ongeveer twee derde).
-3. **Slepen van een noot** werkt niet meer na afspelen.
-4. **Speler:** vanaf een gekozen maat afspelen, voortgangsbalk slepen, maten vooraf, tempo in procenten dat meeloopt met het stuk. (Gedaan of onderweg.)
-5. **Startpagina** in de huisstijl. (Gedaan.)
+## Uitvoerders
+- Codex werkt (ChatGPT-inlog). Copilot: maandtegoed op ("exceeded your monthly quota"). Hermes: OpenRouter-tegoed op. Alles gaat daarom naar Codex, één taak tegelijk (parallel gaf EPERM-fouten in de temp-map bij de tests).
 
-## Pakketten van vannacht
-| Nr | Titel | Bestanden | Uitvoerder | Golf |
-|---|---|---|---|---|
-| 1 | Beginrust ook bij een later repetitiecijfer, als samengestelde maat (#946) | beginrust.mjs | Codex | 1 |
-| 2 | Verdachte noten markeren (sprong boven anderhalve octaaf) | verdacht.mjs, herken.mjs | Codex | 1 |
-| 3 | Ontbrekende maten tussen repetitiecijfers invullen als onzekere rust | ontbrekend.mjs, herken.mjs | Codex | 2 |
-| 4 | Bogen: eigen nummer voor bogen in bogen en over meerdere maten | schrijven.mjs | Codex | 1 |
-| 5 | Onderzoek en herstel: noten die niet klinken | dynamiek.mjs, schrijven.mjs (midi) | Codex | 1 |
-| 6 | Onderzoek en herstel: slepen na afspelen | slepen.js | Codex | 2 |
-| 7 | Documentatie en voorraad bijwerken | docs | Copilot | 3 |
+## Golf 1 (alle bij Codex, achter elkaar)
+- #1299 homr-vergelijk (meet homr tegen de app)
+- #1301 letter na meermaats-rust
+- #1302 titelkop, componist en arrangeur
+- #1303 hokjes 1./2. en herhalingsstrepen
+- #1304 Vivace en "open"
+- #1305 woordenlijst muziektermen
+- #1306 reden niet-gekoppelde noten
 
-## Tests
-Pakketten 1 tot en met 5 hebben een testbestand dat in de taak staat.
+## Daarna (voorraad)
+Regelindeling van het origineel (`breaks: encoded`), Meditation en Distant Land koppelen, fermate, Integrated Warm Up, geluid dat wegvalt, Masque (vraagt pdf-bibliotheek: akkoord Mels).
 
-## Open vragen
-Geen. Alles wat geld, een server of accounts van Mels vraagt blijft liggen (OpenRouter-tegoed voor Hermes, Dependabot-PR's #522 tot en met #525).
+## Eigen werk van Claude
+Na elke gemergde PR het resultaat vergelijken met het origineel (Galop, Renaissance) via `hermes/echte-controle.sh`, en de bevindingen in de voorraad zetten.
