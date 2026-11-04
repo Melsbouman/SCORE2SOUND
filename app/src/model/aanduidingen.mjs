@@ -22,8 +22,12 @@ export function uitlegVan(term) {
   return item?.uitleg ?? '';
 }
 
+// Sterkte-tekens en crescendo/diminuendo staan onder de balk, de rest erboven (ook oudere tekens als sf, fp en fff).
+const STERKTETEKENS = ['pp', 'p', 'mp', 'mf', 'f', 'ff', 'fff', 'ppp', 'ffff', 'pppp', 'sf', 'sfz', 'sfp', 'fp', 'rfz', 'sffz'];
+
 export function plaatsingVan(term) {
-  const gezocht = String(term).toLocaleLowerCase('nl');
+  const gezocht = String(term).trim().toLocaleLowerCase('nl');
+  if (STERKTETEKENS.includes(gezocht) || gezocht.includes('cresc') || gezocht.includes('dim')) return 'below';
   const item = AANDUIDINGENLIJST.find(({ naam, afkorting }) =>
     naam.toLocaleLowerCase('nl') === gezocht || afkorting?.toLocaleLowerCase('nl') === gezocht,
   );
