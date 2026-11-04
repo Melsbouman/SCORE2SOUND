@@ -17,15 +17,14 @@ const stuk = (...maten) => ({
 const soorten = (p) => p.partijen[0].maten.map((m) => `${m.maatsoort.teller}/${m.maatsoort.noemer}`);
 const achtsten = (n) => Array.from({ length: n }, (_, i) => noot(i * 240, 240));
 
-test('een maat van 6/8 met negen achtsten wordt 9/8', () => {
+test('een te lange maat krijgt geen verzonnen maatsoort (9 achtsten in 6/8 blijft 6/8)', () => {
   const nieuw = herstelMaatsoorten(stuk(maat(0, 6, 8, achtsten(6)), maat(1, 6, 8, achtsten(9)), maat(2, 6, 8, achtsten(6))));
-  assert.deepEqual(soorten(nieuw), ['6/8', '9/8', '6/8']);
+  assert.deepEqual(soorten(nieuw), ['6/8', '6/8', '6/8']);
 });
 
-test('een maat van 4/4 met vijf kwarten wordt 5/4', () => {
+test('vijf kwarten in 4/4 blijven 4/4 en een maat die al klopt of korter is blijft ook zoals hij is', () => {
   const vijfKwarten = Array.from({ length: 5 }, (_, i) => noot(i * 480, 480));
-  const nieuw = herstelMaatsoorten(stuk(maat(0, 4, 4, vijfKwarten)));
-  assert.deepEqual(soorten(nieuw), ['5/4']);
+  assert.deepEqual(soorten(herstelMaatsoorten(stuk(maat(0, 4, 4, vijfKwarten)))), ['4/4']);
 });
 
 test('een maat die al klopt, een onvolledige maat, een opmaat en een lege maat blijven zoals ze zijn', () => {
