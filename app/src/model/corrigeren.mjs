@@ -425,3 +425,30 @@ export function splitsNoot(partituur, id) {
   kopie.partijen[partijIndex].maten[maatIndex].elementen.splice(elementIndex, 1, eerste, tweede);
   return kopie;
 }
+export function vulMaatAan(partituur, partijId, maatIndex) {
+  const partij = partituur.partijen.find((kandidaat) => kandidaat.id === partijId);
+  const maat = partij?.maten[maatIndex];
+  if (!maat) return partituur;
+
+  const maatlengte = maat.maatsoort.teller * 1920 / maat.maatsoort.noemer;
+  const gebeurtenissen = maat.elementen.filter((element) =>
+    (element.soort === 'noot' || element.soort === 'rust') && element.stem === 1
+  );
+  const bezet = gebeurtenissen.reduce(
+    (grootste, element) => Math.max(grootste, element.start + element.duur),
+    0,
+  );
+  if (bezet >= maatlengte) return partituur;
+
+  const nieuw = structuredClone(partituur);
+  nieuw.partijen.find((kandidaat) => kandidaat.id === partijId).maten[maatIndex].elementen.push({
+    soort: 'rust',
+    start: bezet,
+    duur: maatlengte - bezet,
+    stem: 1,
+    notenbalk: 1,
+    heleMaat: gebeurtenissen.length === 0,
+    zekerheid: 1,
+  });
+  return nieuw;
+}
