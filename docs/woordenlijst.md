@@ -40,3 +40,5 @@ De muziektermen in SCORE2SOUND, met de term uit MusicXML. Gebruik in teksten van
 | verdachte noot | (geen) | een noot die ver van haar buren ligt en daarom rood wordt gemarkeerd |
 | verplaatsen | (geen) | een noot en een rust van dezelfde duur van plaats laten wisselen met Alt en de pijlen |
 | overgeslagen pagina | (geen) | een pagina die de herkenning niet kon lezen en die daarom ontbreekt, met een melding |
+| splitsen | (geen) | een rust of noot in twee gelijke helften delen |
+| aanvullen | (geen) | een te korte maat met een rust opvullen tot de maatduur |
