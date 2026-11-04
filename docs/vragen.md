@@ -69,3 +69,11 @@ Onderaan elke pagina staat `Gemaakt met SCORE2SOUND`. Daaronder staat het pagina
 
 Als je bent ingelogd, heeft de PDF geen watermerk. Anders staat `SCORE2SOUND` schuin over elke pagina.
 
+## Kan ik eerst een proefscan maken?
+
+Met de knop **Probeer een scan** kun je één pagina als proef laten scannen. De proefscan heeft een watermerk en je kunt het resultaat niet exporteren. De beheerder bepaalt of de proefscan beschikbaar is en zet deze functie aan.
+
+## Waarom staat er een watermerk op mijn scan?
+
+Het watermerk staat alleen op een proefscan. Als je bent ingelogd, staat onderaan alleen **Gemaakt met SCORE2SOUND**.
+
