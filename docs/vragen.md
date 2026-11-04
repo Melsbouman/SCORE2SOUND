@@ -57,3 +57,15 @@ Open in de app het scherm **Meldingen** om te zien welke aandachtspunten bij je 
 
 Een melding beschrijft wat er is gevonden en waar in de muziek dat speelt. Gebruik de tekst van de melding als aanwijzing; niet iedere melding betekent dat je partituur onbruikbaar is.
 
+## Hoe krijgt een export zijn bestandsnaam?
+
+De naam begint met `S2S` en bevat daarna de titel en, als die is ingevuld, de componist en arrangeur. Bij een partituur met één partij komt ook de partijnaam in de bestandsnaam.
+
+## Wat staat er onderaan een PDF?
+
+Onderaan elke pagina staat `Gemaakt met SCORE2SOUND`. Daaronder staat het paginanummer en het totale aantal pagina's, bijvoorbeeld `pagina 1 van 2`.
+
+## Heeft een PDF altijd een watermerk?
+
+Als je bent ingelogd, heeft de PDF geen watermerk. Anders staat `SCORE2SOUND` schuin over elke pagina.
+
