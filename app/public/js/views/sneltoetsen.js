@@ -33,6 +33,7 @@ export function start(app) {
     ['Ctrl + C / Ctrl + V', 'Kopieer en plak de gekozen maten.'],
     ['Ctrl + A', 'Kies alle maten van het stuk.'],
     ['Alt + ← / →', 'Verplaats de gekozen noot naar de vorige of volgende rust van dezelfde duur.'],
+    ['S', 'Deel de gekozen noot of rust in twee gelijke helften.'],
     ['Delete', 'Maak de gekozen noot een rust, of maak de gekozen maten leeg.'],
     ['Twee vingers knijpen', 'Zoom het muziekstuk in of uit op een aanraakscherm.'],
     ['Shift + klik', 'Kies een reeks maten.'],
