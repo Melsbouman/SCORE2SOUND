@@ -64,7 +64,7 @@ function soortVan(body) {
 
 // Audiveris schrijft bij een partituur met meer delen een bestand per deel: invoer.mvt1.xml, invoer.mvt2.xml.
 async function leesUitvoer(uitmap) {
-  const namen = (await readdir(uitmap)).filter((naam) => /^invoer(\.mvt\d+)?\.xml$/.test(naam)).sort();
+  const namen = (await readdir(uitmap)).filter((naam) => /^invoer(\.mvt(?:\d+|null))?\.xml$/.test(naam)).sort();
   if (namen.length === 0) return null;
   const xmlTeksten = await Promise.all(namen.map((naam) => readFile(join(uitmap, naam), 'utf8')));
   const delen = xmlTeksten.map((xml) => herstelMaatsoorten(leesMusicXML(xml)));
