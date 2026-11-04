@@ -1,7 +1,8 @@
-# SCORE2SOUND
-|
-SCORE2SOUND zet bladmuziek om in bewerkbare notatie en hoorbare muziek. Je kunt de noten controleren en corrigeren, partijen beluisteren en je muziek bewaren of exporteren.
-|
+SCORE2SOUND is een web-app die bladmuziek omzet naar bewerkbare notatie en hoorbare muziek.
+
+Start de app vanuit de map `app/` met `npm start`. De app draait op poort 5175.
+
+Voer de tests vanuit de map `app/` uit met `npm test`.
 ## Wat het kan
 |
 - PDF, scan, foto of MusicXML openen en herkennen
