@@ -1,5 +1,6 @@
 import {
   leesId,
+  verplaatsNoot,
   zoekElement,
   verschuif,
   verschuifHalvetoon,
@@ -816,4 +817,3 @@ if (typeof document !== "undefined") {
   document.addEventListener("DOMContentLoaded", groepeerEditorKnoppenbalk);
   new MutationObserver(groepeerEditorKnoppenbalk).observe(document.documentElement, { childList: true, subtree: true });
 }
-import { verplaatsNoot } from '/src/model/corrigeren.mjs';
