@@ -5,9 +5,10 @@ const AUDIO_FOUTEN = {
   stil: 'Alle partijen staan uit in de mixer. Zet er minstens één aan.',
 }
 
+import { exportNaam } from '/src/model/exportnaam.mjs'
+
 function bestandsnaam(partituur, extensie) {
-  const titel = partituur.titel?.trim() || 'partituur'
-  return `${titel.replace(/[^\p{L}\p{N} -]/gu, '-')}.${extensie}`
+  return exportNaam(partituur, { extensie })
 }
 
 function download(blob, naam) {
@@ -139,7 +140,7 @@ export function start(app) {
           else muziek.prepend(nieuwTitelblok)
         }
       }
-      document.title = titeltekst || 'SCORE2SOUND'
+      document.title = exportNaam(partituur)
       window.addEventListener('afterprint', () => {
         document.title = titel
         if (nieuwTitelblok?.parentNode === muziek) {
