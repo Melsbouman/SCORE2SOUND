@@ -104,6 +104,8 @@ function dichtstbij(woord) {
 
 export function leesAanduidingen(tekst) {
   if (typeof tekst !== 'string') return null;
+  // Audiveris leest ff vaak als de ligatuur fl met een apostrof: eerst normaliseren.
+  tekst = tekst.normalize('NFKD').replace(/['’`´]/g, '');
   const woorden = tekst.trim().split(/\s+/).filter(Boolean);
   if (woorden.length === 0 || woorden.length > 3 || /\d/.test(tekst)) return null;
 

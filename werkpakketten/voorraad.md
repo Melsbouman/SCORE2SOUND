@@ -70,3 +70,11 @@ Claude pakt hier werk uit als een nachtplan af is en de eindtijd nog niet bereik
 
 - [ ] Gedraaide scans: *Masque 2nd Cornet* (C:\Brassmuziek PDF) is een liggend A4-vel met twee pagina's naast elkaar die 90 graden gedraaid staan; Audiveris meldt "geen notenbalken". Oplossing: de pdf per pagina draaien en in tweeën knippen vóór de herkenning. Vraagt een bibliotheek om pdf's te bewerken (bijvoorbeeld pdf-lib): akkoord van Mels nodig. (Claude, 4 november 2026)
 - [ ] *Distant Land* (140 noten) en *African Symphony* (75 noten) koppelen veel noten niet aan het origineel; de reden per soort (geen kop in de maat, andere toonhoogte, al gebruikt) staat al in `koppelOmr` (`redenen`) maar niet in de melding. (Claude, 4 november 2026)
+
+## Vergelijking met het origineel (Galop, 4 november 2026)
+Gedaan met `VERGELIJK_UIT=<json> bash hermes/echte-controle.sh <pdf> 1`, daarna `node hermes/maak-pdf.mjs <json> <uit.pdf>` en `python hermes/vergelijk.py <origineel.pdf> <uit.pdf> <uit.png>`. Nog niet goed:
+- [ ] Letter D (en elke letter na een meermaats-rust) wordt niet getekend: hij staat op een maat die onder de samengestelde rust (6 maten) valt; de letter moet naar de eerste maat na de rust. (Claude)
+- [ ] De hokjes 1. en 2. bij de herhaling vóór E ontbreken; de herhalingsstrepen staan op andere maten dan op het blad (herhaling.eind op maat 32 in plaats van de maat voor de hokjes). (Claude)
+- [ ] `open` boven de maat (spelwijze) en het tempo `Vivace` uit de kop ontbreken. (Claude)
+- [ ] De regelindeling van het origineel (new-system) staat op verkeerde maten (regelbegins vlak na elkaar); daarom staat `breaks: encoded` uit. Zoek uit waar `koppelOmr` de maten telt (samengestelde rust en ingevoegde maten). (Claude)
+- [ ] De titelkop, componist (Shoshtakowich in plaats van Shostakovich, OCR) en arr. Alan Fernie ontbreken in de uitkomst; het colofon (copyrightregel) moet onderaan komen. (Claude)

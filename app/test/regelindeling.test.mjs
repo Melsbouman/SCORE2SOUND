@@ -24,10 +24,10 @@ test('de regelindeling van het origineel wordt herkend als er minstens twee rege
   assert.equal(heeftOrigineleRegels(naarMusicXML(stuk([]))), false);
 });
 
-test('de pdf en de editor gebruiken dezelfde regel om te beslissen', async () => {
+test('de pdf en de editor laten onderaan de pagina ruimte voor de voetregel', async () => {
   for (const pad of ['../src/export/pdf.mjs', '../public/js/weergave.js']) {
     const bron = await readFile(new URL(pad, import.meta.url), 'utf8');
-    assert.ok(bron.includes('heeftOrigineleRegels'), pad);
+    assert.ok(bron.includes('pageMarginBottom: 250'), pad);
   }
 });
 

@@ -1,4 +1,3 @@
-import { heeftOrigineleRegels } from '../musicxml/regels.mjs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -53,10 +52,10 @@ function toolkit() {
 export async function maakPdf(musicxml, { watermerk = 'SCORE2SOUND', comprimeer = true, titelblok } = {}) {
   const tk = await toolkit();
   const colofon = leesColofon(musicxml);
-  // Heeft het stuk de regelindeling van het origineel (new-system), volg die dan: hetzelfde aantal maten per regel.
-  const volgOrigineleRegels = heeftOrigineleRegels(musicxml);
+  // De regelindeling van het origineel (heeftOrigineleRegels) staat nog uit: de regelbegins zijn nog niet overal op de goede maat gezet.
   tk.setOptions({
-    breaks: volgOrigineleRegels ? 'encoded' : 'auto',
+    breaks: 'auto',
+    pageMarginBottom: 250,
     header: 'none',
     footer: 'none',
     pageWidth: 2100,
