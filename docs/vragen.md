@@ -32,3 +32,12 @@ U kunt exporteren naar MusicXML, MIDI, WAV en PDF. Gebruik de knop 'Exporteer al
 
 ## Kan ik mijn partituur als PDF krijgen?
 Ja. Kies in het tabblad Bestand de knop PDF downloaden. Op elke pagina staat het watermerk SCORE2SOUND.
+
+## Wat doet Herkenning herstellen?
+De knop verbetert bekende leesfouten in het geopende stuk, zoals een verkeerde maatsoort, ontbrekende beginmaten, verdachte noten of tempo dat in tekst stond. Wat daarna nog onzeker is, blijft rood; je kunt de bewerking ongedaan maken.
+
+## Waarom klinkt een fermate langer?
+Een fermate verlengt de noot tijdens het afspelen. Daardoor hoor je de verlenging in de speler.
+
+## Waarom staan er maten met een rust die ik niet speel?
+De herkenning kan ontbrekende maten afleiden uit sprongen tussen repetitiecijfers en deze als rust invoegen of als samengestelde rust markeren. Een blok met een cijfer erboven telt als meerdere maten rust; de herkenning leest dat cijfer niet altijd.
