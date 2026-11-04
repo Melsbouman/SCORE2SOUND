@@ -79,6 +79,7 @@ function levenshtein(a, b) {
 }
 
 export function herstelMuziekterm(tekst) {
+  if ((/\d/.test(tekst) && /\s/.test(tekst)) || tekst.length > 25) return tekst;
   const genormaliseerd = normaliseer(tekst);
   let besteTerm = null;
   let kleinsteAfstand = Infinity;
