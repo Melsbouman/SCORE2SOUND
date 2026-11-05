@@ -56,6 +56,14 @@ export function zetArticulatie(partituur, id, naam) {
   return kopie;
 }
 
+export function verschuifOctaaf(partituur, id, richting) {
+  const { kopie, element } = kopieMetElement(partituur, id);
+  if (element?.soort !== 'noot') return kopie;
+  element.toonhoogte.octaaf = Math.max(0, Math.min(8, element.toonhoogte.octaaf + richting));
+  element.zekerheid = 1;
+  return kopie;
+}
+
 export function zetOverbinding(partituur, id, aan) {
   const { kopie, element, partij, maatIndex, elementIndex } = kopieMetElement(partituur, id);
   if (element?.soort !== 'noot') return kopie;
