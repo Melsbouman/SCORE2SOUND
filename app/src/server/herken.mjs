@@ -180,16 +180,14 @@ export function maakNetjes(partituur, naam, credits) {
   const arrangeur = creditWoorden.map((waarde) => waarde.trim().match(/^arr(?:\.|\s)\s*(.+)$/i)).find(Boolean);
   if (arrangeur) partituur.arrangeur = arrangeur[1].trim();
   if (!partituur.arrangeur) {
-    const tweedeComponist = creditGegevens.slice(1).find((credit, index) => {
-      const vorige = creditGegevens[index];
-      return credit.type?.toLowerCase() === 'composer'
-        && vorige.type?.toLowerCase() === 'composer'
-        && Number.isFinite(credit.y)
-        && Number.isFinite(vorige.y)
-        && vorige.y > credit.y
-        && vorige.y - credit.y < 60;
-    });
-    if (tweedeComponist) partituur.arrangeur = tweedeComponist.tekst.replace(/^arr\.\s*/i, '').trim();
+    const componisten = creditGegevens.filter((credit) => credit.type?.toLowerCase() === 'composer');
+    const [eersteComponist, tweedeComponist] = componisten;
+    if (Number.isFinite(eersteComponist?.y)
+      && Number.isFinite(tweedeComponist?.y)
+      && eersteComponist.y > tweedeComponist.y
+      && eersteComponist.y - tweedeComponist.y < 60) {
+      partituur.arrangeur = tweedeComponist.tekst.replace(/^arr\.\s*/i, '').trim();
+    }
   }
   const eersteMaat = partituur.partijen?.[0]?.maten?.[0];
   const heeftTempo = eersteMaat?.tempo != null
