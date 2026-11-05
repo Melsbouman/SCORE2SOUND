@@ -1,3 +1,5 @@
+.skip { position: fixed; z-index: 100; top: 8px; left: 8px; padding: 10px 14px; transform: translateY(calc(-100% - 12px)); border-radius: 8px; background: var(--kleur-wit); color: var(--kleur-donker); }
+.skip:focus { transform: translateY(0); outline: 3px solid var(--kleur-accent); outline-offset: 3px; }
 .app { display: grid; grid-template-columns: 270px minmax(0, 1fr); min-height: 100vh; }
 .zijbalk { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 4px; padding: 28px 20px 18px; overflow-y: auto; background: linear-gradient(160deg, var(--kleur-accent) 0%, var(--kleur-zijbalk) 78%); color: var(--kleur-wit); }
 .zijbalk__logo { margin: 0 10px 20px; font: 400 1.15rem/1.1 var(--letter-logo); text-transform: uppercase; }
@@ -29,7 +31,8 @@
 .zijbalk__voet a { display: inline-flex; align-items: center; gap: 4px; color: var(--kleur-wit); text-decoration: none; opacity: 0.85; }
 .zijbalk__voet svg { width: 13px; height: 13px; }
 .zijbalk__voet a:hover { opacity: 1; text-decoration: underline; }
-.zijbalk a:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+.zijbalk a:focus-visible, .zijbalk button:focus-visible { outline: 3px solid var(--kleur-licht); outline-offset: 3px; }
+.zijbalk__accountmenu a:focus-visible, .zijbalk__accountmenu button:focus-visible { outline-color: var(--kleur-accent); }
 .inhoud { min-width: 0; padding-bottom: 120px; }
 .sneltoetsen__groep h3 { margin-bottom: 6px; font-size: 0.95rem; }
 .sneltoetsen__groep ul { margin-top: 0; }

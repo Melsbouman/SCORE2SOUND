@@ -162,6 +162,7 @@ export function start() {
       });
       document.addEventListener('keydown', (gebeurtenis) => {
         if (gebeurtenis.key !== 'Escape' || menu.hidden) return;
+        gebeurtenis.preventDefault();
         sluitMenu();
         accountKnop.focus();
       });
