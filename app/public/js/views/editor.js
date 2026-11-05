@@ -973,6 +973,11 @@ export function start(app) {
     if (invoermodus) {
       let afgehandeld = true;
       if (toets === 'Escape') sluitInvoermodus();
+      else if ((gebeurtenis.ctrlKey || gebeurtenis.metaKey) && toets.toLowerCase() === 'z'
+        && !gebeurtenis.shiftKey) verwijderLaatsteInvoer();
+      else if ((gebeurtenis.ctrlKey || gebeurtenis.metaKey)
+        && (toets.toLowerCase() === 'y'
+          || (toets.toLowerCase() === 'z' && gebeurtenis.shiftKey))) opnieuwMaken();
       else if (gebeurtenis.ctrlKey && DYNAMIEK_SNELTOETSEN[toets]) {
         zetDynamiekBijLaatsteInvoer(DYNAMIEK_SNELTOETSEN[toets]);
       } else if (gebeurtenis.ctrlKey && toets === 'ArrowUp') {

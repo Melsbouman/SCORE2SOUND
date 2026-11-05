@@ -50,6 +50,7 @@ export function start(app) {
     ['# / b', 'Kies een kruis of mol voor de volgende noot.'],
     ['Spatie', 'Voer een rust in.'],
     ['Backspace', 'Haal de laatst ingevoerde noot of rust weg.'],
+    ['Ctrl + Z / Ctrl + Y / Ctrl + Shift + Z', 'Maak de laatste invoer ongedaan of voer die opnieuw uit.'],
     ['Esc', 'Sluit Noten invoeren.'],
   ]);
   const maten = maakGroep('Maten', [
