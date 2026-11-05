@@ -25,9 +25,12 @@ import { maakTriool, maakTriooLos } from '/src/model/triolen.mjs';
 import { voegMaatToe, verwijderMaat, zetMaatsoort } from '/src/model/maten-bewerken.mjs';
 import { opAlle, verwijderAlle } from '/src/model/meerdere.mjs';
 import { controleerMaatduur } from '/src/controle/maatduur.mjs';
+import { schrijfNoot } from '/src/model/invoeren.mjs';
 
 const DUUR = { heel: 1920, half: 960, kwart: 480, achtste: 240, zestiende: 120 };
 const DUUR_TOETSEN = { 1: 'heel', 2: 'half', 3: 'kwart', 4: 'achtste', 5: 'zestiende' };
+const INVOER_DUUR = { 1: 120, 2: 240, 3: 480, 4: 960, 5: 1920 };
+const TOONAFSTANDEN = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 const GESTIPTE_DUUR = new Map([[180, 120], [360, 240], [720, 480], [1440, 960], [2880, 1920]]);
 const PICTOGRAMMEN = {
   hoger: '<path d="M12 19V5M6 11l6-6 6 6"/>',
@@ -66,6 +69,14 @@ export function start(app) {
   let vorigePartituur = app.stand.partituur;
   let bezigMetGeschiedenis = false;
   let projectWerdNetNull = false;
+  let invoermodus = false;
+  let invoerPartijId = null;
+  let invoerMaat = null;
+  let invoerStart = 0;
+  let invoerDuur = 480;
+  let invoerAlter = 0;
+  let vorigeInvoerToon = null;
+  const ingevoerdeNoten = [];
   const ongedaan = [];
   const opnieuw = [];
 
@@ -76,6 +87,123 @@ export function start(app) {
 
   function idsVoorBewerking() {
     return gekozenIds.length ? gekozenIds : gekozen ? [gekozen] : [];
+  }
+
+  function sluitInvoermodus() {
+    invoermodus = false;
+    invoerPartijId = null;
+    invoerMaat = null;
+    invoerStart = 0;
+    invoerAlter = 0;
+    vorigeInvoerToon = null;
+    ingevoerdeNoten.length = 0;
+    teken();
+  }
+
+  function openInvoermodus() {
+    const partituur = app.stand.partituur;
+    if (invoermodus) {
+      sluitInvoermodus();
+      return;
+    }
+    if (!partituur || gekozenMaat === null) {
+      if (statusBalk) statusBalk.textContent = 'Kies eerst een maat.';
+      return;
+    }
+    const partij = partituur.partijen.find((item) => item.maten[gekozenMaat]);
+    if (!partij) return;
+    invoermodus = true;
+    invoerPartijId = partij.id;
+    invoerMaat = gekozenMaat;
+    invoerStart = 0;
+    invoerDuur = 480;
+    invoerAlter = 0;
+    vorigeInvoerToon = null;
+    ingevoerdeNoten.length = 0;
+    teken();
+  }
+
+  function geldendeSleutel(partij, maatIndex) {
+    for (let index = maatIndex; index >= 0; index -= 1) {
+      const sleutel = partij.maten[index]?.sleutels?.find((item) => (item.notenbalk ?? 1) === 1);
+      if (sleutel) return sleutel;
+    }
+    return null;
+  }
+
+  function toonhoogteVoor(stap) {
+    if (!vorigeInvoerToon) {
+      const partij = app.stand.partituur.partijen.find((item) => item.id === invoerPartijId);
+      const sleutel = geldendeSleutel(partij, invoerMaat);
+      return { stap, alter: invoerAlter, octaaf: sleutel?.teken === 'F' ? 4 : 5 };
+    }
+    const vorigeMidi = (vorigeInvoerToon.octaaf + 1) * 12
+      + TOONAFSTANDEN[vorigeInvoerToon.stap] + vorigeInvoerToon.alter;
+    const kandidaten = [vorigeInvoerToon.octaaf - 1, vorigeInvoerToon.octaaf, vorigeInvoerToon.octaaf + 1];
+    const octaaf = kandidaten.reduce((beste, kandidaat) => {
+      const afstand = Math.abs((kandidaat + 1) * 12 + TOONAFSTANDEN[stap] + invoerAlter - vorigeMidi);
+      const besteAfstand = Math.abs((beste + 1) * 12 + TOONAFSTANDEN[stap] + invoerAlter - vorigeMidi);
+      return afstand < besteAfstand ? kandidaat : beste;
+    });
+    return { stap, alter: invoerAlter, octaaf };
+  }
+
+  function maatduur(partij, maatIndex) {
+    const maat = partij.maten[maatIndex];
+    return maat.maatsoort.teller * 1920 / maat.maatsoort.noemer;
+  }
+
+  function schuifInvoercursorVooruit() {
+    const partij = app.stand.partituur.partijen.find((item) => item.id === invoerPartijId);
+    const einde = invoerStart + invoerDuur;
+    const duur = maatduur(partij, invoerMaat);
+    if (einde < duur) {
+      invoerStart = einde;
+    } else if (invoerMaat < partij.maten.length - 1) {
+      invoerMaat += 1;
+      invoerStart = 0;
+      app.meld('kies-maat', { maat: invoerMaat });
+    } else {
+      invoerStart = Math.min(invoerStart, Math.max(0, duur - invoerDuur));
+    }
+  }
+
+  function voerNootIn(stap, rust = false) {
+    const toonhoogte = toonhoogteVoor(stap);
+    try {
+      let nieuw = schrijfNoot(
+        app.stand.partituur, invoerPartijId, invoerMaat, invoerStart, invoerDuur, toonhoogte,
+      );
+      if (rust) {
+        const partij = nieuw.partijen.find((item) => item.id === invoerPartijId);
+        const elementIndex = partij.maten[invoerMaat].elementen.findIndex((item) => (
+          item.soort === 'noot' && item.start === invoerStart && item.duur === invoerDuur
+        ));
+        nieuw = maakRust(nieuw, `n-${invoerPartijId}-${invoerMaat}-${elementIndex}`);
+      } else {
+        vorigeInvoerToon = toonhoogte;
+      }
+      ingevoerdeNoten.push({ maat: invoerMaat, start: invoerStart, toonhoogte: rust ? null : toonhoogte });
+      pas(nieuw);
+      schuifInvoercursorVooruit();
+      invoerAlter = 0;
+      teken();
+    } catch (fout) {
+      if (!(fout instanceof Error)) throw fout;
+      statusBalk.textContent = fout.message;
+    }
+  }
+
+  function verwijderLaatsteInvoer() {
+    const laatste = ingevoerdeNoten.pop();
+    if (!laatste) return;
+    ongedaanMaken();
+    invoerMaat = laatste.maat;
+    invoerStart = laatste.start;
+    vorigeInvoerToon = [...ingevoerdeNoten].reverse()
+      .find((item) => item.toonhoogte)?.toonhoogte ?? null;
+    gekozenMaat = invoerMaat;
+    teken();
   }
 
   function pasAlle(bewerking) {
@@ -287,6 +415,9 @@ export function start(app) {
         pas(nieuw);
       });
       const maatGroep = [knop, kopieerKnop, leegmaakKnop, herstelKnop];
+      const invoerKnop = maakTekstKnop('Noten invoeren', openInvoermodus);
+      invoerKnop.setAttribute('aria-pressed', String(invoermodus));
+      maatGroep.unshift(invoerKnop);
       if (gekopieerdeReeks !== null) {
         const plakKnop = maakTekstKnop('Plakken', plakGekopieerdeReeks);
         plakKnop.setAttribute('aria-label', 'Plak de gekopieerde maten vanaf de gekozen maat');
@@ -439,7 +570,9 @@ export function start(app) {
     const status = document.createElement('span');
     const aantalGekozen = gekozenIds.length;
     status.className = `editor__status${aantalGekozen ? ' editor__status--gekozen' : ''}`;
-    status.textContent = aantalGekozen > 1
+    status.textContent = invoermodus
+      ? `Noten invoeren: maat ${invoerMaat + 1}, tik ${invoerStart}; duur ${invoerDuur}${invoerAlter === 1 ? ', kruis' : invoerAlter === -1 ? ', mol' : ''}`
+      : aantalGekozen > 1
       ? `${aantalGekozen} noten gekozen`
       : aantalGekozen === 1 ? 'Noot gekozen' : 'Geen noot gekozen';
     status.setAttribute('aria-live', 'polite');
@@ -539,6 +672,7 @@ export function start(app) {
     teken();
   });
   app.op('kies-maat', ({ maat, tot }) => {
+    if (invoermodus && maat !== invoerMaat) sluitInvoermodus();
     gekozenMaat = maat;
     gekozenTot = tot ?? null;
     teken();
@@ -549,6 +683,35 @@ export function start(app) {
     const partituur = app.stand.partituur;
     const element = gekozen && partituur ? zoekElement(partituur, gekozen) : null;
     const toets = gebeurtenis.key;
+    if (invoermodus) {
+      let afgehandeld = true;
+      if (toets === 'Escape') sluitInvoermodus();
+      else if (INVOER_DUUR[toets]) {
+        invoerDuur = INVOER_DUUR[toets];
+        teken();
+      } else if (toets === '#') {
+        invoerAlter = 1;
+        teken();
+      } else if (toets === 'b') {
+        invoerAlter = -1;
+        teken();
+      } else if (toets === ' ') voerNootIn(vorigeInvoerToon?.stap ?? 'C', true);
+      else if (toets === 'Backspace') verwijderLaatsteInvoer();
+      else if (['a', 'b', 'c', 'd', 'e', 'f', 'g'].includes(toets.toLowerCase())) {
+        voerNootIn(toets.toUpperCase());
+      } else afgehandeld = false;
+      if (afgehandeld) {
+        gebeurtenis.preventDefault();
+        gebeurtenis.stopImmediatePropagation();
+        return;
+      }
+    }
+    if (toets.toLowerCase() === 'n' && !gebeurtenis.ctrlKey && !gebeurtenis.metaKey && !gebeurtenis.altKey) {
+      gebeurtenis.preventDefault();
+      gebeurtenis.stopImmediatePropagation();
+      openInvoermodus();
+      return;
+    }
     if (toets === 'Escape') {
       if (gebeurtenis.ctrlKey || gebeurtenis.metaKey) return;
       gebeurtenis.preventDefault();
@@ -730,7 +893,7 @@ import { SYMBOOL } from "./muzieksymbolen.js";
 
 
 const KNOPPENBALK_GROEPEN = [
-  ["Noten", ["heel", "half", "kwart", "achtste", "zestiende", "rust", "punt", "triool"]],
+  ["Noten", ["noten invoeren", "heel", "half", "kwart", "achtste", "zestiende", "rust", "punt", "triool"]],
   ["Voortekens", ["kruis", "mol", "herstelling", "dubbelkruis", "dubbelmol"]],
   ["Toonhoogte", ["hoger", "lager"]],
   ["Tekens", ["fermate", "staccato", "accent", "tenuto", "overbinding"]],
