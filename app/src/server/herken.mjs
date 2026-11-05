@@ -24,7 +24,7 @@ import { kinderen, leesXml, tekst } from '../musicxml/xml.mjs';
 import { controleerMaatduur } from '../controle/maatduur.mjs';
 import { vulLegeMaten, markeerFouteMaten } from '../controle/nabewerken.mjs';
 import { INSTRUMENTEN, instrumentBijNaam } from '../model/instrumenten.mjs';
-import { partijNaamUitKop } from '../model/partijnaam.mjs';
+import { partijNaamUitKop, splitsPartijenOpKoppen } from '../model/partijnaam.mjs';
 import { maakLimiet } from './limiet.mjs';
 
 const GELDIG_ID = /^[a-f0-9]{12}$/;
@@ -68,7 +68,18 @@ async function leesUitvoer(uitmap) {
   if (namen.length === 0) return null;
   const xmlTeksten = await Promise.all(namen.map((naam) => readFile(join(uitmap, naam), 'utf8')));
   const delen = xmlTeksten.map((xml) => herstelMaatsoorten(leesMusicXML(xml)));
-  const creditWoorden = xmlTeksten.flatMap((xml) => kinderen(leesXml(xml), 'credit').flatMap((credit) => kinderen(credit, 'credit-words').map((woord) => tekst(woord))));
+  const paginaKopregels = [];
+  for (const xml of xmlTeksten) {
+    const wortel = leesXml(xml);
+    const perPagina = [];
+    for (const credit of kinderen(wortel, 'credit')) {
+      const pagina = Math.max(0, Number(credit.attr.page ?? 1) - 1);
+      perPagina[pagina] ??= [];
+      perPagina[pagina].push(...kinderen(credit, 'credit-words').map((woord) => tekst(woord)));
+    }
+    paginaKopregels.push(...Array.from({ length: perPagina.length }, (_, pagina) => perPagina[pagina] ?? []));
+  }
+  const creditWoorden = paginaKopregels.flatMap((regels) => regels ?? []);
   const [partituur, ...rest] = delen;
   for (const deel of rest.filter((d) => d.partijen.length === partituur.partijen.length)) {
     deel.partijen.forEach((partij, index) => {
@@ -76,7 +87,7 @@ async function leesUitvoer(uitmap) {
       for (const maat of partij.maten) maten.push({ ...maat, index: maten.length });
     });
   }
-  return { partituur, creditWoorden };
+  return { partituur, creditWoorden, paginaKopregels };
 }
 
 function herstelOcr(waarde) {
@@ -229,7 +240,7 @@ export function maakHerken({ map, draaier }) {
     if (taak.stand === 'afgebroken') return;
     const uitvoer = await leesUitvoer(taak.uitmap);
     if (!uitvoer) throw new Error('De bladmuziek is niet herkend.');
-    const { partituur, creditWoorden } = uitvoer;
+    const { partituur, creditWoorden, paginaKopregels } = uitvoer;
 
     const bladenGoed = bladen.filter((blad) => goed.includes(blad.nummer));
     const uit = koppelOmr(voegPaginasSamen(partituur, boek, bladenGoed), bladenGoed);
@@ -238,6 +249,9 @@ export function maakHerken({ map, draaier }) {
       bladen: bladen.map(({ nummer, breedte, hoogte }) => ({ nummer, breedte, hoogte })),
     };
     maakNetjes(uit.partituur, taak.naam, creditWoorden);
+    const paginaNamen = paginaKopregels.map((regels) => (regels ?? [])
+      .map((regel) => partijNaamUitKop(herstelOcr(regel))).find(Boolean) ?? null);
+    uit.partituur = splitsPartijenOpKoppen(uit.partituur, paginaNamen);
     verbeterTekstaanwijzingen(uit.partituur);
   const gevuld = vulLegeMaten(uit.partituur);
   const maatMeldingen = controleerMaatduur(gevuld);
