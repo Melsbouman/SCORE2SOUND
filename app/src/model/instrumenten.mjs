@@ -1,5 +1,6 @@
 // Instrumenten voor het transponeren: stemming (genoteerd naar klinkend), sleutel, General MIDI-programma en klinkend bereik (MIDI-nummers).
 export const INSTRUMENTEN = [
+  { id: 'piano', naam: 'Piano', midiProgramma: 0, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'G', lijn: 2 }, sleutels: [{ teken: 'G', lijn: 2 }, { teken: 'F', lijn: 4 }] },
   { id: 'bugel', naam: 'Bugel in Bes', midiProgramma: 56, transpositie: { chromatisch: -2, diatonisch: -1 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 52, hoog: 82 } },
   { id: 'trompet', naam: 'Trompet in Bes', midiProgramma: 56, transpositie: { chromatisch: -2, diatonisch: -1 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 52, hoog: 82 } },
   { id: 'althoorn', naam: 'Althoorn in Es', midiProgramma: 60, transpositie: { chromatisch: -9, diatonisch: -5 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 43, hoog: 75 } },
