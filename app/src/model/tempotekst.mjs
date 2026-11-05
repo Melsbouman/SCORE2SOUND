@@ -9,6 +9,8 @@ export function tempoUitTekst(partituur) {
   ]);
   const patroon = /\(?\s*(?:[♩J]|𝅘𝅥)(\.?)\s*=\s*(?:c\.?|0\.)?\s*(\d{2,3})\s*\)?/;
 
+  const losGetalPatroon = /^\s*(?:q|\u2669|J)?(\.?)\s*=\s*(\d{2,3})\s*$/i;
+
   for (const partij of nieuw.partijen) {
     for (const [maatIndex, maat] of partij.maten.entries()) {
       const elementen = [];
@@ -31,14 +33,15 @@ export function tempoUitTekst(partituur) {
           continue;
         }
 
-        const overeenkomst = element.waarde.match(patroon);
+        const overeenkomst = element.waarde.match(patroon)
+          ?? (maatIndex === 0 ? element.waarde.match(losGetalPatroon) : null);
         if (!overeenkomst) {
           elementen.push(element);
           continue;
         }
 
         const n = Number(overeenkomst[2]);
-        if (n < 20 || n > 300) {
+        if (n < 30 || n > 300) {
           elementen.push(element);
           continue;
         }
