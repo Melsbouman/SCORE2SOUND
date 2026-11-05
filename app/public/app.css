@@ -360,6 +360,11 @@ main:has(#weergave g.measure) #hulp { display: none; }
 #projecten form { display: flex; flex-wrap: wrap; align-items: end; gap: var(--ruimte-2); margin-bottom: var(--ruimte-3); }
 #projecten label { display: grid; gap: var(--ruimte-1); flex: 1 1 100%; }
 #projecten input[type="text"] { padding: var(--ruimte-2); font: inherit; color: var(--kleur-tekst); background: var(--kleur-vlak); border: 1px solid var(--kleur-lijn); border-radius: var(--hoek); }
+.projecten__leeg { padding: var(--ruimte-4); background: var(--kleur-achtergrond); border-radius: var(--hoek); }
+.projecten__leeg h3 { margin: 0 0 var(--ruimte-1); font-family: var(--letter-kop); font-size: 1.35rem; }
+.projecten__leeg p { margin: 0; color: var(--kleur-zacht); }
+.projecten__lege-acties { display: flex; flex-wrap: wrap; gap: var(--ruimte-2); margin-top: var(--ruimte-3); }
+.projecten__lege-acties .knop { text-align: center; text-decoration: none; }
 .projecten__lijst { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--ruimte-2); }
 .projecten__lijst button { display: block; width: 100%; text-align: left; }
 .projecten__lijst .zacht { display: block; margin-top: var(--ruimte-1); }
@@ -478,6 +483,8 @@ select, input[type="text"], input[type="number"] { font: inherit; color: var(--k
   .werkvlak { padding: 12px; gap: 12px; }
   .werkvlak section { padding: 18px 16px; }
   #upload { padding: 24px 18px; }
+  .projecten__leeg { padding: var(--ruimte-3); }
+  .projecten__lege-acties .knop { width: 100%; }
 
   .tempo-regel {
     grid-template-columns: 1fr minmax(4.5rem, 6rem);

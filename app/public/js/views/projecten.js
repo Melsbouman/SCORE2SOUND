@@ -162,9 +162,26 @@ export function start(app) {
 
     if (projecten !== null) {
       if (projecten.length === 0) {
-        const leeg = document.createElement('p');
-        leeg.className = 'zacht';
-        leeg.textContent = 'Nog geen bewaarde projecten.';
+        const leeg = document.createElement('div');
+        const legeKop = document.createElement('h3');
+        const uitleg = document.createElement('p');
+        const acties = document.createElement('div');
+        const nieuwLink = document.createElement('a');
+        const uploadLink = document.createElement('a');
+
+        leeg.className = 'projecten__leeg';
+        legeKop.textContent = 'Nog geen stukken';
+        uitleg.textContent = 'Begin met een nieuw stuk of scan bestaande bladmuziek in.';
+        acties.className = 'projecten__lege-acties';
+        nieuwLink.href = '#nieuw';
+        nieuwLink.className = 'knop knop--hoofd';
+        nieuwLink.textContent = 'Nieuw stuk beginnen';
+        uploadLink.href = '#upload';
+        uploadLink.className = 'knop';
+        uploadLink.textContent = 'Bladmuziek inscannen';
+
+        acties.append(nieuwLink, uploadLink);
+        leeg.append(legeKop, uitleg, acties);
         vlak.append(leeg);
       } else {
         if (projecten.length > 3) {
