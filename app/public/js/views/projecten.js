@@ -42,6 +42,7 @@ export function start(app) {
   let projecten = null;
   let status = '';
   let zoekterm = '';
+  let actiefLabel = '';
   let sortering = leesSortering();
   const verwijderTimers = new Map();
   const verwijderBevestigingen = new Set();
@@ -193,6 +194,80 @@ export function start(app) {
     kop.textContent = 'Projecten';
     vlak.replaceChildren(kop);
 
+    const bibliotheekKop = document.createElement('div');
+    const zoeken = document.createElement('input');
+    const nieuwLink = document.createElement('a');
+    zoeken.type = 'search';
+    zoeken.className = 'bib-zoek';
+    zoeken.setAttribute('aria-label', 'Zoek in de bibliotheek');
+    zoeken.placeholder = 'Zoek op titel, map of label';
+    zoeken.value = zoekterm;
+    zoeken.addEventListener('input', () => {
+      zoekterm = zoeken.value;
+      const positie = zoeken.selectionStart;
+      teken();
+      const nieuwZoekveld = vlak.querySelector('.bib-zoek');
+      nieuwZoekveld.focus();
+      nieuwZoekveld.setSelectionRange(positie, positie);
+    });
+    nieuwLink.href = '#nieuw';
+    nieuwLink.className = 'knop knop--hoofd';
+    nieuwLink.textContent = 'Nieuw stuk';
+    bibliotheekKop.append(zoeken, nieuwLink);
+    vlak.append(bibliotheekKop);
+
+    if (projecten !== null) {
+      const zoektekst = zoekterm.trim().toLocaleLowerCase('nl-NL');
+      const pastBijFilter = project => {
+        const labels = Array.isArray(project.labels) ? project.labels : [];
+        const doorzoekbaar = [project.naam, project.map, ...labels]
+          .filter(Boolean)
+          .join(' ')
+          .toLocaleLowerCase('nl-NL');
+        return (!zoektekst || doorzoekbaar.includes(zoektekst))
+          && (!actiefLabel || labels.includes(actiefLabel));
+      };
+      const recent = [...projecten]
+        .filter(pastBijFilter)
+        .sort((eerste, tweede) => new Date(tweede.bijgewerkt) - new Date(eerste.bijgewerkt))
+        .slice(0, 6);
+      if (recent.length > 0) {
+        const recenteKop = document.createElement('h3');
+        const recenteRij = document.createElement('div');
+        recenteKop.textContent = 'Recent';
+        recenteRij.className = 'bib-rij';
+        for (const project of recent) {
+          const kaart = document.createElement('article');
+          const titel = document.createElement('strong');
+          const datum = document.createElement('time');
+          const labels = document.createElement('div');
+          kaart.className = 'bib-kaart';
+          titel.textContent = project.naam;
+          datum.dateTime = project.bijgewerkt;
+          datum.textContent = new Date(project.bijgewerkt).toLocaleDateString('nl-NL', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+          });
+          for (const labelNaam of Array.isArray(project.labels) ? project.labels : []) {
+            const label = document.createElement('button');
+            label.type = 'button';
+            label.className = 'bib-label';
+            label.textContent = labelNaam;
+            label.setAttribute('aria-pressed', String(actiefLabel === labelNaam));
+            label.addEventListener('click', () => {
+              actiefLabel = actiefLabel === labelNaam ? '' : labelNaam;
+              teken();
+            });
+            labels.append(label);
+          }
+          kaart.append(titel, datum, labels);
+          recenteRij.append(kaart);
+        }
+        vlak.append(recenteKop, recenteRij);
+      }
+    }
+
     if (app.stand.partituur) {
       const formulier = document.createElement('form');
       const label = document.createElement('label');
@@ -238,7 +313,23 @@ export function start(app) {
     vlak.append(statusRegel);
 
     if (projecten !== null) {
-      if (projecten.length === 0) {
+      const actieveZoekterm = zoekterm.trim().toLocaleLowerCase('nl-NL');
+      const getoondeProjecten = projecten
+        .filter(project => {
+          const labels = Array.isArray(project.labels) ? project.labels : [];
+          const doorzoekbaar = [project.naam, project.map, ...labels]
+            .filter(Boolean)
+            .join(' ')
+            .toLocaleLowerCase('nl-NL');
+          return (!actieveZoekterm || doorzoekbaar.includes(actieveZoekterm))
+            && (!actiefLabel || labels.includes(actiefLabel));
+        })
+        .sort((eerste, tweede) => {
+          if (sortering === 'naam') return eerste.naam.localeCompare(tweede.naam, 'nl-NL');
+          const verschil = new Date(tweede.bijgewerkt) - new Date(eerste.bijgewerkt);
+          return sortering === 'oudste' ? -verschil : verschil;
+        });
+      if (getoondeProjecten.length === 0) {
         const leeg = document.createElement('div');
         const legeKop = document.createElement('h3');
         const uitleg = document.createElement('p');
@@ -246,35 +337,24 @@ export function start(app) {
         const nieuwLink = document.createElement('a');
         const uploadLink = document.createElement('a');
 
-        leeg.className = 'projecten__leeg';
-        legeKop.textContent = 'Nog geen stukken';
-        uitleg.textContent = 'Begin met een nieuw stuk of scan bestaande bladmuziek in.';
+        leeg.className = 'bib-leeg';
+        legeKop.textContent = projecten.length === 0 ? 'Nog geen stukken' : 'Geen stukken gevonden';
+        uitleg.textContent = projecten.length === 0
+          ? 'Begin met een nieuw stuk of scan bestaande bladmuziek in.'
+          : 'Pas je zoekopdracht of labelkeuze aan.';
         acties.className = 'projecten__lege-acties';
         nieuwLink.href = '#nieuw';
         nieuwLink.className = 'knop knop--hoofd';
-        nieuwLink.textContent = 'Nieuw stuk beginnen';
+        nieuwLink.textContent = 'Nieuw stuk';
         uploadLink.href = '#upload';
         uploadLink.className = 'knop';
-        uploadLink.textContent = 'Bladmuziek inscannen';
+        uploadLink.textContent = 'Inscannen';
 
         acties.append(nieuwLink, uploadLink);
         leeg.append(legeKop, uitleg, acties);
         vlak.append(leeg);
       } else {
         if (projecten.length > 3) {
-          const zoeken = document.createElement('input');
-          zoeken.type = 'search';
-          zoeken.setAttribute('aria-label', 'Zoek een project');
-          zoeken.value = zoekterm;
-          zoeken.addEventListener('input', () => {
-            zoekterm = zoeken.value;
-            const positie = zoeken.selectionStart;
-            teken();
-            const nieuwZoekveld = vlak.querySelector('[aria-label="Zoek een project"]');
-            nieuwZoekveld.focus();
-            nieuwZoekveld.setSelectionRange(positie, positie);
-          });
-
           const sorteer = document.createElement('select');
           sorteer.setAttribute('aria-label', 'Sorteren');
           for (const [waarde, tekst] of [
@@ -296,23 +376,7 @@ export function start(app) {
             }
             teken();
           });
-          vlak.append(zoeken, sorteer);
-        }
-
-        const actieveZoekterm = projecten.length > 3 ? zoekterm.toLowerCase() : '';
-        const getoondeProjecten = projecten
-          .filter(project => project.naam.toLowerCase().includes(actieveZoekterm))
-          .sort((eerste, tweede) => {
-            if (sortering === 'naam') return eerste.naam.localeCompare(tweede.naam, 'nl-NL');
-            const verschil = new Date(tweede.bijgewerkt) - new Date(eerste.bijgewerkt);
-            return sortering === 'oudste' ? -verschil : verschil;
-          });
-        if (getoondeProjecten.length === 0) {
-          const leeg = document.createElement('p');
-          leeg.className = 'zacht';
-          leeg.textContent = 'Geen projecten gevonden.';
-          vlak.append(leeg);
-          return;
+          vlak.append(sorteer);
         }
 
         const lijst = document.createElement('div');
