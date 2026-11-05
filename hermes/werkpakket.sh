@@ -49,7 +49,7 @@ case "$UITVOERDER" in
 esac
 MODEL="$(standaard_model "$UITVOERDER")"
 PROVIDER="$(standaard_provider "$UITVOERDER")"
-FALLBACK_MODEL="${AIFLOW_FALLBACK_MODEL-anthropic/claude-haiku-5.5}"
+FALLBACK_MODEL="${AIFLOW_FALLBACK_MODEL-cohere/north-mini-code:free}"
 FALLBACK_PROVIDER="${AIFLOW_FALLBACK_PROVIDER:-openrouter}"
 # Statusbestand voor het paneel (de mod Agents leest deze map).
 STATUS="${AIFLOW_STATUS:-$HOME/.aiflow-status}"

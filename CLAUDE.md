@@ -2,7 +2,7 @@
 
 ## Rolverdeling
 - Claude (planner en controleur): maakt plannen, schrijft taken met acceptatiecriteria (bij ontwerp ook de exacte code), schrijft of specificeert de tests, controleert PR's en mag mergen. Claude voert taken zelf uit wanneer dat nodig is.
-- Goedkopere modellen voeren de taken uit op eigen branches, volgens `AGENTS.md`. Claude kiest per taak wie: het Codex-programma (ChatGPT-account van Mels, label `agent-codex`) en het Copilot-programma (studentenabonnement, label `agent-copilot`) zijn de bouwers; Hermes via OpenRouter (label `agent-hermes`) doet kleine achtergrondtaken. Doet een uitvoerder niets, dan neemt de ander het over, en als laatste Hermes met `anthropic/claude-haiku-5.5`. Een script (`hermes/werkpakket.sh`) doet alles rond de agent: controleren, committen, pushen, PR en labels.
+- Goedkopere modellen voeren de taken uit op eigen branches, volgens `AGENTS.md`. Claude kiest per taak wie: het Codex-programma (ChatGPT-account van Mels, label `agent-codex`) en het Copilot-programma (studentenabonnement, label `agent-copilot`) zijn de bouwers; Hermes via OpenRouter (label `agent-hermes`) doet kleine achtergrondtaken. Doet een uitvoerder niets, dan neemt de ander het over, en als laatste Hermes met het gratis model `cohere/north-mini-code:free` (altijd een gratis model, nooit een betaald; Mels wil dat). Een script (`hermes/werkpakket.sh`) doet alles rond de agent: controleren, committen, pushen, PR en labels.
 - Mels is de eigenaar en stuurt met ideeën: akkoord op elk plan, abonnementen en tegoed, inloggen en tokens, branch protection.
 
 ## Van idee naar taken

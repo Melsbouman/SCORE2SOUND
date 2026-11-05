@@ -56,7 +56,7 @@ Een abonnement in een app is niet vanzelf toegang voor een script. Per bron:
 | **Hermes** (`agent-hermes`, en de laatste reserve) | OpenRouter, 13 euro tegoed | `hermes -t terminal,file --provider openrouter -m <model> -z <prompt>` | geïnstalleerd, OpenRouter-sleutel ingesteld door Mels |
 
 Modellen via OpenRouter (prijzen gecontroleerd op 29 oktober 2026, per miljoen tokens erin en eruit):
-- `anthropic/claude-haiku-5.5`: laatste reserve als niemand iets deed, en reserve voor Hermes-taken, 0,10 en 0,50 dollar. In de bron ongeveer een cent per kleine taak.
+- (Sinds 5 november 2026 niet meer in gebruik: Mels wil altijd het gratis model.) `anthropic/claude-haiku-5.5`: laatste reserve als niemand iets deed, en reserve voor Hermes-taken, 0,10 en 0,50 dollar. In de bron ongeveer een cent per kleine taak.
 - `cohere/north-mini-code:free`: eerste model voor `agent-hermes`. Met tegoed boven de 10 dollar geldt een limiet van 1.000 verzoeken per dag, gedeeld door alle gratis modellen. Traag (enkele minuten per taak).
 - `deepseek/deepseek-v4-flash`: zeer goedkoop alternatief (0,09 en 0,18 dollar), maar veranderde in de bron een bestaande regel. Alleen met `--verwacht`.
 

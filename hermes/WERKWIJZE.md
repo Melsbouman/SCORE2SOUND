@@ -64,7 +64,7 @@ Wat `werkpakket.sh` doet, in volgorde:
 7. Pusht, opent de PR (of plaatst een comment bij een afgekeurde PR) met de echte uitkomsten, en zet `agent-review`.
 8. Is de wijziging precies `## Verwacht`, of slagen alle opdrachten uit `## Controle`, en zijn daarnaast tests, regelcontrole en Action groen en is er niets teruggedraaid, dan merget het script de PR en sluit het issue (`AIFLOW_AUTOMERGE=uit` zet dat uit). Een genoemd nieuw testbestand telt daarbij niet als gewijzigd testbestand; alleen een taak zonder `## Controle` en zonder `## Verwacht` blijft voor Claude.
 
-Doet de agent niets (limiet op, model faalt), dan neemt een reserve het over: Codex en Copilot vangen elkaar op, en als laatste Hermes met `anthropic/claude-haiku-5.5` via OpenRouter. Een Hermes-taak gaat na het gratis model naar Haiku.
+Doet de agent niets (limiet op, model faalt), dan neemt een reserve het over: Codex en Copilot vangen elkaar op, en als laatste Hermes met het gratis model `cohere/north-mini-code:free` via OpenRouter (altijd gratis; het betaalde Haiku-model niet gebruiken). Een Hermes-taak gaat na het gratis model naar Haiku.
 
 Voor een lokale herkenning van een echte partituur gebruik je `bash hermes/echte-controle.sh <pdf> [paginas]`. Het commando start de app tijdelijk, wacht hooguit 15 minuten en toont de herkenningsstand, partijen, letters, onzekere noten, maten met maatrust en de eerste meldingen; daarna stopt de server. Echte partituren mogen vanwege auteursrecht niet in de repo staan en worden alleen lokaal gebruikt.
 
@@ -111,7 +111,7 @@ Start de scripts vanuit je eigen werkmap (`C:\SCORE2SOUND`); ze werken in de apa
 | `AIFLOW_CODEX_MODEL` | `standaard` | model van het Codex-programma; `standaard` is het model uit `~/.codex/config.toml` |
 | `AIFLOW_COPILOT_MODEL` | `auto` | model van het Copilot-programma |
 | `AIFLOW_HERMES_MODEL`, `AIFLOW_HERMES_PROVIDER` | `cohere/north-mini-code:free`, `openrouter` | model voor `agent-hermes` |
-| `AIFLOW_FALLBACK_MODEL` | `anthropic/claude-haiku-5.5` | reserve bij niets doen; leeg zet de reserve uit |
+| `AIFLOW_FALLBACK_MODEL` | `cohere/north-mini-code:free` | reserve bij niets doen; leeg zet de reserve uit |
 | `AIFLOW_FALLBACK_PROVIDER` | `openrouter` | provider van de reserve |
 | `AIFLOW_KLOON` | `/c/Users/mels1/SCORE2SOUND-agent` | aparte kloon voor de agent; met `--alle` komt `-codex`, `-copilot` of `-hermes` erachter |
 | `AIFLOW_STATUS` | `~/.aiflow-status` | map voor de statusbestanden (de mod leest deze) |
