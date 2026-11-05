@@ -31,7 +31,7 @@ import {
 } from '/src/model/maten-bewerken.mjs';
 import { opAlle, verwijderAlle } from '/src/model/meerdere.mjs';
 import { controleerMaatduur } from '/src/controle/maatduur.mjs';
-import { schrijfNoot } from '/src/model/invoeren.mjs';
+import { schrijfNoot, schrijfNootMetOverbinding } from '/src/model/invoeren.mjs';
 
 const DUUR = { heel: 1920, half: 960, kwart: 480, achtste: 240, zestiende: 120 };
 const DUUR_TOETSEN = { 1: 'heel', 2: 'half', 3: 'kwart', 4: 'achtste', 5: 'zestiende' };
@@ -276,7 +276,7 @@ export function start(app) {
   function voerNootIn(stap, rust = false) {
     const toonhoogte = toonhoogteVoor(stap);
     try {
-      let nieuw = schrijfNoot(
+      let nieuw = (rust ? schrijfNoot : schrijfNootMetOverbinding)(
         app.stand.partituur, invoerPartijId, invoerMaat, invoerStart, invoerDuur, toonhoogte,
       );
       if (rust) {
