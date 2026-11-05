@@ -36,6 +36,7 @@ import { schrijfNoot } from '/src/model/invoeren.mjs';
 const DUUR = { heel: 1920, half: 960, kwart: 480, achtste: 240, zestiende: 120 };
 const DUUR_TOETSEN = { 1: 'heel', 2: 'half', 3: 'kwart', 4: 'achtste', 5: 'zestiende' };
 const INVOER_DUUR = { 1: 120, 2: 240, 3: 480, 4: 960, 5: 1920 };
+const INVOER_DUUR_NAAM = { 120: 'zestiende', 240: 'achtste', 480: 'kwart', 960: 'half', 1920: 'heel' };
 const TOONAFSTANDEN = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 const GESTIPTE_DUUR = new Map([[180, 120], [360, 240], [720, 480], [1440, 960], [2880, 1920]]);
 const PICTOGRAMMEN = {
@@ -675,7 +676,11 @@ export function start(app) {
     if (invoermodus) {
       const hint = document.createElement('p');
       hint.textContent = 'Typ een letter A tot en met G en een cijfer 1 tot en met 5.';
-      vlak.replaceChildren(balk, hint);
+      const invoerStatus = document.createElement('div');
+      invoerStatus.className = 'editor__invoerstatus';
+      invoerStatus.textContent = `Duur: ${INVOER_DUUR_NAAM[invoerDuur]}, maat ${invoerMaat + 1}`;
+      invoerStatus.setAttribute('aria-live', 'polite');
+      vlak.replaceChildren(balk, hint, invoerStatus);
     } else {
       vlak.replaceChildren(balk);
     }
