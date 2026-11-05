@@ -171,3 +171,7 @@ Kies bij **Weergave** voor **Partituur** en download daarna de pdf. De zichtbare
 
 Zet onderaan in de speler **Metronoom** aan om tijdens het afspelen een klikspoor te horen. Met **Maten vooraf** laat je het klikspoor eerst één of twee maten aftellen.
 
+## Partituur zoomen
+
+Met de knoppen **Inzoomen** en **Uitzoomen** boven de partituur maak je de notatie groter of kleiner, tussen 40 en 160 procent. De keuze blijft bewaard zolang je het tabblad open houdt.
+
