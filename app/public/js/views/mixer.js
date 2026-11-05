@@ -1,4 +1,5 @@
 import { INSTRUMENTEN } from '/src/model/instrumenten.mjs';
+import { KLANKEN, zetKlank } from '/src/model/klanken.mjs';
 import { voegPartijToe, verwijderPartij } from '/src/model/nieuw.mjs';
 
 export function start(app) {
@@ -30,6 +31,29 @@ export function start(app) {
 
       const naam = document.createElement('span');
       naam.textContent = partij.naam;
+
+      const klankLabel = document.createElement('label');
+      klankLabel.append(document.createTextNode('Klank'));
+      const klank = document.createElement('select');
+      klank.setAttribute('aria-label', `Klank van ${partij.naam}`);
+      const huidigProgramma = partij.instrument.midiProgramma;
+      if (!KLANKEN.some(({ programma }) => programma === huidigProgramma)) {
+        const optie = document.createElement('option');
+        optie.value = String(huidigProgramma);
+        optie.textContent = 'Eigen klank';
+        klank.append(optie);
+      }
+      for (const keuze of KLANKEN) {
+        const optie = document.createElement('option');
+        optie.value = String(keuze.programma);
+        optie.textContent = keuze.naam;
+        klank.append(optie);
+      }
+      klank.value = String(huidigProgramma);
+      klank.addEventListener('change', () => {
+        app.zet({ partituur: zetKlank(app.stand.partituur, partij.id, Number(klank.value)) });
+      });
+      klankLabel.append(klank);
 
       const tonenLabel = document.createElement('label');
       const tonen = Object.assign(document.createElement('input'), {
@@ -110,7 +134,7 @@ export function start(app) {
         }
       });
 
-      rij.append(naam, tonenLabel, volume, dempen, solo, verwijderen);
+      rij.append(naam, klankLabel, tonenLabel, volume, dempen, solo, verwijderen);
       return rij;
     });
 
