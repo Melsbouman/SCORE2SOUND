@@ -3,6 +3,7 @@ import { maatLengte } from '../model/duur.mjs';
 import { uitgevouwen } from '../model/maten.mjs';
 import { tempoOverloop } from '../model/tempoverloop.mjs';
 import { klikGebeurtenissen } from './klik.mjs';
+import { mixVoorPartijen } from './mix.mjs';
 
 const tekstEncoder = new TextEncoder();
 
@@ -220,15 +221,27 @@ function wiggenVoor(partij, tijdlijn, voorintellerTik) {
   return wiggen;
 }
 
-function partijSpoor(partij, partijIndex, tijdlijn, volume, voorintellerTik) {
+function partijSpoor(partij, partijIndex, tijdlijn, volume, voorintellerTik, mix) {
   const { poort, kanaal } = kanaalVan(partijIndex);
   const naam = [...tekstEncoder.encode(partij.naam)];
+  const ctrl = mix?.[partijIndex];
   const events = [
     { tik: 0, volgorde: 0, bytes: [0xff, 0x03, ...vlq(naam.length), ...naam] },
     ...(poort > 0 ? [{ tik: 0, volgorde: 0, bytes: [0xff, 0x21, 1, poort] }] : []),
     { tik: 0, volgorde: 1, bytes: [0xc0 | kanaal, partij.instrument.midiProgramma] },
-    { tik: 0, volgorde: 2, bytes: [0xb0 | kanaal, 7, volume[partij.id] ?? 100] },
+    { tik: 0, volgorde: 2, bytes: [0xb0 | kanaal, 0x07, volume[partij.id] ?? ctrl?.volume ?? 100] },
   ];
+  if (ctrl) {
+    if (ctrl?.pan != null) {
+      events.push({ tik: 0, volgorde: 3, bytes: [0xb0 | kanaal, 0x0A, ctrl.pan] });
+    }
+    if (ctrl?.galm != null) {
+      events.push({ tik: 0, volgorde: 4, bytes: [0xb0 | kanaal, 0x5B, ctrl.galm] });
+    }
+    if (ctrl?.expressie != null) {
+      events.push({ tik: 0, volgorde: 5, bytes: [0xb0 | kanaal, 0x0B, ctrl.expressie] });
+    }
+  }
   const noten = [];
   const wiggen = wiggenVoor(partij, tijdlijn, voorintellerTik);
   let sterkte = 80;
@@ -302,10 +315,11 @@ export function schrijfMidi(partituur, { volume = {}, klik = false, voorinteller
     ? voorinteller * maatLengte(gespeeld.partijen[0]?.maten[0]?.maatsoort ?? { teller: 4, noemer: 4 })
     : 0;
   const tijdlijn = maakTijdlijn(gespeeld);
+  const mix = mixVoorPartijen(gespeeld.partijen);
   const beginnen = tijdlijn.maatBeginnen.map((tik) => tik + verschuiving);
   const sporen = [dirigentenSpoor(gespeeld, beginnen, tijdlijn, verschuiving)];
   for (let index = 0; index < gespeeld.partijen.length; index += 1) {
-    sporen.push(partijSpoor(gespeeld.partijen[index], index, tijdlijn, volume, verschuiving));
+    sporen.push(partijSpoor(gespeeld.partijen[index], index, tijdlijn, volume, verschuiving, mix));
   }
   if (klik || voorinteller > 0) {
     sporen.push(klikSpoor(partituur, voorinteller, verschuiving, !klik, tijdlijn));
