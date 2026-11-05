@@ -1,0 +1,65 @@
+.instellingen-open .werkvlak > section:not(#instellingen) { display: none; }
+.werkvlak > #instellingen { display: none; padding: clamp(24px, 5vw, 64px); border: 0; background: #f0ede1; box-shadow: none; }
+.instellingen-open .werkvlak > #instellingen { display: block; }
+.instellingen__intro { max-width: 720px; margin: 0 auto 2rem; text-align: center; }
+.instellingen__label { display: inline-block; padding: .4rem .9rem; border-radius: 999px; background: #2b6a1f; color: #fff; font-size: .72rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
+.instellingen__intro h2 { margin: .7rem 0 1rem; font: 700 clamp(2rem, 5vw, 3.6rem)/1.08 'Bodoni Moda', Georgia, serif; letter-spacing: 0; text-transform: none; }
+.instellingen__intro h2 em { color: #2b6a1f; font-weight: 700; }
+.instellingen__intro p { margin: 0; color: #3d4a39; }
+.instellingen__formulier { display: grid; max-width: 1040px; margin: 0 auto; gap: 1.5rem; }
+.instellingen__kaart { padding: clamp(22px, 4vw, 38px) !important; border: 1px solid #2b6a1f66 !important; border-radius: 22px !important; background: #fff !important; box-shadow: 0 18px 45px #1c4a1412 !important; }
+.instellingen__kaart h3 { margin: 0 0 1.4rem; font: 700 1.7rem/1.15 'Bodoni Moda', Georgia, serif; }
+.instellingen__veld { display: grid; max-width: 34rem; gap: .5rem; color: #1c4a14; font-size: .84rem; font-weight: 600; }
+.instellingen__veld input { width: 100%; padding: .8rem .9rem; border: 1px solid #2b6a1f66; border-radius: 12px; background: #fff; color: #0d150b; font: inherit; font-weight: 400; }
+.instellingen__veld input[readonly] { background: #f0ede1; color: #52604f; }
+.instellingen__avatarveld { margin: 1.5rem 0 0; padding: 0; border: 0; }
+.instellingen__avatarveld legend { margin-bottom: .7rem; color: #1c4a14; font-size: .84rem; font-weight: 600; }
+.instellingen__emojis { display: grid; grid-template-columns: repeat(8, 3rem); gap: .55rem; }
+.instellingen__emoji { display: grid; width: 3rem; height: 3rem; padding: 0; place-items: center; border: 1px solid #2b6a1f66; border-radius: 12px; background: #fff; font-size: 1.45rem; cursor: pointer; }
+.instellingen__emoji:hover { background: #edf4e8; }
+.instellingen__emoji--gekozen { border: 2px solid #1c4a14; background: #c7e3b0; }
+.instellingen__bestandknop, .instellingen__knop, .instellingen__wachtwoord > div > button { display: inline-block; padding: .75rem 1.35rem; border: 2px solid #2b6a1f; border-radius: 999px; background: transparent; color: #2b6a1f; font: inherit; font-weight: 600; cursor: pointer; }
+.instellingen__bestandknop { margin-top: 1.2rem; }
+.instellingen__bestandknop input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+.instellingen__voorbeeld { display: inline-flex; margin: 1.2rem 0 0 1rem; vertical-align: middle; }
+.instellingen__avatarvoorbeeld { display: grid; width: 64px; height: 64px; place-items: center; overflow: hidden; border: 1px solid #2b6a1f66; border-radius: 50%; background: #edf4e8; font-size: 2rem; object-fit: cover; }
+.instellingen__afbeeldingfout { margin: .6rem 0 0; }
+.instellingen__wachtwoord { margin-top: 1.4rem; }
+.instellingen__wachtwoord > div > button:hover, .instellingen__bestandknop:hover, .instellingen__knop:hover { background: #edf4e8; }
+.instellingen__wachtwoordformulier { margin-top: 1rem; }
+.instellingen__wachtwoordformulier .inloggen__formulier { padding: 1.2rem; border-radius: 16px; background: #f0ede1; }
+.instellingen__schakelaar { display: flex; align-items: center; gap: .8rem; color: #52604f; }
+.instellingen__schakelaar input { position: absolute; opacity: 0; }
+.instellingen__schakelaar > span:first-of-type { position: relative; width: 3rem; height: 1.7rem; border-radius: 999px; background: #c9cec7; }
+.instellingen__schakelaar > span:first-of-type::after { position: absolute; top: .2rem; left: .2rem; width: 1.3rem; height: 1.3rem; border-radius: 50%; background: #fff; content: ''; }
+.instellingen__schakelaar small { display: block; font-size: .78rem; }
+.instellingen__acties { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
+.instellingen__knop--hoofd { border-color: #2b6a1f; background: #2b6a1f; color: #fff; }
+.instellingen__knop--hoofd:hover { background: #1c4a14; }
+.instellingen__knop:disabled { cursor: not-allowed; opacity: .5; }
+.instellingen__melding { margin: 0; color: #1c4a14; }
+.instellingen__melding:empty { display: none; }
+.instellingen__melding--fout { color: #b3261e; }
+.instellingen__laden { max-width: 1040px; margin: 0 auto; }
+.zijbalk__avatar { display: grid; width: 28px; height: 28px; flex: 0 0 auto; place-items: center; overflow: hidden; border-radius: 50%; background: #fff; color: #0d150b; font-size: 1rem; object-fit: cover; }
+.zijbalk__uitloggen:empty { display: none; }
+.zijbalk__uitloggen { margin: 8px 0; }
+.zijbalk__uitlogknop { width: 100%; display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid #ffffff55; border-radius: 999px; background: transparent; color: #fff; font: inherit; text-align: left; cursor: pointer; }
+.zijbalk__uitlogknop:hover { background: #ffffff18; }
+.zijbalk__uitlogfout { display: block; margin-top: 4px; color: #fff; font-size: .75rem; }
+
+@media (max-width: 900px) {
+  .zijbalk__accountknop .zijbalk__avatar { width: 22px; height: 22px; }
+  .zijbalk__uitloggen { order: 2; margin: 0; }
+  .zijbalk__uitlogknop { width: 44px; padding: 10px 12px; }
+  .zijbalk__uitlogknop span { display: none; }
+}
+
+@media (max-width: 600px) {
+  .werkvlak > #instellingen { padding: 24px 16px; overflow-x: hidden; }
+  .instellingen__emojis { grid-template-columns: repeat(4, 3rem); }
+}
+
+@media (max-width: 479px) {
+  .zijbalk__uitlogknop { width: 38px; padding: 7px 9px; }
+}

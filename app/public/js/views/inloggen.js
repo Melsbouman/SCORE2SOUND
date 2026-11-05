@@ -2,6 +2,81 @@ function toonFout(element, tekst) {
   element.textContent = tekst;
 }
 
+export function maakWachtwoordWijzigen() {
+  const vak = document.createElement('div');
+  const wijzigKnop = document.createElement('button');
+  wijzigKnop.type = 'button';
+  wijzigKnop.textContent = 'Wachtwoord wijzigen';
+  wijzigKnop.setAttribute('aria-expanded', 'false');
+  const wijzigSectie = document.createElement('div');
+  wijzigSectie.className = 'instellingen__wachtwoordformulier';
+  wijzigSectie.hidden = true;
+  wijzigSectie.innerHTML = `
+    <form class="inloggen__formulier">
+      <label>Huidig wachtwoord
+        <input name="oud" type="password" autocomplete="current-password" required>
+      </label>
+      <label>Nieuw wachtwoord
+        <input name="nieuw" type="password" autocomplete="new-password" required minlength="10">
+      </label>
+      <button class="knop" type="submit">Wachtwoord wijzigen</button>
+      <p role="status" aria-live="polite"></p>
+    </form>`;
+  const formulier = wijzigSectie.querySelector('form');
+  const melding = wijzigSectie.querySelector('[role="status"]');
+
+  wijzigKnop.addEventListener('click', () => {
+    wijzigSectie.hidden = !wijzigSectie.hidden;
+    wijzigKnop.setAttribute('aria-expanded', String(!wijzigSectie.hidden));
+    if (!wijzigSectie.hidden) formulier.elements.oud.focus();
+  });
+
+  formulier.addEventListener('submit', async (gebeurtenis) => {
+    gebeurtenis.preventDefault();
+    const knop = formulier.querySelector('[type="submit"]');
+    const gegevens = new FormData(formulier);
+    knop.disabled = true;
+    melding.className = '';
+    toonFout(melding, '');
+    try {
+      const resultaat = await fetch('/api/account/wachtwoord', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ oud: gegevens.get('oud'), nieuw: gegevens.get('nieuw') }),
+      });
+      if (!resultaat.ok) {
+        const antwoordJson = await resultaat.json();
+        throw new Error(antwoordJson.fout || 'Het wachtwoord kon niet worden gewijzigd.');
+      }
+      formulier.reset();
+      toonFout(melding, 'Je wachtwoord is gewijzigd.');
+    } catch (fout) {
+      melding.className = 'melding--fout';
+      toonFout(melding, fout.message || 'Het wachtwoord kon niet worden gewijzigd. Controleer je verbinding en probeer het opnieuw.');
+    } finally {
+      knop.disabled = false;
+    }
+  });
+
+  vak.append(wijzigKnop, wijzigSectie);
+  return vak;
+}
+
+function maakAvatar(avatar) {
+  if (avatar?.soort === 'afbeelding') {
+    const afbeelding = document.createElement('img');
+    afbeelding.className = 'zijbalk__avatar';
+    afbeelding.src = avatar.waarde;
+    afbeelding.alt = '';
+    return afbeelding;
+  }
+  const emoji = document.createElement('span');
+  emoji.className = 'zijbalk__avatar';
+  emoji.setAttribute('aria-hidden', 'true');
+  emoji.textContent = avatar?.waarde || '🎵';
+  return emoji;
+}
+
 function werkActievePlekBij() {
   const hash = window.location.hash || '#nieuw';
   const links = [...document.querySelectorAll('.zijbalk__item')];
@@ -95,51 +170,27 @@ export function start() {
       accountKnop.type = 'button';
       accountKnop.setAttribute('aria-expanded', 'false');
       accountKnop.setAttribute('aria-controls', 'account-menu');
-      accountKnop.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0M12 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z"/></svg>';
+      accountKnop.append(maakAvatar(gegevens.gebruiker.profiel?.avatar));
       const accountNaam = document.createElement('span');
-      accountNaam.textContent = gegevens.gebruiker.naam || gegevens.gebruiker.email;
+      accountNaam.textContent = gegevens.gebruiker.profiel?.naam || 'Jouw account';
       accountKnop.append(accountNaam);
       const menu = document.createElement('div');
       menu.className = 'zijbalk__accountmenu';
       menu.id = 'account-menu';
       menu.hidden = true;
-      const instellingen = document.createElement('button');
-      instellingen.type = 'button';
+      const instellingen = document.createElement('a');
+      instellingen.href = '#instellingen';
       instellingen.textContent = 'Instellingen';
-      instellingen.setAttribute('aria-expanded', 'false');
-      const instellingenTekst = document.createElement('p');
-      instellingenTekst.className = 'zacht';
-      instellingenTekst.hidden = true;
-      instellingenTekst.textContent = 'Komt later: donkere modus en meer';
       const uitloggen = document.createElement('button');
       uitloggen.type = 'button';
-      uitloggen.textContent = 'Uitloggen';
+      uitloggen.className = 'zijbalk__uitlogknop';
+      uitloggen.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H5v14h5m4-3 4-4-4-4m4 4H9"/></svg><span>Uitloggen</span>';
       const foutElement = document.createElement('span');
-      foutElement.className = 'inloggen__uitlogfout';
+      foutElement.className = 'zijbalk__uitlogfout';
       foutElement.setAttribute('role', 'status');
-      const wijzigKnop = document.createElement('button');
-      wijzigKnop.type = 'button';
-      wijzigKnop.textContent = 'Wachtwoord wijzigen';
-      wijzigKnop.setAttribute('aria-expanded', 'false');
-      wijzigKnop.setAttribute('aria-controls', 'inloggen-wachtwoord-wijzigen');
-      const wijzigSectie = document.createElement('div');
-      wijzigSectie.id = 'inloggen-wachtwoord-wijzigen';
-      wijzigSectie.hidden = true;
-      wijzigSectie.innerHTML = `
-        <form class="inloggen__formulier">
-          <label>Huidig wachtwoord
-            <input name="oud" type="password" autocomplete="current-password" required>
-          </label>
-          <label>Nieuw wachtwoord
-            <input name="nieuw" type="password" autocomplete="new-password" required minlength="10">
-          </label>
-          <button class="knop" type="submit">Wachtwoord wijzigen</button>
-          <p class="melding--fout" role="status" aria-live="polite"></p>
-        </form>`;
-      const wijzigFormulier = wijzigSectie.querySelector('form');
-      const wijzigFout = wijzigSectie.querySelector('[role="status"]');
-      menu.append(instellingen, instellingenTekst, wijzigKnop, wijzigSectie, uitloggen, foutElement);
+      menu.append(instellingen);
       accountVak.replaceChildren(accountKnop, menu);
+      document.getElementById('uitloggen')?.replaceChildren(uitloggen, foutElement);
 
       function sluitMenu() {
         menu.hidden = true;
@@ -149,13 +200,10 @@ export function start() {
       accountKnop.addEventListener('click', () => {
         menu.hidden = !menu.hidden;
         accountKnop.setAttribute('aria-expanded', String(!menu.hidden));
-        if (!menu.hidden) menu.querySelector('button')?.focus();
+        if (!menu.hidden) menu.querySelector('a')?.focus();
       });
 
-      instellingen.addEventListener('click', () => {
-        instellingenTekst.hidden = !instellingenTekst.hidden;
-        instellingen.setAttribute('aria-expanded', String(!instellingenTekst.hidden));
-      });
+      instellingen.addEventListener('click', sluitMenu);
 
       document.addEventListener('click', (gebeurtenis) => {
         if (!accountVak.contains(gebeurtenis.target)) sluitMenu();
@@ -167,40 +215,9 @@ export function start() {
         accountKnop.focus();
       });
 
-      wijzigKnop.addEventListener('click', () => {
-        wijzigSectie.hidden = !wijzigSectie.hidden;
-        wijzigKnop.setAttribute('aria-expanded', String(!wijzigSectie.hidden));
-      });
-
-      wijzigFormulier.addEventListener('submit', async (gebeurtenis) => {
-        gebeurtenis.preventDefault();
-        const knop = wijzigFormulier.querySelector('[type="submit"]');
-        const formulierGegevens = new FormData(wijzigFormulier);
-        knop.disabled = true;
-        toonFout(wijzigFout, '');
-        try {
-          const resultaat = await fetch('/api/account/wachtwoord', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              oud: formulierGegevens.get('oud'),
-              nieuw: formulierGegevens.get('nieuw'),
-            }),
-          });
-          if (!resultaat.ok) {
-            const antwoordJson = await resultaat.json();
-            toonFout(wijzigFout, antwoordJson.fout || 'Het wachtwoord kon niet worden gewijzigd.');
-            return;
-          }
-          wijzigFormulier.reset();
-          wijzigSectie.hidden = true;
-          wijzigKnop.setAttribute('aria-expanded', 'false');
-          toonFout(wijzigFout, 'Je wachtwoord is gewijzigd.');
-        } catch {
-          toonFout(wijzigFout, 'Het wachtwoord kon niet worden gewijzigd. Controleer je verbinding en probeer het opnieuw.');
-        } finally {
-          knop.disabled = false;
-        }
+      window.addEventListener('profiel-gewijzigd', (gebeurtenis) => {
+        accountKnop.firstElementChild?.replaceWith(maakAvatar(gebeurtenis.detail?.avatar));
+        accountNaam.textContent = gebeurtenis.detail?.naam || 'Jouw account';
       });
 
       uitloggen.addEventListener('click', async () => {
