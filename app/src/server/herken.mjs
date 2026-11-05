@@ -71,13 +71,21 @@ async function leesUitvoer(uitmap) {
   const xmlTeksten = await Promise.all(namen.map((naam) => readFile(join(uitmap, naam), 'utf8')));
   const delen = xmlTeksten.map((xml) => herstelMaatsoorten(leesMusicXML(xml)));
   const paginaKopregels = [];
+  const creditGegevens = [];
   for (const xml of xmlTeksten) {
     const wortel = leesXml(xml);
     const perPagina = [];
     for (const credit of kinderen(wortel, 'credit')) {
       const pagina = Math.max(0, Number(credit.attr.page ?? 1) - 1);
       perPagina[pagina] ??= [];
-      perPagina[pagina].push(...kinderen(credit, 'credit-words').map((woord) => tekst(woord)));
+      const woorden = kinderen(credit, 'credit-words');
+      perPagina[pagina].push(...woorden.map((woord) => tekst(woord)));
+      const y = Number(woorden[0]?.attr['default-y']);
+      creditGegevens.push({
+        tekst: woorden.map((woord) => tekst(woord)).join(' '),
+        type: tekst(kinderen(credit, 'credit-type')[0]),
+        y: Number.isFinite(y) ? y : null,
+      });
     }
     paginaKopregels.push(...Array.from({ length: perPagina.length }, (_, pagina) => perPagina[pagina] ?? []));
   }
@@ -89,7 +97,7 @@ async function leesUitvoer(uitmap) {
       for (const maat of partij.maten) maten.push({ ...maat, index: maten.length });
     });
   }
-  return { partituur, creditWoorden, paginaKopregels };
+  return { partituur, creditWoorden, creditGegevens, paginaKopregels };
 }
 
 function herstelOcr(waarde) {
@@ -162,11 +170,27 @@ function tempowoordInKop(waarde) {
   return TEMPOWOORDEN.find((tempowoord) => afstandLevenshtein(klein, tempowoord.toLocaleLowerCase('nl')) <= 1) ?? null;
 }
 
-export function maakNetjes(partituur, naam, creditWoorden) {
+export function maakNetjes(partituur, naam, credits) {
+  const creditGegevens = credits.map((credit) => typeof credit === 'string'
+    ? { tekst: credit, type: null, y: null }
+    : credit);
+  const creditWoorden = creditGegevens.map((credit) => credit.tekst);
   if (!partituur.titel && naam) partituur.titel = basename(naam, extname(naam));
   partituur.componist = herstelComponist(partituur.componist);
   const arrangeur = creditWoorden.map((waarde) => waarde.trim().match(/^arr(?:\.|\s)\s*(.+)$/i)).find(Boolean);
   if (arrangeur) partituur.arrangeur = arrangeur[1].trim();
+  if (!partituur.arrangeur) {
+    const tweedeComponist = creditGegevens.slice(1).find((credit, index) => {
+      const vorige = creditGegevens[index];
+      return credit.type?.toLowerCase() === 'composer'
+        && vorige.type?.toLowerCase() === 'composer'
+        && Number.isFinite(credit.y)
+        && Number.isFinite(vorige.y)
+        && vorige.y > credit.y
+        && vorige.y - credit.y < 60;
+    });
+    if (tweedeComponist) partituur.arrangeur = tweedeComponist.tekst.replace(/^arr\.\s*/i, '').trim();
+  }
   const eersteMaat = partituur.partijen?.[0]?.maten?.[0];
   const heeftTempo = eersteMaat?.tempo != null
     || eersteMaat?.elementen?.some((element) => element.soort === 'aanwijzing' && element.type === 'tempo');
@@ -267,7 +291,7 @@ export function maakHerken({ map, draaier }) {
     if (taak.stand === 'afgebroken') return;
     const uitvoer = await leesUitvoer(taak.uitmap);
     if (!uitvoer) throw new Error('De bladmuziek is niet herkend.');
-    const { partituur, creditWoorden, paginaKopregels } = uitvoer;
+    const { partituur, creditGegevens, paginaKopregels } = uitvoer;
 
     const bladenGoed = bladen.filter((blad) => goed.includes(blad.nummer));
     const uit = koppelOmr(voegPaginasSamen(partituur, boek, bladenGoed), bladenGoed);
@@ -275,7 +299,7 @@ export function maakHerken({ map, draaier }) {
       herkenning: taak.id,
       bladen: bladen.map(({ nummer, breedte, hoogte }) => ({ nummer, breedte, hoogte })),
     };
-    maakNetjes(uit.partituur, taak.naam, creditWoorden);
+    maakNetjes(uit.partituur, taak.naam, creditGegevens);
     const paginaNamen = paginaKopregels.map((regels) => (regels ?? [])
       .map((regel) => partijNaamUitKop(herstelOcr(regel))).find(Boolean) ?? null);
     uit.partituur = splitsPartijenOpKoppen(uit.partituur, paginaNamen);
