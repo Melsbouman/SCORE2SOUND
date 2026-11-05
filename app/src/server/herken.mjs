@@ -68,6 +68,25 @@ function soortVan(body) {
   return null;
 }
 
+function creditsUitWortel(wortel) {
+  return kinderen(wortel, 'credit').map((credit) => {
+    const woorden = kinderen(credit, 'credit-words');
+    const x = Number(woorden[0]?.attr['default-x']);
+    const y = Number(woorden[0]?.attr['default-y']);
+    return {
+      tekst: woorden.map((woord) => tekst(woord)).join(' '),
+      type: tekst(kinderen(credit, 'credit-type')[0]),
+      pagina: Math.max(0, Number(credit.attr.page ?? 1) - 1),
+      x: Number.isFinite(x) ? x : null,
+      y: Number.isFinite(y) ? y : null,
+    };
+  });
+}
+
+export function leesCredits(xml) {
+  return creditsUitWortel(leesXml(xml));
+}
+
 // Audiveris schrijft bij een partituur met meer delen een bestand per deel: invoer.mvt1.xml, invoer.mvt2.xml.
 async function leesUitvoer(uitmap) {
   const namen = (await readdir(uitmap)).filter((naam) => /^invoer(\.mvt(?:\d+|null))?\.xml$/.test(naam)).sort();
@@ -84,13 +103,8 @@ async function leesUitvoer(uitmap) {
       perPagina[pagina] ??= [];
       const woorden = kinderen(credit, 'credit-words');
       perPagina[pagina].push(...woorden.map((woord) => tekst(woord)));
-      const y = Number(woorden[0]?.attr['default-y']);
-      creditGegevens.push({
-        tekst: woorden.map((woord) => tekst(woord)).join(' '),
-        type: tekst(kinderen(credit, 'credit-type')[0]),
-        y: Number.isFinite(y) ? y : null,
-      });
     }
+    creditGegevens.push(...creditsUitWortel(wortel));
     paginaKopregels.push(...Array.from({ length: perPagina.length }, (_, pagina) => perPagina[pagina] ?? []));
   }
   const creditWoorden = paginaKopregels.flatMap((regels) => regels ?? []);
