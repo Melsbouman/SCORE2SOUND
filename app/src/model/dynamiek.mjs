@@ -7,6 +7,15 @@ const DYNAMIEKTEKENS = new Set([
 
 const SAMENGESTELDE_TEKENS = new Set(['fp', 'sfz', 'sfp', 'mf']);
 
+export const DYNAMIEK_SNELTOETSEN = {
+  1: 'pp',
+  2: 'p',
+  3: 'mp',
+  4: 'mf',
+  5: 'f',
+  6: 'ff',
+};
+
 export function dynamiekUitTekst(waarde) {
   const naam = String(waarde).trim().toLowerCase();
   return DYNAMIEKTEKENS.has(naam) ? naam : null;
