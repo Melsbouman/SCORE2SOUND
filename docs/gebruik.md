@@ -179,3 +179,7 @@ Met de knoppen **Inzoomen** en **Uitzoomen** boven de partituur maak je de notat
 
 In de invoermodus (toets **N**) zet een klik op een noot of rust de cursor op die plek. Met **P** speel je af vanaf de maat van de cursor; nogmaals **P** of **Esc** stopt het afspelen.
 
+## Beginnen met een stuk
+
+Kies bij **Nieuw stuk** eerst of je bladmuziek wilt inscannen (sleep een pdf of foto) of met een leeg blad begint. Bij een leeg blad kies je daarna voor wie je schrijft (een combinatie zoals brassband of strijkkwartet, of je eigen instrumenten) en vul je de details in.
+
