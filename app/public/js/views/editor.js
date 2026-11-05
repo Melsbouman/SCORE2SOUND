@@ -22,7 +22,12 @@ import {
   zetOverbinding,
 } from '/src/model/noten-bewerken.mjs';
 import { maakTriool, maakTriooLos } from '/src/model/triolen.mjs';
-import { voegMaatToe, verwijderMaat, zetMaatsoort } from '/src/model/maten-bewerken.mjs';
+import {
+  voegMaatToe,
+  verwijderMaat,
+  zetMaatsoort,
+  zetToonsoort,
+} from '/src/model/maten-bewerken.mjs';
 import { opAlle, verwijderAlle } from '/src/model/meerdere.mjs';
 import { controleerMaatduur } from '/src/controle/maatduur.mjs';
 import { schrijfNoot } from '/src/model/invoeren.mjs';
@@ -492,6 +497,37 @@ export function start(app) {
         pas(zetMaatsoort(app.stand.partituur, gekozenMaat, teller, noemer));
       });
       maatGroep.push(maatsoortMenu);
+      const toonsoortMenu = document.createElement('select');
+      toonsoortMenu.className = 'knop editor__knop';
+      toonsoortMenu.setAttribute('aria-label', 'Toonsoort vanaf de gekozen maat');
+      const toonsoorten = [
+        [0, 'C'],
+        [1, 'G'],
+        [2, 'D'],
+        [3, 'A'],
+        [4, 'E'],
+        [5, 'B'],
+        [6, 'F#'],
+        [7, 'C#'],
+        [-1, 'F'],
+        [-2, 'Bb'],
+        [-3, 'Eb'],
+        [-4, 'Ab'],
+        [-5, 'Db'],
+        [-6, 'Gb'],
+        [-7, 'Cb'],
+      ];
+      for (const [kwinten, naam] of toonsoorten) {
+        const optie = document.createElement('option');
+        optie.value = String(kwinten);
+        optie.textContent = naam;
+        toonsoortMenu.append(optie);
+      }
+      toonsoortMenu.value = String(bronMaat?.toonsoort?.kwinten ?? 0);
+      toonsoortMenu.addEventListener('change', () => {
+        pas(zetToonsoort(app.stand.partituur, gekozenMaat, Number(toonsoortMenu.value)));
+      });
+      maatGroep.push(toonsoortMenu);
       maatGroep.push(maakTekstKnop('Maat invoegen', () => {
         pas(voegMaatToe(app.stand.partituur, gekozenMaat));
         app.meld('kies-maat', { maat: gekozenMaat + 1 });
