@@ -471,6 +471,9 @@ export function start(app) {
   function markeerSelectie() {
     for (const element of document.querySelectorAll('g.note.gekozen, g.rest.gekozen, g.mRest.gekozen')) {
       element.classList.remove('gekozen');
+    }
+    for (const element of document.querySelectorAll('g.invoercursor')) {
+      element.classList.remove('invoercursor');
       element.removeAttribute('aria-current');
     }
     for (const id of gekozenIds) {
@@ -478,7 +481,7 @@ export function start(app) {
     }
     if (invoermodus) {
       const cursor = document.getElementById(invoercursorId(true));
-      cursor?.classList.add('gekozen');
+      cursor?.classList.add('invoercursor');
       cursor?.setAttribute('aria-current', 'true');
     }
   }
@@ -953,6 +956,20 @@ export function start(app) {
       gekozenIds = Array.isArray(ids) ? ids : id ? [id] : [];
     }
     if (id) gekozenMaat = null;
+    teken();
+  });
+  app.op('klik-noot', ({ id }) => {
+    if (!invoermodus) {
+      app.meld('kies-noot', { id });
+      return;
+    }
+    const plaats = leesId(id);
+    const element = plaats && zoekElement(app.stand.partituur, id);
+    if (!plaats || (element?.soort !== 'noot' && element?.soort !== 'rust')) return;
+    invoerPartijId = plaats.partijId;
+    invoerMaat = plaats.maatIndex;
+    invoerStart = element.start;
+    gekozenMaat = invoerMaat;
     teken();
   });
   app.op('kies-maat', ({ maat, tot }) => {
