@@ -57,7 +57,20 @@
     <section id="editor" aria-label="Noot aanpassen"></section>
     <section id="onzeker" aria-label="Onzekere noten"></section>
     <section id="aanduidingen" aria-label="Aanduidingen"></section>
-    <section id="weergave" aria-label="Partituur"></section>
+    <section id="weergave" aria-label="Partituur">
+      <div id="weergave-keuze">
+        <label>Weergave
+          <select id="weergave-soort">
+            <option value="partituur">Partituur</option>
+            <option value="partij">Losse partij</option>
+          </select>
+        </label>
+        <label>Partij
+          <select id="weergave-partij"></select>
+        </label>
+      </div>
+      <div id="weergave-notatie"></div>
+    </section>
     <section id="corrigeren" aria-label="Noot corrigeren"></section>
     <section id="speler" aria-label="Speler"></section>
     <section id="passage" aria-label="Passage herhalen"></section>
