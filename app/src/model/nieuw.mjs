@@ -1,5 +1,6 @@
 import { TIKKEN_PER_KWART } from './duur.mjs';
 import { INSTRUMENTEN } from './instrumenten.mjs';
+import { schrijfNoot } from './invoeren.mjs';
 
 export const SJABLONEN = [
   {
@@ -124,6 +125,35 @@ export function maakLeegStuk(opties = {}) {
       return maakPartij(`P${index + 1}`, instrument, voorbeeldMaten, nummer);
     }),
   };
+}
+
+export function maakVoorbeeldStuk() {
+  let stuk = maakLeegStuk({
+    titel: 'Frère Jacques',
+    instrumenten: ['trompet'],
+    maatsoort: { teller: 4, noemer: 4 },
+    kwinten: 0,
+    aantalMaten: 8,
+  });
+  const melodie = [
+    [['C', 480], ['D', 480], ['E', 480], ['C', 480]],
+    [['C', 480], ['D', 480], ['E', 480], ['C', 480]],
+    [['E', 480], ['F', 480], ['G', 960]],
+    [['E', 480], ['F', 480], ['G', 960]],
+    [['G', 240], ['A', 240], ['G', 240], ['F', 240], ['E', 480], ['C', 480]],
+    [['G', 240], ['A', 240], ['G', 240], ['F', 240], ['E', 480], ['C', 480]],
+    [['C', 480], ['G', 480], ['C', 960]],
+    [['C', 480], ['G', 480], ['C', 960]],
+  ];
+
+  for (const [maatIndex, noten] of melodie.entries()) {
+    let start = 0;
+    for (const [stap, duur] of noten) {
+      stuk = schrijfNoot(stuk, 'P1', maatIndex, start, duur, { stap, alter: 0, octaaf: 5 });
+      start += duur;
+    }
+  }
+  return stuk;
 }
 
 export function voegPartijToe(partituur, instrumentId) {
