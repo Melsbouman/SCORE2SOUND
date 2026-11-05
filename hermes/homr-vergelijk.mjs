@@ -30,7 +30,7 @@ function appMaten(partituur) {
   return maten.map((maat, index) => ({
     maatnummer: String(maat.nummer ?? maat.maatnummer ?? index + 1),
     toonhoogtes: (maat.elementen ?? [])
-      .filter((element) => element.type === 'noot' && element.toonhoogte)
+      .filter((element) => element.soort === 'noot' && element.toonhoogte)
       .map((element) => `${element.toonhoogte.stap}${element.toonhoogte.octaaf}`),
   }));
 }

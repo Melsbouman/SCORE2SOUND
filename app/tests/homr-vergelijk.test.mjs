@@ -24,14 +24,14 @@ const partituur = {
       {
         nummer: 1,
         elementen: [
-          { type: 'noot', toonhoogte: { stap: 'C', octaaf: 4 } },
-          { type: 'noot', toonhoogte: { stap: 'D', octaaf: 4 } },
+          { soort: 'noot', toonhoogte: { stap: 'C', octaaf: 4 } },
+          { soort: 'noot', toonhoogte: { stap: 'D', octaaf: 4 } },
         ],
       },
       {
         nummer: 2,
         elementen: [
-          { type: 'noot', toonhoogte: { stap: 'F', octaaf: 4 } },
+          { soort: 'noot', toonhoogte: { stap: 'F', octaaf: 4 } },
         ],
       },
     ],
