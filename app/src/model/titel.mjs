@@ -12,3 +12,11 @@ export function herstelTitel(titel) {
   }
   return tokens.join(' ');
 }
+
+export function titelblokVoorPartij(titelblok, partij) {
+  return {
+    ...titelblok,
+    partij: titelblok?.partij || partij.naam,
+    colofon: partij.colofon || titelblok?.colofon,
+  };
+}
