@@ -78,9 +78,11 @@ export function scheidColofon(partituur) {
     for (const regel of colofonRegels) {
       for (const noot of regel.noten) delete noot.teksten;
     }
-    if (colofon === null && colofonRegels.length > 0) {
+    if (colofonRegels.length > 0) {
       const unieke = [...new Set(colofonRegels.map((regel) => regel.tekst))];
-      colofon = colofonRegels.some(herhaald) ? colofonRegels.at(-1).tekst : unieke.join(' ');
+      const partijColofon = colofonRegels.some(herhaald) ? colofonRegels.at(-1).tekst : unieke.join(' ');
+      if (colofon === null) colofon = partijColofon;
+      if (partijColofon.length >= 6) partij.colofon = partijColofon;
     }
   }
 
