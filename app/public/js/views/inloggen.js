@@ -2,10 +2,20 @@ function toonFout(element, tekst) {
   element.textContent = tekst;
 }
 
+function werkActievePlekBij() {
+  const hash = window.location.hash || '#nieuw';
+  const links = [...document.querySelectorAll('.zijbalk__item')];
+  for (const link of links) link.removeAttribute('aria-current');
+  const passend = links.filter(link => link.getAttribute('href') === hash);
+  passend.at(-1)?.setAttribute('aria-current', 'page');
+}
+
 export function start() {
   const sectie = document.querySelector('#inloggen');
   const kop = document.querySelector('header.kop');
   if (!sectie || !kop) return;
+  werkActievePlekBij();
+  window.addEventListener('hashchange', werkActievePlekBij);
   // Proefmodus (?proef=1): geen inlog, de editor is zichtbaar; de rest staat onderaan dit bestand.
   if (new URLSearchParams(window.location.search).get('proef') === '1') return;
 
@@ -78,19 +88,36 @@ export function start() {
       if (!gegevens.gebruiker?.email) throw new Error('De accountgegevens zijn onvolledig.');
 
       document.body.classList.remove('inloggen-niet-ingelogd');
-      const gebruiker = document.createElement('div');
-      gebruiker.className = 'inloggen__gebruiker';
-      const email = document.createElement('span');
-      email.textContent = gegevens.gebruiker.email;
+      const accountVak = document.getElementById('account');
+      if (!accountVak) return;
+      const accountKnop = document.createElement('button');
+      accountKnop.className = 'zijbalk__accountknop';
+      accountKnop.type = 'button';
+      accountKnop.setAttribute('aria-expanded', 'false');
+      accountKnop.setAttribute('aria-controls', 'account-menu');
+      accountKnop.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0M12 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z"/></svg>';
+      const accountNaam = document.createElement('span');
+      accountNaam.textContent = gegevens.gebruiker.naam || gegevens.gebruiker.email;
+      accountKnop.append(accountNaam);
+      const menu = document.createElement('div');
+      menu.className = 'zijbalk__accountmenu';
+      menu.id = 'account-menu';
+      menu.hidden = true;
+      const instellingen = document.createElement('button');
+      instellingen.type = 'button';
+      instellingen.textContent = 'Instellingen';
+      instellingen.setAttribute('aria-expanded', 'false');
+      const instellingenTekst = document.createElement('p');
+      instellingenTekst.className = 'zacht';
+      instellingenTekst.hidden = true;
+      instellingenTekst.textContent = 'Komt later: donkere modus en meer';
       const uitloggen = document.createElement('button');
-      uitloggen.className = 'knop';
       uitloggen.type = 'button';
       uitloggen.textContent = 'Uitloggen';
       const foutElement = document.createElement('span');
       foutElement.className = 'inloggen__uitlogfout';
       foutElement.setAttribute('role', 'status');
       const wijzigKnop = document.createElement('button');
-      wijzigKnop.className = 'knop';
       wijzigKnop.type = 'button';
       wijzigKnop.textContent = 'Wachtwoord wijzigen';
       wijzigKnop.setAttribute('aria-expanded', 'false');
@@ -111,28 +138,33 @@ export function start() {
         </form>`;
       const wijzigFormulier = wijzigSectie.querySelector('form');
       const wijzigFout = wijzigSectie.querySelector('[role="status"]');
-      const verwijderenKnop = document.createElement('button');
-      verwijderenKnop.className = 'knop';
-      verwijderenKnop.type = 'button';
-      verwijderenKnop.textContent = 'Account verwijderen';
-      verwijderenKnop.setAttribute('aria-expanded', 'false');
-      verwijderenKnop.setAttribute('aria-controls', 'inloggen-account-verwijderen');
-      const verwijderenSectie = document.createElement('div');
-      verwijderenSectie.id = 'inloggen-account-verwijderen';
-      verwijderenSectie.hidden = true;
-      verwijderenSectie.innerHTML = `
-        <p>Let op: als je je account verwijdert, worden je account en al je gegevens definitief verwijderd.</p>
-        <form class="inloggen__formulier">
-          <label>Vul je wachtwoord in om je account te verwijderen
-            <input name="wachtwoord" type="password" autocomplete="current-password" required>
-          </label>
-          <button class="knop" type="submit">Account definitief verwijderen</button>
-          <p class="melding--fout" role="status" aria-live="polite"></p>
-        </form>`;
-      const verwijderenFormulier = verwijderenSectie.querySelector('form');
-      const verwijderenFout = verwijderenSectie.querySelector('[role="status"]');
-      gebruiker.append(email, uitloggen, foutElement, wijzigKnop, wijzigSectie, verwijderenKnop, verwijderenSectie);
-      const accountVak = document.getElementById("account"); (accountVak ?? kop).append(gebruiker);
+      menu.append(instellingen, instellingenTekst, wijzigKnop, wijzigSectie, uitloggen, foutElement);
+      accountVak.replaceChildren(accountKnop, menu);
+
+      function sluitMenu() {
+        menu.hidden = true;
+        accountKnop.setAttribute('aria-expanded', 'false');
+      }
+
+      accountKnop.addEventListener('click', () => {
+        menu.hidden = !menu.hidden;
+        accountKnop.setAttribute('aria-expanded', String(!menu.hidden));
+        if (!menu.hidden) menu.querySelector('button')?.focus();
+      });
+
+      instellingen.addEventListener('click', () => {
+        instellingenTekst.hidden = !instellingenTekst.hidden;
+        instellingen.setAttribute('aria-expanded', String(!instellingenTekst.hidden));
+      });
+
+      document.addEventListener('click', (gebeurtenis) => {
+        if (!accountVak.contains(gebeurtenis.target)) sluitMenu();
+      });
+      document.addEventListener('keydown', (gebeurtenis) => {
+        if (gebeurtenis.key !== 'Escape' || menu.hidden) return;
+        sluitMenu();
+        accountKnop.focus();
+      });
 
       wijzigKnop.addEventListener('click', () => {
         wijzigSectie.hidden = !wijzigSectie.hidden;
@@ -165,36 +197,6 @@ export function start() {
           toonFout(wijzigFout, 'Je wachtwoord is gewijzigd.');
         } catch {
           toonFout(wijzigFout, 'Het wachtwoord kon niet worden gewijzigd. Controleer je verbinding en probeer het opnieuw.');
-        } finally {
-          knop.disabled = false;
-        }
-      });
-
-      verwijderenKnop.addEventListener('click', () => {
-        verwijderenSectie.hidden = !verwijderenSectie.hidden;
-        verwijderenKnop.setAttribute('aria-expanded', String(!verwijderenSectie.hidden));
-      });
-
-      verwijderenFormulier.addEventListener('submit', async (gebeurtenis) => {
-        gebeurtenis.preventDefault();
-        const knop = verwijderenFormulier.querySelector('[type="submit"]');
-        const formulierGegevens = new FormData(verwijderenFormulier);
-        knop.disabled = true;
-        toonFout(verwijderenFout, '');
-        try {
-          const resultaat = await fetch('/api/account', {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ wachtwoord: formulierGegevens.get('wachtwoord') }),
-          });
-          if (!resultaat.ok) {
-            const antwoordJson = await resultaat.json();
-            toonFout(verwijderenFout, antwoordJson.fout || 'Je account kon niet worden verwijderd.');
-            return;
-          }
-          window.location.reload();
-        } catch {
-          toonFout(verwijderenFout, 'Je account kon niet worden verwijderd. Controleer je verbinding en probeer het opnieuw.');
         } finally {
           knop.disabled = false;
         }

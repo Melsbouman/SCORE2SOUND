@@ -1,23 +1,48 @@
-.app { display: grid; grid-template-columns: 250px minmax(0, 1fr); min-height: 100vh; }
-.zijbalk { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 4px; padding: 32px 24px 20px; background: linear-gradient(160deg, var(--kleur-accent) 0%, var(--kleur-zijbalk) 78%); color: var(--kleur-wit); }
-.zijbalk__logo { margin-bottom: 22px; font: 400 1.15rem/1.1 var(--letter-logo); text-transform: uppercase; }
+.app { display: grid; grid-template-columns: 270px minmax(0, 1fr); min-height: 100vh; }
+.zijbalk { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 4px; padding: 28px 20px 18px; overflow-y: auto; background: linear-gradient(160deg, var(--kleur-accent) 0%, var(--kleur-zijbalk) 78%); color: var(--kleur-wit); }
+.zijbalk__logo { margin: 0 10px 20px; font: 400 1.15rem/1.1 var(--letter-logo); text-transform: uppercase; }
 .zijbalk__logo .logo__2 { color: var(--kleur-licht); }
-.zijbalk__nieuw { display: block; margin-bottom: 18px; padding: 11px 16px; border-radius: 50px; background: var(--kleur-wit); color: var(--kleur-zijbalk); text-align: center; text-decoration: none; font-weight: 600; }
-.zijbalk__nieuw:hover { background: var(--kleur-achtergrond); }
-.zijbalk__item { padding: 10px 12px; border-radius: 12px; color: var(--kleur-wit); text-decoration: none; }
+.zijbalk__account { position: relative; margin-bottom: 18px; }
+.zijbalk__accountknop { width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid #ffffff55; border-radius: 12px; background: #ffffff12; color: var(--kleur-wit); font: inherit; text-align: left; text-decoration: none; cursor: pointer; }
+.zijbalk__accountknop span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.zijbalk__accountknop:hover { background: #ffffff22; text-decoration: none; }
+.zijbalk__accountmenu { position: absolute; z-index: 10; top: calc(100% + 6px); left: 0; width: 100%; padding: 8px; border-radius: 12px; background: var(--kleur-wit); color: var(--kleur-donker); box-shadow: 0 8px 24px #10250d55; }
+.zijbalk__accountmenu[hidden] { display: none; }
+.zijbalk__accountmenu button, .zijbalk__accountmenu a { width: 100%; display: block; padding: 8px 10px; border: 0; border-radius: 8px; background: transparent; color: inherit; font: inherit; text-align: left; text-decoration: none; cursor: pointer; }
+.zijbalk__accountmenu button:hover, .zijbalk__accountmenu a:hover { background: var(--kleur-achtergrond); }
+.zijbalk__accountmenu p { margin: 4px 10px 8px; font-size: 0.8rem; }
+.zijbalk__accountmenu .inloggen__formulier { padding: 8px 4px; }
+.zijbalk__accountmenu .inloggen__formulier button { background: var(--kleur-licht); }
+.zijbalk__navigatie { display: flex; flex-direction: column; gap: 18px; }
+.zijbalk__groep h2 { margin: 0 12px 5px; color: #ffffffaa; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; }
+.zijbalk__item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 12px; color: var(--kleur-wit); text-decoration: none; }
+.zijbalk svg { width: 18px; height: 18px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .zijbalk__item:hover { background: #c7e3b029; text-decoration: none; }
 .zijbalk__item[aria-current="page"], .zijbalk__item.actief { background: var(--kleur-licht); color: var(--kleur-donker); font-weight: 600; }
+.zijbalk__recent { margin: 1px 0 5px 40px; }
+.zijbalk__recent > span { display: block; padding: 3px 0; color: #ffffff99; font-size: 0.78rem; }
+.zijbalk__recent a { display: block; padding: 4px 8px; overflow: hidden; border-radius: 7px; color: #ffffffcc; font-size: 0.78rem; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
+.zijbalk__recent a:hover { background: #ffffff18; color: var(--kleur-wit); }
+.zijbalk__recent time { display: block; color: #ffffff88; font-size: 0.7rem; }
 .zijbalk__vul { flex: 1; }
-.zijbalk__voet { padding-top: 14px; border-top: 1px solid #ffffff55; font-size: 0.85rem; }
-.zijbalk__voet a { color: var(--kleur-wit); text-decoration: none; opacity: 0.85; }
+.zijbalk__voet { display: flex; flex-wrap: wrap; gap: 5px 12px; padding: 14px 10px 0; border-top: 1px solid #ffffff55; font-size: 0.75rem; }
+.zijbalk__voet a { display: inline-flex; align-items: center; gap: 4px; color: var(--kleur-wit); text-decoration: none; opacity: 0.85; }
+.zijbalk__voet svg { width: 13px; height: 13px; }
 .zijbalk__voet a:hover { opacity: 1; text-decoration: underline; }
 .zijbalk a:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
 .inhoud { min-width: 0; padding-bottom: 120px; }
 @media (max-width: 900px) {
   .app { grid-template-columns: minmax(0, 1fr); }
-  .zijbalk { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 4px 8px; padding: 16px 20px; }
-  .zijbalk__logo { width: 100%; margin-bottom: 6px; }
-  .zijbalk__nieuw, .zijbalk__vul, .zijbalk__voet { display: none; }
+  .zijbalk { position: sticky; z-index: 20; height: auto; max-height: none; flex-direction: row; align-items: center; gap: 10px; padding: 12px 16px; overflow: visible; }
+  .zijbalk__logo { margin: 0 auto 0 0; }
+  .zijbalk__account { order: 2; margin: 0; }
+  .zijbalk__accountknop { width: 44px; padding: 10px 12px; }
+  .zijbalk__accountknop span { display: none; }
+  .zijbalk__accountmenu { right: 0; left: auto; width: min(300px, calc(100vw - 24px)); }
+  .zijbalk__navigatie { order: 3; width: 100%; flex-direction: row; gap: 4px; overflow-x: auto; scrollbar-width: thin; }
+  .zijbalk__groep { display: contents; }
+  .zijbalk__groep h2, .zijbalk__recent, .zijbalk__vul, .zijbalk__voet { display: none; }
+  .zijbalk__item { flex: 0 0 auto; }
 }
 @media (max-width: 600px) {
   #speler .speler__passage, #speler .speler__veld:has(select), #speler .speler__veld:has(input[type="checkbox"]), #speler > span, #speler > p { display: none; }
@@ -26,15 +51,7 @@
   body:has(#speler) .werkvlak { padding-bottom: 140px; }
   .kop h1 { display: none; }
 }
-.zijbalk__account { margin-bottom: 14px; padding-top: 14px; border-top: 1px solid #ffffff55; font-size: 0.85rem; overflow-wrap: anywhere; }
-.zijbalk__account:empty { display: none; }
-.zijbalk__account .inloggen__gebruiker { flex-direction: column; align-items: stretch; gap: 6px; margin-top: 0; }
-.zijbalk__account .knop { padding: 6px 12px; font-size: 0.85rem; color: var(--kleur-wit); background: transparent; border: 1px solid #ffffff80; }
-.zijbalk__account .knop:hover { background: #ffffff22; filter: none; }
-.zijbalk__account .knop:disabled { opacity: 0.5; }
-.zijbalk__account input { width: 100%; }
-@media (max-width: 900px) { .zijbalk__account { width: 100%; margin-bottom: 0; border-top: 0; } }
 @media (max-width: 375px) {
-  .zijbalk { padding: 14px 12px; }
-  .zijbalk__item { flex: 1 1 auto; padding: 9px 10px; text-align: center; }
+  .zijbalk { padding: 10px 12px; }
+  .zijbalk__item { padding: 8px 10px; }
 }
