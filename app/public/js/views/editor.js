@@ -691,7 +691,7 @@ export function start(app) {
         'Fermate',
         PICTOGRAMMEN.fermate,
         () => pasAlle((partituur, id) => zetFermate(partituur, id, !zoekElement(partituur, id).fermate)),
-        !isNoot,
+        !heeftKeuze,
         elementen.length > 0 && elementen.every((item) => Boolean(item.fermate)),
       ),
       maakKnop(
