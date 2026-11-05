@@ -25,6 +25,7 @@ import { controleerMaatduur } from '../controle/maatduur.mjs';
 import { vulLegeMaten, markeerFouteMaten } from '../controle/nabewerken.mjs';
 import { INSTRUMENTEN, instrumentBijNaam } from '../model/instrumenten.mjs';
 import { partijNaamUitKop, splitsPartijenOpKoppen } from '../model/partijnaam.mjs';
+import { herstelComponist } from '../model/titelgegevens.mjs';
 import { maakLimiet } from './limiet.mjs';
 
 const GELDIG_ID = /^[a-f0-9]{12}$/;
@@ -151,8 +152,11 @@ function instrumentInKop(waarde) {
   return null;
 }
 
-function maakNetjes(partituur, naam, creditWoorden) {
+export function maakNetjes(partituur, naam, creditWoorden) {
   if (!partituur.titel && naam) partituur.titel = basename(naam, extname(naam));
+  partituur.componist = herstelComponist(partituur.componist);
+  const arrangeur = creditWoorden.map((waarde) => waarde.trim().match(/^arr(?:\.|\s)\s*(.+)$/i)).find(Boolean);
+  if (arrangeur) partituur.arrangeur = arrangeur[1].trim();
   partituur.partijen.forEach((partij, index) => {
     if (!partij.naam || partij.naam === 'Voice') {
       const gevonden = creditWoorden.map((waarde) => {
