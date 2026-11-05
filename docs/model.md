@@ -199,3 +199,13 @@ vulMaatAan(partituur, partijId, maatIndex) vult een te korte maat aan het eind a
 
 ## Waar de bewerkfuncties staan
 Alle bewerkingen op een stuk (verplaatsNoot, splitsRust, splitsNoot, vulMaatAan en de oudere zoals verschuif en zetDuur) staan in app/src/model/corrigeren.mjs. Elke functie geeft een nieuw stuk terug en laat de invoer ongemoeid.
+
+## Eigen muziek
+`maakLeegStuk(opties)` maakt met de opgegeven titel, makers, maatsoort, toonsoort, tempo, aantal maten en instrumenten een nieuwe partituur en geeft die terug.
+`voegPartijToe(partituur, instrumentId)` voegt het gekozen instrument als nieuwe partij aan de partituur toe en geeft een nieuwe partituur terug.
+`verwijderPartij(partituur, partijId)` verwijdert de gekozen partij en geeft een nieuwe partituur terug.
+`SJABLONEN` neemt geen argumenten aan en geeft de beschikbare ensemblesjablonen met hun instrumenten.
+`schrijfNoot(partituur, partijId, maatIndex, start, duur, toonhoogte)` schrijft een noot op de opgegeven plek en geeft een nieuwe partituur terug.
+`schrijfNootMetOverbinding(partituur, partijId, maatIndex, start, duur, toonhoogte)` schrijft een noot zo nodig over meerdere maten met overbindingen en geeft een nieuwe partituur terug.
+`voegAkkoordNootToe(partituur, partijId, maatIndex, start, toonhoogte)` voegt op de opgegeven plek een toonhoogte aan een bestaande noot toe en geeft een nieuwe partituur terug.
+`herstelMaatrust(partituur, partijId, maatIndex)` herstelt een maat met alleen rusten in stem 1 als maatrust en geeft een nieuwe partituur terug.
