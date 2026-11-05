@@ -88,6 +88,7 @@ import { kanaalVan } from '/src/midi/schrijven.mjs';
 import { maatLengte } from '/src/model/duur.mjs';
 import { maakVolumeOp } from '/src/midi/dynamiek.mjs';
 import { leesId } from '/src/model/corrigeren.mjs';
+import { partijTekstVoorSpeler } from '/src/model/spelertekst.mjs';
 
 // Kanaal per partij, zoals in schrijfMidi: elke poort heeft 16 kanalen en kanaal 9 (slagwerk) wordt overgeslagen.
 const kanaal = (index) => { const plek = kanaalVan(index); return plek.poort * 16 + plek.kanaal; };
@@ -148,6 +149,7 @@ let speelMaat = null;
 let doelMaat = null;
   let lus = 0;
   let luisterNaar = null; // een bewaarde versie die klinkt in plaats van de huidige partituur
+  let partijTekst = null;
 
   const knop = (klasse = 'knop') => Object.assign(document.createElement('button'), { type: 'button', className: klasse });
   const veld = (label, ...invoeren) => {
@@ -204,6 +206,23 @@ let doelMaat = null;
   const status = Object.assign(document.createElement('p'), { className: 'zacht' });
   status.setAttribute('role', 'status');
 
+  function zichtbarePartituur() {
+    const partituur = app.stand.partituur;
+    if (!partituur) return partituur;
+    const soortKeuze = document.getElementById('weergave-soort');
+    if (soortKeuze?.value === 'partij') {
+      const partijId = document.getElementById('weergave-partij')?.value;
+      return { ...partituur, partijen: partituur.partijen.filter((partij) => partij.id === partijId) };
+    }
+    const verborgen = new Set(app.stand.verborgen ?? []);
+    const zichtbaar = partituur.partijen.filter((partij) => !verborgen.has(partij.id));
+    return { ...partituur, partijen: zichtbaar.length ? zichtbaar : partituur.partijen.slice(0, 1) };
+  }
+
+  function werkPartijTekstBij() {
+    if (partijTekst) partijTekst.textContent = partijTekstVoorSpeler(zichtbarePartituur());
+  }
+
   function teken() {
     const passageVlak = document.getElementById('passage');
     if (!app.stand.partituur) {
@@ -213,9 +232,13 @@ let doelMaat = null;
     }
     const links = document.createElement('div');
     links.className = 'speler__links';
+    partijTekst = Object.assign(document.createElement('span'), {
+      className: 'speler__partij',
+      textContent: partijTekstVoorSpeler(zichtbarePartituur()),
+    });
     links.append(
       Object.assign(document.createElement('span'), { className: 'speler__titel', textContent: app.stand.partituur.titel || 'SCORE2SOUND' }),
-      Object.assign(document.createElement('span'), { className: 'speler__partij', textContent: app.stand.partituur.partijen[0]?.naam ?? '' })
+      partijTekst
     );
     const midden = document.createElement('div');
     midden.className = 'speler__midden';
@@ -516,6 +539,8 @@ let doelMaat = null;
   });
   metronoom.addEventListener('change', wijzigMetronoom);
   voorinteller.addEventListener('change', wijzigMetronoom);
+  document.getElementById('weergave-soort')?.addEventListener('change', werkPartijTekstBij);
+  document.getElementById('weergave-partij')?.addEventListener('change', werkPartijTekstBij);
 
   app.op('partituur', (partituur) => {
     doelMaat = null;
@@ -539,6 +564,7 @@ let doelMaat = null;
     voortgangVulling.parentElement.setAttribute('aria-valuenow', String(percentage));
   });
   app.op('mixer', pasMixerToe);
+  app.op('verborgen', werkPartijTekstBij);
   app.op('kies-maat', ({ maat }) => {
     const nummer = maten()[maat]?.nummer;
     if (nummer === undefined) return;
