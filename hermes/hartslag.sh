@@ -30,6 +30,28 @@ REST=${SAMENVATTING#* }
 BEZIG=${REST%% *}
 VAST=${REST#* }
 
+# Een rij die al lang "bezig" meldt maar niet meer draait (pc uit, venster gesloten): zet de taak terug en de status op standby.
+for UITVOERDER in codex copilot hermes; do
+  SF="$STATUS/$UITVOERDER.json"
+  [ -f "$SF" ] || continue
+  OUD=$(SF="$SF" python -I -X utf8 -c '
+import json,os,time
+d=json.load(open(os.environ["SF"],encoding="utf-8"))
+print(int(d.get("status")=="bezig" and time.time()-d.get("start",time.time())>1800))' 2>/dev/null)
+  if [ "$OUD" = "1" ] && [ "$(powershell.exe -NoProfile -Command "@(Get-CimInstance Win32_Process -Filter \"Name='bash.exe'\" | ? CommandLine -match 'werkpakketten\.sh').Count" 2>/dev/null | tr -d '')" = "0" ]; then
+    for NR in $("$GH" issue list -R "$R" --state open --label "agent-$UITVOERDER" --label agent-bezig --json number --jq '.[].number'); do
+      "$GH" issue edit "$NR" -R "$R" --remove-label agent-bezig --add-label agent-ready >/dev/null 2>&1
+    done
+    SF="$SF" python -I -X utf8 -c '
+import json,os
+d=json.load(open(os.environ["SF"],encoding="utf-8")); d["status"]="standby"; d["fase"]="gereset door de hartslag"
+json.dump(d,open(os.environ["SF"],"w",encoding="utf-8"))'
+    echo "hersteld: $UITVOERDER stond vast zonder draaiende rij"
+    # taken opnieuw ophalen voor de volgende stap
+    "$GH" issue list -R "$R" --state open --limit 100 --json number,labels > "$WERK/issues.json" 2>/dev/null
+  fi
+done
+
 for UITVOERDER in codex copilot hermes; do
   TOESTAND=$(U="$UITVOERDER" ISSUES="$WERK/issues.json" STATUSBESTAND="$STATUS/$UITVOERDER.json" python -I -X utf8 -c '
 import json,os
