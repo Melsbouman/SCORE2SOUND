@@ -107,18 +107,6 @@ function dirigentenSpoor(partituur, beginnen, tijdlijn, voorintellerTik = 0) {
       bytes: [0xff, 0x51, 3, (microseconden >>> 16) & 0xff, (microseconden >>> 8) & 0xff, microseconden & 0xff],
     });
   }
-  // Add time signature events for each wisseling
-  for (let index = 1; index < maten.length; index++) {
-    const huidige = maten[index].maatsoort ?? { teller: 4, noemer: 4 };
-    const vorige = maten[index - 1].maatsoort ?? { teller: 4, noemer: 4 };
-    if (huidige.teller !== vorige.teller || huidige.noemer !== vorige.noemer) {
-      events.push({
-        tik: beginnen[index],
-        volgorde: 0,
-        bytes: [0xff, 0x58, 4, huidige.teller, Math.log2(huidige.noemer), 24, 8],
-      });
-    }
-  }
   for (let index = 0; index < maten.length; index += 1) {
     const tempo = maten[index].tempo;
     if (tempo != null && !(voorintellerTik > 0 && index === 0)) {
@@ -241,7 +229,7 @@ function partijSpoor(partij, partijIndex, tijdlijn, volume, voorintellerTik, mix
     { tik: 0, volgorde: 0, bytes: [0xff, 0x03, ...vlq(naam.length), ...naam] },
     ...(poort > 0 ? [{ tik: 0, volgorde: 0, bytes: [0xff, 0x21, 1, poort] }] : []),
     { tik: 0, volgorde: 1, bytes: [0xc0 | kanaal, partij.instrument.midiProgramma] },
-    { tik: 0, volgorde: 2, bytes: [0xb0 | kanaal, 7, volume[partij.id] ?? 100] },
+    { tik: 0, volgorde: 2, bytes: [0xb0 | kanaal, 0x07, volume[partij.id] ?? ctrl?.volume ?? 100] },
   ];
   if (ctrl) {
     if (ctrl?.pan != null) {
