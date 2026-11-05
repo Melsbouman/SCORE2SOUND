@@ -11,6 +11,37 @@ function maatnummer(maat) {
   return /^\d+$/.test(maat.nummer) ? Number(maat.nummer) : null;
 }
 
+function verwijderPlekken(waarde) {
+  if (!waarde || typeof waarde !== 'object') return;
+  if (Array.isArray(waarde)) {
+    waarde.forEach(verwijderPlekken);
+    return;
+  }
+  delete waarde.plek;
+  Object.values(waarde).forEach(verwijderPlekken);
+}
+
+export function plakMaten(partituur, partijId, vanIndex, totIndex, doelIndex) {
+  const partij = partituur.partijen.find((item) => item.id === partijId);
+  if (!partij
+    || !Number.isInteger(vanIndex) || !Number.isInteger(totIndex) || !Number.isInteger(doelIndex)
+    || vanIndex < 0 || vanIndex > totIndex || totIndex >= partij.maten.length
+    || doelIndex < 0 || doelIndex >= partij.maten.length) {
+    throw new Error('Ongeldig bereik om maten te plakken.');
+  }
+
+  const kopie = structuredClone(partituur);
+  const doelPartij = kopie.partijen.find((item) => item.id === partijId);
+  const nieuweMaten = structuredClone(partij.maten.slice(vanIndex, totIndex + 1));
+  nieuweMaten.forEach(verwijderPlekken);
+  doelPartij.maten.splice(doelIndex + 1, 0, ...nieuweMaten);
+  doelPartij.maten.forEach((maat, index) => {
+    maat.nummer = String(index + 1);
+    maat.index = index;
+  });
+  return kopie;
+}
+
 export function voegMaatToe(partituur, maatIndex) {
   const kopie = structuredClone(partituur);
   if (!Number.isInteger(maatIndex) || maatIndex < 0) return kopie;

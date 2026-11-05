@@ -12,7 +12,6 @@ import {
   nootBijLetter,
   keurGoed,
   keurMaatGoed,
-  kopieerMaten,
   leegMaten,
 } from '/src/model/corrigeren.mjs';
 import { herstelMaatduur } from '/src/model/maatduur.mjs';
@@ -24,6 +23,7 @@ import {
 import { maakTriool, maakTriooLos } from '/src/model/triolen.mjs';
 import {
   voegMaatToe,
+  plakMaten,
   verwijderMaat,
   zetMaatsoort,
   zetSleutel,
@@ -217,13 +217,20 @@ export function start(app) {
   }
 
   function onthoudGekozenMaten() {
-    gekopieerdeReeks = { van: gekozenMaat, tot: gekozenTot ?? gekozenMaat };
+    const partij = app.stand.partituur.partijen.find((item) => item.maten[gekozenMaat]);
+    if (!partij) return;
+    gekopieerdeReeks = {
+      partijId: partij.id,
+      van: gekozenMaat,
+      tot: gekozenTot ?? gekozenMaat,
+    };
     teken();
   }
 
   function plakGekopieerdeReeks() {
-    pas(kopieerMaten(
+    pas(plakMaten(
       app.stand.partituur,
+      gekopieerdeReeks.partijId,
       gekopieerdeReeks.van,
       gekopieerdeReeks.tot,
       gekozenMaat,
@@ -403,7 +410,7 @@ export function start(app) {
         }
         pas(nieuw);
       });
-      const kopieerKnop = maakTekstKnop('Kopiëren', onthoudGekozenMaten);
+      const kopieerKnop = maakTekstKnop('Kopieer maat', onthoudGekozenMaten);
       kopieerKnop.setAttribute('aria-label', 'Onthoud de gekozen maten om te plakken');
       const leegmaakKnop = maakTekstKnop('Maten leegmaken', () => {
         pas(leegMaten(app.stand.partituur, gekozenMaat, gekozenTot ?? gekozenMaat));
@@ -425,8 +432,8 @@ export function start(app) {
       invoerKnop.setAttribute('aria-pressed', String(invoermodus));
       maatGroep.unshift(invoerKnop);
       if (gekopieerdeReeks !== null) {
-        const plakKnop = maakTekstKnop('Plakken', plakGekopieerdeReeks);
-        plakKnop.setAttribute('aria-label', 'Plak de gekopieerde maten vanaf de gekozen maat');
+        const plakKnop = maakTekstKnop('Plak na deze maat', plakGekopieerdeReeks);
+        plakKnop.setAttribute('aria-label', 'Plak de gekopieerde maten na de gekozen maat');
         maatGroep.push(plakKnop);
       }
       const bronMaat = app.stand.partituur.partijen
@@ -782,6 +789,19 @@ export function start(app) {
       app.meld('kies-maat', { maat: null });
       return;
     }
+    if ((gebeurtenis.ctrlKey || gebeurtenis.metaKey) && toets.toLowerCase() === 'c' && gekozenMaat !== null) {
+      gebeurtenis.preventDefault();
+      gebeurtenis.stopImmediatePropagation();
+      onthoudGekozenMaten();
+      return;
+    }
+    if ((gebeurtenis.ctrlKey || gebeurtenis.metaKey) && toets.toLowerCase() === 'v'
+      && gekozenMaat !== null && gekopieerdeReeks !== null) {
+      gebeurtenis.preventDefault();
+      gebeurtenis.stopImmediatePropagation();
+      plakGekopieerdeReeks();
+      return;
+    }
     if ((toets === 's' || toets === 'S') && !gebeurtenis.ctrlKey && !gebeurtenis.metaKey && !gebeurtenis.altKey && gekozen !== null && gekozenIds.length === 1 && element) {
       gebeurtenis.preventDefault();
       gebeurtenis.stopImmediatePropagation();
@@ -854,18 +874,6 @@ export function start(app) {
         gebeurtenis.preventDefault();
         gebeurtenis.stopImmediatePropagation();
         app.meld('kies-noot', { id: `n-${partij.id}-${volgende.maatIndex}-${volgende.elementIndex}` });
-        return;
-      }
-      if (toets.toLowerCase() === 'c' && gekozenMaat !== null) {
-        gebeurtenis.preventDefault();
-        gebeurtenis.stopImmediatePropagation();
-        onthoudGekozenMaten();
-        return;
-      }
-      if (toets.toLowerCase() === 'v' && gekozenMaat !== null && gekopieerdeReeks !== null) {
-        gebeurtenis.preventDefault();
-        gebeurtenis.stopImmediatePropagation();
-        plakGekopieerdeReeks();
         return;
       }
       return;
