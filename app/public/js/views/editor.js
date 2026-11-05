@@ -289,6 +289,11 @@ export function start(app) {
         vorigeInvoerToon = toonhoogte;
       }
       ingevoerdeNoten.push({ maat: invoerMaat, start: invoerStart, toonhoogte: rust ? null : toonhoogte });
+      const partij = nieuw.partijen.find((item) => item.id === invoerPartijId);
+      if (invoerMaat === partij.maten.length - 1
+        && invoerStart + invoerDuur >= maatduur(partij, invoerMaat)) {
+        nieuw = voegMaatToe(nieuw, invoerMaat);
+      }
       pas(nieuw);
       schuifInvoercursorVooruit();
       invoerAlter = 0;
