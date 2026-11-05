@@ -583,6 +583,15 @@ let doelMaat = null;
     van.value = maten()[doel.maat]?.nummer ?? van.value;
     zetSpeelpositie(doel.maat);
   });
+  app.op('speel-vanaf-maat', ({ maat }) => {
+    if (geluid && !geluid.seq.paused) {
+      pauze();
+      return;
+    }
+    if (maat === null || maat === undefined) return;
+    zetSpeelpositie(maat);
+    afspelen();
+  });
   teken();
 }
 import { maatIndexVanNummer, speelVolgorde } from '/src/model/maten.mjs';

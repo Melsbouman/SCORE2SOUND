@@ -989,8 +989,12 @@ export function start(app) {
     const toets = gebeurtenis.key;
     if (invoermodus) {
       let afgehandeld = true;
-      if (toets === 'Escape') sluitInvoermodus();
-      else if ((gebeurtenis.ctrlKey || gebeurtenis.metaKey) && toets.toLowerCase() === 'z'
+      if (toets === 'Escape') {
+        app.meld('speel-vanaf-maat', { maat: null });
+        sluitInvoermodus();
+      } else if (toets.toLowerCase() === 'p' && !gebeurtenis.ctrlKey && !gebeurtenis.metaKey && !gebeurtenis.altKey) {
+        app.meld('speel-vanaf-maat', { maat: invoerMaat });
+      } else if ((gebeurtenis.ctrlKey || gebeurtenis.metaKey) && toets.toLowerCase() === 'z'
         && !gebeurtenis.shiftKey) verwijderLaatsteInvoer();
       else if ((gebeurtenis.ctrlKey || gebeurtenis.metaKey)
         && (toets.toLowerCase() === 'y'
