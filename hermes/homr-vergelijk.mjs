@@ -26,13 +26,26 @@ function homrMaten(homrXml) {
 
 function appMaten(partituur) {
   const maten = partituur.partijen?.[0]?.maten ?? [];
+  const resultaat = [];
 
-  return maten.map((maat, index) => ({
-    maatnummer: String(maat.nummer ?? maat.maatnummer ?? index + 1),
-    toonhoogtes: (maat.elementen ?? [])
-      .filter((element) => element.soort === 'noot' && element.toonhoogte)
-      .map((element) => `${element.toonhoogte.stap}${element.toonhoogte.octaaf}`),
-  }));
+  for (let index = 0; index < maten.length; index += 1) {
+    const maat = maten[index];
+    const appMaat = {
+      maatnummer: String(maat.nummer ?? maat.maatnummer ?? index + 1),
+      toonhoogtes: (maat.elementen ?? [])
+        .filter((element) => element.soort === 'noot' && element.toonhoogte)
+        .map((element) => `${element.toonhoogte.stap}${element.toonhoogte.octaaf}`),
+    };
+    const maatrust = Number(maat.maatrust);
+    const aantalMaten = Number.isInteger(maatrust) && maatrust > 1 ? maatrust : 1;
+
+    for (let positie = 0; positie < aantalMaten; positie += 1) resultaat.push(appMaat);
+    for (let positie = 1; positie < aantalMaten && maten[index + 1]?.verborgen; positie += 1) {
+      index += 1;
+    }
+  }
+
+  return resultaat;
 }
 
 export function vergelijkMotoren(homrXml, partituur) {
