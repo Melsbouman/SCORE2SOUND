@@ -34,7 +34,7 @@ poort=$(node -e 'const net = require("node:net"); const server = net.createServe
 PORT="$poort" SCORE2SOUND_HERKENNING="$herkenning_map" node "$root/app/server.mjs" >"$tijdelijk/server.log" 2>&1 &
 server_pid=$!
 
-node - "$pdf" "$paginas" "$poort" <<'NODE'
+HERKENNING_LOG="$tijdelijk/server.log" node - "$pdf" "$paginas" "$poort" <<'NODE'
 const fs = require('node:fs/promises');
 const path = require('node:path');
 
@@ -107,6 +107,11 @@ async function main() {
 
   console.log(`Stand: ${resultaat.stand}`);
   if (resultaat.fout) console.log(`Fout: ${resultaat.fout}`);
+  if (resultaat.stand === 'fout') {
+    const log = await fs.readFile(process.env.HERKENNING_LOG, 'utf8').catch(() => '');
+    const foutregels = log.split(/\r?\n/).filter((regel) => regel.includes('ERROR') || regel.includes('Exception')).slice(-5);
+    for (const regel of foutregels) console.log(regel);
+  }
   console.log('Partijen:');
   if (partijen.length === 0) console.log('- (geen)');
   for (const partij of partijen) {
