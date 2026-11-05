@@ -147,6 +147,26 @@ export function zetMaatsoort(partituur, maatIndex, teller, noemer) {
   return kopie;
 }
 
+export function zetHerhaling(partituur, maatIndex, soort, aan) {
+  const kopie = structuredClone(partituur);
+  if (!['begin', 'eind', 'volta1', 'volta2'].includes(soort)) return kopie;
+
+  for (const partij of kopie.partijen) {
+    const maat = partij.maten.find((item) => item.index === maatIndex);
+    if (!maat) continue;
+    if (soort === 'begin' || soort === 'eind') {
+      maat.herhaling ??= { begin: false, eind: false, keer: 2 };
+      maat.herhaling[soort] = aan;
+      maat.herhaling.keer = 2;
+    } else if (aan) {
+      maat.volta = { nummers: [soort === 'volta1' ? 1 : 2], begin: true, eind: false };
+    } else {
+      delete maat.volta;
+    }
+  }
+  return kopie;
+}
+
 export function zetToonsoort(partituur, maatIndex, kwinten, modus = 'majeur') {
   if (!Number.isInteger(kwinten) || kwinten < -7 || kwinten > 7) {
     throw new Error('Het aantal kwinten moet tussen -7 en 7 liggen.');
