@@ -129,6 +129,22 @@ export function start(app) {
     teken();
   }
 
+  function startInvoermodus(partijId, maat) {
+    const partij = app.stand.partituur?.partijen.find((item) => item.id === partijId);
+    if (!partij?.maten[maat]) return;
+    gekozenMaat = maat;
+    gekozenTot = null;
+    invoermodus = true;
+    invoerPartijId = partijId;
+    invoerMaat = maat;
+    invoerStart = 0;
+    invoerDuur = 480;
+    invoerAlter = 0;
+    vorigeInvoerToon = null;
+    ingevoerdeNoten.length = 0;
+    teken();
+  }
+
   function geldendeSleutel(partij, maatIndex) {
     for (let index = maatIndex; index >= 0; index -= 1) {
       const sleutel = partij.maten[index]?.sleutels?.find((item) => (item.notenbalk ?? 1) === 1);
@@ -656,7 +672,13 @@ export function start(app) {
       : `Maat ${gekozenMaat + 1} tot ${gekozenTot + 1} gekozen`;
     selectieStatus.hidden = gekozenMaat === null;
     balk.append(selectieStatus);
-    vlak.replaceChildren(balk);
+    if (invoermodus) {
+      const hint = document.createElement('p');
+      hint.textContent = 'Typ een letter A tot en met G en een cijfer 1 tot en met 5.';
+      vlak.replaceChildren(balk, hint);
+    } else {
+      vlak.replaceChildren(balk);
+    }
     markeerSelectie();
   }
 
@@ -745,6 +767,9 @@ export function start(app) {
     gekozenMaat = maat;
     gekozenTot = tot ?? null;
     teken();
+  });
+  app.op('start-invoermodus', ({ partijId, maat }) => {
+    startInvoermodus(partijId, maat);
   });
   document.addEventListener('keydown', (gebeurtenis) => {
     if (gebeurtenis.target?.closest?.('input, select, textarea, [contenteditable="true"]')) return;
