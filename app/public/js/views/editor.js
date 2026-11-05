@@ -81,6 +81,7 @@ export function start(app) {
   let invoerMaat = null;
   let invoerStart = 0;
   let invoerDuur = 480;
+  let invoerGepunteerd = false;
   let invoerAlter = 0;
   let vorigeInvoerToon = null;
   const ingevoerdeNoten = [];
@@ -124,6 +125,7 @@ export function start(app) {
     invoerMaat = gekozenMaat;
     invoerStart = 0;
     invoerDuur = 480;
+    invoerGepunteerd = false;
     invoerAlter = 0;
     vorigeInvoerToon = null;
     ingevoerdeNoten.length = 0;
@@ -140,6 +142,7 @@ export function start(app) {
     invoerMaat = maat;
     invoerStart = 0;
     invoerDuur = 480;
+    invoerGepunteerd = false;
     invoerAlter = 0;
     vorigeInvoerToon = null;
     ingevoerdeNoten.length = 0;
@@ -764,7 +767,8 @@ export function start(app) {
       hint.textContent = 'Typ een letter A tot en met G en een cijfer 1 tot en met 5.';
       const invoerStatus = document.createElement('div');
       invoerStatus.className = 'editor__invoerstatus';
-      invoerStatus.textContent = `Duur: ${INVOER_DUUR_NAAM[invoerDuur]}, maat ${invoerMaat + 1}`;
+      const invoerDuurNaam = INVOER_DUUR_NAAM[invoerDuur / (invoerGepunteerd ? 1.5 : 1)];
+      invoerStatus.textContent = `Duur: ${invoerDuurNaam}${invoerGepunteerd ? ' met punt' : ''}, maat ${invoerMaat + 1}`;
       invoerStatus.setAttribute('aria-live', 'polite');
       vlak.replaceChildren(balk, hint, invoerStatus);
     } else {
@@ -873,6 +877,11 @@ export function start(app) {
       if (toets === 'Escape') sluitInvoermodus();
       else if (INVOER_DUUR[toets]) {
         invoerDuur = INVOER_DUUR[toets];
+        invoerGepunteerd = false;
+        teken();
+      } else if (toets === '.') {
+        invoerDuur = invoerGepunteerd ? invoerDuur / 1.5 : invoerDuur * 1.5;
+        invoerGepunteerd = !invoerGepunteerd;
         teken();
       } else if (toets === '#') {
         invoerAlter = 1;
