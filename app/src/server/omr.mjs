@@ -3,6 +3,7 @@
 import { stapelKaart } from '../model/stapels.mjs';
 import { leesXmlBoom, kind, kinderen } from '../musicxml/xml.mjs';
 import { instrumentBijNaam } from '../model/instrumenten.mjs';
+import { systeemOnder, systemenVan } from './letters.mjs';
 
 const STAPPEN = 'CDEFGAB';
 const REFERENTIE = { G: ['G', 4], F: ['F', 3], C: ['C', 4] };
@@ -174,7 +175,22 @@ export function koppelOmr(partituur, bladen) {
   const maatBij = (partijIndex, stapel) => uit.partijen[partijIndex].maten[kaarten[partijIndex][stapel]];
 
   for (const blad of bladen) {
-    for (const [systemIndex, system] of kinderen(kind(leesXmlBoom(blad.xml), 'page'), 'system').entries()) {
+    const systemen = kinderen(kind(leesXmlBoom(blad.xml), 'page'), 'system');
+    const systeemplekken = systemenVan(blad.xml);
+    const bladMaatStart = maatStart;
+    const aantalBladMaten = systemen.reduce((aantal, system) => aantal + kinderen(system, 'stack').length, 0);
+    const matenOpBlad = Array.from({ length: aantalBladMaten }, (_, index) => maatBij(0, bladMaatStart + index)).filter(Boolean);
+    for (const maat of matenOpBlad) {
+      for (const element of maat.elementen) if (element.soort === 'aanwijzing' && element.type === 'tekst') delete element.plek;
+    }
+    const tekstplekken = systemen.flatMap((system, bronSysteem) => {
+      const inters = kind(kind(system, 'sig'), 'inters');
+      return kinderen(inters, 'word').map(leesTekstplek).filter(Boolean).map((woord) => {
+        const gevondenSysteem = systeemOnder(systeemplekken, woord.y + woord.hoogte);
+        return { ...woord, systeem: gevondenSysteem >= 0 ? gevondenSysteem : bronSysteem };
+      });
+    });
+    for (const [systemIndex, system] of systemen.entries()) {
       const stacks = kinderen(system, 'stack');
       const delen = kinderen(system, 'part');
       if (delen.length !== uit.partijen.length) {
@@ -185,7 +201,6 @@ export function koppelOmr(partituur, bladen) {
       const inters = kind(kind(system, 'sig'), 'inters');
       const koppen = kinderen(inters, 'head').map(leesSymbool);
       const rusten = kinderen(inters, 'rest').map(leesSymbool);
-      const tekstplekken = kinderen(inters, 'word').map(leesTekstplek).filter(Boolean);
       delen.forEach((deel, partijIndex) => {
         const balken = kinderen(deel, 'staff').map((staff) => Number(staff.attr.id));
         const eersteMaat = maatBij(partijIndex, maatStart);
@@ -203,28 +218,26 @@ export function koppelOmr(partituur, bladen) {
               const links = Number(stack.attr.left) - MARGE;
               const rechts = Number(stack.attr.right) + MARGE;
               const inStack = (woord) => woord.x + woord.breedte / 2 >= links && woord.x + woord.breedte / 2 <= rechts;
-              const woordenInMaat = tekstplekken.filter(inStack).sort((a, b) => a.x - b.x);
+              const woordenInMaat = tekstplekken.filter((woord) => woord.systeem === systemIndex && inStack(woord)).sort((a, b) => a.x - b.x);
               for (const woord of woordenInMaat) {
                 const hokje = /^([12])\s*[._,:;-]?$/.exec(woord.waarde.trim());
                 if (hokje) voltaKandidaten.push({ nummer: Number(hokje[1]), stapel: maatStart + stackIndex });
               }
-              for (const element of maat.elementen) {
-                if (element.soort !== 'aanwijzing' || element.type !== 'tekst') continue;
-                delete element.plek;
-                const aanwijzingWoorden = woorden(element.waarde);
-                const woord = woordenInMaat.find((kandidaat) => {
-                  const woordTokens = woorden(kandidaat.waarde);
+              for (const woord of woordenInMaat) {
+                const bron = matenOpBlad.find((bronMaat) => bronMaat.elementen.some((element) => {
+                  if (element.soort !== 'aanwijzing' || element.type !== 'tekst' || element.plek) return false;
+                  const aanwijzingWoorden = woorden(element.waarde);
+                  const woordTokens = woorden(woord.waarde);
                   return woordTokens.length > 0 && woordTokens.every((token, index) => token === aanwijzingWoorden[index]);
-                });
-                if (woord) {
-                  element.plek = {
-                    blad: blad.nummer,
-                    x: woord.x,
-                    y: woord.y,
-                    breedte: woord.breedte,
-                    hoogte: woord.hoogte,
-                  };
+                }));
+                const element = bron?.elementen.find((kandidaat) => kandidaat.soort === 'aanwijzing' && kandidaat.type === 'tekst' && !kandidaat.plek
+                  && woorden(woord.waarde).every((token, index) => token === woorden(kandidaat.waarde)[index]));
+                if (!element) continue;
+                if (bron !== maat) {
+                  bron.elementen.splice(bron.elementen.indexOf(element), 1);
+                  maat.elementen.push(element);
                 }
+                element.plek = { blad: blad.nummer, x: woord.x, y: woord.y, breedte: woord.breedte, hoogte: woord.hoogte };
               }
             }
           }

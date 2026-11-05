@@ -11,6 +11,19 @@ const MAAT_MARGE = 60; // pixels dat het midden van een kader van een maatstreep
 
 const getal = (knoop, naam) => Number(knoop.attr[naam]);
 
+export function systeemOnder(systemen, onder) {
+  let systeem = -1;
+  let afstand = Infinity;
+  systemen.forEach((s, index) => {
+    const d = s.boven - onder;
+    if (d >= -MARGE_BOVEN && d < MAX_AFSTAND && d < afstand) {
+      systeem = index;
+      afstand = d;
+    }
+  });
+  return systeem;
+}
+
 // Systemen van een blad met hun maten (links en rechts in pixels) en de y van de bovenste notenlijn.
 export function systemenVan(xml) {
   const pagina = kind(leesXmlBoom(xml), 'page');
@@ -50,15 +63,7 @@ export function lettersVoorBlad({ xml, png }, status = { volgende: 'A' }) {
   for (const kader of kaders.sort((a, b) => a.y - b.y || a.x - b.x)) {
     const midden = kader.x + kader.w / 2;
     const onder = kader.y + kader.h;
-    let systeem = -1;
-    let afstand = Infinity;
-    systemen.forEach((s, index) => {
-      const d = s.boven - onder;
-      if (d >= -MARGE_BOVEN && d < MAX_AFSTAND && d < afstand) {
-        systeem = index;
-        afstand = d;
-      }
-    });
+    const systeem = systeemOnder(systemen, onder);
     if (systeem < 0) continue;
     const stacks = systemen[systeem].stacks;
     let stack = stacks.findIndex((s) => Math.abs(s.links - midden) <= MAAT_MARGE);
