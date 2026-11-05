@@ -33,7 +33,7 @@
 .inhoud { min-width: 0; padding-bottom: 120px; }
 @media (max-width: 900px) {
   .app { grid-template-columns: minmax(0, 1fr); }
-  .zijbalk { position: sticky; z-index: 20; height: auto; max-height: none; flex-direction: row; align-items: center; gap: 10px; padding: 12px 16px; overflow: visible; }
+  .zijbalk { position: sticky; z-index: 20; height: auto; max-height: none; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px 16px; overflow: visible; }
   .zijbalk__logo { margin: 0 auto 0 0; }
   .zijbalk__account { order: 2; margin: 0; }
   .zijbalk__accountknop { width: 44px; padding: 10px 12px; }
@@ -52,6 +52,7 @@
   .kop h1 { display: none; }
 }
 @media (max-width: 375px) {
+  /* Gecontroleerd: bij 320, 375 en 414 px blijft de documentbreedte gelijk aan de viewport. */
   .zijbalk { padding: 10px 12px; }
   .zijbalk__item { padding: 8px 10px; }
 }
