@@ -171,6 +171,8 @@ export function start(app) {
         aantalMaten: Number(aantalMaten.value),
       });
       app.zet({ partituur, meldingen: [], project: null });
+      app.meld('bewaar-project', { naam: partituur.titel || 'Nieuw stuk' });
+      app.meld('start-invoermodus', { partijId: partituur.partijen[0].id, maat: 0 });
       window.location.hash = '#weergave';
     } catch (fout) {
       status.textContent = fout.message;

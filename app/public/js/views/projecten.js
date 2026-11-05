@@ -328,6 +328,16 @@ export function start(app) {
   }, 120000);
   app.op('partituur', teken);
   app.op('project', teken);
+  app.op('bewaar-project', async ({ naam }) => {
+    try {
+      const project = await bewaar(naam);
+      status = `Bewaard: ${project.naam}`;
+      await laadProjecten();
+    } catch (fout) {
+      status = fout.message || nietBereikbaar;
+      teken();
+    }
+  });
   laadProjecten();
 }
 import { miniatuurSvg } from '../miniatuur.js';
