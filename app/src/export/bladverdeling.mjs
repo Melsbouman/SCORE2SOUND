@@ -23,3 +23,7 @@ export function verdeelPartijenOverBladen(partituur, { maxNotenbalken = 14 } = {
   if (partijen.length > 0) groepen.push({ ...partituur, partijen });
   return groepen;
 }
+
+export function kiesBladindeling(partituur) {
+  return verdeelPartijenOverBladen(partituur);
+}

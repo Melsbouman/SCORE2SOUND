@@ -2,6 +2,7 @@
 // Tekent opnieuw bij een nieuwe partituur (via naarMusicXML uit /src/musicxml/schrijven.mjs) of bij app.meld('musicxml', tekst).
 // Luistert naar 'naar-maat' ({ maat }: markeert en toont die maat) en 'speel-maat' ({ maat } of null: de maat die nu klinkt).
 import { zetTitelgegevens } from '../../src/model/titelgegevens.mjs';
+import { kiesBladindeling } from '../../src/export/bladverdeling.mjs';
 
 const VASTE_PAGINABREEDTE = 2100;
 const schaalVoor = (breedte) => (breedte < 500 ? 70 : breedte <= 1200 ? 60 : 75); // op een telefoon zijn de noten anders te klein.
@@ -32,6 +33,11 @@ async function naarMusicXML(partituur, verberg, metAccolade) {
   return musicxml
     .replace('<part-list>', '<part-list><part-group type="start"><group-symbol>brace</group-symbol><group-barline>yes</group-barline></part-group>')
     .replace('</part-list>', '<part-group type="stop"/></part-list>');
+}
+
+function aantalNotenbalken(partij) {
+  const sleutels = partij.maten?.[0]?.sleutels ?? [];
+  return Math.max(1, ...sleutels.map((sleutel) => sleutel.notenbalk || 1));
 }
 
 export function start(app) {
@@ -202,32 +208,12 @@ export function start(app) {
     const breedte = Math.max(320, vlak.clientWidth - 48);
     const pdfVorm = true; // Mels, 4 november 2026: dezelfde staande A4-pagina's als de pdf
     const vasteRegels = false; // Mels, 3 november 2026: regels gelijkmatig vullen in plaats van de afbrekingen van het origineel
-    const schaal = pdfVorm ? 40 : vasteRegels ? vasteSchaal(breedte, zoom) : Math.round(schaalVoor(breedte) * zoom);
-    const paginaBreedte = pdfVorm ? 2100 : vasteRegels ? VASTE_PAGINABREEDTE : Math.round((breedte * 100) / schaal);
-    const paginaPixels = pdfVorm ? Math.round(Math.min(breedte, 794) * (zoom / BEGINZOOM)) : Math.round((paginaBreedte * schaal) / 100);
+    const basisschaal = pdfVorm ? 40 : vasteRegels ? vasteSchaal(breedte, zoom) : Math.round(schaalVoor(breedte) * zoom);
+    const bronnen = Array.isArray(musicxml) ? musicxml : [{ musicxml }];
     const gegevens = app.stand?.partituur ?? {};
     const bladbron = gegevens.bron?.bladen?.[0];
     const heeftPaginabegin = gegevens.partijen?.some((partij) => partij.maten?.some((maat) => maat.paginabegin)) ?? false;
     const heeftPaginavorm = false; // Mels, 3 november 2026: regels automatisch afbreken en gelijkmatig vullen
-    tk.setOptions({
-      scale: schaal,
-      pageWidth: paginaBreedte,
-      ...(pdfVorm ? { pageHeight: 2970, adjustPageHeight: false } : heeftPaginavorm ? {
-        pageHeight: Math.round(paginaBreedte * bladbron.hoogte / bladbron.breedte),
-        adjustPageHeight: false,
-      } : { adjustPageHeight: true }),
-      breaks: (!pdfVorm && (vasteRegels || heeftPaginavorm)) ? 'encoded' : 'auto',
-      footer: 'none',
-      header: 'none',
-      ...(pdfVorm ? { pageMarginBottom: 250 } : { font: 'Leland', pageMarginLeft: 60, pageMarginRight: 60, pageMarginTop: 60 }),
-      spacingStaff: 10,
-      spacingSystem: 12,
-      spacingLinear: 0.25,
-      spacingNonLinear: 0.6,
-      minLastJustification: 0,
-      justifyVertically: false,
-    });
-    if (!tk.loadData(musicxml)) return status('Deze partituur kon niet worden getekend.');
     const blad = document.createElement('div');
     blad.className = 'bladmuziek';
     if (vasteRegels) blad.style.overflowX = 'auto';
@@ -283,15 +269,46 @@ export function start(app) {
       }
       blad.append(titelblok);
     }
-    for (let pagina = 1; pagina <= tk.getPageCount(); pagina++) {
-      const svg = new DOMParser().parseFromString(tk.renderToSVG(pagina), 'image/svg+xml').documentElement;
-    svg.classList.add('bladmuziek__pagina');
-    svg.setAttribute('aria-label', `Pagina ${pagina}`);
-    const paginanummer = document.createElement('p');
-    paginanummer.className = 'bladmuziek__paginanr';
-    paginanummer.textContent = `pagina ${pagina} van ${tk.getPageCount()}`;
-      svg.style.width = vasteRegels ? '100%' : `${paginaPixels}px`;
-      blad.append(document.importNode(svg, true), paginanummer);
+    for (const bron of bronnen) {
+      const schaal = pdfVorm
+        ? Math.max(1, Math.min(basisschaal, Math.floor(basisschaal * 14 / (bron.notenbalken || 14))))
+        : basisschaal;
+      const paginaBreedte = pdfVorm ? 2100 : vasteRegels ? VASTE_PAGINABREEDTE : Math.round((breedte * 100) / schaal);
+      const paginaPixels = pdfVorm ? Math.round(Math.min(breedte, 794) * (zoom / BEGINZOOM)) : Math.round((paginaBreedte * schaal) / 100);
+      tk.setOptions({
+        scale: schaal,
+        pageWidth: paginaBreedte,
+        ...(pdfVorm ? { pageHeight: 2970, adjustPageHeight: false } : heeftPaginavorm ? {
+          pageHeight: Math.round(paginaBreedte * bladbron.hoogte / bladbron.breedte),
+          adjustPageHeight: false,
+        } : { adjustPageHeight: true }),
+        breaks: (!pdfVorm && (vasteRegels || heeftPaginavorm)) ? 'encoded' : 'auto',
+        footer: 'none',
+        header: 'none',
+        ...(pdfVorm ? { pageMarginBottom: 250 } : { font: 'Leland', pageMarginLeft: 60, pageMarginRight: 60, pageMarginTop: 60 }),
+        spacingStaff: 10,
+        spacingSystem: 12,
+        spacingLinear: 0.25,
+        spacingNonLinear: 0.6,
+        minLastJustification: 0,
+        justifyVertically: false,
+      });
+      if (!tk.loadData(bron.musicxml)) return status('Deze partituur kon niet worden getekend.');
+      if (bron.kop) {
+        const kop = document.createElement('h2');
+        kop.textContent = bron.kop;
+        blad.append(kop);
+      }
+      for (let pagina = 1; pagina <= tk.getPageCount(); pagina++) {
+        const svg = new DOMParser().parseFromString(tk.renderToSVG(pagina), 'image/svg+xml').documentElement;
+        svg.classList.add('bladmuziek__pagina');
+        svg.setAttribute('aria-label', `Pagina ${pagina}`);
+        const paginanummer = document.createElement('p');
+        paginanummer.className = 'bladmuziek__paginanr';
+        paginanummer.textContent = `pagina ${pagina} van ${tk.getPageCount()}`;
+        svg.style.width = vasteRegels ? '100%' : `${paginaPixels}px`;
+        blad.append(document.importNode(svg, true), paginanummer);
+      }
     }
     if (typeof gegevens.colofon === 'string' && gegevens.colofon.length > 0) {
       const colofon = document.createElement('p');
@@ -474,7 +491,19 @@ export function start(app) {
       const verberg = lossePartij
         ? partituur.partijen.filter((partij) => partij.id !== partijKeuze.value).map((partij) => partij.id)
         : app.stand.verborgen ?? [];
-      await teken(await naarMusicXML(partituur, verberg, !lossePartij && partituur.partijen.length > 1), { meteen: true });
+      const groepen = lossePartij ? [partituur] : kiesBladindeling(partituur);
+      let eerstePartij = 1;
+      const bronnen = [];
+      for (const groep of groepen) {
+        const laatstePartij = eerstePartij + groep.partijen.length - 1;
+        bronnen.push({
+          musicxml: await naarMusicXML(groep, verberg, !lossePartij && groep.partijen.length > 1),
+          kop: groepen.length > 1 ? `Partijen ${eerstePartij} tot en met ${laatstePartij}` : null,
+          notenbalken: groep.partijen.reduce((totaal, partij) => totaal + aantalNotenbalken(partij), 0),
+        });
+        eerstePartij = laatstePartij + 1;
+      }
+      await teken(bronnen, { meteen: true });
     } catch (fout) {
       console.error(fout);
       status('De partituur kon niet worden omgezet om te tekenen.');
