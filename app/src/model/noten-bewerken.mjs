@@ -1,4 +1,5 @@
 import { leesId, zoekElement, maakNoot } from './corrigeren.mjs';
+import { herstelMaatrust } from './invoeren.mjs';
 
 const articulatiesToegestaan = ['staccato', 'accent', 'tenuto', 'marcato', 'staccatissimo'];
 
@@ -76,7 +77,7 @@ export function voegNootToe(partituur, id, toonhoogte) {
 }
 
 export function verwijderElement(partituur, id) {
-  const { kopie, element, maat, elementIndex } = kopieMetElement(partituur, id);
+  const { kopie, element, maat, partij, maatIndex, elementIndex } = kopieMetElement(partituur, id);
   if (element?.soort !== 'noot') return kopie;
   maat.elementen[elementIndex] = {
     soort: 'rust',
@@ -88,5 +89,5 @@ export function verwijderElement(partituur, id) {
     zekerheid: 1,
     ...(element.plek ? { plek: element.plek } : {}),
   };
-  return kopie;
+  return herstelMaatrust(kopie, partij.id, maatIndex);
 }
