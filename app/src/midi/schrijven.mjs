@@ -4,6 +4,7 @@ import { uitgevouwen } from '../model/maten.mjs';
 import { tempoOverloop } from '../model/tempoverloop.mjs';
 import { klikGebeurtenissen } from './klik.mjs';
 import { mixVoorPartijen } from './mix.mjs';
+import { uitvoeringVanNoot } from './uitvoering.mjs';
 
 const tekstEncoder = new TextEncoder();
 
@@ -262,18 +263,6 @@ function partijSpoor(partij, partijIndex, tijdlijn, volume, voorintellerTik, mix
       if (element.soort !== 'noot' || element.voorslag) continue;
       const toets = naarMidi(element.toonhoogte) + partij.instrument.transpositie.chromatisch + (element.octaafVerschuiving ?? 0) * 12;
       const begin = tijdlijn.verplaats(tijdlijn.basisBeginnen[maatIndex] + element.start) + voorintellerTik;
-      const klinkendeDuur = element.articulaties.includes('staccatissimo')
-        ? Math.floor(element.duur / 4)
-        : element.articulaties.includes('staccato')
-          ? Math.floor(element.duur / 2)
-          : element.duur;
-      const einde = begin + klinkendeDuur * (element.fermate ? 2 : 1);
-      if (element.overbinding.eind && overbonden.has(toets)) {
-        const vorige = overbonden.get(toets);
-        vorige.einde = Math.max(vorige.einde, einde);
-        if (!element.overbinding.begin) overbonden.delete(toets);
-        continue;
-      }
       let kracht = eenmalig.get(element.start) ?? sterkte;
       const wig = wiggen.find((item) => begin >= item.begin && begin <= item.eind);
       if (wig) {
@@ -281,8 +270,24 @@ function partijSpoor(partij, partijIndex, tijdlijn, volume, voorintellerTik, mix
         kracht = Math.round(wig.startSterkte + (wig.eindSterkte - wig.startSterkte) * verloop);
         kracht = Math.max(20, Math.min(120, kracht));
       }
+      const uitvoering = uitvoeringVanNoot(element, { sterkte: kracht, positieInMaat: element.start });
+      const bestaandeArticulatie = element.articulaties.some((naam) =>
+        ['staccato', 'staccatissimo', 'accent', 'marcato'].includes(naam));
+      const nieuweUitvoering = element.articulaties.includes('tenuto') || element.legato?.begin || element.legato?.eind;
+      const duurFactor = bestaandeArticulatie
+        ? uitvoering.duurFactor
+        : nieuweUitvoering ? uitvoering.duurFactor : 1;
+      const klinkendeDuur = Math.floor(element.duur * duurFactor);
+      const einde = begin + klinkendeDuur * (element.fermate ? 2 : 1);
+      if (element.overbinding.eind && overbonden.has(toets)) {
+        const vorige = overbonden.get(toets);
+        vorige.einde = Math.max(vorige.einde, einde);
+        if (!element.overbinding.begin) overbonden.delete(toets);
+        continue;
+      }
       if (element.articulaties.includes('accent')) kracht += 15;
-      if (element.articulaties.includes('marcato')) kracht += 25;
+      else if (element.articulaties.includes('marcato')) kracht += 25;
+      else if (nieuweUitvoering) kracht = uitvoering.velocity;
       kracht = Math.max(30, Math.min(kracht, 127));
       const noot = { begin, einde, toets, kracht };
       noten.push(noot);
