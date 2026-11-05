@@ -158,6 +158,10 @@ for r in sys.stdin.buffer.read().decode('utf-8').splitlines():
     if r.startswith('## '): inn = r.strip()=='## Bestanden'; continue
     if inn and r.startswith('- \`') and r.count('\`')>=2: out.append(r.split('\`')[1].split(' ')[0])
 print(','.join(out))" < "$WERK/body.md")
+# Controle van de taak zelf, voor een agent begint (kost geen modelgebruik).
+TAAKFOUT=$(bash "$(dirname "$0")/taak-check.sh" "$WERK/body.md") || vast "$ISSUE" "de taak zelf klopt niet (Claude moet hem verbeteren): $(echo "$TAAKFOUT" | grep FOUT | tr '
+' ' ')"
+MAXREGELS=$(awk '/^## Maxregels/{g=1;next} /^## /{g=0} g&&/^[0-9]+/{print $1; exit}' "$WERK/body.md")
 # Optioneel: onder "## Verwacht" staan in een codeblok de regels die de wijziging precies moet toevoegen.
 py "
 import sys
@@ -336,7 +340,7 @@ while :; do
     VERWIJDERD=$(git diff main...HEAD --numstat | awk '{v+=$2} END{print v+0}')
     if [ "$VERWIJDERD" = "0" ] && diff -q "$WERK/echt.txt" "$WERK/verwacht.txt" >/dev/null 2>&1; then EXACT="ja, precies zoals verwacht"; else EXACT="nee, wijkt af van het verwachte resultaat"; fi
   fi
-  REGELS=$(node hermes/regels-controle.mjs --basis main --toegestaan "$TOEGESTAAN" 2>&1) || FOUT="De regelcontrole keurde de wijziging af:
+  REGELS=$(node hermes/regels-controle.mjs --basis main --toegestaan "$TOEGESTAAN" --maxregels "${MAXREGELS:-600}" 2>&1) || FOUT="De regelcontrole keurde de wijziging af:
 $REGELS"
   # Elk bestand onder ## Bestanden hoort er na de taak te zijn; zo valt een overgeslagen test op.
   ONTBREEKT=""
@@ -428,7 +432,7 @@ if [ "$MODUS" = "terug" ]; then
   "$GH" pr edit "$PRNR" -R "$R" --remove-label agent-terug >/dev/null 2>&1
   PRURL="$PRNR"
 else
-  PRURL=$("$GH" pr create -R "$R" --base main --head "$BRANCH" --title "$TITEL" --body-file "$WERK/pr.md") || vast "$ISSUE" "PR openen mislukt"
+  PRURL=$("$GH" pr create -R "$R" --base main --head "$BRANCH" --title "$TITEL" --body-file "$WERK/pr.md" 2>/dev/null) || { sleep 20; PRURL=$("$GH" pr create -R "$R" --base main --head "$BRANCH" --title "$TITEL" --body-file "$WERK/pr.md" 2>/dev/null) || PRURL=$("$GH" pr list -R "$R" --head "$BRANCH" --json url --jq ".[0].url") ; [ -n "$PRURL" ] || vast "$ISSUE" "PR openen mislukt (twee keer geprobeerd)"; }
   case "$EXACT" in ja*) "$GH" pr edit "$PRURL" -R "$R" --add-label agent-exact >/dev/null 2>&1 ;; esac
 fi
 zet_labels "$ISSUE" agent-review

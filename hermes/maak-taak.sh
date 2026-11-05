@@ -8,6 +8,7 @@
 #     [--verwacht "regel die precies moet worden toegevoegd"] [--verwacht "..."] \
 #     [--controle "opdracht die moet slagen"] [--controle "..."] \
 #     [--criterium "extra criterium"] [--niet "wat niet mag"] [--bron "verwijzing"]
+#     [--maxregels N]   hogere diffgrens voor deze taak (standaard 600)
 #     [--voor codex|copilot|hermes]   wie de taak bouwt (label agent-codex, agent-copilot of agent-hermes);
 #                  zonder --voor: codex. hermes is voor kleine achtergrondtaken, liefst met --verwacht.
 #
@@ -17,7 +18,7 @@ export PYTHONUTF8=1
 GH="${GH:-/c/Program Files/GitHub CLI/gh.exe}"
 R="${AIFLOW_REPO:-Melsbouman/SCORE2SOUND}"
 TITEL=""; DOEL=""; BRON="Gemaakt met maak-taak.sh"
-VOOR=""
+VOOR=""; MAXREGELS=""; TESTMAG=""; SLA=""
 BESTANDEN=(); STAPPEN=(); VERWACHT=(); CONTROLES=(); CRITERIA=(); NIET=()
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -31,6 +32,9 @@ while [ $# -gt 0 ]; do
     --niet) NIET+=("$2"); shift 2 ;;
     --bron) BRON="$2"; shift 2 ;;
     --voor) VOOR="$2"; shift 2 ;;
+    --maxregels) MAXREGELS="$2"; shift 2 ;;
+    --test-aanpassen) TESTMAG=1; shift ;;
+    --sla-check-over) SLA=1; shift ;;
     *) echo "onbekende optie: $1" >&2; exit 2 ;;
   esac
 done
@@ -56,6 +60,8 @@ TMP="$(mktemp)"
     for c in "${CONTROLES[@]}"; do echo "$c"; done
     echo "$FENCE"; echo
   fi
+  if [ -n "$MAXREGELS" ]; then echo "## Maxregels"; echo "$MAXREGELS"; echo; fi
+  if [ -n "$TESTMAG" ]; then echo "[test-aanpassen] Deze taak mag een bestaande test aanpassen."; echo; fi
   echo "## Acceptatiecriteria"
   if [ "${#VERWACHT[@]}" -gt 0 ]; then echo "- [ ] De toegevoegde regels komen exact overeen met het blok onder Verwacht"; fi
   echo "- [ ] Alleen de genoemde bestanden zijn gewijzigd"
@@ -66,6 +72,7 @@ TMP="$(mktemp)"
   for x in "${NIET[@]}"; do echo "- $x"; done; echo
   echo "## Bron"; echo "$BRON"
 } > "$TMP"
+if [ -z "$SLA" ]; then bash "$(dirname "$0")/taak-check.sh" "$TMP" || { echo "Taak niet aangemaakt: los de FOUT hierboven op (of --sla-check-over)." >&2; rm -f "$TMP"; exit 3; }; fi
 case "${VOOR:-codex}" in codex|copilot|hermes) ;; *) echo "--voor moet codex, copilot of hermes zijn" >&2; rm -f "$TMP"; exit 2 ;; esac
 EXTRA=(--label "agent-${VOOR:-codex}")
 "$GH" issue create -R "$R" --title "$TITEL" --body-file "$TMP" --label agent-ready "${EXTRA[@]}"
