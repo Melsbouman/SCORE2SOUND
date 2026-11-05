@@ -25,9 +25,13 @@ function toolkit() {
   return toolkitBelofte;
 }
 
-async function naarMusicXML(partituur, app) {
+async function naarMusicXML(partituur, verberg, metAccolade) {
   const { naarMusicXML: omzetten } = await import('/src/musicxml/schrijven.mjs');
-  return omzetten(partituur, { weergave: true, verberg: app.stand.verborgen ?? [] });
+  const musicxml = omzetten(partituur, { weergave: true, verberg });
+  if (!metAccolade) return musicxml;
+  return musicxml
+    .replace('<part-list>', '<part-list><part-group type="start"><group-symbol>brace</group-symbol><group-barline>yes</group-barline></part-group>')
+    .replace('</part-list>', '<part-group type="stop"/></part-list>');
 }
 
 export function start(app) {
@@ -55,7 +59,39 @@ export function start(app) {
       teken(huidige, { meteen: true, opnieuw: true });
     }
   });
-const vlak = document.getElementById('weergave');
+  const vlak = document.getElementById('weergave-notatie');
+  const soortKeuze = document.getElementById('weergave-soort');
+  const partijKeuze = document.getElementById('weergave-partij');
+  try {
+    soortKeuze.value = sessionStorage.getItem('score2sound-weergave-soort') === 'partij' ? 'partij' : 'partituur';
+  } catch {}
+
+  function vulPartijen(partituur) {
+    const opgeslagen = (() => {
+      try { return sessionStorage.getItem('score2sound-weergave-partij'); } catch { return null; }
+    })();
+    const gekozenId = partituur.partijen.some((partij) => partij.id === partijKeuze.value)
+      ? partijKeuze.value
+      : partituur.partijen.some((partij) => partij.id === opgeslagen) ? opgeslagen : partituur.partijen[0]?.id;
+    partijKeuze.replaceChildren(...partituur.partijen.map((partij) => {
+      const optie = document.createElement('option');
+      optie.value = partij.id;
+      optie.textContent = partij.naam || partij.id;
+      return optie;
+    }));
+    partijKeuze.value = gekozenId ?? '';
+    partijKeuze.disabled = soortKeuze.value !== 'partij';
+  }
+
+  soortKeuze.addEventListener('change', () => {
+    partijKeuze.disabled = soortKeuze.value !== 'partij';
+    try { sessionStorage.setItem('score2sound-weergave-soort', soortKeuze.value); } catch {}
+    if (app.stand.partituur) tekenPartituur(app.stand.partituur);
+  });
+  partijKeuze.addEventListener('change', () => {
+    try { sessionStorage.setItem('score2sound-weergave-partij', partijKeuze.value); } catch {}
+    if (app.stand.partituur) tekenPartituur(app.stand.partituur);
+  });
 
   function zetZoom(waarde) {
     zoom = waarde;
@@ -488,7 +524,12 @@ percentage.textContent = Math.round((zoom / BEGINZOOM) * 100) + '%';
 
   async function tekenPartituur(partituur) {
     try {
-      await teken(await naarMusicXML(partituur, app), { meteen: true });
+      vulPartijen(partituur);
+      const lossePartij = soortKeuze.value === 'partij';
+      const verberg = lossePartij
+        ? partituur.partijen.filter((partij) => partij.id !== partijKeuze.value).map((partij) => partij.id)
+        : [];
+      await teken(await naarMusicXML(partituur, verberg, !lossePartij && partituur.partijen.length > 1), { meteen: true });
     } catch (fout) {
       console.error(fout);
       status('De partituur kon niet worden omgezet om te tekenen.');
