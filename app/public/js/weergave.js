@@ -35,11 +35,23 @@ async function naarMusicXML(partituur, verberg, metAccolade) {
 }
 
 export function start(app) {
-  const BEGINZOOM = window.innerWidth < 700 ? 0.5 : 0.8;
+  const BEGINZOOM = 1;
+  const vlak = document.getElementById('weergave-notatie');
+  const soortKeuze = document.getElementById('weergave-soort');
+  const partijKeuze = document.getElementById('weergave-partij');
+  const uitzoomen = document.getElementById('weergave-uitzoomen');
+  const inzoomen = document.getElementById('weergave-inzoomen');
+  let zoom = BEGINZOOM;
+  try {
+    const opgeslagenZoom = Number(sessionStorage.getItem('score2sound-zoom'));
+    if (opgeslagenZoom >= 0.4 && opgeslagenZoom <= 1.6) zoom = opgeslagenZoom;
+  } catch {}
+
   document.addEventListener('keydown', (gebeurtenis) => {
     const doel = gebeurtenis.target;
     if (
       app.stand.partituur === null ||
+      !doel?.closest?.('#weergave') ||
       doel?.closest?.('input, select, textarea, [contenteditable]') ||
       (!gebeurtenis.ctrlKey && !gebeurtenis.metaKey)
     ) {
@@ -54,14 +66,9 @@ export function start(app) {
       wijzigZoom(-0.1);
     } else if (gebeurtenis.key === '0') {
       gebeurtenis.preventDefault();
-      zoom = BEGINZOOM;
-      localStorage.setItem('score2sound-zoom', String(zoom));
-      teken(huidige, { meteen: true, opnieuw: true });
+      zetZoom(BEGINZOOM);
     }
   });
-  const vlak = document.getElementById('weergave-notatie');
-  const soortKeuze = document.getElementById('weergave-soort');
-  const partijKeuze = document.getElementById('weergave-partij');
   try {
     soortKeuze.value = sessionStorage.getItem('score2sound-weergave-soort') === 'partij' ? 'partij' : 'partituur';
   } catch {}
@@ -95,41 +102,20 @@ export function start(app) {
 
   function zetZoom(waarde) {
     zoom = waarde;
-    localStorage.setItem('score2sound-zoom', String(zoom));
+    uitzoomen.disabled = zoom <= 0.4;
+    inzoomen.disabled = zoom >= 1.6;
+    try { sessionStorage.setItem('score2sound-zoom', String(zoom)); } catch {}
     teken(huidige, { meteen: true, opnieuw: true });
   }
 
   function wijzigZoom(stap) {
-    zetZoom(Math.min(2, Math.max(0.3, Math.round((zoom + stap) * 10) / 10)));
+    zetZoom(Math.min(1.6, Math.max(0.4, Math.round((zoom + stap) * 10) / 10)));
   }
 
-  function voegZoombalkToe() {
-    if (vlak.querySelector('.zoombalk')) return;
-    const titelblok = vlak.firstElementChild;
-    if (!titelblok) return;
-    const zoombalk = document.createElement('div');
-    zoombalk.className = 'zoombalk';
-    const kleiner = document.createElement('button');
-    kleiner.type = 'button';
-    kleiner.className = 'knop';
-    kleiner.textContent = '−';
-    kleiner.setAttribute('aria-label', 'Stuk kleiner');
-    kleiner.addEventListener('click', () => wijzigZoom(-0.1));
-    const percentage = document.createElement('button');
-    percentage.type = 'button';
-    percentage.className = 'knop';
-percentage.textContent = Math.round((zoom / BEGINZOOM) * 100) + '%';
-    percentage.setAttribute('aria-label', 'Zoom terugzetten');
-    percentage.addEventListener('click', () => wijzigZoom(BEGINZOOM - zoom));
-    const groter = document.createElement('button');
-    groter.type = 'button';
-    groter.className = 'knop';
-    groter.textContent = '+';
-    groter.setAttribute('aria-label', 'Stuk groter');
-    groter.addEventListener('click', () => wijzigZoom(0.1));
-    zoombalk.append(kleiner, percentage, groter);
-    titelblok.after(zoombalk);
-  }
+  uitzoomen.addEventListener('click', () => wijzigZoom(-0.1));
+  inzoomen.addEventListener('click', () => wijzigZoom(0.1));
+  uitzoomen.disabled = zoom <= 0.4;
+  inzoomen.disabled = zoom >= 1.6;
 
   vlak.addEventListener('wheel', (gebeurtenis) => {
     if (!gebeurtenis.ctrlKey) return;
@@ -156,7 +142,7 @@ percentage.textContent = Math.round((zoom / BEGINZOOM) * 100) + '%';
       event.touches[1].clientX - event.touches[0].clientX,
       event.touches[1].clientY - event.touches[0].clientY,
     );
-    const nieuweZoom = Math.min(2, Math.max(0.3,
+    const nieuweZoom = Math.min(1.6, Math.max(0.4,
       Math.round(beginZoom * afstand / beginAfstand * 10) / 10));
     if (nieuweZoom !== zoom) zetZoom(nieuweZoom);
   }, { passive: false });
@@ -165,8 +151,6 @@ percentage.textContent = Math.round((zoom / BEGINZOOM) * 100) + '%';
     if (event.touches.length < 2) beginAfstand = undefined;
   });
 
-  new MutationObserver(voegZoombalkToe).observe(vlak, { childList: true });
-  voegZoombalkToe();
   let huidige = null; // de laatst aangevraagde MusicXML
   let laatstGetekend = null;
   let tekenNummer = 0;
@@ -175,23 +159,6 @@ percentage.textContent = Math.round((zoom / BEGINZOOM) * 100) + '%';
   let gekozen = null;
   let gekozenMaat = null;
   let gekozenTot = null;
-  let zoom = BEGINZOOM;
-  try {
-    const opgeslagenZoom = Number(localStorage.getItem('score2sound-zoom'));
-    if (opgeslagenZoom >= 0.3 && opgeslagenZoom <= 2) zoom = opgeslagenZoom;
-  } catch {}
-  document.addEventListener('click', (gebeurtenis) => {
-    if (gebeurtenis.target.textContent.trim() !== 'Kleiner') return;
-    try {
-      localStorage.setItem('score2sound-zoom', String(zoom));
-    } catch {}
-  });
-  document.addEventListener('click', (gebeurtenis) => {
-    if (gebeurtenis.target.textContent.trim() !== 'Groter') return;
-    try {
-      localStorage.setItem('score2sound-zoom', String(zoom));
-    } catch {}
-  });
   let verschil = []; // maten die anders zijn dan in de gekozen versie
 
   function status(tekst) {
@@ -315,29 +282,6 @@ percentage.textContent = Math.round((zoom / BEGINZOOM) * 100) + '%';
         titelblok.append(details);
       }
       blad.append(titelblok);
-    }
-    const knoppen = document.createElement('div');
-    knoppen.className = 'origineel__knoppen';
-    for (const [label, aanpassen] of [
-      ['Kleiner', () => { zoom = Math.round(Math.max(0.3, zoom - 0.2) * 10) / 10; }],
-      ['Groter', () => { zoom = Math.round(Math.min(2, zoom + 0.2) * 10) / 10; }],
-    ]) {
-      const knop = document.createElement('button');
-      knop.type = 'button';
-      knop.className = 'knop';
-      knop.textContent = label;
-      knop.addEventListener('click', () => {
-        aanpassen();
-        teken(huidige, { meteen: true, opnieuw: true });
-      });
-      knoppen.append(knop);
-    }
-    const zoomVlak = document.getElementById('zoom');
-    if (zoomVlak) {
-      zoomVlak.className = 'zoom';
-      zoomVlak.replaceChildren(knoppen);
-    } else {
-      blad.append(knoppen);
     }
     for (let pagina = 1; pagina <= tk.getPageCount(); pagina++) {
       const svg = new DOMParser().parseFromString(tk.renderToSVG(pagina), 'image/svg+xml').documentElement;
