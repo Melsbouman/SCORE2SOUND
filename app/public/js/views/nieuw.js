@@ -1,5 +1,5 @@
 import { INSTRUMENTEN } from '/src/model/instrumenten.mjs';
-import { maakLeegStuk } from '/src/model/nieuw.mjs';
+import { SJABLONEN, maakLeegStuk } from '/src/model/nieuw.mjs';
 
 const TOONSOORTEN = [
   [-7, 'Ces majeur'],
@@ -57,6 +57,13 @@ export function start(app) {
   const titel = maakTekstveld('titel', 'Titel');
   const componist = maakTekstveld('componist', 'Componist');
 
+  const sjabloon = maakSelect(
+    'sjabloon',
+    'Sjabloon',
+    SJABLONEN.map((item) => [item.id, item.naam]),
+  );
+  sjabloon.select.value = 'leeg';
+
   const instrumenten = document.createElement('fieldset');
   const instrumentenKop = document.createElement('legend');
   instrumentenKop.textContent = 'Instrumenten';
@@ -71,6 +78,14 @@ export function start(app) {
     label.append(keuze, ` ${instrument.naam}`);
     instrumenten.append(label);
   }
+
+  sjabloon.select.addEventListener('change', () => {
+    const gekozenSjabloon = SJABLONEN.find((item) => item.id === sjabloon.select.value);
+    const gekozenIds = new Set(gekozenSjabloon?.instrumenten ?? []);
+    for (const keuze of instrumenten.querySelectorAll('input[name="instrumenten"]')) {
+      keuze.checked = gekozenIds.has(keuze.value);
+    }
+  });
 
   const maatsoort = maakSelect('maatsoort', 'Maatsoort', [
     ['2/4', '2/4'],
@@ -120,6 +135,7 @@ export function start(app) {
   formulier.append(
     titel.label,
     componist.label,
+    sjabloon.label,
     instrumenten,
     maatsoort.label,
     toonsoort.label,
@@ -133,10 +149,15 @@ export function start(app) {
   formulier.addEventListener('submit', (gebeurtenis) => {
     gebeurtenis.preventDefault();
     status.textContent = '';
-    const gekozenInstrumenten = Array.from(
+    const aangevinkteInstrumenten = Array.from(
       formulier.querySelectorAll('input[name="instrumenten"]:checked'),
       (keuze) => keuze.value,
     );
+    const gekozenSjabloon = SJABLONEN.find((item) => item.id === sjabloon.select.value);
+    const gekozenInstrumenten = aangevinkteInstrumenten.flatMap((id) => {
+      const aantal = gekozenSjabloon?.instrumenten.filter((instrumentId) => instrumentId === id).length ?? 0;
+      return Array(Math.max(1, aantal)).fill(id);
+    });
     const [teller, noemer] = maatsoort.select.value.split('/').map(Number);
 
     try {

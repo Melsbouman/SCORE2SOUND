@@ -1,6 +1,25 @@
 import { TIKKEN_PER_KWART } from './duur.mjs';
 import { INSTRUMENTEN } from './instrumenten.mjs';
 
+export const SJABLONEN = [
+  {
+    id: 'brassband',
+    naam: 'Brassband',
+    instrumenten: ['es-kornet', 'bugel', 'trompet', 'hoorn', 'bariton', 'trombone', 'tuba'],
+  },
+  {
+    id: 'strijkkwartet',
+    naam: 'Strijkkwartet',
+    instrumenten: ['viool', 'viool', 'altviool', 'cello'],
+  },
+  {
+    id: 'houtblazers',
+    naam: 'Houtblazers',
+    instrumenten: ['dwarsfluit', 'hobo', 'klarinet', 'fagot'],
+  },
+  { id: 'leeg', naam: 'Leeg', instrumenten: ['trompet'] },
+];
+
 function zoekInstrument(id) {
   const instrument = INSTRUMENTEN.find((item) => item.id === id);
   if (!instrument) throw new Error(`Onbekend instrument: ${id}.`);
