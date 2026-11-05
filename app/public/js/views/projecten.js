@@ -37,6 +37,7 @@ async function vraag(url, opties) {
 export function start(app) {
   const vlak = document.getElementById('projecten');
   const recenteProjecten = document.getElementById('recente-projecten');
+  const bibliotheekMappen = document.getElementById('bibliotheek-mappen');
   let projecten = null;
   let status = '';
   let zoekterm = '';
@@ -46,6 +47,39 @@ export function start(app) {
   let laatstBewaardePartituur = app.stand.project
     ? JSON.stringify(app.stand.partituur)
     : null;
+
+  function tekenBibliotheekMappen() {
+    if (!bibliotheekMappen || projecten === null) return;
+    bibliotheekMappen.replaceChildren();
+    const laatstGebruikt = new Map();
+    for (const project of projecten) {
+      if (!project.map) continue;
+      const bijgewerkt = new Date(project.bijgewerkt).getTime();
+      laatstGebruikt.set(project.map, Math.max(laatstGebruikt.get(project.map) ?? 0, bijgewerkt));
+    }
+    const actieveMap = decodeURIComponent(window.location.hash.slice('#bibliotheek/'.length));
+    const mappen = [...laatstGebruikt]
+      .sort((eerste, tweede) => tweede[1] - eerste[1])
+      .slice(0, 5);
+    for (const [naam] of mappen) {
+      const link = document.createElement('a');
+      const icoon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      const pad = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      const tekst = document.createElement('span');
+      link.href = `#bibliotheek/${encodeURIComponent(naam)}`;
+      link.title = naam;
+      if (window.location.hash.startsWith('#bibliotheek/') && actieveMap === naam) {
+        link.setAttribute('aria-current', 'page');
+      }
+      icoon.setAttribute('viewBox', '0 0 24 24');
+      icoon.setAttribute('aria-hidden', 'true');
+      pad.setAttribute('d', 'M4 5h6l2 2h8v12H4V5Z');
+      icoon.append(pad);
+      tekst.textContent = naam;
+      link.append(icoon, tekst);
+      bibliotheekMappen.append(link);
+    }
+  }
 
   function tekenRecenteProjecten() {
     if (!recenteProjecten || projecten === null) return;
@@ -112,6 +146,7 @@ export function start(app) {
 
   function teken() {
     tekenRecenteProjecten();
+    tekenBibliotheekMappen();
     const kop = document.createElement('h2');
     kop.textContent = 'Projecten';
     vlak.replaceChildren(kop);
@@ -355,6 +390,7 @@ export function start(app) {
       teken();
     }
   });
+  window.addEventListener('hashchange', tekenBibliotheekMappen);
   laadProjecten();
 }
 import { miniatuurSvg } from '../miniatuur.js';
