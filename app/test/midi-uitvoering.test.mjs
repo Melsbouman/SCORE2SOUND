@@ -73,12 +73,12 @@ test('sf, sfz en fp gelden alleen voor de noot op die plek', () => {
   assert.deepEqual(uit.map((n) => n[3]), [68, 110, 68]);
 });
 
-test('staccato klinkt half zo lang, staccatissimo een kwart', () => {
+test('staccato klinkt half zo lang, staccatissimo drie tiende', () => {
   const uit = noten(schrijfMidi(partituur(maat(0, [noot(0, 'C', { articulaties: ['staccato'] }), noot(480, 'D', { articulaties: ['staccatissimo'] }), noot(960, 'E')]))));
-  assert.deepEqual(uit.map((n) => n[1] - n[0]), [240, 120, 480]);
+  assert.deepEqual(uit.map((n) => n[1] - n[0]), [240, 144, 480]);
 });
 
-test('een accent is sterker, marcato nog sterker, en nooit boven 127', () => {
+test('accent en marcato zijn sterker en komen nooit boven 127', () => {
   const uit = noten(schrijfMidi(partituur(maat(0, [
     dynamiek(0, 'fff'),
     noot(0, 'C', { articulaties: ['accent'] }),
@@ -87,5 +87,19 @@ test('een accent is sterker, marcato nog sterker, en nooit boven 127', () => {
   ]))));
   assert.deepEqual(uit.map((n) => n[3]), [127, 127, 120]);
   const zacht = noten(schrijfMidi(partituur(maat(0, [noot(0, 'C', { articulaties: ['accent'] }), noot(480, 'D', { articulaties: ['marcato'] })]))));
-  assert.deepEqual(zacht.map((n) => n[3]), [95, 105]);
+  assert.deepEqual(zacht.map((n) => n[3]), [100, 99]);
+});
+
+test('een staccato noot is korter dan een tenuto noot', () => {
+  const uit = noten(schrijfMidi(partituur(maat(0, [
+    noot(0, 'C', { articulaties: ['staccato'] }),
+    noot(480, 'D', { articulaties: ['tenuto'] }),
+  ]))));
+  assert.ok(uit[0][1] - uit[0][0] < uit[1][1] - uit[1][0]);
+});
+
+test('een accent heeft een hogere velocity dan dezelfde noot zonder accent', () => {
+  const gewoon = noten(schrijfMidi(partituur(maat(0, [noot(0, 'C')]))))[0][3];
+  const accent = noten(schrijfMidi(partituur(maat(0, [noot(0, 'C', { articulaties: ['accent'] })]))))[0][3];
+  assert.ok(accent > gewoon);
 });
