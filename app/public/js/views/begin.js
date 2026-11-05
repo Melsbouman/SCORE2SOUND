@@ -1,5 +1,6 @@
 import { INSTRUMENTEN } from '/src/model/instrumenten.mjs';
 import { FAMILIES, combinatieKaarten, maakLeegStuk, maakVoorbeeldStuk } from '/src/model/nieuw.mjs';
+import { controleerMaatduur } from '/src/controle/maatduur.mjs';
 
 const TOONSOORTEN = [
   [-7, 'Ces majeur'],
@@ -32,6 +33,7 @@ export function start(app) {
   vlak.className = 'begin';
   vlak.tabIndex = -1;
   let gekozenInstrumenten = [];
+  let huidigeStap = 1;
 
   const stappen = maakElement('ol', 'begin__stappen');
   const stapNamen = ['Begin', 'Voor wie', 'Details'];
@@ -47,6 +49,7 @@ export function start(app) {
   vlak.replaceChildren(stappen, inhoud);
 
   function toonStap(nummer) {
+    huidigeStap = nummer;
     stapKnoppen.forEach((stap, index) => {
       stap.classList.toggle('begin__stap--actief', index === nummer - 1);
       if (index === nummer - 1) stap.setAttribute('aria-current', 'step');
@@ -55,6 +58,11 @@ export function start(app) {
     if (nummer === 1) toonBegin();
     if (nummer === 2) toonVoorWie();
     if (nummer === 3) toonDetails();
+    const kop = inhoud.querySelector('h2');
+    if (kop) {
+      kop.tabIndex = -1;
+      kop.focus({ preventScroll: true });
+    }
   }
 
   function maakKop(bovenregel, accent, vervolg) {
@@ -73,11 +81,15 @@ export function start(app) {
     const kaarten = maakElement('div', 'begin__keuzekaarten');
 
     const scanKaart = maakElement('article', 'begin__hoofdkaart');
-    scanKaart.append(
+    const scanKnop = maakElement('button', 'begin__scan-knop');
+    scanKnop.type = 'button';
+    scanKnop.append(
       maakElement('span', 'begin__kaarticoon', '↑'),
       maakElement('h3', '', 'Bladmuziek inscannen'),
       maakElement('p', '', 'Zet een pdf, scan of foto om in muziek die je kunt horen en bewerken.'),
     );
+    scanKnop.addEventListener('click', () => uploadVlak.querySelector('input[type="file"]')?.click());
+    scanKaart.append(scanKnop);
     uploadVlak.classList.add('begin__upload');
     const uploadKop = uploadVlak.querySelector('h2');
     const uploadUitleg = uploadVlak.querySelector('p');
@@ -105,6 +117,57 @@ export function start(app) {
       window.location.hash = '#weergave';
     });
     inhoud.append(kop, uitleg, kaarten, voorbeeld);
+    toonRecenteProjecten();
+  }
+
+  async function toonRecenteProjecten() {
+    let projecten;
+    try {
+      const antwoord = await fetch('/api/projecten');
+      if (!antwoord.ok) return;
+      projecten = await antwoord.json();
+    } catch {
+      return;
+    }
+    if (!Array.isArray(projecten) || projecten.length === 0 || huidigeStap !== 1) return;
+
+    const recent = [...projecten]
+      .sort((eerste, tweede) => new Date(tweede.bijgewerkt) - new Date(eerste.bijgewerkt))
+      .slice(0, 3);
+    const blok = maakElement('section', 'begin__verder-werken');
+    blok.append(maakElement('h3', '', 'Verder werken'));
+    const lijst = maakElement('div', 'begin__recente-projecten');
+    for (const project of recent) {
+      const knop = maakElement('button', 'begin__recent-project');
+      knop.type = 'button';
+      const titel = maakElement('strong', '', project.naam);
+      const datum = maakElement('time', '', new Date(project.bijgewerkt).toLocaleDateString('nl-NL', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      }));
+      datum.dateTime = project.bijgewerkt;
+      knop.append(titel, datum);
+      knop.addEventListener('click', async () => {
+        try {
+          const antwoord = await fetch(`/api/projecten/${encodeURIComponent(project.id)}`);
+          if (!antwoord.ok) return;
+          const geopend = await antwoord.json();
+          app.zet({
+            partituur: geopend.partituur,
+            meldingen: controleerMaatduur(geopend.partituur),
+            project: { id: geopend.id, naam: geopend.naam },
+            versies: geopend.versies ?? [],
+          });
+          window.location.hash = '#weergave';
+        } catch {
+          // Het projectenscherm toont eventuele verbindingsfouten.
+        }
+      });
+      lijst.append(knop);
+    }
+    blok.append(lijst);
+    inhoud.append(blok);
   }
 
   function toonVoorWie() {
@@ -128,12 +191,16 @@ export function start(app) {
     for (const combinatie of combinatieKaarten()) {
       const kaart = maakElement('button', 'begin__combinatie');
       kaart.type = 'button';
+      kaart.setAttribute('aria-pressed', 'false');
       kaart.append(maakElement('strong', '', combinatie.naam), maakElement('span', '', combinatie.beschrijving));
       kaart.addEventListener('click', () => {
         gekozenKaart = combinatie;
         gekozenInstrumenten = combinatie.id === 'eigen' ? [...eigenInstrumenten] : [...combinatie.instrumenten];
-        for (const andereKaart of kaarten.children) andereKaart.classList.remove('begin__combinatie--gekozen');
-        kaart.classList.add('begin__combinatie--gekozen');
+        for (const andereKaart of kaarten.children) {
+          const gekozen = andereKaart === kaart;
+          andereKaart.classList.toggle('begin__combinatie--gekozen', gekozen);
+          andereKaart.setAttribute('aria-pressed', String(gekozen));
+        }
         eigenKeuze.hidden = combinatie.id !== 'eigen';
         werkVerderBij();
       });
@@ -355,7 +422,6 @@ export function start(app) {
     if (window.location.hash !== '#begin') return;
     toonStap(1);
     vlak.scrollIntoView({ block: 'start' });
-    vlak.focus({ preventScroll: true });
   }
 
   window.addEventListener('hashchange', openBegin);
