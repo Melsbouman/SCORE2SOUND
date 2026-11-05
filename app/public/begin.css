@@ -52,9 +52,11 @@
 .begin__keuzekaarten { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; text-align: left; }
 .begin__hoofdkaart { min-width: 0; padding: clamp(22px, 4vw, 38px); border: 1px solid #2b6a1f66; border-radius: 22px; background: #fff; box-shadow: 0 18px 45px #1c4a1412; transition: transform .2s ease, box-shadow .2s ease; }
 .begin__hoofdkaart--knop { width: 100%; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.begin__scan-knop { width: 100%; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .begin__hoofdkaart:hover { transform: translateY(-3px); box-shadow: 0 22px 50px #1c4a1422; }
+.begin button:focus-visible, .begin a:focus-visible, .begin input:focus-visible, .begin select:focus-visible, .begin [tabindex]:focus-visible { outline: 3px solid var(--begin-donkergroen); outline-offset: 3px; }
 .begin__hoofdkaart h3 { margin: 1rem 0 .4rem; font: 700 1.7rem/1.15 'Bodoni Moda', Georgia, serif; }
-.begin__hoofdkaart > p { margin: 0; color: #3d4a39; }
+.begin__hoofdkaart > p, .begin__scan-knop > p { margin: 0; color: #3d4a39; }
 .begin__kaarticoon { display: grid; width: 3rem; height: 3rem; place-items: center; border-radius: 50%; background: var(--begin-lichtgroen); color: var(--begin-donkergroen); font-size: 1.6rem; }
 .begin__pill, .begin__knop { display: inline-block; padding: .75rem 1.35rem; border: 0; border-radius: 999px; font: inherit; font-weight: 600; }
 .begin__pill { margin-top: 1.5rem; background: var(--begin-groen); color: #fff; }
@@ -109,10 +111,30 @@
 .begin__samenvatting dt { margin-top: .9rem; color: var(--begin-lichtgroen); font-size: .75rem; font-weight: 600; text-transform: uppercase; }
 .begin__samenvatting dd { margin: .2rem 0 0; overflow-wrap: anywhere; }
 .begin__acties--details { grid-column: 1 / -1; justify-content: flex-start; }
+.begin__verder-werken { margin-top: 2.5rem; text-align: left; }
+.begin__verder-werken h3 { margin: 0 0 1rem; font: 700 1.5rem/1.15 'Bodoni Moda', Georgia, serif; }
+.begin__recente-projecten { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.begin__recent-project { min-width: 0; padding: 1rem 1.15rem; border: 1px solid #2b6a1f66; border-radius: 14px; background: #fff; color: inherit; font: inherit; text-align: left; cursor: pointer; transition: background-color .2s ease, transform .2s ease; }
+.begin__recent-project:hover { transform: translateY(-2px); background: #f8fbf4; }
+.begin__recent-project strong, .begin__recent-project time { display: block; overflow-wrap: anywhere; }
+.begin__recent-project time { margin-top: .35rem; color: #52604f; font-size: .82rem; }
+.begin__inhoud > * { animation: begin-stap-in .2s ease both; }
+
+@keyframes begin-stap-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
 @media (max-width: 760px) {
+  .werkvlak > .begin { padding: 24px 16px; overflow-x: hidden; }
   .begin__stappen { gap: .75rem; }
   .begin__stap { flex-direction: column; gap: .25rem; font-size: .7rem; }
-  .begin__keuzekaarten, .begin__combinaties, .begin__details, .begin__formulier { grid-template-columns: 1fr; }
+  .begin__keuzekaarten, .begin__combinaties, .begin__details, .begin__formulier, .begin__recente-projecten { grid-template-columns: minmax(0, 1fr); }
   .begin__maatsoorten { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .begin__acties { flex-wrap: wrap; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .begin__inhoud > * { animation: none; }
+  .begin__hoofdkaart, .begin__combinatie, .begin__recent-project { transition: none; }
 }
