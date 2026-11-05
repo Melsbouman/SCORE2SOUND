@@ -60,6 +60,33 @@ export function schrijfNoot(partituur, partijId, maatIndex, start, duur, toonhoo
   return nieuw;
 }
 
+export function voegAkkoordNootToe(partituur, partijId, maatIndex, start, toonhoogte) {
+  const maat = partituur.partijen
+    .find((kandidaat) => kandidaat.id === partijId)?.maten[maatIndex];
+  const noot = maat?.elementen.find((element) => (
+    element.soort === 'noot' && element.stem === 1 && element.start === start
+  ));
+  if (!noot) throw new Error('Er staat geen noot op deze plek.');
+
+  const bestaatAl = maat.elementen.some((element) => (
+    element.soort === 'noot' && element.start === start
+    && element.toonhoogte.stap === toonhoogte.stap
+    && element.toonhoogte.alter === toonhoogte.alter
+    && element.toonhoogte.octaaf === toonhoogte.octaaf
+  ));
+  if (bestaatAl) throw new Error('Deze toonhoogte staat al in het akkoord.');
+
+  const nieuw = structuredClone(partituur);
+  const nieuweMaat = nieuw.partijen
+    .find((kandidaat) => kandidaat.id === partijId).maten[maatIndex];
+  const nieuweNoot = structuredClone(noot);
+  nieuweNoot.toonhoogte = structuredClone(toonhoogte);
+  nieuweNoot.akkoord = true;
+  nieuweMaat.elementen.push(nieuweNoot);
+  nieuweMaat.elementen.sort((a, b) => a.start - b.start);
+  return nieuw;
+}
+
 export function schrijfNootMetOverbinding(
   partituur, partijId, maatIndex, start, duur, toonhoogte,
 ) {

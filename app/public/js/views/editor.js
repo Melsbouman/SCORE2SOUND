@@ -31,7 +31,11 @@ import {
 } from '/src/model/maten-bewerken.mjs';
 import { opAlle, verwijderAlle } from '/src/model/meerdere.mjs';
 import { controleerMaatduur } from '/src/controle/maatduur.mjs';
-import { schrijfNoot, schrijfNootMetOverbinding } from '/src/model/invoeren.mjs';
+import {
+  schrijfNoot,
+  schrijfNootMetOverbinding,
+  voegAkkoordNootToe,
+} from '/src/model/invoeren.mjs';
 
 const DUUR = { heel: 1920, half: 960, kwart: 480, achtste: 240, zestiende: 120 };
 const DUUR_TOETSEN = { 1: 'heel', 2: 'half', 3: 'kwart', 4: 'achtste', 5: 'zestiende' };
@@ -296,6 +300,25 @@ export function start(app) {
       }
       pas(nieuw);
       schuifInvoercursorVooruit();
+      invoerAlter = 0;
+      teken();
+    } catch (fout) {
+      if (!(fout instanceof Error)) throw fout;
+      statusBalk.textContent = fout.message;
+    }
+  }
+
+  function voerAkkoordNootIn(stap) {
+    const laatste = ingevoerdeNoten.at(-1);
+    if (!laatste || !laatste.toonhoogte) return;
+    const toonhoogte = toonhoogteVoor(stap);
+    try {
+      const nieuw = voegAkkoordNootToe(
+        app.stand.partituur, invoerPartijId, laatste.maat, laatste.start, toonhoogte,
+      );
+      vorigeInvoerToon = toonhoogte;
+      ingevoerdeNoten.push({ maat: laatste.maat, start: laatste.start, toonhoogte });
+      pas(nieuw);
       invoerAlter = 0;
       teken();
     } catch (fout) {
@@ -902,7 +925,8 @@ export function start(app) {
       else if (toets === 'ArrowDown') verplaatsInvoercursorNaarPartij(1);
       else if (toets === 'Enter') openNootOnderInvoercursor();
       else if (['a', 'b', 'c', 'd', 'e', 'f', 'g'].includes(toets.toLowerCase())) {
-        voerNootIn(toets.toUpperCase());
+        if (gebeurtenis.shiftKey) voerAkkoordNootIn(toets.toUpperCase());
+        else voerNootIn(toets.toUpperCase());
       } else afgehandeld = false;
       if (afgehandeld) {
         gebeurtenis.preventDefault();
