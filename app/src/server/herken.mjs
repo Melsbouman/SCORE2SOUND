@@ -28,6 +28,7 @@ import { partijNaamUitKop, splitsPartijenOpKoppen } from '../model/partijnaam.mj
 import { herstelComponist } from '../model/titelgegevens.mjs';
 import { tempoVoorWoord } from '../model/tempotekst.mjs';
 import { kopUitOcr } from '../model/tekstlezerkop.mjs';
+import { woordenNaarMaten } from '../model/tekstlezerwoorden.mjs';
 import { maakLimiet } from './limiet.mjs';
 import { leesBlad } from './tekstlezer.mjs';
 
@@ -303,7 +304,11 @@ export function maakHerken({ map, draaier }) {
     const eersteMaat = uit.partituur.partijen?.[0]?.maten?.[0];
     const tempoBekend = eersteMaat?.tempo != null
       || eersteMaat?.elementen?.some((element) => element.soort === 'aanwijzing' && element.type === 'tempo');
-    const ocr = await leesBlad(join(taak.uitmap, 'blad-1.png'));
+    const ocrPerBlad = await Promise.all(bladenGoed.map(async (blad) => ({
+      ...await leesBlad(join(taak.uitmap, `blad-${blad.nummer}.png`)),
+      blad: blad.nummer,
+    })));
+    const ocr = ocrPerBlad[0] ?? { regels: [] };
     const kop = kopUitOcr(ocr, { arrangeurBekend: Boolean(uit.partituur.arrangeur), tempoBekend });
     if (kop.arrangeur) uit.partituur.arrangeur = kop.arrangeur;
     if (kop.tempoWoord && eersteMaat) {
@@ -316,6 +321,7 @@ export function maakHerken({ map, draaier }) {
     const paginaNamen = paginaKopregels.map((regels) => (regels ?? [])
       .map((regel) => partijNaamUitKop(herstelOcr(regel))).find(Boolean) ?? null);
     uit.partituur = splitsPartijenOpKoppen(uit.partituur, paginaNamen);
+    uit.partituur = woordenNaarMaten(uit.partituur, ocrPerBlad);
     verbeterTekstaanwijzingen(uit.partituur);
   const gevuld = vulLegeMaten(uit.partituur);
   const maatMeldingen = controleerMaatduur(gevuld);
