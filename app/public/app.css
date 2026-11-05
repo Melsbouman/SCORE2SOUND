@@ -30,17 +30,17 @@
   --kleur-zacht: #3d4a39;
   --kleur-lijn: #2b6a1f55;
   --kleur-accent: #2b6a1f;
-  --kleur-accent-zacht: #e4e9d8;
-  --kleur-op-accent: #f0ede1;
+  --kleur-accent-zacht: #c7e3b0;
+  --kleur-op-accent: #ffffff;
   --kleur-fout: #b3261e;
   --kleur-waarschuwing: #8a5a00;
   --ruimte-1: 4px;
   --ruimte-2: 8px;
   --ruimte-3: 16px;
   --ruimte-4: 24px;
-  --ruimte-5: 40px;
-  --hoek: 6px;
-  --schaduw: none;
+  --ruimte-5: 48px;
+  --hoek: 16px;
+  --schaduw: 0 16px 40px #1c4a1412;
   --letter: 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --letter-kop: 'Bodoni Moda', 'Bodoni 72', Didot, Georgia, serif;
   --letter-logo: 'Archivo Black', 'Arial Black', sans-serif;
@@ -57,13 +57,14 @@ body {
   font-size: 16px;
   color: var(--kleur-tekst);
   background: var(--kleur-achtergrond);
+  line-height: 1.6;
 }
-.kop { padding: var(--ruimte-3) var(--ruimte-4); border-bottom: 1px solid var(--kleur-lijn); }
+.kop { padding: var(--ruimte-4) clamp(16px, 4vw, 56px); border-bottom: 1px solid var(--kleur-lijn); }
 .kop h1 { margin: 0; font-size: 20px; }
 .kop h1 .logo__2 { color: var(--kleur-accent); }
 .kop p { margin: var(--ruimte-1) 0 0; color: var(--kleur-tekst); }
 .werkvlak {
-  padding: var(--ruimte-3);
+  padding: clamp(16px, 3vw, 48px);
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
@@ -81,17 +82,16 @@ body {
     "versies"
     "meldingen"
     "export";
-  gap: var(--ruimte-3);
+  gap: var(--ruimte-4);
 }
 #inloggen { grid-area: inloggen; }
 .werkvlak section {
   min-width: 0;
-  padding: var(--ruimte-4) 0;
-  background: transparent;
-  border: 0;
-  border-top: 1px solid var(--kleur-lijn);
-  border-radius: 0;
-  box-shadow: none;
+  padding: var(--ruimte-4);
+  background: var(--kleur-vlak);
+  border: 1px solid var(--kleur-lijn);
+  border-radius: var(--hoek);
+  box-shadow: var(--schaduw);
 }
 .werkvlak section:empty { display: none; }
 .werkvlak h2 {
@@ -160,11 +160,11 @@ main:has(#weergave g.measure) #hulp { display: none; }
 .inloggen__gebruiker > span:first-child { overflow-wrap: anywhere; }
 .inloggen__uitlogfout { flex-basis: 100%; color: var(--kleur-fout); font-size: 0.875em; }
 #upload {
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  padding: var(--ruimte-4) 0 var(--ruimte-2);
+  border: 1px solid var(--kleur-lijn);
+  border-radius: var(--hoek);
+  background: var(--kleur-vlak);
+  box-shadow: var(--schaduw);
+  padding: clamp(24px, 5vw, 64px);
 }
 #upload h2 { margin: 0 0 var(--ruimte-2); font-size: clamp(1.8rem, 3.6vw, 3rem); line-height: 1.05; }
 #upload p { margin: 0; max-width: 40em; font-size: 1.05rem; color: var(--kleur-zacht); }
@@ -255,7 +255,7 @@ main:has(#weergave g.measure) #hulp { display: none; }
   color: var(--kleur-accent);
   background: transparent;
   border: 1px solid var(--kleur-accent);
-  border-radius: 50px;
+  border-radius: 999px;
   font: inherit;
   font-weight: 600;
   cursor: pointer;
@@ -475,6 +475,10 @@ select, input[type="text"], input[type="number"] { font: inherit; color: var(--k
 }
 
 @media (max-width: 375px) {
+  .werkvlak { padding: 12px; gap: 12px; }
+  .werkvlak section { padding: 18px 16px; }
+  #upload { padding: 24px 18px; }
+
   .tempo-regel {
     grid-template-columns: 1fr minmax(4.5rem, 6rem);
   }
