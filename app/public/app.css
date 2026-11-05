@@ -59,10 +59,10 @@ body {
   background: var(--kleur-achtergrond);
   line-height: 1.6;
 }
-.kop { padding: var(--ruimte-4) clamp(16px, 4vw, 56px); border-bottom: 1px solid var(--kleur-lijn); }
+.kop { padding: 18px clamp(16px, 4vw, 56px); border-bottom: 1px solid var(--kleur-lijn); }
 .kop h1 { margin: 0; font-size: 20px; }
-.kop h1 .logo__2 { color: var(--kleur-accent); }
-.kop p { margin: var(--ruimte-1) 0 0; color: var(--kleur-tekst); }
+.kop h1 em { color: var(--kleur-accent); font-size: 0.48em; font-weight: 700; }
+.kop p { margin: 2px 0 0; color: var(--kleur-zacht); }
 .werkvlak {
   padding: clamp(16px, 3vw, 48px);
   display: grid;
@@ -120,6 +120,7 @@ main:has(#weergave g.measure) #hulp { display: none; }
   background: var(--kleur-vlak);
   border-radius: var(--hoek);
 }
+#weergave:not(:has(#weergave-notatie > *)) { display: none; }
 #corrigeren { grid-area: corrigeren; }
 #speler {
   grid-area: speler;
@@ -374,13 +375,13 @@ main:has(#weergave g.measure) #hulp { display: none; }
 
 .kop { position: sticky; top: 0; z-index: 10; background: var(--kleur-vlak); box-shadow: var(--schaduw); }
 .kop h1 {
-  font-size: clamp(1.9rem, 3.6vw, 2.9rem);
-  font-family: var(--letter-logo);
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+  font-family: var(--letter-kop);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: 0;
 }
-.kop p { font-size: 14px; }
+.kop p { font-size: 0.78rem; }
 .sneltoetsen__open { display: block; margin-top: var(--ruimte-2); padding: var(--ruimte-1) var(--ruimte-2); font-size: 0.875em; }
 .sneltoetsen__achtergrond {
   position: fixed;
@@ -522,8 +523,8 @@ main:has(#weergave g.measure) #upload label:not(.knop) {
 
 @media (max-width: 600px) {
   .kop { padding: 8px 12px; }
-  .kop h1 { font-size: clamp(1.9rem, 3.6vw, 2.9rem); }
-  .kop p { display: none; }
+  .kop h1 { font-size: 1.6rem; }
+  .kop p { font-size: 0.7rem; }
   .kop .sneltoetsen__open { display: block; }
 
   main:has(#weergave g.measure) #upload {
