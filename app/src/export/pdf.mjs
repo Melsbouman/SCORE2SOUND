@@ -4,8 +4,12 @@ import { pathToFileURL } from 'node:url';
 import PDFDocument from 'pdfkit';
 import schrijfSvgNaarPdf from 'svg-to-pdfkit';
 import { titelblokVoorPartij } from '../model/titel.mjs';
+import { leesMusicXML } from '../musicxml/lezen.mjs';
+import { naarMusicXML } from '../musicxml/schrijven.mjs';
+import { verdeelPartijenOverBladen } from './bladverdeling.mjs';
 
 const verovioOpties = { footer: 'none', header: 'none' };
+const schalen = [40, 34, 28, 22];
 
 function leesColofon(musicxml) {
   const gevonden = musicxml.match(/<rights\b[^>]*>([\s\S]*?)<\/rights>/i);
@@ -71,6 +75,41 @@ function SVGtoPDF(document, svg, ...opties) {
 const require = createRequire(import.meta.url);
 let toolkitBelofte;
 
+function zetVerovioOpties(tk, schaal, metTitelblok) {
+  tk.setOptions({
+    breaks: 'auto',
+    pageMarginBottom: 250,
+    header: 'none',
+    footer: 'none',
+    pageWidth: 2100,
+    pageHeight: 2970,
+    scale: schaal,
+    adjustPageHeight: false,
+    ...(metTitelblok ? { pageMarginTop: 360 } : {}),
+  });
+}
+
+function eersteSysteemPast(svg) {
+  const begin = svg.search(/<g\b[^>]*class="system"/);
+  if (begin < 0) return true;
+  const volgende = svg.slice(begin + 1).search(/<g\b[^>]*class="system"/);
+  const systeem = volgende < 0 ? svg.slice(begin) : svg.slice(begin, begin + 1 + volgende);
+  const hoogtes = [...systeem.matchAll(/transform="translate\([^,]+,\s*([\d.]+)\)"/g)]
+    .map((gevonden) => Number(gevonden[1]));
+  return hoogtes.length === 0 || Math.max(...hoogtes) <= 27200;
+}
+
+function groepsTitelblok(partituur, titelblok) {
+  const eerste = partituur.partijen[0]?.naam ?? '';
+  const laatste = partituur.partijen.at(-1)?.naam ?? '';
+  return {
+    titel: titelblok?.titel ?? partituur.titel,
+    componist: titelblok?.componist ?? partituur.componist,
+    arrangeur: titelblok?.arrangeur ?? partituur.arrangeur,
+    partij: `Partijen ${eerste} tot en met ${laatste}`,
+  };
+}
+
 // Verovio werkt in Node alleen via de ESM-bestanden; de oude require('verovio').toolkit werkt niet.
 function toolkit() {
   toolkitBelofte ??= (async () => {
@@ -88,30 +127,38 @@ export async function maakPdf(musicxml, { watermerk = 'SCORE2SOUND', comprimeer 
   const tk = await toolkit();
   const colofon = leesColofon(musicxml);
   // De regelindeling van het origineel (heeftOrigineleRegels) staat nog uit: de regelbegins zijn nog niet overal op de goede maat gezet.
-  tk.setOptions({
-    breaks: 'auto',
-    pageMarginBottom: 250,
-    header: 'none',
-    footer: 'none',
-    pageWidth: 2100,
-    pageHeight: 2970,
-    scale: 40,
-    adjustPageHeight: false,
-    ...(titelblok ? { pageMarginTop: 360 } : {}),
-  });
-  const partijgegevens = leesPartijen(musicxml);
-  const invoer = partijgegevens.length > 0
-    ? partijgegevens.map((partij, index) => {
-      const partijTitelblok = titelblokVoorPartij(titelblok, partij);
-      return {
-        musicxml: partij.musicxml,
-        titelblok: partijTitelblok,
-        colofon: partijTitelblok.colofon || (index === partijgegevens.length - 1 ? colofon : ''),
-      };
-    })
-    : [{ musicxml, titelblok, colofon }];
+  const groepen = verdeelPartijenOverBladen(leesMusicXML(musicxml));
+  let invoer;
+  if (groepen.length > 1) {
+    invoer = groepen.map((groep, index) => ({
+      musicxml: naarMusicXML(groep),
+      titelblok: groepsTitelblok(groep, titelblok),
+      colofon: index === groepen.length - 1 ? colofon : '',
+      pasSchaalAan: true,
+    }));
+  } else {
+    zetVerovioOpties(tk, 40, Boolean(titelblok));
+    const partijgegevens = leesPartijen(musicxml);
+    invoer = partijgegevens.length > 0
+      ? partijgegevens.map((partij, index) => {
+        const partijTitelblok = titelblokVoorPartij(titelblok, partij);
+        return {
+          musicxml: partij.musicxml,
+          titelblok: partijTitelblok,
+          colofon: partijTitelblok.colofon || (index === partijgegevens.length - 1 ? colofon : ''),
+        };
+      })
+      : [{ musicxml, titelblok, colofon }];
+  }
   const paginas = [];
   for (const partij of invoer) {
+    if (partij.pasSchaalAan) {
+      for (const schaal of schalen) {
+        zetVerovioOpties(tk, schaal, true);
+        tk.loadData(partij.musicxml);
+        if (eersteSysteemPast(tk.renderToSVG(1))) break;
+      }
+    }
     tk.loadData(partij.musicxml);
     const partijPaginas = tk.getPageCount();
     for (let nummer = 1; nummer <= partijPaginas; nummer += 1) {
