@@ -41,3 +41,8 @@ blijft de bron voor noten, maten en tekst die het al wel leest.
 8. Controleer op *Galop* dat `Vivace`, `Marcato` en `arr. Alan Fernie` worden gevonden.
 9. Controleer dat `st. mute` en `open` niet dubbel worden toegevoegd.
 10. Leg installatie, lokaal gebruik en de Apache 2.0-licentie vast in de documentatie.
+
+## Update 5 november 2026: eerst de ingebouwde Windows-tekstherkenning
+Windows heeft een eigen tekstherkenning (Windows.Media.Ocr), lokaal en zonder installatie. Op Galop leest die wel `Vivace`, `Marcato`, `open`, `st. mute`, `marc.` en `arr. Alan frernie`, met het vak van elk woord. Daarom gebruiken we die eerst, via `app/src/server/ocr-windows.ps1` (JSON-uitvoer met woorden en vakken). Tesseract blijft het plan voor de online versie (fase 5, Linux), achter dezelfde functie `leesBlad`.
+
+Stappen: (1) `tekstlezer.mjs` met `leesBlad` (module + test), (2) kop en tempo uit de OCR (arrangeur, Vivace), (3) woorden boven de systemen als aanwijzing bij de maat eronder, zonder dubbelingen met wat Audiveris al las.
