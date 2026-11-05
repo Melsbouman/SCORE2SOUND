@@ -49,6 +49,7 @@ export function start(app) {
     ['.', 'Maak de duur van de volgende noot gepunteerd.'],
     ['# / b', 'Kies een kruis of mol voor de volgende noot.'],
     ['Spatie', 'Voer een rust in.'],
+    ['P', 'Speel af vanaf de maat van de invoercursor of stop het afspelen.'],
     ['Backspace', 'Haal de laatst ingevoerde noot of rust weg.'],
     ['Ctrl + Z / Ctrl + Y / Ctrl + Shift + Z', 'Maak de laatste invoer ongedaan of voer die opnieuw uit.'],
     ['Esc', 'Sluit Noten invoeren.'],
