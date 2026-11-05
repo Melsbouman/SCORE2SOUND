@@ -100,3 +100,26 @@ export function zetMaatsoort(partituur, maatIndex, teller, noemer) {
   }
   return kopie;
 }
+
+export function zetToonsoort(partituur, maatIndex, kwinten, modus = 'majeur') {
+  if (!Number.isInteger(kwinten) || kwinten < -7 || kwinten > 7) {
+    throw new Error('Het aantal kwinten moet tussen -7 en 7 liggen.');
+  }
+  const kopie = structuredClone(partituur);
+  for (let partijIndex = 0; partijIndex < partituur.partijen.length; partijIndex += 1) {
+    const origineleMaten = partituur.partijen[partijIndex].maten;
+    const nieuweMaten = kopie.partijen[partijIndex].maten;
+    let begonnen = false;
+    for (let positie = 0; positie < origineleMaten.length; positie += 1) {
+      const maat = origineleMaten[positie];
+      if (!begonnen) {
+        if (maat.index !== maatIndex) continue;
+        begonnen = true;
+      } else if (JSON.stringify(maat.toonsoort) !== JSON.stringify(origineleMaten[positie - 1].toonsoort)) {
+        break;
+      }
+      nieuweMaten[positie].toonsoort = { kwinten, modus };
+    }
+  }
+  return kopie;
+}
