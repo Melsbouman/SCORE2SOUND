@@ -42,6 +42,7 @@ export function start(app) {
     ['N', 'Open of sluit Noten invoeren voor de gekozen maat.'],
     ['A tot en met G', 'Voer een noot in.'],
     ['1 tot en met 5', 'Kies zestiende, achtste, kwart, half of heel.'],
+    ['.', 'Maak de duur van de volgende noot gepunteerd.'],
     ['# / b', 'Kies een kruis of mol voor de volgende noot.'],
     ['Spatie', 'Voer een rust in.'],
     ['Backspace', 'Haal de laatst ingevoerde noot of rust weg.'],
