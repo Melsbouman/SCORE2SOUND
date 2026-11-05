@@ -26,6 +26,31 @@ function zoekInstrument(id) {
   return instrument;
 }
 
+const AFKORTINGEN = {
+  bugel: 'Bgl.',
+  trompet: 'Tr.',
+  althoorn: 'A.h.',
+  hoorn: 'Hn.',
+  bariton: 'Bar.',
+  trombone: 'Trb.',
+  tuba: 'Tba.',
+  'bes-tuba': 'B.tba.',
+  klarinet: 'Kl.',
+  piccolo: 'Picc.',
+  altsaxofoon: 'A.s.',
+  tenorsaxofoon: 'T.s.',
+  sopraansaxofoon: 'S.s.',
+  baritonsaxofoon: 'B.s.',
+  'es-kornet': 'E.k.',
+  dwarsfluit: 'Fl.',
+  hobo: 'Hob.',
+  fagot: 'Fg.',
+  timpani: 'Tmp.',
+  viool: 'Vl.',
+  altviool: 'Vla.',
+  cello: 'Vc.',
+};
+
 function maakMaat(index, maatsoort, kwinten, tempo, sleutel) {
   const duur = maatsoort.teller * TIKKEN_PER_KWART * 4 / maatsoort.noemer;
   return {
@@ -46,11 +71,11 @@ function maakMaat(index, maatsoort, kwinten, tempo, sleutel) {
   };
 }
 
-function maakPartij(id, instrument, maten) {
+function maakPartij(id, instrument, maten, nummer = null) {
   return {
     id,
-    naam: instrument.naam,
-    afkorting: '',
+    naam: nummer === null ? instrument.naam : `${instrument.naam} ${nummer}`,
+    afkorting: nummer === null ? '' : `${AFKORTINGEN[instrument.id]} ${nummer}`,
     instrument: {
       midiProgramma: instrument.midiProgramma,
       transpositie: { ...instrument.transpositie },
@@ -89,7 +114,13 @@ export function maakLeegStuk(opties = {}) {
     titel: opties.titel ?? '',
     componist: opties.componist ?? '',
     arrangeur: opties.arrangeur ?? '',
-    partijen: instrumenten.map((instrument, index) => maakPartij(`P${index + 1}`, instrument, voorbeeldMaten)),
+    partijen: instrumenten.map((instrument, index) => {
+      const aantal = instrumenten.filter((item) => item.id === instrument.id).length;
+      const nummer = aantal > 1
+        ? instrumenten.slice(0, index + 1).filter((item) => item.id === instrument.id).length
+        : null;
+      return maakPartij(`P${index + 1}`, instrument, voorbeeldMaten, nummer);
+    }),
   };
 }
 
@@ -101,9 +132,20 @@ export function voegPartijToe(partituur, instrumentId) {
     .map(Number);
   const nummer = Math.max(0, ...nummers) + 1;
   const maten = partituur.partijen[0]?.maten ?? [];
+  const naamPatroon = new RegExp(`^${instrument.naam.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?: (\\d+))?$`);
+  const gelijkePartijen = partituur.partijen.filter((partij) => naamPatroon.test(partij.naam));
+  const bestaandeNummers = gelijkePartijen
+    .map((partij) => Number(naamPatroon.exec(partij.naam)?.[1] ?? 0));
+  const instrumentNummer = gelijkePartijen.length === 0
+    ? null
+    : Math.max(gelijkePartijen.length, ...bestaandeNummers) + 1;
+  const partijen = partituur.partijen.map((partij) => {
+    if (gelijkePartijen.length !== 1 || naamPatroon.exec(partij.naam)?.[1]) return partij;
+    return { ...partij, naam: `${instrument.naam} 1`, afkorting: `${AFKORTINGEN[instrument.id]} 1` };
+  });
   return {
     ...partituur,
-    partijen: [...partituur.partijen, maakPartij(`P${nummer}`, instrument, maten)],
+    partijen: [...partijen, maakPartij(`P${nummer}`, instrument, maten, instrumentNummer)],
   };
 }
 
