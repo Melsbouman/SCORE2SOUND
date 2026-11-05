@@ -21,6 +21,49 @@ export const SJABLONEN = [
   { id: 'leeg', naam: 'Leeg', instrumenten: ['trompet'] },
 ];
 
+export const FAMILIES = [
+  {
+    id: 'koper',
+    naam: 'Koper',
+    instrumenten: ['bugel', 'es-kornet', 'trompet', 'althoorn', 'hoorn', 'bariton', 'trombone', 'tuba', 'bes-tuba'],
+  },
+  {
+    id: 'hout',
+    naam: 'Hout',
+    instrumenten: ['dwarsfluit', 'piccolo', 'hobo', 'klarinet', 'fagot', 'altsaxofoon', 'tenorsaxofoon', 'sopraansaxofoon', 'baritonsaxofoon'],
+  },
+  {
+    id: 'strijkers',
+    naam: 'Strijkers',
+    instrumenten: ['viool', 'altviool', 'cello'],
+  },
+  {
+    id: 'toetsen-slagwerk',
+    naam: 'Toetsen en slagwerk',
+    instrumenten: ['piano', 'timpani'],
+  },
+];
+
+export function combinatieKaarten() {
+  const beschrijvingen = {
+    brassband: 'Cornets, hoorns, trombones en tuba',
+    strijkkwartet: 'Twee violen, altviool en cello',
+    houtblazers: 'Fluit, hobo, klarinet en fagot',
+    leeg: 'Begin met één trompetpartij',
+  };
+  const kaarten = SJABLONEN.map((sjabloon) => ({
+    ...sjabloon,
+    beschrijving: beschrijvingen[sjabloon.id],
+    aantal: sjabloon.instrumenten.length,
+  }));
+  return [
+    ...kaarten,
+    { id: 'piano', naam: 'Piano', beschrijving: 'Een pianopartij', instrumenten: ['piano'], aantal: 1 },
+    { id: 'solo', naam: 'Solo', beschrijving: 'Een trompetpartij', instrumenten: ['trompet'], aantal: 1 },
+    { id: 'eigen', naam: 'Eigen keuze', beschrijving: 'Kies zelf je instrumenten', instrumenten: [], aantal: 0 },
+  ];
+}
+
 function zoekInstrument(id) {
   const instrument = INSTRUMENTEN.find((item) => item.id === id);
   if (!instrument) throw new Error(`Onbekend instrument: ${id}.`);
