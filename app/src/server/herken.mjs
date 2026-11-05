@@ -27,7 +27,9 @@ import { INSTRUMENTEN, instrumentBijNaam } from '../model/instrumenten.mjs';
 import { partijNaamUitKop, splitsPartijenOpKoppen } from '../model/partijnaam.mjs';
 import { herstelComponist } from '../model/titelgegevens.mjs';
 import { tempoVoorWoord } from '../model/tempotekst.mjs';
+import { kopUitOcr } from '../model/tekstlezerkop.mjs';
 import { maakLimiet } from './limiet.mjs';
+import { leesBlad } from './tekstlezer.mjs';
 
 const GELDIG_ID = /^[a-f0-9]{12}$/;
 const PAGINAS = /^\d+(-\d+)?( \d+(-\d+)?)*$/;
@@ -298,6 +300,19 @@ export function maakHerken({ map, draaier }) {
       bladen: bladen.map(({ nummer, breedte, hoogte }) => ({ nummer, breedte, hoogte })),
     };
     maakNetjes(uit.partituur, taak.naam, creditGegevens);
+    const eersteMaat = uit.partituur.partijen?.[0]?.maten?.[0];
+    const tempoBekend = eersteMaat?.tempo != null
+      || eersteMaat?.elementen?.some((element) => element.soort === 'aanwijzing' && element.type === 'tempo');
+    const ocr = await leesBlad(join(taak.uitmap, 'blad-1.png'));
+    const kop = kopUitOcr(ocr, { arrangeurBekend: Boolean(uit.partituur.arrangeur), tempoBekend });
+    if (kop.arrangeur) uit.partituur.arrangeur = kop.arrangeur;
+    if (kop.tempoWoord && eersteMaat) {
+      const tempo = tempoVoorWoord(kop.tempoWoord);
+      eersteMaat.tempo = tempo;
+      eersteMaat.elementen.push({
+        soort: 'aanwijzing', start: 0, type: 'tempo', waarde: tempo, getoond: kop.tempoWoord, zekerheid: 1,
+      });
+    }
     const paginaNamen = paginaKopregels.map((regels) => (regels ?? [])
       .map((regel) => partijNaamUitKop(herstelOcr(regel))).find(Boolean) ?? null);
     uit.partituur = splitsPartijenOpKoppen(uit.partituur, paginaNamen);
