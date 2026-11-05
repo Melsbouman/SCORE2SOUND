@@ -35,7 +35,7 @@ export function tempoUitTekst(partituur) {
           continue;
         }
 
-        const woordtempo = maatIndex === 0 ? tempowoorden.get(element.waarde.trim().toLocaleLowerCase('nl')) : null;
+        const woordtempo = tempowoorden.get(element.waarde.trim().toLocaleLowerCase('nl'));
         if (woordtempo != null && maat.tempo == null) {
           elementen.push({
             soort: 'aanwijzing',
