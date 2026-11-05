@@ -1,4 +1,9 @@
 .bladmuziek g.note:hover, .bladmuziek g.rest:hover { fill: #2f5d8a; color: #2f5d8a; }
+.bladmuziek g.invoercursor {
+  outline: 4px solid #79c96b;
+  outline-offset: 4px;
+  filter: drop-shadow(0 0 2px #79c96b);
+}
 .bladmuziek .maat-markering { fill: rgba(47, 93, 138, 0.12); }
 .bladmuziek g.measure { cursor: pointer; }
 .werkvlak { grid-template-areas: "lint" "weergave" "inloggen" "upload" "voorbeeld" "hulp"; }

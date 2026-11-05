@@ -448,7 +448,7 @@ percentage.textContent = Math.round((zoom / BEGINZOOM) * 100) + '%';
       .filter((kandidaat) => kandidaat.binnen)
       .sort((a, b) => a.afstand - b.afstand);
     if (kandidaten.length) {
-      app.meld('kies-noot', { id: kandidaten[0].id });
+      app.meld('klik-noot', { id: kandidaten[0].id });
       return;
     }
 
@@ -465,6 +465,7 @@ percentage.textContent = Math.round((zoom / BEGINZOOM) * 100) + '%';
       })
       .filter((kandidaat) => kandidaat.binnen)
       .sort((a, b) => a.oppervlakte - b.oppervlakte)[0];
+    if (!maat) return;
     if (gebeurtenis.shiftKey && gekozenMaat !== null && maat?.index !== undefined) {
       const van = Math.min(gekozenMaat, maat.index);
       const tot = Math.max(gekozenMaat, maat.index);
