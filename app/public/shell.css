@@ -26,6 +26,12 @@
 .zijbalk__recent a { display: block; padding: 4px 8px; overflow: hidden; border-radius: 7px; color: #ffffffcc; font-size: 0.78rem; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
 .zijbalk__recent a:hover { background: #ffffff18; color: var(--kleur-wit); }
 .zijbalk__recent time { display: block; color: #ffffff88; font-size: 0.7rem; }
+.zijbalk__mappen { margin: 1px 0 5px 40px; }
+.zijbalk__mappen a { display: flex; align-items: center; gap: 6px; min-width: 0; padding: 4px 8px; border-radius: 7px; color: #ffffffcc; font-size: 0.78rem; text-decoration: none; }
+.zijbalk__mappen a:hover { background: #ffffff18; color: var(--kleur-wit); }
+.zijbalk__mappen a[aria-current="page"] { background: var(--kleur-licht); color: var(--kleur-donker); font-weight: 600; }
+.zijbalk__mappen svg { width: 14px; height: 14px; }
+.zijbalk__mappen span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .zijbalk__vul { flex: 1; }
 .zijbalk__voet { display: flex; flex-wrap: wrap; gap: 5px 12px; padding: 14px 10px 0; border-top: 1px solid #ffffff55; font-size: 0.75rem; }
 .zijbalk__voet a { display: inline-flex; align-items: center; gap: 4px; color: var(--kleur-wit); text-decoration: none; opacity: 0.85; }
@@ -66,4 +72,7 @@
   .zijbalk__logo { font-size: 1rem; }
   .zijbalk__accountknop { width: 38px; padding: 7px 9px; }
   .zijbalk__item { padding: 6px 8px; }
+}
+@media (max-width: 375px) {
+  .zijbalk__mappen { display: none; }
 }
