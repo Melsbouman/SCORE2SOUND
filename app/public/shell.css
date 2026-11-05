@@ -54,8 +54,10 @@
   body:has(#speler) .werkvlak { padding-bottom: 140px; }
   .kop h1 { display: none; }
 }
-@media (max-width: 375px) {
+@media (max-width: 479px) {
   /* Gecontroleerd: bij 320, 375 en 414 px blijft de documentbreedte gelijk aan de viewport. */
-  .zijbalk { padding: 10px 12px; }
-  .zijbalk__item { padding: 8px 10px; }
+  .zijbalk { gap: 6px; padding: 8px; }
+  .zijbalk__logo { font-size: 1rem; }
+  .zijbalk__accountknop { width: 38px; padding: 7px 9px; }
+  .zijbalk__item { padding: 6px 8px; }
 }

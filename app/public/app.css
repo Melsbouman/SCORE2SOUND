@@ -479,10 +479,16 @@ select, input[type="text"], input[type="number"] { font: inherit; color: var(--k
   margin: 0;
 }
 
-@media (max-width: 375px) {
-  .werkvlak { padding: 12px; gap: 12px; }
-  .werkvlak section { padding: 18px 16px; }
-  #upload { padding: 24px 18px; }
+@media (max-width: 479px) {
+  .werkvlak { padding: 8px; gap: 8px; }
+  .werkvlak section { padding: 12px; }
+  #upload { padding: 16px 12px; }
+  #upload h2 { font-size: 1.5rem; }
+  .bladmuziek { padding: 8px; }
+  .bladmuziek__titelblok { margin-bottom: 12px; padding-bottom: 8px; }
+  .bladmuziek__titelblok h1 { font-size: 1.2rem; }
+  .bladmuziek__ondertitel { font-size: 0.95rem; }
+  .bladmuziek__details { margin-top: 8px; font-size: 0.85rem; }
   .projecten__leeg { padding: var(--ruimte-3); }
   .projecten__lege-acties .knop { width: 100%; }
 
