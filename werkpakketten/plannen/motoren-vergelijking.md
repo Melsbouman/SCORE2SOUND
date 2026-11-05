@@ -26,3 +26,18 @@ Betaalde diensten zijn niet getest (account nodig); Mels kan een pagina zelf pro
 
 ## Hoe opnieuw te draaien
 `venv-homr` en `venv-oemer` staan in de scratchpad van de vorige chat; opnieuw installeren kan met `python -m venv` en `pip install homr` of `pip install oemer` (python 3.12). oemer vraagt `onnxruntime==1.19.2` en `numpy>=2,<2.3`.
+
+## Meting met hermes/homr-vergelijk.mjs (5 november 2026)
+Het script legt homr per maat naast de app (Audiveris plus herstelketen). Eerste poging gaf nul noten door een veldnaam (`type` in plaats van `soort`, PR 1383); hieronder de cijfers daarna.
+
+| Stuk | Maten homr / app | Maten met gelijk notenaantal | Noten met gelijke toonhoogte |
+|---|---|---|---|
+| Galop | 100 / 104 | 51 | 83 |
+| Renaissance | 74 / 78 | 12 | 9 |
+
+Let op bij het lezen:
+- De vergelijking legt maat 1 naast maat 1, maat 2 naast maat 2 enzovoort. Een rust van meerdere maten (de app telt die als meerdere maten, homr als één) verschuift alles erna. Bij Galop komt het verschil na maat 14 daardoor deels uit de uitlijning (maat 15, 26 en verder staan bij de app leeg) en bij Renaissance loopt de uitlijning vanaf maat 2 mis.
+- Dit zegt dus nog niet welke motor gelijk heeft; alleen dat homr op Galop vaak hetzelfde ziet als de app (83 gelijke toonhoogtes).
+
+## Conclusie
+homr is niet duidelijk beter dan Audiveris en mist herhalingen, hokjes, letters en tekst. Voordat een koppeling zin heeft moet de vergelijking eerst de uitlijning corrigeren (maten van een meermaats-rust meetellen). Nieuw voorraadpunt: uitlijning in `homr-vergelijk.mjs` met `maatrust`-telling, daarna opnieuw meten.
