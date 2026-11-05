@@ -59,3 +59,58 @@ export function schrijfNoot(partituur, partijId, maatIndex, start, duur, toonhoo
   delete nieuweMaat.maatrust;
   return nieuw;
 }
+
+export function schrijfNootMetOverbinding(
+  partituur, partijId, maatIndex, start, duur, toonhoogte,
+) {
+  const partij = partituur.partijen.find((kandidaat) => kandidaat.id === partijId);
+  if (!partij?.maten[maatIndex]) {
+    return schrijfNoot(partituur, partijId, maatIndex, start, duur, toonhoogte);
+  }
+  const eersteMaat = partij.maten[maatIndex];
+  const eersteMaatduur = eersteMaat.maatsoort.teller * 480 * 4 / eersteMaat.maatsoort.noemer;
+  if (start + duur <= eersteMaatduur) {
+    return schrijfNoot(partituur, partijId, maatIndex, start, duur, toonhoogte);
+  }
+
+  let nieuw = partituur;
+  let huidigeMaatIndex = maatIndex;
+  let huidigeStart = start;
+  let resterendeDuur = duur;
+  let eersteDeel = true;
+
+  while (resterendeDuur > 0) {
+    const maat = partij.maten[huidigeMaatIndex];
+    if (!maat) throw new Error('Geen maat meer om in door te schrijven.');
+    const maatduur = maat.maatsoort.teller * 480 * 4 / maat.maatsoort.noemer;
+    const deelDuur = Math.min(resterendeDuur, maatduur - huidigeStart);
+    if (deelDuur <= 0) {
+      huidigeMaatIndex += 1;
+      huidigeStart = 0;
+      continue;
+    }
+    if (resterendeDuur > deelDuur && !partij.maten[huidigeMaatIndex + 1]) {
+      throw new Error('Geen maat meer om in door te schrijven.');
+    }
+
+    nieuw = schrijfNoot(
+      nieuw, partijId, huidigeMaatIndex, huidigeStart, deelDuur, toonhoogte,
+    );
+    const nieuweMaat = nieuw.partijen
+      .find((kandidaat) => kandidaat.id === partijId).maten[huidigeMaatIndex];
+    const nieuweNoot = nieuweMaat.elementen.find((element) => (
+      element.soort === 'noot' && element.start === huidigeStart && element.duur === deelDuur
+    ));
+    nieuweNoot.overbinding = {
+      begin: resterendeDuur > deelDuur,
+      eind: !eersteDeel,
+    };
+
+    resterendeDuur -= deelDuur;
+    eersteDeel = false;
+    huidigeMaatIndex += 1;
+    huidigeStart = 0;
+  }
+
+  return nieuw;
+}
