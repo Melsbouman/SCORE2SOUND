@@ -10,7 +10,27 @@ export default async function projecten(verzoek) {
   const opslag = maakOpslag(verzoek.gebruiker ? join(projectenMap, verzoek.gebruiker) : projectenMap);
 
   try {
-    if (verzoek.methode === 'GET' && !verzoek.rest) return { status: 200, body: await opslag.lijst() };
+    if (verzoek.methode === 'GET' && !verzoek.rest) {
+      const lijst = await opslag.lijst();
+      return { status: 200, body: lijst.map((project) => ({ ...project, map: project.map, labels: project.labels })) };
+    }
+    const meta = verzoek.rest.match(/^([a-f0-9]{12})\/meta$/);
+    if (verzoek.methode === 'POST' && meta) {
+      let gegevens;
+      try {
+        gegevens = JSON.parse(verzoek.body.toString());
+        if (typeof gegevens.map === 'string' && gegevens.map.trim().length > 40) {
+          throw new Error('Map mag maximaal 40 tekens lang zijn.');
+        }
+        const bijgewerkt = await opslag.zetMeta(meta[1], gegevens);
+        const { partituur, ...project } = bijgewerkt;
+        return { status: 200, body: project };
+      } catch (fout) {
+        if (fout instanceof SyntaxError) return { status: 400, body: { fout: 'De gegevens zijn geen geldige JSON.' } };
+        if (fout.message === 'Onbekend project.') throw fout;
+        return { status: 400, body: { fout: fout.message } };
+      }
+    }
     if ((verzoek.methode === 'GET' || verzoek.methode === 'DELETE') && !/^[a-f0-9]{12}$/.test(verzoek.rest)) {
       return { status: 400, body: { fout: 'Onbekend project.' } };
     }
