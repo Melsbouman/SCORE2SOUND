@@ -1,13 +1,19 @@
 export const MUZIEKTERMEN = [
   'rall.',
   'rit.',
+  'accel.',
   'dolce',
   'poco a poco',
   'a tempo',
+  'poco',
   'molto',
+  'meno',
+  'piu',
   'cresc.',
+  'decresc.',
   'dim.',
   'morendo',
+  'perdendo',
   'agitato',
   'poco agitato',
   'espressivo',
@@ -59,6 +65,12 @@ export const MUZIEKTERMEN = [
   'col legno',
   'tutti',
   'solo',
+  'soli',
+  'open',
+  'st. mute',
+  'straight mute',
+  'cup mute',
+  'harmon mute',
   'div.',
   'unis.',
   'ad lib.',
@@ -69,6 +81,17 @@ export const MUZIEKTERMEN = [
   'energico',
   'giocoso',
   'lento',
+  'sfz',
+  'fp',
+  '1.',
+  '2.',
+  'D.C.',
+  'D.S.',
+  'al fine',
+  'coda',
+  'fermata',
+  'optional cut',
+  'cut to bar',
   'meno mosso',
   'più mosso',
   'poco rit.',
@@ -112,18 +135,24 @@ function levenshtein(a, b) {
 export function herstelMuziekterm(tekst) {
   if ((/\d/.test(tekst) && /\s/.test(tekst)) || tekst.length > 25) return tekst;
   const genormaliseerd = normaliseer(tekst);
+  const aaneengeschreven = genormaliseerd.replaceAll(' ', '');
   let besteTerm = null;
   let kleinsteAfstand = Infinity;
+  let aantalBeste = 0;
 
   for (const term of MUZIEKTERMEN) {
-    const afstand = levenshtein(genormaliseerd, normaliseer(term));
+    if (tekst.trim().toLowerCase() === term.toLowerCase()) return tekst;
+    const afstand = levenshtein(aaneengeschreven, normaliseer(term).replaceAll(' ', ''));
     if (afstand < kleinsteAfstand) {
       besteTerm = term;
       kleinsteAfstand = afstand;
+      aantalBeste = 1;
+    } else if (afstand === kleinsteAfstand) {
+      aantalBeste += 1;
     }
   }
 
-  if (kleinsteAfstand <= 2 && kleinsteAfstand <= genormaliseerd.length / 3) {
+  if (aantalBeste === 1 && kleinsteAfstand < aaneengeschreven.length * 0.4) {
     return besteTerm;
   }
 
