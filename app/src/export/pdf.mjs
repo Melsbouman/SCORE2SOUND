@@ -3,6 +3,7 @@ import { dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import PDFDocument from 'pdfkit';
 import schrijfSvgNaarPdf from 'svg-to-pdfkit';
+import { titelblokVoorPartij } from '../model/titel.mjs';
 
 const verovioOpties = { footer: 'none', header: 'none' };
 
@@ -16,6 +17,40 @@ function leesColofon(musicxml) {
     .replace(/&quot;/g, '"')
     .replace(/&apos;/g, "'")
     .trim();
+}
+
+function leesTekst(xml, naam) {
+  const gevonden = xml.match(new RegExp(`<${naam}\\b[^>]*>([\\s\\S]*?)<\\/${naam}>`, 'i'));
+  if (!gevonden) return '';
+  return gevonden[1]
+    .replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .trim();
+}
+
+function regexWaarde(waarde) {
+  return waarde.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function leesPartijen(musicxml) {
+  const beschrijvingen = [...musicxml.matchAll(/<score-part\b[^>]*\bid=(?:"([^"]+)"|'([^']+)')[^>]*>[\s\S]*?<\/score-part>/gi)];
+  if (beschrijvingen.length <= 1) return [];
+  return beschrijvingen.map((gevonden) => {
+    const id = gevonden[1] || gevonden[2];
+    const idPatroon = regexWaarde(id);
+    const partij = musicxml.match(new RegExp(`<part(?=\\s|>)[^>]*\\bid=(?:"${idPatroon}"|'${idPatroon}')[^>]*>[\\s\\S]*?<\\/part>`, 'i'))?.[0];
+    const scorePart = gevonden[0];
+    const zonderAndereScorePartijen = musicxml.replace(/<score-part\b[^>]*>[\s\S]*?<\/score-part>/gi, (deel) => deel === scorePart ? deel : '');
+    return {
+      musicxml: zonderAndereScorePartijen.replace(/<part(?=\s|>)[^>]*>[\s\S]*?<\/part>/gi, (deel) => deel === partij ? deel : ''),
+      naam: leesTekst(scorePart, 'part-name'),
+      colofon: leesColofon(scorePart),
+    };
+  });
 }
 
 function voegAttribuutToe(tag, naam, waarde) {
@@ -64,7 +99,31 @@ export async function maakPdf(musicxml, { watermerk = 'SCORE2SOUND', comprimeer 
     adjustPageHeight: false,
     ...(titelblok ? { pageMarginTop: 360 } : {}),
   });
-  tk.loadData(musicxml);
+  const partijgegevens = leesPartijen(musicxml);
+  const invoer = partijgegevens.length > 0
+    ? partijgegevens.map((partij, index) => {
+      const partijTitelblok = titelblokVoorPartij(titelblok, partij);
+      return {
+        musicxml: partij.musicxml,
+        titelblok: partijTitelblok,
+        colofon: partijTitelblok.colofon || (index === partijgegevens.length - 1 ? colofon : ''),
+      };
+    })
+    : [{ musicxml, titelblok, colofon }];
+  const paginas = [];
+  for (const partij of invoer) {
+    tk.loadData(partij.musicxml);
+    const partijPaginas = tk.getPageCount();
+    for (let nummer = 1; nummer <= partijPaginas; nummer += 1) {
+      paginas.push({
+        svg: tk.renderToSVG(nummer),
+        titelblok: partij.titelblok,
+        colofon: partij.colofon,
+        eerste: nummer === 1,
+        laatste: nummer === partijPaginas,
+      });
+    }
+  }
 
   const doc = new PDFDocument({ size: 'A4', margin: 0, compress: comprimeer, info: { Title: 'SCORE2SOUND', Producer: 'SCORE2SOUND' } });
   const delen = [];
@@ -74,34 +133,35 @@ export async function maakPdf(musicxml, { watermerk = 'SCORE2SOUND', comprimeer 
     doc.on('error', mislukken);
   });
 
-  const aantal = tk.getPageCount();
+  const aantal = paginas.length;
   for (let pagina = 1; pagina <= aantal; pagina += 1) {
+    const blad = paginas[pagina - 1];
     if (pagina > 1) doc.addPage();
-    SVGtoPDF(doc, tk.renderToSVG(pagina), 0, 0, {
+    SVGtoPDF(doc, blad.svg, 0, 0, {
       width: doc.page.width,
       height: doc.page.height,
       assumePt: true,
       preserveAspectRatio: 'xMinYMin meet',
     });
-    if (pagina === 1 && titelblok) {
+    if (blad.eerste && blad.titelblok) {
       const tekst = (waarde) => waarde?.replace(/♭/g, 'b');
-      if (titelblok.titel) {
-        doc.font('Times-Bold').fontSize(20).text(tekst(titelblok.titel), 40, 40, {
+      if (blad.titelblok.titel) {
+        doc.font('Times-Bold').fontSize(20).text(tekst(blad.titelblok.titel), 40, 40, {
           width: doc.page.width - 80,
           align: 'center',
         });
       }
-      if (titelblok.partij) {
-        doc.font('Times-Roman').fontSize(11).text(tekst(titelblok.partij), 40, 80);
+      if (blad.titelblok.partij) {
+        doc.font('Times-Roman').fontSize(11).text(tekst(blad.titelblok.partij), 40, 80);
       }
-      if (titelblok.componist) {
-        doc.font('Times-Roman').fontSize(11).text(tekst(titelblok.componist), 40, 70, {
+      if (blad.titelblok.componist) {
+        doc.font('Times-Roman').fontSize(11).text(tekst(blad.titelblok.componist), 40, 70, {
           width: doc.page.width - 80,
           align: 'right',
         });
       }
-      if (titelblok.arrangeur) {
-        doc.font('Times-Roman').fontSize(11).text(`arr. ${tekst(titelblok.arrangeur)}`, 40, 84, {
+      if (blad.titelblok.arrangeur) {
+        doc.font('Times-Roman').fontSize(11).text(`arr. ${tekst(blad.titelblok.arrangeur)}`, 40, 84, {
           width: doc.page.width - 80,
           align: 'right',
         });
@@ -114,11 +174,11 @@ export async function maakPdf(musicxml, { watermerk = 'SCORE2SOUND', comprimeer 
       doc.text(watermerk, 0, doc.page.height / 2 - 40, { width: doc.page.width, align: 'center', lineBreak: false });
       doc.restore();
     }
-    if (pagina === aantal && colofon) {
+    if (blad.laatste && blad.colofon) {
       doc.save();
       doc.font('Times-Roman').fontSize(8).fillColor('#666666').fillOpacity(1);
-      doc.addContent(`% ${Buffer.from(colofon).toString('hex')}`);
-      doc.text(colofon, 0, doc.page.height - 56, { width: doc.page.width, align: 'center', lineBreak: false });
+      doc.addContent(`% ${Buffer.from(blad.colofon).toString('hex')}`);
+      doc.text(blad.colofon, 0, doc.page.height - 56, { width: doc.page.width, align: 'center', lineBreak: false });
       doc.restore();
     }
     doc.save();
