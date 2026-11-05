@@ -1,3 +1,6 @@
+import { INSTRUMENTEN } from '/src/model/instrumenten.mjs';
+import { voegPartijToe, verwijderPartij } from '/src/model/nieuw.mjs';
+
 export function start(app) {
   const vlak = document.getElementById('mixer');
 
@@ -86,11 +89,44 @@ export function start(app) {
         solo.setAttribute('aria-pressed', String(soloActief));
       });
 
-      rij.append(naam, tonenLabel, volume, dempen, solo);
+      const verwijderen = Object.assign(document.createElement('button'), {
+        type: 'button',
+        className: 'knop',
+        textContent: 'Verwijderen',
+      });
+      verwijderen.addEventListener('click', () => {
+        if (!window.confirm(`Wil je ${partij.naam} verwijderen?`)) return;
+        try {
+          app.zet({ partituur: verwijderPartij(app.stand.partituur, partij.id) });
+        } catch (fout) {
+          window.alert(fout.message);
+        }
+      });
+
+      rij.append(naam, tonenLabel, volume, dempen, solo, verwijderen);
       return rij;
     });
 
-    vlak.replaceChildren(kop, ...rijen);
+    const toevoegen = document.createElement('div');
+    const instrument = document.createElement('select');
+    instrument.setAttribute('aria-label', 'Instrument voor nieuwe partij');
+    for (const keuze of INSTRUMENTEN) {
+      const optie = document.createElement('option');
+      optie.value = keuze.id;
+      optie.textContent = keuze.naam;
+      instrument.append(optie);
+    }
+    const toevoegenKnop = Object.assign(document.createElement('button'), {
+      type: 'button',
+      className: 'knop',
+      textContent: 'Partij toevoegen',
+    });
+    toevoegenKnop.addEventListener('click', () => {
+      app.zet({ partituur: voegPartijToe(app.stand.partituur, instrument.value) });
+    });
+    toevoegen.append(instrument, toevoegenKnop);
+
+    vlak.replaceChildren(kop, ...rijen, toevoegen);
   }
 
   app.op('partituur', (partituur) => {
