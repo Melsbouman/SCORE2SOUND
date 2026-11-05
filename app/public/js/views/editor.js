@@ -13,7 +13,9 @@ import {
   keurGoed,
   keurMaatGoed,
   leegMaten,
+  voegAanwijzingToe,
 } from '/src/model/corrigeren.mjs';
+import { DYNAMIEK_SNELTOETSEN } from '/src/model/dynamiek.mjs';
 import { herstelMaatduur } from '/src/model/maatduur.mjs';
 import {
   zetFermate,
@@ -338,6 +340,19 @@ export function start(app) {
       .find((item) => item.toonhoogte)?.toonhoogte ?? null;
     gekozenMaat = invoerMaat;
     teken();
+  }
+
+  function zetDynamiekBijLaatsteInvoer(waarde) {
+    const laatsteNoot = [...ingevoerdeNoten].reverse().find((item) => item.toonhoogte);
+    if (!laatsteNoot) return;
+    pas(voegAanwijzingToe(
+      app.stand.partituur,
+      invoerPartijId,
+      laatsteNoot.maat,
+      laatsteNoot.start,
+      'dynamiek',
+      waarde,
+    ));
   }
 
   function pasAlle(bewerking) {
@@ -922,7 +937,9 @@ export function start(app) {
     if (invoermodus) {
       let afgehandeld = true;
       if (toets === 'Escape') sluitInvoermodus();
-      else if (INVOER_DUUR[toets]) {
+      else if (gebeurtenis.ctrlKey && DYNAMIEK_SNELTOETSEN[toets]) {
+        zetDynamiekBijLaatsteInvoer(DYNAMIEK_SNELTOETSEN[toets]);
+      } else if (INVOER_DUUR[toets]) {
         invoerDuur = INVOER_DUUR[toets];
         invoerGepunteerd = false;
         teken();
