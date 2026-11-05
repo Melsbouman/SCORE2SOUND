@@ -355,6 +355,23 @@ export function start(app) {
     ));
   }
 
+  function maakTrioolVanLaatsteInvoer() {
+    const laatsteNoot = [...ingevoerdeNoten].reverse().find((item) => item.toonhoogte);
+    if (!laatsteNoot) return;
+    const partij = app.stand.partituur.partijen.find((item) => item.id === invoerPartijId);
+    const elementIndex = partij?.maten[laatsteNoot.maat]?.elementen.findIndex((item) => (
+      item.soort === 'noot' && item.start === laatsteNoot.start
+      && item.toonhoogte.stap === laatsteNoot.toonhoogte.stap
+      && item.toonhoogte.alter === laatsteNoot.toonhoogte.alter
+      && item.toonhoogte.octaaf === laatsteNoot.toonhoogte.octaaf
+    ));
+    if (elementIndex === undefined || elementIndex < 0) return;
+    pas(maakTriool(
+      app.stand.partituur,
+      `n-${invoerPartijId}-${laatsteNoot.maat}-${elementIndex}`,
+    ));
+  }
+
   function pasAlle(bewerking) {
     pas(opAlle(app.stand.partituur, idsVoorBewerking(), bewerking));
   }
@@ -954,6 +971,7 @@ export function start(app) {
         invoerAlter = -1;
         teken();
       } else if (toets === ' ') voerNootIn(vorigeInvoerToon?.stap ?? 'C', true);
+      else if (toets.toLowerCase() === 't') maakTrioolVanLaatsteInvoer();
       else if (toets === 'Backspace') verwijderLaatsteInvoer();
       else if (toets === 'ArrowLeft') verplaatsInvoercursor(-1);
       else if (toets === 'ArrowRight') verplaatsInvoercursor(1);
