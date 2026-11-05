@@ -143,6 +143,14 @@ De beheerder moet deze mogelijkheid aanzetten met `SCORE2SOUND_PROEF=aan`.
 
 Kies in de zijbalk **Nieuw stuk** om met een leeg stuk te beginnen. Vul de gegevens van het stuk in en voeg daarna de partijen en noten toe.
 
+## Eigen muziek schrijven
+
+Kies **Nieuw stuk** en begin met een sjabloon. Voeg partijen toe via **Partijen bewerken**.
+
+Kies een maat en druk op N om **Noten invoeren** te openen. Voer een toon in met A tot en met G en kies met 1 tot en met 5 een zestiende, achtste, kwart, halve of hele noot. Met een punt maak je de volgende noot gepunteerd, met # of b kies je een kruis of mol, met Spatie voer je een rust in en met Backspace haal je de laatst ingevoerde noot of rust weg. Met Shift plus A tot en met G voeg je een noot aan een akkoord toe. Druk op T om van de volgende drie noten een triool te maken en gebruik Ctrl plus pijl omhoog of omlaag om het invoeroctaaf te verplaatsen.
+
+Zet met Ctrl+1 tot en met Ctrl+6 de dynamiek pp, p, mp, mf, f of ff bij de laatst geschreven noot. Voeg herhalingen en eerste en tweede hokjes toe met de knoppen voor herhalingen. Kies maten en gebruik Ctrl+C en Ctrl+V om ze te kopiëren en te plakken.
+
 ## Partijen toevoegen of weghalen
 
 Open **Partijen bewerken** om een partij toe te voegen. Kies bij een bestaande partij verwijderen om die partij weg te halen.
