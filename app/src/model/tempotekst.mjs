@@ -1,3 +1,18 @@
+const TEMPOWOORDEN = new Map([
+  ['vivace', 160],
+  ['allegro', 120],
+  ['andante', 76],
+  ['moderato', 100],
+  ['adagio', 66],
+  ['presto', 180],
+  ['largo', 50],
+  ['lento', 56],
+]);
+
+export function tempoVoorWoord(woord) {
+  return TEMPOWOORDEN.get(woord.toLocaleLowerCase('nl')) ?? null;
+}
+
 export function tempoUitTekst(partituur) {
   const nieuw = structuredClone(partituur);
   const tempowoorden = new Map([

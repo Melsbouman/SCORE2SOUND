@@ -26,6 +26,7 @@ import { vulLegeMaten, markeerFouteMaten } from '../controle/nabewerken.mjs';
 import { INSTRUMENTEN, instrumentBijNaam } from '../model/instrumenten.mjs';
 import { partijNaamUitKop, splitsPartijenOpKoppen } from '../model/partijnaam.mjs';
 import { herstelComponist } from '../model/titelgegevens.mjs';
+import { tempoVoorWoord } from '../model/tempotekst.mjs';
 import { maakLimiet } from './limiet.mjs';
 
 const GELDIG_ID = /^[a-f0-9]{12}$/;
@@ -152,11 +153,33 @@ function instrumentInKop(waarde) {
   return null;
 }
 
+const TEMPOWOORDEN = ['Vivace', 'Allegro', 'Andante', 'Moderato', 'Adagio', 'Presto', 'Largo', 'Lento'];
+
+function tempowoordInKop(waarde) {
+  const woord = waarde.trim();
+  if (!/^\p{L}+$/u.test(woord)) return null;
+  const klein = woord.toLocaleLowerCase('nl');
+  return TEMPOWOORDEN.find((tempowoord) => afstandLevenshtein(klein, tempowoord.toLocaleLowerCase('nl')) <= 1) ?? null;
+}
+
 export function maakNetjes(partituur, naam, creditWoorden) {
   if (!partituur.titel && naam) partituur.titel = basename(naam, extname(naam));
   partituur.componist = herstelComponist(partituur.componist);
   const arrangeur = creditWoorden.map((waarde) => waarde.trim().match(/^arr(?:\.|\s)\s*(.+)$/i)).find(Boolean);
   if (arrangeur) partituur.arrangeur = arrangeur[1].trim();
+  const eersteMaat = partituur.partijen?.[0]?.maten?.[0];
+  const heeftTempo = eersteMaat?.tempo != null
+    || eersteMaat?.elementen?.some((element) => element.soort === 'aanwijzing' && element.type === 'tempo');
+  if (eersteMaat && !heeftTempo) {
+    const tempowoord = creditWoorden.map(tempowoordInKop).find(Boolean);
+    if (tempowoord) {
+      const tempo = tempoVoorWoord(tempowoord);
+      eersteMaat.tempo = tempo;
+      eersteMaat.elementen.push({
+        soort: 'aanwijzing', start: 0, type: 'tempo', waarde: tempo, getoond: tempowoord, zekerheid: 1,
+      });
+    }
+  }
   partituur.partijen.forEach((partij, index) => {
     if (!partij.naam || partij.naam === 'Voice') {
       const gevonden = creditWoorden.map((waarde) => {
