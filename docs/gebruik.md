@@ -139,3 +139,27 @@ Kies op het startscherm **Probeer een scan** om één pagina te proberen.
 Over de notatie staat een watermerk en exporteren is niet mogelijk.
 De beheerder moet deze mogelijkheid aanzetten met `SCORE2SOUND_PROEF=aan`.
 
+## Een nieuw stuk beginnen
+
+Kies in de zijbalk **Nieuw stuk** om met een leeg stuk te beginnen. Vul de gegevens van het stuk in en voeg daarna de partijen en noten toe.
+
+## Partijen toevoegen of weghalen
+
+Open **Partijen bewerken** om een partij toe te voegen. Kies bij een bestaande partij verwijderen om die partij weg te halen.
+
+## Alle partijen of één partij bekijken
+
+Kies bij **Weergave** voor **Partituur** om de partijen onder elkaar te zien. Kies **Losse partij** en daarna de gewenste partij om alleen die partij te bekijken.
+
+## Nieuwe noten invoeren met het toetsenbord
+
+Druk op N om een nieuwe noot in te voeren. Kies met A tot en met G de toon en met 1 tot en met 5 de duur van de noot.
+
+## Meerdere partijen in één pdf
+
+Kies bij **Weergave** voor **Partituur** en download daarna de pdf. De zichtbare partijen komen onder elkaar in één pdf.
+
+## Oefenen met het klikspoor
+
+Zet onderaan in de speler **Metronoom** aan om tijdens het afspelen een klikspoor te horen. Met **Maten vooraf** laat je het klikspoor eerst één of twee maten aftellen.
+
