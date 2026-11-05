@@ -5,6 +5,20 @@ function maakRust(start, duur) {
   };
 }
 
+export function herstelMaatrust(partituur, partijId, maatIndex) {
+  const nieuw = structuredClone(partituur);
+  const maat = nieuw.partijen.find((kandidaat) => kandidaat.id === partijId)?.maten[maatIndex];
+  if (!maat || !maat.elementen.every((element) => element.stem === 1 && element.soort === 'rust')) {
+    return nieuw;
+  }
+
+  const maatduur = maat.maatsoort.teller * 480 * 4 / maat.maatsoort.noemer;
+  maat.elementen = [maakRust(0, maatduur)];
+  maat.elementen[0].heleMaat = true;
+  maat.maatrust = true;
+  return nieuw;
+}
+
 export function schrijfNoot(partituur, partijId, maatIndex, start, duur, toonhoogte) {
   const partij = partituur.partijen.find((kandidaat) => kandidaat.id === partijId);
   const maat = partij?.maten[maatIndex];
