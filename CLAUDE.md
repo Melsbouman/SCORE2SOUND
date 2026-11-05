@@ -5,6 +5,9 @@
 - Goedkopere modellen voeren de taken uit op eigen branches, volgens `AGENTS.md`. Claude kiest per taak wie: het Codex-programma (ChatGPT-account van Mels, label `agent-codex`) en het Copilot-programma (studentenabonnement, label `agent-copilot`) zijn de bouwers; Hermes via OpenRouter (label `agent-hermes`) doet kleine achtergrondtaken. Doet een uitvoerder niets, dan neemt de ander het over, en als laatste Hermes met het gratis model `cohere/north-mini-code:free` (altijd een gratis model, nooit een betaald; Mels wil dat). Een script (`hermes/werkpakket.sh`) doet alles rond de agent: controleren, committen, pushen, PR en labels.
 - Mels is de eigenaar en stuurt met ideeën: akkoord op elk plan, abonnementen en tegoed, inloggen en tokens, branch protection.
 
+## Bij elke nieuwe chat (eerst doen)
+Lees `werkpakketten/plannen/stand-2026-11-05.md`: daar staat wat je leest, wat je als eerste draait (hartslag, review, controle dat precies een wachtrij draait) en wat er open staat. Houd die stand bij: werk hem bij aan het eind van elke chat of nacht. De hartslag (`bash hermes/hartslag.sh`) draait niet vanzelf; draai hem bij elke start en bij elke wekker.
+
 ## Van idee naar taken
 Geeft Mels een idee, volg dan de skill `idee` (`.claude/skills/idee/SKILL.md`): begrijpen, een plan in `werkpakketten/plannen/`, akkoord van Mels, taakpakketten verdelen over Codex, Copilot en Hermes, starten met `bash hermes/werkpakketten.sh --alle`, en elke PR controleren.
 - De opzet en de keuzes staan in `hermes/ARCHITECTUUR.md`. De werkwijze, met het commando per stap, staat in `hermes/WERKWIJZE.md`. Lees die voor je taken klaarzet of PR's controleert.
