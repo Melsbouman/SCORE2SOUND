@@ -195,7 +195,7 @@ function schrijfNotations(element, markering = {}, openBogen) {
   let inhoud = '';
   if (markering.start) inhoud += leeg('tuplet', { type: 'start', number: 1, placement: 'above', bracket: 'yes' });
   if (markering.stop) inhoud += leeg('tuplet', { type: 'stop', number: 1 });
-  if (element.fermate) inhoud += leeg('fermata', { type: 'upright' });
+  if (element.fermate) inhoud += leeg('fermata', { type: element.fermateType ?? 'upright' });
   if (element.overbinding?.eind) inhoud += leeg('tied', { type: 'stop' });
   if (element.overbinding?.begin) inhoud += leeg('tied', { type: 'start' });
   if (element.legato?.eind && openBogen.length) {
