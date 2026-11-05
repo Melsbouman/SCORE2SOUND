@@ -1,6 +1,7 @@
 import { mkdir, readdir, readFile, rename, unlink, writeFile } from 'node:fs/promises';
 import { randomBytes } from 'node:crypto';
 import { join } from 'node:path';
+import { schoonMeta } from './meta.mjs';
 
 const geldigId = /^[a-f0-9]{12}$/;
 
@@ -37,7 +38,13 @@ export function maakOpslag(map) {
     );
     return projecten
       .sort((a, b) => b.bijgewerkt.localeCompare(a.bijgewerkt))
-      .map(({ id, naam, aangemaakt, bijgewerkt }) => ({ id, naam, aangemaakt, bijgewerkt }));
+      .map(({ id, naam, aangemaakt, bijgewerkt, map = null, labels = [] }) => Object.defineProperties(
+        { id, naam, aangemaakt, bijgewerkt },
+        {
+          map: { value: map, enumerable: false },
+          labels: { value: labels, enumerable: false },
+        },
+      ));
   }
 
   async function bewaar({ id, naam, partituur, versies }) {
@@ -48,9 +55,11 @@ export function maakOpslag(map) {
     const nu = new Date().toISOString();
     let aangemaakt = nu;
     let eerdereVersies = [];
+    let meta = schoonMeta({});
     if (id) {
       const eerder = await open(id);
       eerdereVersies = eerder.versies ?? [];
+      meta = schoonMeta({ map: eerder.map, labels: eerder.labels });
     }
     if (id === undefined) {
       id = randomBytes(6).toString('hex');
@@ -63,6 +72,7 @@ export function maakOpslag(map) {
       naam: String(naam ?? '').trim().slice(0, 120) || 'Naamloos',
       aangemaakt,
       bijgewerkt: nu,
+      ...meta,
       partituur,
       versies: Array.isArray(versies) ? versies : eerdereVersies,
     };
@@ -86,6 +96,28 @@ export function maakOpslag(map) {
     return lees(id);
   }
 
+  async function zetMeta(id, meta) {
+    const project = await lees(id);
+    const bijgewerkt = {
+      ...project,
+      ...schoonMeta(meta),
+      bijgewerkt: new Date().toISOString(),
+    };
+    const tijdelijkBestand = `${bestand(id)}.tmp`;
+    try {
+      await writeFile(tijdelijkBestand, `${JSON.stringify(bijgewerkt, null, 2)}\n`, 'utf8');
+      await rename(tijdelijkBestand, bestand(id));
+    } catch (fout) {
+      try {
+        await unlink(tijdelijkBestand);
+      } catch (opruimFout) {
+        if (opruimFout.code !== 'ENOENT') throw opruimFout;
+      }
+      throw fout;
+    }
+    return bijgewerkt;
+  }
+
   async function verwijder(id) {
     controleerId(id);
     try {
@@ -96,5 +128,5 @@ export function maakOpslag(map) {
     }
   }
 
-  return { lijst, bewaar, open, verwijder };
+  return { lijst, bewaar, open, zetMeta, verwijder };
 }
