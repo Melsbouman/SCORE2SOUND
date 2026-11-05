@@ -21,6 +21,7 @@ import {
   zetFermate,
   zetArticulatie,
   zetOverbinding,
+  verschuifOctaaf,
 } from '/src/model/noten-bewerken.mjs';
 import { maakTriool, maakTriooLos } from '/src/model/triolen.mjs';
 import {
@@ -353,6 +354,24 @@ export function start(app) {
       'dynamiek',
       waarde,
     ));
+  }
+
+  function verschuifLaatsteInvoerOctaaf(richting) {
+    const laatsteNoot = [...ingevoerdeNoten].reverse().find((item) => item.toonhoogte);
+    if (!laatsteNoot) return;
+    const partij = app.stand.partituur.partijen.find((item) => item.id === invoerPartijId);
+    const elementIndex = partij?.maten[laatsteNoot.maat]?.elementen.findIndex((item) => (
+      item.soort === 'noot' && item.start === laatsteNoot.start
+      && item.toonhoogte.stap === laatsteNoot.toonhoogte.stap
+      && item.toonhoogte.alter === laatsteNoot.toonhoogte.alter
+      && item.toonhoogte.octaaf === laatsteNoot.toonhoogte.octaaf
+    ));
+    if (elementIndex === undefined || elementIndex < 0) return;
+    const id = `n-${invoerPartijId}-${laatsteNoot.maat}-${elementIndex}`;
+    const nieuw = verschuifOctaaf(app.stand.partituur, id, richting);
+    laatsteNoot.toonhoogte = { ...zoekElement(nieuw, id).toonhoogte };
+    vorigeInvoerToon = laatsteNoot.toonhoogte;
+    pas(nieuw);
   }
 
   function maakTrioolVanLaatsteInvoer() {
@@ -956,6 +975,10 @@ export function start(app) {
       if (toets === 'Escape') sluitInvoermodus();
       else if (gebeurtenis.ctrlKey && DYNAMIEK_SNELTOETSEN[toets]) {
         zetDynamiekBijLaatsteInvoer(DYNAMIEK_SNELTOETSEN[toets]);
+      } else if (gebeurtenis.ctrlKey && toets === 'ArrowUp') {
+        verschuifLaatsteInvoerOctaaf(1);
+      } else if (gebeurtenis.ctrlKey && toets === 'ArrowDown') {
+        verschuifLaatsteInvoerOctaaf(-1);
       } else if (INVOER_DUUR[toets]) {
         invoerDuur = INVOER_DUUR[toets];
         invoerGepunteerd = false;
