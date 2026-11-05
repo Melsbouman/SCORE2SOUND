@@ -24,6 +24,7 @@ import { kinderen, leesXml, tekst } from '../musicxml/xml.mjs';
 import { controleerMaatduur } from '../controle/maatduur.mjs';
 import { vulLegeMaten, markeerFouteMaten } from '../controle/nabewerken.mjs';
 import { INSTRUMENTEN, instrumentBijNaam } from '../model/instrumenten.mjs';
+import { herstelInstrumentnamen } from '../model/instrumentnamen.mjs';
 import { partijNaamUitKop, splitsPartijenOpKoppen } from '../model/partijnaam.mjs';
 import { herstelComponist } from '../model/titelgegevens.mjs';
 import { tempoVoorWoord } from '../model/tempotekst.mjs';
@@ -221,6 +222,12 @@ export function maakNetjes(partituur, naam, credits) {
       }
       return;
     }
+    const instrument = instrumentBijNaam(partij.naam);
+    if (instrument) Object.assign(partij.instrument, { midiProgramma: instrument.midiProgramma, transpositie: instrument.transpositie });
+  });
+  const hersteldeNamen = herstelInstrumentnamen(partituur.partijen.map((partij) => partij.naam));
+  partituur.partijen.forEach((partij, index) => {
+    if (!/^Partij \d+$/.test(partij.naam)) partij.naam = hersteldeNamen[index];
     const instrument = instrumentBijNaam(partij.naam);
     if (instrument) Object.assign(partij.instrument, { midiProgramma: instrument.midiProgramma, transpositie: instrument.transpositie });
   });
