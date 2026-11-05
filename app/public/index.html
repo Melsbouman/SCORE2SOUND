@@ -20,14 +20,37 @@
   <div class="app">
     <nav class="zijbalk" aria-label="Hoofdmenu">
       <div class="zijbalk__logo">SCORE<span class="logo__2">2</span>SOUND</div>
-      <a class="zijbalk__nieuw" href="#nieuw">+ Nieuw stuk</a>
-      <a class="zijbalk__item" href="#upload">Inscannen</a>
-      <a class="zijbalk__item" href="#projecten">Bibliotheek</a>
-      <a class="zijbalk__item" href="#upload">Openen</a>
-      <a class="zijbalk__item" href="#weergave">Partituur</a>
+      <div class="zijbalk__account" id="account">
+        <a class="zijbalk__accountknop" href="#inloggen">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0M12 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z"/></svg>
+          <span>Inloggen</span>
+        </a>
+      </div>
+      <div class="zijbalk__navigatie">
+        <div class="zijbalk__groep">
+          <h2>Maken</h2>
+          <a class="zijbalk__item" href="#nieuw"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Nieuw stuk</span></a>
+          <a class="zijbalk__item" href="#upload"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7V4h3m10 0h3v3m0 10v3h-3M7 20H4v-3M7 12h10"/></svg><span>Inscannen</span></a>
+        </div>
+        <div class="zijbalk__groep">
+          <h2>Mijn werk</h2>
+          <a class="zijbalk__item" href="#projecten"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8v5l3 2M4 6v5h5M5.5 17a8 8 0 1 0 0-10"/></svg><span>Recent</span></a>
+          <div class="zijbalk__recent" id="recente-projecten"><span>Nog niets bewaard</span></div>
+          <a class="zijbalk__item" href="#projecten"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6l2 2h8v12H4V5Z"/></svg><span>Bibliotheek</span></a>
+        </div>
+        <div class="zijbalk__groep">
+          <h2>Huidig stuk</h2>
+          <a class="zijbalk__item" href="#weergave"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18H6V3Zm3 5h6M9 12h6M9 16h4"/></svg><span>Partituur</span></a>
+          <a class="zijbalk__item" href="#bewerken"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 20 4-1 11-11-3-3L5 16l-1 4ZM14 7l3 3"/></svg><span>Bewerken</span></a>
+          <a class="zijbalk__item" href="#export"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m-4-4 4 4 4-4M5 19h14"/></svg><span>Exporteren</span></a>
+        </div>
+      </div>
       <div class="zijbalk__vul"></div>
-      <div class="zijbalk__account" id="account"></div>
-      <div class="zijbalk__voet"><a href="voorwaarden.html">Voorwaarden en privacy</a></div>
+      <div class="zijbalk__voet">
+        <a href="voorwaarden.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l3 3v15H6V3Zm3 7h6m-6 4h6"/></svg>Voorwaarden</a>
+        <a href="voorwaarden.html#privacy"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 5 3 8 7 10 4-2 7-5 7-10V6l-7-3Z"/></svg>Privacy</a>
+        <a href="voorwaarden.html#contact"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v12H8l-4 4V5Zm4 4h8m-8 4h5"/></svg>Contact</a>
+      </div>
     </nav>
     <div class="inhoud">
       <header class="kop">

@@ -36,6 +36,7 @@ async function vraag(url, opties) {
 
 export function start(app) {
   const vlak = document.getElementById('projecten');
+  const recenteProjecten = document.getElementById('recente-projecten');
   let projecten = null;
   let status = '';
   let zoekterm = '';
@@ -45,6 +46,51 @@ export function start(app) {
   let laatstBewaardePartituur = app.stand.project
     ? JSON.stringify(app.stand.partituur)
     : null;
+
+  function tekenRecenteProjecten() {
+    if (!recenteProjecten || projecten === null) return;
+    recenteProjecten.replaceChildren();
+    const recent = [...projecten]
+      .sort((eerste, tweede) => new Date(tweede.bijgewerkt) - new Date(eerste.bijgewerkt))
+      .slice(0, 5);
+    if (recent.length === 0) {
+      const leeg = document.createElement('span');
+      leeg.textContent = 'Nog niets bewaard';
+      recenteProjecten.append(leeg);
+      return;
+    }
+    for (const project of recent) {
+      const link = document.createElement('a');
+      const datum = document.createElement('time');
+      link.href = '#projecten';
+      link.textContent = project.naam;
+      link.title = project.naam;
+      datum.dateTime = project.bijgewerkt;
+      datum.textContent = new Date(project.bijgewerkt).toLocaleDateString('nl-NL', {
+        day: 'numeric',
+        month: 'short'
+      });
+      link.append(datum);
+      link.addEventListener('click', async (gebeurtenis) => {
+        gebeurtenis.preventDefault();
+        try {
+          const geopend = await vraag(`/api/projecten/${encodeURIComponent(project.id)}`);
+          laatstBewaardePartituur = JSON.stringify(geopend.partituur);
+          app.zet({
+            partituur: geopend.partituur,
+            meldingen: controleerMaatduur(geopend.partituur),
+            project: { id: geopend.id, naam: geopend.naam },
+            versies: geopend.versies ?? []
+          });
+          window.location.hash = 'weergave';
+        } catch (fout) {
+          status = fout.message || nietBereikbaar;
+          teken();
+        }
+      });
+      recenteProjecten.append(link);
+    }
+  }
 
   async function bewaar(naam) {
     const partituur = app.stand.partituur;
@@ -65,6 +111,7 @@ export function start(app) {
   }
 
   function teken() {
+    tekenRecenteProjecten();
     const kop = document.createElement('h2');
     kop.textContent = 'Projecten';
     vlak.replaceChildren(kop);
@@ -236,6 +283,7 @@ export function start(app) {
                 method: 'DELETE'
               });
               projecten = projecten.filter(item => item.id !== project.id);
+              tekenRecenteProjecten();
               status = `Verwijderd: ${project.naam}`;
               if (app.stand.project?.id === project.id) {
                 app.zet({ project: null });
