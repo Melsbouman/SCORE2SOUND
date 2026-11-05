@@ -13,9 +13,9 @@
   overflow: hidden;
   background: var(--kleur-vlak);
   border: 0;
-  border-bottom: 1px solid var(--kleur-lijn);
-  border-radius: 0;
-  box-shadow: none;
+  border: 1px solid var(--kleur-lijn);
+  border-radius: var(--hoek);
+  box-shadow: var(--schaduw);
 }
 .lint__tabs { display: flex; max-width: 100%; gap: var(--ruimte-2); overflow-x: auto; scrollbar-width: thin; }
 .lint__tab {
@@ -29,7 +29,7 @@
   white-space: nowrap;
   cursor: pointer;
 }
-.lint__tab[aria-selected="true"] { color: var(--kleur-tekst); border-bottom-color: var(--kleur-accent); font-weight: 600; }
+.lint__tab[aria-selected="true"] { color: var(--kleur-tekst); background: #c7e3b066; border-bottom-color: var(--kleur-accent); font-weight: 600; }
 .lint__tab:focus-visible { outline: 2px solid var(--kleur-accent); outline-offset: -2px; }
 .lint__paneel {
   display: flex;
@@ -208,14 +208,14 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
 }
 .kop { position: static; box-shadow: none; }
 
-.editor-knoppenbalk { position: static; display: flex; flex-wrap: wrap; align-items: stretch; gap: 10px 16px; padding: 10px 14px; color: #0d150b; background: #ffffff; }
+.editor-knoppenbalk { position: static; display: flex; flex-wrap: wrap; align-items: stretch; gap: 10px 16px; padding: 12px 14px; color: var(--kleur-donker); background: var(--kleur-vlak); border-radius: 0 0 var(--hoek) var(--hoek); }
 .editor-knoppengroep { padding-right: 16px; border-right: 1px solid var(--kleur-lijn); }
 .editor-knoppengroep:last-child { padding-right: 0; border-right: 0; }
 .editor-knoppengroep__knoppen { flex-wrap: wrap; gap: 4px; }
-.editor-knoppenbalk button { min-width: 38px; height: 38px; padding: 0 8px; color: #0d150b; background: transparent; border: 1px solid transparent; border-radius: 6px; font-weight: 600; }
-.editor-knoppenbalk button:hover:not(:disabled) { background: #0d150b14; border-color: #0d150b33; }
+.editor-knoppenbalk button { min-width: 38px; height: 38px; padding: 0 8px; color: var(--kleur-donker); background: transparent; border: 1px solid transparent; border-radius: 10px; font-weight: 600; }
+.editor-knoppenbalk button:hover:not(:disabled) { background: #c7e3b066; border-color: var(--kleur-lijn); }
 .editor-knoppenbalk .muzieksymbool { color: #0d150b; }
-.editor-knoppenbalk button[aria-pressed="true"], .editor-knoppenbalk button.actief { color: #ffffff; background: #0d150b; box-shadow: none; }
+.editor-knoppenbalk button[aria-pressed="true"], .editor-knoppenbalk button.actief { color: var(--kleur-wit); background: var(--kleur-accent); box-shadow: none; }
 .editor-knoppenbalk button[aria-pressed="true"] .muzieksymbool, .editor-knoppenbalk button.actief .muzieksymbool { color: #ffffff; }
 .editor-knoppengroep__kop { color: #0d150b99; font-size: 0.65rem; letter-spacing: 0.05em; text-transform: uppercase; }
 @media (min-width: 900px) { .lint__paneel { max-height: none; overflow: visible; } }
@@ -300,8 +300,8 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
 }
 .aanduidingen__groep { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 6px 0; }
 .aanduidingen__kop { flex: 0 0 90px; color: #0d150b99; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; }
-.aanduidingen__knop { padding: 4px 12px; color: #0d150b; background: transparent; border: 1px solid var(--kleur-lijn); border-radius: 6px; font-size: 0.85rem; }
-.aanduidingen__knop:hover:not(:disabled) { background: #0d150b14; }
+.aanduidingen__knop { padding: 5px 13px; color: var(--kleur-donker); background: transparent; border: 1px solid var(--kleur-lijn); border-radius: 999px; font-size: 0.85rem; }
+.aanduidingen__knop:hover:not(:disabled) { background: #c7e3b066; }
 .aanduidingen__knop:disabled { opacity: 0.4; }
 #corrigeren { display: none; }
 
@@ -327,6 +327,12 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
   .lint__paneel:has(> #projecten) { grid-template-columns: minmax(0, 1fr); grid-template-areas: "open" "projecten" "titel" "export"; }
 }
 @media (max-width: 600px) { .lint__paneel:has(> #aanduidingen) { max-height: 280px; overflow-y: auto; } .aanduidingen__groep { flex-wrap: wrap; } .aanduidingen__kop { flex: 1 0 100%; } .aanduidingen__knop { padding: 6px 12px; } }
+@media (max-width: 375px) {
+  .lint__tabs { gap: 0; }
+  .lint__tab { padding-inline: 9px; }
+  .editor-knoppenbalk { padding: 10px 8px; gap: 8px; }
+  .editor-knoppengroep { max-width: 100%; padding-right: 8px; }
+}
 #speler button:focus-visible, #speler input:focus-visible, #speler select:focus-visible { outline: 2px solid var(--kleur-wit); outline-offset: 2px; }
 .zoombalk .knop:focus-visible, .aanduidingen__knop:focus-visible, .editor-knoppenbalk button:focus-visible { outline: 2px solid var(--kleur-accent); outline-offset: 2px; }
 .werkvlak > .lint { position: static; }

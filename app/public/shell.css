@@ -1,11 +1,12 @@
 .app { display: grid; grid-template-columns: 250px minmax(0, 1fr); min-height: 100vh; }
-.zijbalk { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 2px; padding: 28px 24px 20px; background: var(--kleur-zijbalk); color: var(--kleur-wit); }
+.zijbalk { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 4px; padding: 32px 24px 20px; background: linear-gradient(160deg, var(--kleur-accent) 0%, var(--kleur-zijbalk) 78%); color: var(--kleur-wit); }
 .zijbalk__logo { margin-bottom: 22px; font: 400 1.15rem/1.1 var(--letter-logo); text-transform: uppercase; }
 .zijbalk__logo .logo__2 { color: var(--kleur-licht); }
 .zijbalk__nieuw { display: block; margin-bottom: 18px; padding: 11px 16px; border-radius: 50px; background: var(--kleur-wit); color: var(--kleur-zijbalk); text-align: center; text-decoration: none; font-weight: 600; }
 .zijbalk__nieuw:hover { background: var(--kleur-achtergrond); }
-.zijbalk__item { padding: 8px 0; color: var(--kleur-wit); text-decoration: none; }
-.zijbalk__item:hover { text-decoration: underline; text-underline-offset: 4px; }
+.zijbalk__item { padding: 10px 12px; border-radius: 12px; color: var(--kleur-wit); text-decoration: none; }
+.zijbalk__item:hover { background: #c7e3b029; text-decoration: none; }
+.zijbalk__item[aria-current="page"], .zijbalk__item.actief { background: var(--kleur-licht); color: var(--kleur-donker); font-weight: 600; }
 .zijbalk__vul { flex: 1; }
 .zijbalk__voet { padding-top: 14px; border-top: 1px solid #ffffff55; font-size: 0.85rem; }
 .zijbalk__voet a { color: var(--kleur-wit); text-decoration: none; opacity: 0.85; }
@@ -14,7 +15,7 @@
 .inhoud { min-width: 0; padding-bottom: 120px; }
 @media (max-width: 900px) {
   .app { grid-template-columns: minmax(0, 1fr); }
-  .zijbalk { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 2px 22px; padding: 16px 20px; }
+  .zijbalk { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 4px 8px; padding: 16px 20px; }
   .zijbalk__logo { width: 100%; margin-bottom: 6px; }
   .zijbalk__nieuw, .zijbalk__vul, .zijbalk__voet { display: none; }
 }
@@ -33,3 +34,7 @@
 .zijbalk__account .knop:disabled { opacity: 0.5; }
 .zijbalk__account input { width: 100%; }
 @media (max-width: 900px) { .zijbalk__account { width: 100%; margin-bottom: 0; border-top: 0; } }
+@media (max-width: 375px) {
+  .zijbalk { padding: 14px 12px; }
+  .zijbalk__item { flex: 1 1 auto; padding: 9px 10px; text-align: center; }
+}
