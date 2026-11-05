@@ -1,5 +1,5 @@
 import { INSTRUMENTEN } from '/src/model/instrumenten.mjs';
-import { SJABLONEN, maakLeegStuk } from '/src/model/nieuw.mjs';
+import { SJABLONEN, maakLeegStuk, maakVoorbeeldStuk } from '/src/model/nieuw.mjs';
 
 const TOONSOORTEN = [
   [-7, 'Ces majeur'],
@@ -128,6 +128,11 @@ export function start(app) {
   knop.className = 'knop knop--hoofd';
   knop.textContent = 'Maak stuk';
 
+  const voorbeeldKnop = document.createElement('button');
+  voorbeeldKnop.type = 'button';
+  voorbeeldKnop.className = 'knop';
+  voorbeeldKnop.textContent = 'Laad voorbeeld';
+
   const status = document.createElement('p');
   status.className = 'melding--fout';
   status.setAttribute('role', 'status');
@@ -142,6 +147,7 @@ export function start(app) {
     tempoLabel,
     matenLabel,
     knop,
+    voorbeeldKnop,
     status,
   );
   vlak.replaceChildren(kop, formulier);
@@ -177,5 +183,12 @@ export function start(app) {
     } catch (fout) {
       status.textContent = fout.message;
     }
+  });
+
+  voorbeeldKnop.addEventListener('click', () => {
+    const partituur = maakVoorbeeldStuk();
+    app.zet({ partituur, meldingen: [], project: null });
+    app.meld('bewaar-project', { naam: partituur.titel });
+    window.location.hash = '#weergave';
   });
 }
