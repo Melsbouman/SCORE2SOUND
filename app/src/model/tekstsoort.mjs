@@ -25,11 +25,37 @@ function herkenningstekst(tekst) {
     .trim()
     .toLowerCase()
     .replace(/[^\p{L}\p{N}\s]/gu, "")
-    .replace(/\s+/g, " ");
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function begintMetTerm(tekst, term) {
   return tekst === term || tekst.startsWith(`${term} `);
+}
+
+function verschil(links, rechts) {
+  let vorige = Array.from({ length: rechts.length + 1 }, (_, index) => index);
+  for (let i = 1; i <= links.length; i += 1) {
+    const huidige = [i];
+    for (let j = 1; j <= rechts.length; j += 1) {
+      huidige[j] = Math.min(
+        huidige[j - 1] + 1,
+        vorige[j] + 1,
+        vorige[j - 1] + (links[i - 1] === rechts[j - 1] ? 0 : 1),
+      );
+    }
+    vorige = huidige;
+  }
+  return vorige[rechts.length];
+}
+
+export function tekstenBijnaGelijk(links, rechts) {
+  const eerste = herkenningstekst(links);
+  const tweede = herkenningstekst(rechts);
+  if (!eerste || !tweede) return false;
+  if (eerste === tweede) return true;
+  if (Math.max(eerste.length, tweede.length) < 10) return false;
+  return verschil(eerste, tweede) <= 2;
 }
 
 export function tekstSoort(tekst) {
