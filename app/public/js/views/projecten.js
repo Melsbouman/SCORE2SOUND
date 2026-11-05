@@ -44,6 +44,7 @@ export function start(app) {
   let zoekterm = '';
   let actiefLabel = '';
   let sortering = leesSortering();
+  const legeMappen = new Set();
   const verwijderTimers = new Map();
   const verwijderBevestigingen = new Set();
   let laatstBewaardePartituur = app.stand.project
@@ -187,6 +188,185 @@ export function start(app) {
     return project;
   }
 
+  function mapNamen() {
+    return [...new Set([
+      ...legeMappen,
+      ...(projecten ?? []).map(project => project.map).filter(Boolean)
+    ])].sort((eerste, tweede) => eerste.localeCompare(tweede, 'nl-NL'));
+  }
+
+  async function bewaarMeta(project, wijzigingen) {
+    const bijgewerkt = await vraag(`/api/projecten/${encodeURIComponent(project.id)}/meta`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        map: project.map ?? null,
+        labels: Array.isArray(project.labels) ? project.labels : [],
+        ...wijzigingen
+      })
+    });
+    Object.assign(project, bijgewerkt, wijzigingen);
+    if (project.map) legeMappen.delete(project.map);
+    teken();
+  }
+
+  function vraagMapNaam(naBewaren) {
+    const dialoog = document.createElement('form');
+    const label = document.createElement('label');
+    const invoer = document.createElement('input');
+    const bewaren = document.createElement('button');
+    const annuleren = document.createElement('button');
+    dialoog.className = 'bib-dialoog';
+    label.textContent = 'Naam van de map';
+    invoer.type = 'text';
+    invoer.required = true;
+    invoer.maxLength = 40;
+    bewaren.type = 'submit';
+    bewaren.className = 'knop knop--hoofd';
+    bewaren.textContent = 'Maken';
+    annuleren.type = 'button';
+    annuleren.className = 'knop';
+    annuleren.textContent = 'Annuleren';
+    annuleren.addEventListener('click', () => dialoog.remove());
+    dialoog.addEventListener('submit', async gebeurtenis => {
+      gebeurtenis.preventDefault();
+      const naam = invoer.value.trim();
+      if (!naam) return;
+      try {
+        await naBewaren(naam);
+        dialoog.remove();
+      } catch (fout) {
+        status = fout.message || nietBereikbaar;
+        teken();
+      }
+    });
+    dialoog.append(label, invoer, bewaren, annuleren);
+    vlak.append(dialoog);
+    invoer.focus();
+  }
+
+  function maakMenu(project) {
+    const menu = document.createElement('details');
+    const samenvatting = document.createElement('summary');
+    const inhoud = document.createElement('div');
+    const mapLabel = document.createElement('label');
+    const mapKeuze = document.createElement('select');
+    const labelsKop = document.createElement('span');
+    const labels = document.createElement('div');
+    const labelInvoer = document.createElement('input');
+    const hernoemen = document.createElement('button');
+    const verwijderen = document.createElement('button');
+    menu.className = 'bib-menu';
+    samenvatting.textContent = 'Menu';
+    inhoud.setAttribute('role', 'menu');
+    mapLabel.textContent = 'Verplaats naar map';
+    for (const [waarde, tekst] of [
+      ['', 'Geen map'],
+      ...mapNamen().map(naam => [naam, naam]),
+      ['__nieuw__', 'Nieuwe map']
+    ]) {
+      const optie = document.createElement('option');
+      optie.value = waarde;
+      optie.textContent = tekst;
+      mapKeuze.append(optie);
+    }
+    mapKeuze.value = project.map ?? '';
+    mapKeuze.addEventListener('change', async () => {
+      if (mapKeuze.value === '__nieuw__') {
+        vraagMapNaam(naam => bewaarMeta(project, { map: naam }));
+        return;
+      }
+      try {
+        await bewaarMeta(project, { map: mapKeuze.value || null });
+      } catch (fout) {
+        status = fout.message || nietBereikbaar;
+        teken();
+      }
+    });
+    mapLabel.append(mapKeuze);
+    labelsKop.textContent = 'Labels bewerken';
+    labels.className = 'bib-labels';
+    const tekenLabels = () => {
+      labels.replaceChildren();
+      for (const naam of Array.isArray(project.labels) ? project.labels : []) {
+        const label = document.createElement('button');
+        label.type = 'button';
+        label.className = 'bib-label';
+        label.textContent = `${naam} ×`;
+        label.addEventListener('click', async () => {
+          try {
+            await bewaarMeta(project, { labels: project.labels.filter(item => item !== naam) });
+          } catch (fout) {
+            status = fout.message || nietBereikbaar;
+            teken();
+          }
+        });
+        labels.append(label);
+      }
+    };
+    tekenLabels();
+    labelInvoer.type = 'text';
+    labelInvoer.placeholder = 'Nieuw label';
+    labelInvoer.maxLength = 24;
+    labelInvoer.disabled = (project.labels?.length ?? 0) >= 5;
+    labelInvoer.addEventListener('keydown', async gebeurtenis => {
+      if (gebeurtenis.key !== 'Enter') return;
+      gebeurtenis.preventDefault();
+      const naam = labelInvoer.value.trim();
+      const huidige = Array.isArray(project.labels) ? project.labels : [];
+      if (!naam || huidige.includes(naam) || huidige.length >= 5) return;
+      try {
+        await bewaarMeta(project, { labels: [...huidige, naam] });
+      } catch (fout) {
+        status = fout.message || nietBereikbaar;
+        teken();
+      }
+    });
+    hernoemen.type = 'button';
+    hernoemen.textContent = 'Hernoemen';
+    hernoemen.addEventListener('click', async () => {
+      const naam = window.prompt('Nieuwe naam', project.naam)?.trim();
+      if (!naam || naam === project.naam) return;
+      try {
+        await bewaarMeta(project, { naam });
+        if (app.stand.project?.id === project.id) app.zet({ project: { ...app.stand.project, naam } });
+      } catch (fout) {
+        status = fout.message || nietBereikbaar;
+        teken();
+      }
+    });
+    verwijderen.type = 'button';
+    verwijderen.textContent = verwijderBevestigingen.has(project.id) ? 'Zeker weten?' : 'Verwijderen';
+    verwijderen.addEventListener('click', async () => {
+      if (!verwijderBevestigingen.has(project.id)) {
+        verwijderBevestigingen.add(project.id);
+        verwijderTimers.set(project.id, setTimeout(() => {
+          verwijderBevestigingen.delete(project.id);
+          verwijderTimers.delete(project.id);
+          teken();
+        }, 3000));
+        teken();
+        return;
+      }
+      clearTimeout(verwijderTimers.get(project.id));
+      verwijderTimers.delete(project.id);
+      verwijderBevestigingen.delete(project.id);
+      try {
+        await vraag(`/api/projecten/${encodeURIComponent(project.id)}`, { method: 'DELETE' });
+        projecten = projecten.filter(item => item.id !== project.id);
+        status = `Verwijderd: ${project.naam}`;
+        if (app.stand.project?.id === project.id) app.zet({ project: null });
+        teken();
+      } catch (fout) {
+        status = fout.message || nietBereikbaar;
+        teken();
+      }
+    });
+    inhoud.append(mapLabel, labelsKop, labels, labelInvoer, hernoemen, verwijderen);
+    menu.append(samenvatting, inhoud);
+    return menu;
+  }
+
   function teken() {
     tekenRecenteProjecten();
     tekenBibliotheekMappen();
@@ -261,11 +441,45 @@ export function start(app) {
             });
             labels.append(label);
           }
-          kaart.append(titel, datum, labels);
+          kaart.append(titel, datum, labels, maakMenu(project));
           recenteRij.append(kaart);
         }
         vlak.append(recenteKop, recenteRij);
       }
+
+      const mappenBlok = document.createElement('div');
+      const mappenKop = document.createElement('h3');
+      const mappenRij = document.createElement('div');
+      mappenBlok.className = 'bib-mappen';
+      mappenKop.textContent = 'Mijn mappen';
+      mappenRij.className = 'bib-rij';
+      for (const naam of mapNamen()) {
+        const map = document.createElement('button');
+        const mapNaam = document.createElement('strong');
+        const aantal = document.createElement('span');
+        const stukken = projecten.filter(project => project.map === naam).length;
+        map.type = 'button';
+        map.className = 'bib-map';
+        mapNaam.textContent = naam;
+        aantal.textContent = `${stukken} ${stukken === 1 ? 'stuk' : 'stukken'}`;
+        map.append(mapNaam, aantal);
+        map.addEventListener('click', () => {
+          window.location.hash = `#bibliotheek/${encodeURIComponent(naam)}`;
+          teken();
+        });
+        mappenRij.append(map);
+      }
+      const nieuweMap = document.createElement('button');
+      nieuweMap.type = 'button';
+      nieuweMap.className = 'bib-map';
+      nieuweMap.textContent = 'Nieuwe map';
+      nieuweMap.addEventListener('click', () => vraagMapNaam(naam => {
+        legeMappen.add(naam);
+        teken();
+      }));
+      mappenRij.append(nieuweMap);
+      mappenBlok.append(mappenKop, mappenRij);
+      vlak.append(mappenBlok);
     }
 
     if (app.stand.partituur) {
@@ -314,6 +528,24 @@ export function start(app) {
 
     if (projecten !== null) {
       const actieveZoekterm = zoekterm.trim().toLocaleLowerCase('nl-NL');
+      const actieveMap = window.location.hash.startsWith('#bibliotheek/')
+        ? decodeURIComponent(window.location.hash.slice('#bibliotheek/'.length))
+        : '';
+      if (actieveMap) {
+        const mapKop = document.createElement('div');
+        const terug = document.createElement('button');
+        const naam = document.createElement('h3');
+        terug.type = 'button';
+        terug.className = 'knop';
+        terug.textContent = 'Terug';
+        terug.addEventListener('click', () => {
+          window.location.hash = '#projecten';
+          teken();
+        });
+        naam.textContent = actieveMap;
+        mapKop.append(terug, naam);
+        vlak.append(mapKop);
+      }
       const getoondeProjecten = projecten
         .filter(project => {
           const labels = Array.isArray(project.labels) ? project.labels : [];
@@ -322,7 +554,8 @@ export function start(app) {
             .join(' ')
             .toLocaleLowerCase('nl-NL');
           return (!actieveZoekterm || doorzoekbaar.includes(actieveZoekterm))
-            && (!actiefLabel || labels.includes(actiefLabel));
+            && (!actiefLabel || labels.includes(actiefLabel))
+            && (!actieveMap || project.map === actieveMap);
         })
         .sort((eerste, tweede) => {
           if (sortering === 'naam') return eerste.naam.localeCompare(tweede.naam, 'nl-NL');
@@ -383,7 +616,6 @@ export function start(app) {
         lijst.className = 'projecten__lijst';
         for (const project of getoondeProjecten) {
           const knop = document.createElement('button');
-          const verwijderKnop = document.createElement('button');
           const bijgewerkt = document.createElement('span');
           knop.type = 'button';
           knop.className = 'knop';
@@ -415,44 +647,7 @@ export function start(app) {
             }
           });
 
-          verwijderKnop.type = 'button';
-          verwijderKnop.className = 'knop';
-          verwijderKnop.textContent = verwijderBevestigingen.has(project.id)
-            ? 'Zeker weten?'
-            : 'Verwijderen';
-          verwijderKnop.addEventListener('click', async () => {
-            if (!verwijderBevestigingen.has(project.id)) {
-              verwijderBevestigingen.add(project.id);
-              verwijderTimers.set(project.id, setTimeout(() => {
-                verwijderBevestigingen.delete(project.id);
-                verwijderTimers.delete(project.id);
-                teken();
-              }, 3000));
-              teken();
-              return;
-            }
-
-            clearTimeout(verwijderTimers.get(project.id));
-            verwijderTimers.delete(project.id);
-            verwijderBevestigingen.delete(project.id);
-            verwijderKnop.disabled = true;
-            try {
-              await vraag(`/api/projecten/${encodeURIComponent(project.id)}`, {
-                method: 'DELETE'
-              });
-              projecten = projecten.filter(item => item.id !== project.id);
-              tekenRecenteProjecten();
-              status = `Verwijderd: ${project.naam}`;
-              if (app.stand.project?.id === project.id) {
-                app.zet({ project: null });
-              }
-              teken();
-            } catch (fout) {
-              status = fout.message || nietBereikbaar;
-              teken();
-            }
-          });
-          lijst.append(knop, verwijderKnop);
+          lijst.append(knop, maakMenu(project));
         }
         vlak.append(lijst);
       }
@@ -497,7 +692,7 @@ export function start(app) {
       teken();
     }
   });
-  window.addEventListener('hashchange', tekenBibliotheekMappen);
+  window.addEventListener('hashchange', teken);
   laadProjecten();
 }
 import { miniatuurSvg } from '../miniatuur.js';
