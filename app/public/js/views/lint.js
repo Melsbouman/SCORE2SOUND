@@ -1,3 +1,5 @@
+import { controleerBereik } from '/src/controle/bereik.mjs';
+
 const tabbladen = [
   { naam: 'Bestand', vlakken: ['projecten', 'titel', 'export'] },
   { naam: 'Start', vlakken: ['passage', 'tempo'] },
@@ -214,6 +216,13 @@ export function start(app) {
       teHerstellenZoom = null;
       return;
     }
+
+    app.zet({
+      meldingen: [
+        ...app.stand.meldingen.filter((melding) => melding.soort !== 'bereik'),
+        ...controleerBereik(partituur),
+      ],
+    });
 
     huidigePartituurSleutel = sleutelVoorPartituur(partituur);
     const opgeslagenZoom = leesZoomenPerPartituur()[huidigePartituurSleutel];
