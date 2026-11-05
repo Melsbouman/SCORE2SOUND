@@ -183,3 +183,6 @@ In de invoermodus (toets **N**) zet een klik op een noot of rust de cursor op di
 
 Kies bij **Nieuw stuk** eerst of je bladmuziek wilt inscannen (sleep een pdf of foto) of met een leeg blad begint. Bij een leeg blad kies je daarna voor wie je schrijft (een combinatie zoals brassband of strijkkwartet, of je eigen instrumenten) en vul je de details in.
 
+## Bibliotheek, mappen en labels
+In de **Bibliotheek** zie je je recente stukken en je eigen mappen. Geef een map zelf een naam (bijvoorbeeld Orkest of Concert 14 mei), verplaats een stuk naar een map en geef een stuk labels om het later terug te vinden; het zoekveld zoekt in titel, map en labels. Onder Ontdekken staan rechtenvrije voorbeeldstukken die je als eigen kopie kunt openen.
+
