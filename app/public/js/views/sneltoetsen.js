@@ -41,8 +41,11 @@ export function start(app) {
   const notenSchrijven = maakGroep('Noten schrijven', [
     ['N', 'Open of sluit Noten invoeren voor de gekozen maat.'],
     ['A tot en met G', 'Voer een noot in.'],
+    ['Shift + A tot en met G', 'Voeg een noot toe aan een akkoord.'],
     ['1 tot en met 5', 'Kies zestiende, achtste, kwart, half of heel.'],
+    ['T', 'Maak van de volgende drie noten een triool.'],
     ['Ctrl + 1 tot en met 6', 'Zet pp, p, mp, mf, f of ff bij de laatst geschreven noot.'],
+    ['Ctrl + ↑ / ↓', 'Verplaats het invoeroctaaf omhoog of omlaag.'],
     ['.', 'Maak de duur van de volgende noot gepunteerd.'],
     ['# / b', 'Kies een kruis of mol voor de volgende noot.'],
     ['Spatie', 'Voer een rust in.'],
