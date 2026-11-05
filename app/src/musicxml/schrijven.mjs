@@ -22,6 +22,8 @@ function duurInfo(duur) {
     if (duur === basis) return { type, punten: 0, triool: false };
     if (duur === basis * 1.5) return { type, punten: 1, triool: false };
     if (duur === basis * 1.75) return { type, punten: 2, triool: false };
+  }
+  for (const [basis, type] of types) {
     if (duur * 1.5 === basis) return { type, punten: 0, triool: true };
   }
   return { type: null, punten: 0, triool: false };
