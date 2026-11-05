@@ -1,0 +1,95 @@
+.begin {
+  --begin-donkergroen: #1c4a14;
+  --begin-groen: #2b6a1f;
+  --begin-creme: #f0ede1;
+  --begin-lichtgroen: #c7e3b0;
+  color: #0d150b;
+  background: var(--begin-creme) !important;
+  font-family: 'Poppins', system-ui, sans-serif;
+}
+
+.werkvlak > .begin {
+  padding: clamp(24px, 5vw, 64px);
+  border: 0;
+  box-shadow: none;
+}
+
+.begin__stappen {
+  display: flex;
+  justify-content: center;
+  gap: clamp(18px, 6vw, 72px);
+  margin: 0 0 3rem;
+  padding: 0;
+  list-style: none;
+}
+
+.begin__stap {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  color: #52604f;
+  font-size: .82rem;
+  font-weight: 600;
+}
+
+.begin__stapnummer {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid #2b6a1f66;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.begin__stap--actief { color: var(--begin-donkergroen); }
+.begin__stap--actief .begin__stapnummer { background: var(--begin-groen); color: #fff; }
+.begin__inhoud { max-width: 1040px; margin: 0 auto; text-align: center; }
+.begin__kop h2 { margin: .7rem 0 1rem; font: 700 clamp(2rem, 5vw, 3.6rem)/1.08 'Bodoni Moda', Georgia, serif; letter-spacing: 0; text-transform: none; }
+.begin__kop h2 em { color: var(--begin-groen); font-weight: 700; }
+.begin__label { display: inline-block; padding: .4rem .9rem; border-radius: 999px; background: var(--begin-groen); color: #fff; font-size: .72rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
+.begin__intro { max-width: 650px; margin: 0 auto 2rem; color: #3d4a39; }
+.begin__keuzekaarten { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; text-align: left; }
+.begin__hoofdkaart { min-width: 0; padding: clamp(22px, 4vw, 38px); border: 1px solid #2b6a1f66; border-radius: 22px; background: #fff; box-shadow: 0 18px 45px #1c4a1412; transition: transform .2s ease, box-shadow .2s ease; }
+.begin__hoofdkaart--knop { width: 100%; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.begin__hoofdkaart:hover { transform: translateY(-3px); box-shadow: 0 22px 50px #1c4a1422; }
+.begin__hoofdkaart h3 { margin: 1rem 0 .4rem; font: 700 1.7rem/1.15 'Bodoni Moda', Georgia, serif; }
+.begin__hoofdkaart > p { margin: 0; color: #3d4a39; }
+.begin__kaarticoon { display: grid; width: 3rem; height: 3rem; place-items: center; border-radius: 50%; background: var(--begin-lichtgroen); color: var(--begin-donkergroen); font-size: 1.6rem; }
+.begin__pill, .begin__knop { display: inline-block; padding: .75rem 1.35rem; border: 0; border-radius: 999px; font: inherit; font-weight: 600; }
+.begin__pill { margin-top: 1.5rem; background: var(--begin-groen); color: #fff; }
+.begin__upload { margin-top: 1.5rem; padding: 1.4rem !important; border: 2px dashed #2b6a1f88 !important; border-radius: 16px !important; background: #f8f7f0 !important; box-shadow: none !important; text-align: center; }
+.begin__upload p { margin: 0 auto !important; font-size: .9rem !important; }
+.begin__upload > ol, .begin__upload > label:not(.knop) { display: none; }
+.begin__upload > .knop { margin-top: 1rem; border-radius: 999px; }
+.begin__upload.sleept { background: var(--begin-lichtgroen) !important; outline: 0 !important; }
+.begin__voorbeeld { margin: 1.6rem auto 0; border: 0; background: transparent; color: var(--begin-groen); font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: .25em; cursor: pointer; }
+.begin__combinaties { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; text-align: left; }
+.begin__combinatie { min-width: 0; padding: 1.25rem; border: 1px solid #2b6a1f66; border-radius: 16px; background: #fff; color: inherit; font: inherit; text-align: left; cursor: pointer; transition: background-color .2s ease, transform .2s ease; }
+.begin__combinatie:hover { transform: translateY(-2px); background: #f8fbf4; }
+.begin__combinatie--gekozen { background: var(--begin-groen); color: #fff; }
+.begin__combinatie strong, .begin__combinatie span { display: block; }
+.begin__combinatie strong { font-size: 1rem; }
+.begin__combinatie span { margin-top: .3rem; font-size: .84rem; opacity: .82; }
+.begin__families { margin-top: 2rem; text-align: left; }
+.begin__families[hidden] { display: none; }
+.begin__familie { margin: 0 0 1.5rem; padding: 0; border: 0; }
+.begin__familie legend { margin-bottom: .7rem; font: 700 1.25rem 'Bodoni Moda', Georgia, serif; }
+.begin__instrumenten { display: flex; flex-wrap: wrap; gap: .6rem; }
+.begin__instrument { padding: .65rem 1rem; border: 1px solid #2b6a1f66; border-radius: 12px; background: #fff; color: inherit; font: inherit; cursor: pointer; }
+.begin__instrument:hover { background: #edf4e8; }
+.begin__instrument--gekozen { background: var(--begin-groen); color: #fff; }
+.begin__acties { display: flex; justify-content: center; gap: .8rem; margin-top: 2rem; }
+.begin__knop { cursor: pointer; }
+.begin__knop--hoofd { background: var(--begin-groen); color: #fff; }
+.begin__knop--hoofd:hover { background: var(--begin-donkergroen); }
+.begin__knop--licht { border: 2px solid var(--begin-groen); background: transparent; color: var(--begin-groen); }
+.begin__knop--licht:hover { background: var(--begin-groen); color: #fff; }
+.begin__knop:disabled { cursor: not-allowed; opacity: .42; }
+.begin__plaatshouder { min-height: 15rem; padding-top: 2rem; }
+
+@media (max-width: 760px) {
+  .begin__stappen { gap: .75rem; }
+  .begin__stap { flex-direction: column; gap: .25rem; font-size: .7rem; }
+  .begin__keuzekaarten, .begin__combinaties { grid-template-columns: 1fr; }
+}

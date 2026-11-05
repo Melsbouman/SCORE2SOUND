@@ -10,7 +10,7 @@ import * as mixer from './views/mixer.js';
 import * as bewerken from './views/bewerken.js';
 import * as exporteren from './views/export.js';
 import * as projecten from './views/projecten.js';
-import * as nieuw from './views/nieuw.js';
+import * as begin from './views/begin.js';
 import * as titel from './views/titel.js';
 import * as corrigeren from './views/corrigeren.js';
 import * as onzeker from './views/onzeker.js';
@@ -61,7 +61,7 @@ window.addEventListener('error', toonAlgemeneFoutmelding);
 window.addEventListener('unhandledrejection', toonAlgemeneFoutmelding);
 
 const app = maakApp();
-const schermen = { inloggen, upload, nieuw, voorbeeld, editor, weergave, lint, slepen, speler, meldingen, mixer, bewerken, exporteren, projecten, titel, corrigeren, onzeker, aanduidingen, versies, sneltoetsen };
+const schermen = { inloggen, upload, begin, voorbeeld, editor, weergave, lint, slepen, speler, meldingen, mixer, bewerken, exporteren, projecten, titel, corrigeren, onzeker, aanduidingen, versies, sneltoetsen };
 
 for (const [naam, scherm] of Object.entries(schermen)) {
   try {
