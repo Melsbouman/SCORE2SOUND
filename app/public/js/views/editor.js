@@ -26,6 +26,7 @@ import {
   plakMaten,
   verwijderMaat,
   zetMaatsoort,
+  zetHerhaling,
   zetSleutel,
   zetToonsoort,
 } from '/src/model/maten-bewerken.mjs';
@@ -694,6 +695,24 @@ export function start(app) {
         pas(zetToonsoort(app.stand.partituur, gekozenMaat, Number(toonsoortMenu.value)));
       });
       maatGroep.push(toonsoortMenu);
+      const herhaling = bronMaat?.herhaling;
+      const voltaNummers = bronMaat?.volta?.nummers ?? [];
+      maatGroep.push(maakTekstKnop('Herhaling begin', () => {
+        pas(zetHerhaling(app.stand.partituur, gekozenMaat, 'begin', !herhaling?.begin));
+      }));
+      maatGroep.at(-1).setAttribute('aria-pressed', String(Boolean(herhaling?.begin)));
+      maatGroep.push(maakTekstKnop('Herhaling eind', () => {
+        pas(zetHerhaling(app.stand.partituur, gekozenMaat, 'eind', !herhaling?.eind));
+      }));
+      maatGroep.at(-1).setAttribute('aria-pressed', String(Boolean(herhaling?.eind)));
+      maatGroep.push(maakTekstKnop('Hokje 1', () => {
+        pas(zetHerhaling(app.stand.partituur, gekozenMaat, 'volta1', !voltaNummers.includes(1)));
+      }));
+      maatGroep.at(-1).setAttribute('aria-pressed', String(voltaNummers.includes(1)));
+      maatGroep.push(maakTekstKnop('Hokje 2', () => {
+        pas(zetHerhaling(app.stand.partituur, gekozenMaat, 'volta2', !voltaNummers.includes(2)));
+      }));
+      maatGroep.at(-1).setAttribute('aria-pressed', String(voltaNummers.includes(2)));
       maatGroep.push(maakTekstKnop('Maat invoegen', () => {
         pas(voegMaatToe(app.stand.partituur, gekozenMaat));
         app.meld('kies-maat', { maat: gekozenMaat + 1 });
