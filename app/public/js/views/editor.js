@@ -26,6 +26,7 @@ import {
   voegMaatToe,
   verwijderMaat,
   zetMaatsoort,
+  zetSleutel,
   zetToonsoort,
 } from '/src/model/maten-bewerken.mjs';
 import { opAlle, verwijderAlle } from '/src/model/meerdere.mjs';
@@ -497,6 +498,31 @@ export function start(app) {
         pas(zetMaatsoort(app.stand.partituur, gekozenMaat, teller, noemer));
       });
       maatGroep.push(maatsoortMenu);
+      const sleutelMenu = document.createElement('select');
+      sleutelMenu.className = 'knop editor__knop';
+      sleutelMenu.setAttribute('aria-label', 'Sleutel vanaf de gekozen maat');
+      const sleutels = [
+        ['G/2', 'Viool G2'],
+        ['F/4', 'Bas F4'],
+        ['C/3', 'Alt C3'],
+        ['C/4', 'Tenor C4'],
+      ];
+      for (const [waarde, label] of sleutels) {
+        const optie = document.createElement('option');
+        optie.value = waarde;
+        optie.textContent = label;
+        sleutelMenu.append(optie);
+      }
+      const bronPartij = app.stand.partituur.partijen
+        .find((partij) => partij.maten.some((maat) => maat.index === gekozenMaat));
+      const huidigeSleutel = bronPartij ? geldendeSleutel(bronPartij, gekozenMaat) : null;
+      sleutelMenu.value = `${huidigeSleutel?.teken ?? 'G'}/${huidigeSleutel?.lijn ?? 2}`;
+      sleutelMenu.disabled = !bronPartij;
+      sleutelMenu.addEventListener('change', () => {
+        const [teken, lijn] = sleutelMenu.value.split('/');
+        pas(zetSleutel(app.stand.partituur, bronPartij.id, gekozenMaat, teken, Number(lijn)));
+      });
+      maatGroep.push(sleutelMenu);
       const toonsoortMenu = document.createElement('select');
       toonsoortMenu.className = 'knop editor__knop';
       toonsoortMenu.setAttribute('aria-label', 'Toonsoort vanaf de gekozen maat');
