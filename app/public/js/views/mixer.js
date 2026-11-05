@@ -40,7 +40,14 @@ export function start(app) {
       tonen.addEventListener('change', () => {
         const verborgen = new Set(app.stand.verborgen ?? []);
         if (tonen.checked) verborgen.delete(partij.id);
-        else verborgen.add(partij.id);
+        else {
+          const zichtbarePartijen = partituur.partijen.filter(({ id }) => !verborgen.has(id));
+          if (zichtbarePartijen.length === 1) {
+            tonen.checked = true;
+            return;
+          }
+          verborgen.add(partij.id);
+        }
         app.zet({ verborgen: [...verborgen] });
       });
       tonenLabel.append(tonen, document.createTextNode('Tonen in de notatie'));

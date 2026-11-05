@@ -528,7 +528,7 @@ percentage.textContent = Math.round((zoom / BEGINZOOM) * 100) + '%';
       const lossePartij = soortKeuze.value === 'partij';
       const verberg = lossePartij
         ? partituur.partijen.filter((partij) => partij.id !== partijKeuze.value).map((partij) => partij.id)
-        : [];
+        : app.stand.verborgen ?? [];
       await teken(await naarMusicXML(partituur, verberg, !lossePartij && partituur.partijen.length > 1), { meteen: true });
     } catch (fout) {
       console.error(fout);
