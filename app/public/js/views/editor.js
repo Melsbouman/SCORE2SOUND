@@ -176,6 +176,85 @@ export function start(app) {
     return maat.maatsoort.teller * 1920 / maat.maatsoort.noemer;
   }
 
+  function invoerElementen(partij) {
+    return partij.maten.flatMap((maat, maatIndex) => maat.elementen
+      .map((element, elementIndex) => ({ element, maatIndex, elementIndex }))
+      .filter(({ element }) => element.soort === 'noot' || element.soort === 'rust'));
+  }
+
+  function invoercursorId(gebruikLaatste = false) {
+    const partij = app.stand.partituur?.partijen.find((item) => item.id === invoerPartijId);
+    if (!partij) return null;
+    const elementen = invoerElementen(partij);
+    const huidig = elementen.find(({ element, maatIndex }) => (
+      maatIndex === invoerMaat && element.start === invoerStart
+    ));
+    const zichtbaar = huidig ?? (gebruikLaatste
+      ? [...elementen].reverse().find(({ maatIndex }) => maatIndex <= invoerMaat)
+      : null);
+    return zichtbaar ? `n-${partij.id}-${zichtbaar.maatIndex}-${zichtbaar.elementIndex}` : null;
+  }
+
+  function verplaatsInvoercursor(richting) {
+    const partij = app.stand.partituur.partijen.find((item) => item.id === invoerPartijId);
+    const elementen = invoerElementen(partij);
+    const huidigeIndex = elementen.findIndex(({ element, maatIndex }) => (
+      maatIndex === invoerMaat && element.start === invoerStart
+    ));
+    let doel;
+    if (richting < 0) {
+      doel = huidigeIndex >= 0
+        ? elementen[huidigeIndex - 1]
+        : [...elementen].reverse().find(({ element, maatIndex }) => (
+          maatIndex < invoerMaat || (maatIndex === invoerMaat && element.start < invoerStart)
+        ));
+    } else if (huidigeIndex >= 0 && huidigeIndex < elementen.length - 1) {
+      doel = elementen[huidigeIndex + 1];
+    } else if (huidigeIndex < 0) {
+      doel = elementen.find(({ element, maatIndex }) => (
+        maatIndex > invoerMaat || (maatIndex === invoerMaat && element.start > invoerStart)
+      ));
+    }
+    if (doel) {
+      invoerMaat = doel.maatIndex;
+      invoerStart = doel.element.start;
+    } else if (richting > 0) {
+      invoerMaat = partij.maten.length - 1;
+      invoerStart = maatduur(partij, invoerMaat);
+    }
+    gekozenMaat = invoerMaat;
+    teken();
+  }
+
+  function verplaatsInvoercursorNaarPartij(richting) {
+    const partijen = app.stand.partituur.partijen;
+    const huidigeIndex = partijen.findIndex((partij) => partij.id === invoerPartijId);
+    const huidigePartij = partijen[huidigeIndex];
+    const partij = partijen[huidigeIndex + richting];
+    if (!partij?.maten[invoerMaat]) return;
+    const stondAanEinde = invoerStart === maatduur(huidigePartij, invoerMaat);
+    invoerPartijId = partij.id;
+    const elementen = invoerElementen(partij).filter(({ maatIndex }) => maatIndex === invoerMaat);
+    const doel = elementen.find(({ element }) => element.start >= invoerStart) ?? elementen.at(-1);
+    invoerStart = stondAanEinde
+      ? maatduur(partij, invoerMaat)
+      : doel?.element.start ?? Math.min(invoerStart, maatduur(partij, invoerMaat));
+    teken();
+  }
+
+  function openNootOnderInvoercursor() {
+    const id = invoercursorId();
+    if (!id) return;
+    const element = zoekElement(app.stand.partituur, id);
+    if (element?.soort !== 'noot') return;
+    invoermodus = false;
+    invoerPartijId = null;
+    invoerMaat = null;
+    invoerStart = 0;
+    ingevoerdeNoten.length = 0;
+    app.meld('kies-noot', { id });
+  }
+
   function schuifInvoercursorVooruit() {
     const partij = app.stand.partituur.partijen.find((item) => item.id === invoerPartijId);
     const einde = invoerStart + invoerDuur;
@@ -187,7 +266,7 @@ export function start(app) {
       invoerStart = 0;
       app.meld('kies-maat', { maat: invoerMaat });
     } else {
-      invoerStart = Math.min(invoerStart, Math.max(0, duur - invoerDuur));
+      invoerStart = duur;
     }
   }
 
@@ -309,9 +388,15 @@ export function start(app) {
   function markeerSelectie() {
     for (const element of document.querySelectorAll('g.note.gekozen, g.rest.gekozen, g.mRest.gekozen')) {
       element.classList.remove('gekozen');
+      element.removeAttribute('aria-current');
     }
     for (const id of gekozenIds) {
       document.getElementById(id)?.classList.add('gekozen');
+    }
+    if (invoermodus) {
+      const cursor = document.getElementById(invoercursorId(true));
+      cursor?.classList.add('gekozen');
+      cursor?.setAttribute('aria-current', 'true');
     }
   }
 
@@ -655,9 +740,10 @@ export function start(app) {
 
     const status = document.createElement('span');
     const aantalGekozen = gekozenIds.length;
-    status.className = `editor__status${aantalGekozen ? ' editor__status--gekozen' : ''}`;
+    status.className = `editor__status${aantalGekozen || invoermodus ? ' editor__status--gekozen' : ''}`;
+    const invoerPartij = partituur.partijen.find((partij) => partij.id === invoerPartijId);
     status.textContent = invoermodus
-      ? `Noten invoeren: maat ${invoerMaat + 1}, tik ${invoerStart}; duur ${invoerDuur}${invoerAlter === 1 ? ', kruis' : invoerAlter === -1 ? ', mol' : ''}`
+      ? `Invoercursor: ${invoerPartij?.naam ?? 'partij'}, maat ${invoerMaat + 1}, tik ${invoerStart}; duur ${invoerDuur}${invoerAlter === 1 ? ', kruis' : invoerAlter === -1 ? ', mol' : ''}`
       : aantalGekozen > 1
       ? `${aantalGekozen} noten gekozen`
       : aantalGekozen === 1 ? 'Noot gekozen' : 'Geen noot gekozen';
@@ -796,6 +882,11 @@ export function start(app) {
         teken();
       } else if (toets === ' ') voerNootIn(vorigeInvoerToon?.stap ?? 'C', true);
       else if (toets === 'Backspace') verwijderLaatsteInvoer();
+      else if (toets === 'ArrowLeft') verplaatsInvoercursor(-1);
+      else if (toets === 'ArrowRight') verplaatsInvoercursor(1);
+      else if (toets === 'ArrowUp') verplaatsInvoercursorNaarPartij(-1);
+      else if (toets === 'ArrowDown') verplaatsInvoercursorNaarPartij(1);
+      else if (toets === 'Enter') openNootOnderInvoercursor();
       else if (['a', 'b', 'c', 'd', 'e', 'f', 'g'].includes(toets.toLowerCase())) {
         voerNootIn(toets.toUpperCase());
       } else afgehandeld = false;
