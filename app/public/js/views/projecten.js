@@ -1,4 +1,5 @@
 import { controleerMaatduur } from '/src/controle/maatduur.mjs';
+import { voorbeeldStukken } from '/src/model/voorbeeldstukken.mjs';
 
 const nietBereikbaar = 'De server is niet bereikbaar. Probeer het opnieuw.';
 const sorteringSleutel = 'score2sound-projecten-sortering';
@@ -47,6 +48,47 @@ export function start(app) {
   let laatstBewaardePartituur = app.stand.project
     ? JSON.stringify(app.stand.partituur)
     : null;
+
+  function tekenOntdekken() {
+    if (!recenteProjecten) return;
+    let ontdekken = document.getElementById('ontdekken');
+    if (!ontdekken) {
+      ontdekken = document.createElement('div');
+      ontdekken.id = 'ontdekken';
+      recenteProjecten.after(ontdekken);
+    }
+    ontdekken.replaceChildren();
+
+    const kop = document.createElement('h3');
+    const rij = document.createElement('div');
+    kop.textContent = 'Ontdekken';
+    rij.className = 'projecten__lijst';
+    for (const voorbeeld of voorbeeldStukken()) {
+      const kaart = document.createElement('button');
+      const titel = document.createElement('strong');
+      const componist = document.createElement('span');
+      const rechten = document.createElement('small');
+      kaart.type = 'button';
+      kaart.className = 'knop';
+      titel.textContent = voorbeeld.titel;
+      componist.textContent = voorbeeld.componist;
+      rechten.textContent = 'Rechtenvrij';
+      kaart.append(titel, componist, rechten);
+      kaart.addEventListener('click', () => {
+        const partituur = structuredClone(voorbeeld.stuk);
+        laatstBewaardePartituur = null;
+        app.zet({
+          partituur,
+          meldingen: controleerMaatduur(partituur),
+          project: null,
+          versies: [],
+        });
+        window.location.hash = '#weergave';
+      });
+      rij.append(kaart);
+    }
+    ontdekken.append(kop, rij);
+  }
 
   function tekenBibliotheekMappen() {
     if (!bibliotheekMappen || projecten === null) return;
@@ -364,6 +406,7 @@ export function start(app) {
   }
 
   teken();
+  tekenOntdekken();
   setInterval(async () => {
     if (!app.stand.project || !app.stand.partituur) return;
     if (JSON.stringify(app.stand.partituur) === laatstBewaardePartituur) return;
