@@ -86,10 +86,33 @@
 .begin__knop--licht { border: 2px solid var(--begin-groen); background: transparent; color: var(--begin-groen); }
 .begin__knop--licht:hover { background: var(--begin-groen); color: #fff; }
 .begin__knop:disabled { cursor: not-allowed; opacity: .42; }
-.begin__plaatshouder { min-height: 15rem; padding-top: 2rem; }
+.begin__details { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(260px, .65fr); gap: 2rem; align-items: start; text-align: left; }
+.begin__formulier { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
+.begin__veld { display: flex; min-width: 0; flex-direction: column; gap: .5rem; margin: 0; padding: 0; border: 0; }
+.begin__veldlabel { color: var(--begin-donkergroen); font-size: .84rem; font-weight: 700; }
+.begin__veld input, .begin__veld select { width: 100%; min-width: 0; padding: .8rem .9rem; border: 1px solid #2b6a1f66; border-radius: 12px; background: #fff; color: inherit; font: inherit; }
+.begin__keuzeveld { grid-column: 1 / -1; }
+.begin__maatsoorten { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: .5rem; }
+.begin__maatsoort { padding: .8rem .4rem; border: 1px solid #2b6a1f66; border-radius: 12px; background: #fff; color: inherit; font: inherit; font-weight: 600; cursor: pointer; }
+.begin__maatsoort:hover { background: #edf4e8; }
+.begin__maatsoort--gekozen { background: var(--begin-groen); color: #fff; }
+.begin__getalregel { display: grid; grid-template-columns: 2.8rem minmax(0, 1fr) 2.8rem; }
+.begin__getalregel input { border-radius: 0; text-align: center; }
+.begin__getalknop { border: 1px solid #2b6a1f66; background: var(--begin-lichtgroen); color: var(--begin-donkergroen); font: inherit; font-size: 1.2rem; font-weight: 700; line-height: 1; cursor: pointer; }
+.begin__getalknop:first-child { border-radius: 12px 0 0 12px; }
+.begin__getalknop:last-child { border-radius: 0 12px 12px 0; }
+.begin__veldfout { min-height: 1.25em; margin: 0; color: #9d241f; font-size: .8rem; }
+.begin__samenvatting { padding: 1.6rem; border-radius: 20px; background: var(--begin-donkergroen); color: #fff; box-shadow: 0 18px 45px #1c4a1422; }
+.begin__samenvatting .begin__label { background: var(--begin-lichtgroen); color: var(--begin-donkergroen); }
+.begin__samenvatting h3 { margin: 1rem 0 1.4rem; font: 700 2rem/1.1 'Bodoni Moda', Georgia, serif; }
+.begin__samenvatting dl { margin: 0; }
+.begin__samenvatting dt { margin-top: .9rem; color: var(--begin-lichtgroen); font-size: .75rem; font-weight: 600; text-transform: uppercase; }
+.begin__samenvatting dd { margin: .2rem 0 0; overflow-wrap: anywhere; }
+.begin__acties--details { grid-column: 1 / -1; justify-content: flex-start; }
 
 @media (max-width: 760px) {
   .begin__stappen { gap: .75rem; }
   .begin__stap { flex-direction: column; gap: .25rem; font-size: .7rem; }
-  .begin__keuzekaarten, .begin__combinaties { grid-template-columns: 1fr; }
+  .begin__keuzekaarten, .begin__combinaties, .begin__details, .begin__formulier { grid-template-columns: 1fr; }
+  .begin__maatsoorten { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
