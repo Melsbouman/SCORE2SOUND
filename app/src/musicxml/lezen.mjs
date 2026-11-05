@@ -187,6 +187,8 @@ function leesNoot(knoop, start, duur, akkoord, stand, schuinVoorslag = null) {
   const zekerheid = duur.exact ? 1 : 0.5;
   const rust = kind(knoop, 'rest');
   const { balk, ...details } = leesDetails(knoop);
+  const fermate = kinderen(knoop, 'notations').map((notaties) => kind(notaties, 'fermata')).find(Boolean);
+  if (fermate?.attr.type) details.fermateType = fermate.attr.type;
   if (rust) {
     return { soort: 'rust', ...gemeen, duur: duur.tikken || maatLengte(stand.maatsoort), heleMaat: rust.attr.measure === 'yes', zekerheid, ...details };
   }
