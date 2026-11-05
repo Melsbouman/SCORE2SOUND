@@ -54,6 +54,7 @@ export function start(app) {
   kop.textContent = 'Nieuw stuk';
 
   const formulier = document.createElement('form');
+  formulier.noValidate = true;
   const titel = maakTekstveld('titel', 'Titel');
   const componist = maakTekstveld('componist', 'Componist');
 
@@ -103,7 +104,7 @@ export function start(app) {
   tempo.id = 'nieuw-tempo';
   tempo.name = 'tempo';
   tempo.type = 'number';
-  tempo.min = '20';
+  tempo.min = '30';
   tempo.max = '300';
   tempo.value = '100';
   tempo.required = true;
@@ -117,6 +118,7 @@ export function start(app) {
   aantalMaten.name = 'aantalMaten';
   aantalMaten.type = 'number';
   aantalMaten.min = '1';
+  aantalMaten.max = '400';
   aantalMaten.value = '8';
   aantalMaten.required = true;
   matenLabel.htmlFor = aantalMaten.id;
@@ -135,7 +137,7 @@ export function start(app) {
 
   const status = document.createElement('p');
   status.className = 'melding--fout';
-  status.setAttribute('role', 'status');
+  status.setAttribute('role', 'alert');
 
   formulier.append(
     titel.label,
