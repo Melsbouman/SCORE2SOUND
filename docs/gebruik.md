@@ -175,3 +175,7 @@ Zet onderaan in de speler **Metronoom** aan om tijdens het afspelen een klikspoo
 
 Met de knoppen **Inzoomen** en **Uitzoomen** boven de partituur maak je de notatie groter of kleiner, tussen 40 en 160 procent. De keuze blijft bewaard zolang je het tabblad open houdt.
 
+## Cursor en afspelen bij het noten invoeren
+
+In de invoermodus (toets **N**) zet een klik op een noot of rust de cursor op die plek. Met **P** speel je af vanaf de maat van de cursor; nogmaals **P** of **Esc** stopt het afspelen.
+
