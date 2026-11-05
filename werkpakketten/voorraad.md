@@ -88,3 +88,9 @@ Gedaan met `VERGELIJK_UIT=<json> bash hermes/echte-controle.sh <pdf> 1`, daarna 
 
 - [ ] Koppelen aan het origineel: per niet gekoppelde noot de reden melden (geen kop in de maat, andere toonhoogte, al gekoppeld) bij Meditation en Distant Land; eerst uitzoeken in welk bestand de koppeling (plek) wordt gemaakt, het stond niet in verdacht.mjs (nacht 4 op 5 november).
 - [ ] homr-vergelijk: de uitlijning corrigeren voor meermaats-rusten (app telt ze als meerdere maten, homr als een) en daarna opnieuw meten op Galop en Renaissance.
+- [ ] Herkenning: bij Distant Land en African Symphony de reden per niet gekoppelde noot melden (zoek de tekst 'konden niet aan het origineel worden gekoppeld' in hermes/echte-controle.sh).
+
+## Nacht 4 op 5 november: overgebleven punten
+- [ ] Maat 15, 31 en 40 bij Galop duren 1,5 kwart in plaats van 2 (kleine noot niet gelezen of kwart i.p.v. achtste).
+- [ ] Het scherm Nieuw stuk, partijen toevoegen en noten invoeren in de browser doorlopen met een testaccount en op 375 px (Claude of Mels).
+- [ ] Tesseract als tweede tekstlezer (plan: werkpakketten/plannen/tekstlezer-tesseract.md); akkoord Mels voor de installatie.
