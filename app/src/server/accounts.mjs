@@ -13,6 +13,10 @@ const SESSIEDUUR = 30 * 24 * 60 * 60 * 1000;
 const SESSIEOPRUIMPERIODE = 60 * 60 * 1000;
 const POGINGSPERIODE = 15 * 60 * 1000;
 const MAX_POGINGEN = 5;
+const STANDAARD_PROFIEL = {
+  naam: '',
+  avatar: { soort: 'emoji', waarde: '🎵' },
+};
 
 function normaalEmail(email) {
   return typeof email === 'string' ? email.trim().toLowerCase() : '';
@@ -139,6 +143,7 @@ export function maakAccounts({ map, codes, nu = Date.now }) {
     const gebruiker = {
       id,
       email: adres,
+      profiel: STANDAARD_PROFIEL,
       wachtwoordHash: await wachtwoordHash(wachtwoord, zout),
       zout,
       code,
@@ -181,7 +186,7 @@ export function maakAccounts({ map, codes, nu = Date.now }) {
     return token;
   }
 
-  async function gebruikerVan(token) {
+  async function gebruikerVan(token, metProfiel = false) {
     if (typeof token !== 'string') return null;
     const hash = tokenHash(token);
     let sessie;
@@ -197,7 +202,35 @@ export function maakAccounts({ map, codes, nu = Date.now }) {
       return null;
     }
     const gebruiker = (await gebruikers()).find((item) => item.id === sessie.gebruikerId);
-    return gebruiker ? { id: gebruiker.id, email: gebruiker.email } : null;
+    if (!gebruiker) return null;
+    const account = { id: gebruiker.id, email: gebruiker.email };
+    if (metProfiel) account.profiel = gebruiker.profiel ?? STANDAARD_PROFIEL;
+    return account;
+  }
+
+  async function zetProfiel(gebruikerId, { naam, avatar } = {}) {
+    if (typeof naam !== 'string' || naam.trim().length > 40) {
+      throw new Error('De naam moet tekst van hoogstens 40 tekens zijn.');
+    }
+
+    const geldigeEmoji = avatar?.soort === 'emoji'
+      && typeof avatar.waarde === 'string'
+      && avatar.waarde.length <= 8
+      && /\p{Extended_Pictographic}/u.test(avatar.waarde)
+      && /^[\p{Extended_Pictographic}\p{Emoji_Component}\uFE0E\uFE0F\u200D]+$/u.test(avatar.waarde);
+    const geldigeAfbeelding = avatar?.soort === 'afbeelding'
+      && typeof avatar.waarde === 'string'
+      && avatar.waarde.length <= 70000
+      && /^data:image\/(?:jpeg|png);base64,/.test(avatar.waarde);
+    if (!geldigeEmoji && !geldigeAfbeelding) {
+      throw new Error('Kies een geldige emoji of afbeelding als avatar.');
+    }
+
+    const gebruiker = (await gebruikers()).find((item) => item.id === gebruikerId);
+    if (!gebruiker) throw new Error('Het account bestaat niet.');
+    gebruiker.profiel = { naam: naam.trim(), avatar };
+    await schrijfAtomair(bestand(map, gebruikerId), `${JSON.stringify(gebruiker, null, 2)}\n`);
+    return gebruiker.profiel;
   }
 
   async function wijzigWachtwoord(gebruikerId, oud, nieuw, houdToken) {
@@ -242,5 +275,14 @@ export function maakAccounts({ map, codes, nu = Date.now }) {
     return true;
   }
 
-  return { registreer, logIn, gebruikerVan, wijzigWachtwoord, logUit, verwijder, ruimSessiesOp };
+  return {
+    registreer,
+    logIn,
+    gebruikerVan,
+    zetProfiel,
+    wijzigWachtwoord,
+    logUit,
+    verwijder,
+    ruimSessiesOp,
+  };
 }

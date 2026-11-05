@@ -34,7 +34,7 @@ export async function gebruikerVan(token) {
 export default async function inloggen(verzoek) {
   const token = tokenUit(verzoek.koppen);
   if (verzoek.methode === 'GET' && !verzoek.rest) {
-    const gebruiker = await accounts.gebruikerVan(token);
+    const gebruiker = await accounts.gebruikerVan(token, true);
     return gebruiker
       ? { status: 200, body: { gebruiker } }
       : { status: 401, body: { fout: 'Log eerst in.' } };
@@ -58,6 +58,29 @@ export default async function inloggen(verzoek) {
       if (![
         'Het huidige wachtwoord klopt niet.',
         'Kies een nieuw wachtwoord van minstens 10 tekens.',
+      ].includes(fout.message)) throw fout;
+      return { status: 400, body: { fout: fout.message } };
+    }
+  }
+
+  if (verzoek.methode === 'POST' && verzoek.rest === 'profiel') {
+    const gebruiker = await accounts.gebruikerVan(token);
+    if (!gebruiker) return { status: 401, body: { fout: 'Log eerst in.' } };
+
+    let gegevens;
+    try {
+      gegevens = JSON.parse(verzoek.body.toString());
+    } catch {
+      return { status: 400, body: { fout: 'De gegevens zijn geen geldige JSON.' } };
+    }
+
+    try {
+      const profiel = await accounts.zetProfiel(gebruiker.id, gegevens);
+      return { status: 200, body: { profiel } };
+    } catch (fout) {
+      if (![
+        'De naam moet tekst van hoogstens 40 tekens zijn.',
+        'Kies een geldige emoji of afbeelding als avatar.',
       ].includes(fout.message)) throw fout;
       return { status: 400, body: { fout: fout.message } };
     }
@@ -122,12 +145,12 @@ export default async function inloggen(verzoek) {
     let gebruiker;
     let sessieToken;
     if (verzoek.rest === 'registreer') {
-      gebruiker = await accounts.registreer(gegevens);
+      await accounts.registreer(gegevens);
       sessieToken = await accounts.logIn(gegevens);
     } else {
       sessieToken = await accounts.logIn(gegevens);
-      gebruiker = await accounts.gebruikerVan(sessieToken);
     }
+    gebruiker = await accounts.gebruikerVan(sessieToken, true);
     return {
       status: 200,
       body: { gebruiker },
