@@ -79,6 +79,21 @@ export function verwijderMaat(partituur, maatIndex) {
   return kopie;
 }
 
+export function zetSleutel(partituur, partijId, maatIndex, teken, lijn) {
+  const kopie = structuredClone(partituur);
+  const partij = kopie.partijen.find((item) => item.id === partijId);
+  if (!partij) throw new Error('Onbekende partij.');
+  if (!['G', 'F', 'C'].includes(teken)) throw new Error('Onbekend sleutel-teken.');
+
+  const positie = partij.maten.findIndex((maat) => maat.index === maatIndex);
+  if (positie === -1) return kopie;
+  for (const maat of partij.maten.slice(positie)) {
+    maat.sleutels ??= [];
+    maat.sleutels[0] = { teken, lijn, notenbalk: 1, octaafVerschuiving: 0 };
+  }
+  return kopie;
+}
+
 export function zetMaatsoort(partituur, maatIndex, teller, noemer) {
   if (!Number.isInteger(maatIndex) || maatIndex < 0
     || !Number.isInteger(teller) || teller <= 0
