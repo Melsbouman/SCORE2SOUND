@@ -103,6 +103,10 @@ export function maakLeegStuk(opties = {}) {
   if (!Number.isInteger(aantalMaten) || aantalMaten < 1) {
     throw new Error('Het aantal maten moet minstens 1 zijn.');
   }
+  if (aantalMaten > 400) throw new Error('Het aantal maten mag niet meer dan 400 zijn.');
+  if (!Number.isFinite(tempo) || tempo < 30 || tempo > 300) {
+    throw new Error('Kies een tempo tussen 30 en 300.');
+  }
   if (instrumentIds.length < 1) throw new Error('Kies minstens één instrument.');
 
   const instrumenten = instrumentIds.map(zoekInstrument);
