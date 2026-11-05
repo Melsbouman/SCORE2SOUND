@@ -1,6 +1,7 @@
 const COLOFONWOORDEN = [
-  'copyright', 'copyr', '©', 'verlag', 'publishing', 'publishers', 'rights',
-  'reserved', 'printed', 'edition', 'obrasso', 'wiedlisbach', 'switzerland',
+  'copyright', 'copyr', '©', 'verlag', 'publications', 'publishing', 'publishers',
+  'music', 'supplies', 'holland', 'ltd', 'salvationist', 'rights', 'reserved',
+  'printed', 'edition', 'obrasso', 'wiedlisbach', 'switzerland',
 ];
 
 function regelTekst(noten) {
@@ -15,7 +16,7 @@ function vergelijkbareTekst(tekst) {
 }
 
 function bevatColofonwoord(tekst) {
-  const woorden = tekst.toLocaleLowerCase().split(/[^\p{L}\p{N}©]+/u).filter(Boolean);
+  const woorden = tekst.toLocaleLowerCase().replace(/[’']/g, '').split(/[^\p{L}\p{N}©]+/u).filter(Boolean);
   return woorden.some((woord) => COLOFONWOORDEN.some((colofonwoord) => woord.startsWith(colofonwoord)));
 }
 
