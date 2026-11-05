@@ -51,7 +51,7 @@ const AFKORTINGEN = {
   cello: 'Vc.',
 };
 
-function maakMaat(index, maatsoort, kwinten, tempo, sleutel) {
+function maakMaat(index, maatsoort, kwinten, tempo, sleutels) {
   const duur = maatsoort.teller * TIKKEN_PER_KWART * 4 / maatsoort.noemer;
   return {
     nummer: String(index + 1),
@@ -61,13 +61,15 @@ function maakMaat(index, maatsoort, kwinten, tempo, sleutel) {
     paginabegin: false,
     maatsoort: { ...maatsoort },
     toonsoort: { kwinten, modus: 'majeur' },
-    sleutels: [{ ...sleutel, notenbalk: 1, octaafVerschuiving: 0 }],
+    sleutels: sleutels.map((sleutel, sleutelIndex) => ({
+      ...sleutel, notenbalk: sleutelIndex + 1, octaafVerschuiving: 0,
+    })),
     tempo: index === 0 ? tempo : null,
     herhaling: { begin: false, eind: false, keer: 2 },
     maatrust: true,
-    elementen: [{
-      soort: 'rust', start: 0, duur, stem: 1, notenbalk: 1, heleMaat: true, zekerheid: 1,
-    }],
+    elementen: sleutels.map((_, sleutelIndex) => ({
+      soort: 'rust', start: 0, duur, stem: sleutelIndex + 1, notenbalk: sleutelIndex + 1, heleMaat: true, zekerheid: 1,
+    })),
   };
 }
 
@@ -85,7 +87,7 @@ function maakPartij(id, instrument, maten, nummer = null) {
       maat.maatsoort,
       maat.toonsoort.kwinten,
       maat.tempo,
-      instrument.sleutel,
+      instrument.sleutels ?? [instrument.sleutel],
     )),
   };
 }
