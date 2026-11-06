@@ -68,3 +68,10 @@ Een bestaand MusicXML-bestand is de beste route als dat beschikbaar is.
 - Probeer een ander stuk om te controleren of het probleem bij dit stuk hoort.
 - Blijft het geluid wegvallen? Meld dan aan Mels om welk stuk en welke maat het gaat.
 
+## Het aantal maten rust of het tempo klopt niet
+
+Je ziet bijvoorbeeld te weinig rustmaten of hoort dat het tempo niet klopt.
+Audiveris bewaart aantallen en metronoomgetallen soms als losse paginatekst, waardoor de app ze niet altijd goed overneemt.
+Tik voor een verkeerd tempo de maat aan en zet het tempo in het tabblad Tempo.
+Vul ontbrekende rustmaten aan met Maat klopt of door een maat toe te voegen.
+
