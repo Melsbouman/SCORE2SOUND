@@ -89,6 +89,7 @@ import { maatLengte } from '/src/model/duur.mjs';
 import { maakVolumeOp } from '/src/midi/dynamiek.mjs';
 import { leesId } from '/src/model/corrigeren.mjs';
 import { partijTekstVoorSpeler } from '/src/model/spelertekst.mjs';
+import { tempoLijst } from '/src/model/tempo.mjs';
 
 // Kanaal per partij, zoals in schrijfMidi: elke poort heeft 16 kanalen en kanaal 9 (slagwerk) wordt overgeslagen.
 const kanaal = (index) => { const plek = kanaalVan(index); return plek.poort * 16 + plek.kanaal; };
@@ -147,6 +148,7 @@ function startSpeler(app) {
   let geladen = false;
 let speelMaat = null;
 let doelMaat = null;
+  let lopendeMaat = null;
   let lus = 0;
   let luisterNaar = null; // een bewaarde versie die klinkt in plaats van de huidige partituur
   let partijTekst = null;
@@ -300,19 +302,21 @@ let doelMaat = null;
   }
 
   function tempoVan(maatIndex) {
-    const maten = app.stand.partituur?.partijen[0]?.maten ?? [];
-    for (let i = Math.min(maatIndex, maten.length - 1); i >= 0; i--) {
-      const maat = maten[i];
-      if (maat.tempo !== null && maat.tempo !== undefined) return maat.tempo;
-      const aanwijzing = maat.elementen.find((element) => element.soort === 'aanwijzing' && element.type === 'tempo');
-      if (aanwijzing) return Number(aanwijzing.waarde);
-    }
-    return 120;
+    const lijst = tempoLijst(app.stand.partituur);
+    return lijst.findLast((tempoPunt) => tempoPunt.maat <= maatIndex)?.bpm ?? 120;
   }
 
   function werkTempoTekstBij() {
+    const maten = app.stand.partituur?.partijen[0]?.maten ?? [];
+    const heeftTempo = maten.some((maat) => typeof maat.tempo === 'number' || maat.elementen?.some(
+      (element) => element.soort === 'aanwijzing' && element.type === 'tempo'
+    ));
+    if (!heeftTempo) {
+      tempoTekst.textContent = '';
+      return;
+    }
     const percentage = Number(tempoPercentage.value);
-    tempoTekst.textContent = ` ${percentage}% (${Math.round(tempoVan(speelMaat ?? 0) * percentage / 100)} bpm)`;
+    tempoTekst.textContent = `♩ = ${Math.round(tempoVan(lopendeMaat ?? 0) * percentage / 100)}`;
   }
 
   function pasTempoToe(percentage) {
@@ -548,6 +552,7 @@ let doelMaat = null;
     geladen = false;
     luisterNaar = null;
     speelMaat = null;
+    lopendeMaat = null;
     tijden = partituur ? maatTijden(partituur) : [];
     volgorde = speelVolgorde(maten());
     van.value = maten()[0]?.nummer ?? '1';
@@ -556,6 +561,7 @@ let doelMaat = null;
     teken();
   });
   app.op('speel-maat', ({ maat }) => {
+    lopendeMaat = maat;
     werkTempoTekstBij();
     const aantalMaten = app.stand.partituur?.partijen[0]?.maten.length ?? 0;
     const percentage = maat === null || !aantalMaten ? 0 : (maat + 1) / aantalMaten * 100;
