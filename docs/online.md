@@ -50,3 +50,6 @@ De website opent op de startpagina (welkom.html) zolang je geen sessie hebt. De 
 
 De proefscan is standaard uit en is gepland. Met `SCORE2SOUND_PROEF=aan` zet je hem aan. De proefscan werkt zonder account, voor één pagina van maximaal 2 MB, met maximaal drie proeven per IP-adres per dag en één proef tegelijk. Over de notatie komt een watermerk. Houd er rekening mee dat de proefscan rekenkracht van de server kost.
 
+
+## Ontdekken (/api/ontdek)
+De server haalt voor Ontdekken een MusicXML-bestand op bij raw.githubusercontent.com (alleen stukken uit app/public/ontdekken/lieder.json). De server moet die host kunnen bereiken.

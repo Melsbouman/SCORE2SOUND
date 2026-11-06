@@ -190,3 +190,6 @@ In de **Bibliotheek** zie je je recente stukken en je eigen mappen. Geef een map
 ## Instellingen en profiel
 Op de pagina **Instellingen** kun je je weergavenaam aanpassen. Kies als profielfoto een muziek-emoji of een eigen afbeelding in png- of jpg-formaat. Onder **Account** kun je via **Wachtwoord wijzigen** een nieuw wachtwoord instellen. Kies **Uitloggen** in de zijbalk om je sessie te beëindigen.
 
+
+## Ontdekken
+Klik in de zijbalk op Ontdekken om gratis bladmuziek te zoeken. Typ een titel of componist in het zoekveld, of kies een stuk bij Uitgelicht of een componist. Klik op een kaart om het stuk in de editor te openen. De stukken komen uit OpenScore Lieder (publiek domein, CC0). Het openen haalt het bestand via de server van GitHub, dus de server heeft internet nodig.
