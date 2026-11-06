@@ -30,6 +30,23 @@ const INSTRUMENTEN = [
   ['bariton', 'Bariton'],
 ];
 
+const SLAGWERKNAMEN = [
+  'drums',
+  'drum',
+  'xylophone',
+  'snare',
+  'cymbal',
+  'glockenspiel',
+  'tambourine',
+  'triangle',
+  'timbales',
+  'marimba',
+  'vibraphone',
+  'bell',
+  'bells',
+  'gong',
+];
+
 function normaliseer(tekst) {
   return tekst
     .toLowerCase()
@@ -67,6 +84,15 @@ function afstand(a, b) {
 }
 
 function besteInstrument(gelezen) {
+  const isSlagwerk = varianten(gelezen).some((gelezenVariant) => {
+    const woorden = gelezenVariant.split(' ');
+    return SLAGWERKNAMEN.some((slagwerknaam) => varianten(slagwerknaam).some((slagwerkVariant) => (
+      gelezenVariant.includes(slagwerkVariant)
+      || woorden.some((woord) => afstand(woord, slagwerkVariant) <= 1)
+    )));
+  });
+  if (isSlagwerk) return 'Percussion';
+
   let beste = null;
 
   for (const [zoeknaam, schrijfwijze] of INSTRUMENTEN) {
