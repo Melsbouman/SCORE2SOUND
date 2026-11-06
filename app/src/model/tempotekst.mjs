@@ -7,6 +7,10 @@ const TEMPOWOORDEN = new Map([
   ['presto', 180],
   ['largo', 50],
   ['lento', 56],
+  ['allegretto', 108],
+  ['larghetto', 60],
+  ['andantino', 84],
+  ['maestoso', 80],
 ]);
 
 export function tempoVoorWoord(woord) {
@@ -21,6 +25,10 @@ export function tempoUitTekst(partituur) {
     ['andante', 76],
     ['moderato', 108],
     ['adagio', 66],
+    ['allegretto', 108],
+    ['larghetto', 60],
+    ['andantino', 84],
+    ['maestoso', 80],
   ]);
   const patroon = /\(?\s*(?:[♩J]|𝅘𝅥)(\.?)\s*=\s*(?:c\.?|0\.)?\s*(\d{2,3})\s*\)?/;
 
