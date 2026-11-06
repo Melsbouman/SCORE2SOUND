@@ -28,6 +28,8 @@ import { INSTRUMENTEN, instrumentBijNaam } from '../model/instrumenten.mjs';
 import { herstelInstrumentnamen } from '../model/instrumentnamen.mjs';
 import { partijNaamUitKop, splitsPartijenOpKoppen } from '../model/partijnaam.mjs';
 import { herstelComponist } from '../model/titelgegevens.mjs';
+import { creditTempos } from '../model/credittempo.mjs';
+import { zetTempo } from '../model/tempo.mjs';
 import { tempoVoorWoord } from '../model/tempotekst.mjs';
 import { kopUitOcr } from '../model/tekstlezerkop.mjs';
 import { woordenNaarMaten } from '../model/tekstlezerwoorden.mjs';
@@ -224,13 +226,20 @@ export function maakNetjes(partituur, naam, credits) {
   const heeftTempo = eersteMaat?.tempo != null
     || eersteMaat?.elementen?.some((element) => element.soort === 'aanwijzing' && element.type === 'tempo');
   if (eersteMaat && !heeftTempo) {
-    const tempowoord = creditWoorden.map(tempowoordInKop).find(Boolean);
-    if (tempowoord) {
-      const tempo = tempoVoorWoord(tempowoord);
-      eersteMaat.tempo = tempo;
-      eersteMaat.elementen.push({
-        soort: 'aanwijzing', start: 0, type: 'tempo', waarde: tempo, getoond: tempowoord, zekerheid: 1,
-      });
+    const creditTempo = creditTempos(creditGegevens)
+      .filter((tempo) => tempo.pagina === 0)
+      .sort((a, b) => b.y - a.y)[0];
+    if (creditTempo) {
+      Object.assign(partituur, zetTempo(partituur, 0, creditTempo.bpm));
+    } else {
+      const tempowoord = creditWoorden.map(tempowoordInKop).find(Boolean);
+      if (tempowoord) {
+        const tempo = tempoVoorWoord(tempowoord);
+        eersteMaat.tempo = tempo;
+        eersteMaat.elementen.push({
+          soort: 'aanwijzing', start: 0, type: 'tempo', waarde: tempo, getoond: tempowoord, zekerheid: 1,
+        });
+      }
     }
   }
   partituur.partijen.forEach((partij, index) => {
