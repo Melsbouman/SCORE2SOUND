@@ -55,3 +55,5 @@ De labels op een issue geven de stand aan:
 - `agent-exact` (op de PR): de wijziging komt precies overeen met `## Verwacht`.
 
 Merge nooit zelf en push nooit naar `main`.
+
+- Schrijf nooit naar een bestand met de naam `nul` (zoals `> nul` of `2>nul`) in een bestand of opdracht: dat maakt op Windows een bestand dat de repo niet meer schoon te maken is. Gebruik `/dev/null`.
