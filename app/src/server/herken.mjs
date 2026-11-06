@@ -14,6 +14,7 @@ import { bladenUitOmr, koppelOmr, voegPaginasSamen } from './omr.mjs';
 import { leesMusicXML } from '../musicxml/lezen.mjs';
 import { herstelMaatsoorten as herstelMaatsoortenZonderBeginrust } from '../model/maatsoorten.mjs';
 import { vulBeginRust as vulOorspronkelijkeBeginRust } from '../model/beginrust.mjs';
+import { creditBeginRust } from '../model/creditrusten.mjs';
 import { vulOntbrekendeMaten } from '../model/ontbrekend.mjs';
 import { markeerVerdachteNoten } from '../model/verdacht.mjs';
 
@@ -193,6 +194,18 @@ export function maakNetjes(partituur, naam, credits) {
     ? { tekst: credit, type: null, y: null }
     : credit);
   const creditWoorden = creditGegevens.map((credit) => credit.tekst);
+  const eersteMaatVoorCreditrust = partituur.partijen?.[0]?.maten?.[0];
+  const aantalCreditrusten = eersteMaatVoorCreditrust?.maatrust == null ? creditBeginRust(creditGegevens) : null;
+  if (aantalCreditrusten) {
+    const creditrust = structuredClone(partituur);
+    creditrust.partijen[0].maten[0].elementen.unshift({
+      soort: 'aanwijzing', start: 0, type: 'letter', waarde: String(aantalCreditrusten + 1), zekerheid: 1, creditrust: true,
+    });
+    const aangevuld = vulOorspronkelijkeBeginRust(creditrust);
+    aangevuld.partijen[0].maten[aantalCreditrusten].elementen = aangevuld.partijen[0].maten[aantalCreditrusten].elementen
+      .filter((element) => !element.creditrust);
+    Object.assign(partituur, aangevuld);
+  }
   if (!partituur.titel && naam) partituur.titel = basename(naam, extname(naam));
   partituur.componist = herstelComponist(partituur.componist);
   const arrangeur = creditWoorden.map((waarde) => waarde.trim().match(/^arr(?:\.|\s)\s*(.+)$/i)).find(Boolean);
