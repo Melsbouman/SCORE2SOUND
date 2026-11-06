@@ -109,6 +109,17 @@ function dirigentenSpoor(partituur, beginnen, tijdlijn, voorintellerTik = 0) {
     });
   }
   for (let index = 0; index < maten.length; index += 1) {
+    const vorigeMaatsoort = maten[index - 1]?.maatsoort;
+    const huidigeMaatsoort = maten[index].maatsoort;
+    if (index > 0 &&
+        (huidigeMaatsoort.teller !== vorigeMaatsoort.teller ||
+         huidigeMaatsoort.noemer !== vorigeMaatsoort.noemer)) {
+      events.push({
+        tik: beginnen[index],
+        volgorde: 0,
+        bytes: [0xff, 0x58, 4, huidigeMaatsoort.teller, Math.log2(huidigeMaatsoort.noemer), 24, 8],
+      });
+    }
     const tempo = maten[index].tempo;
     if (tempo != null && !(voorintellerTik > 0 && index === 0)) {
       const microseconden = Math.round(60000000 / tempo);
