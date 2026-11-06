@@ -76,3 +76,11 @@
 @media (max-width: 375px) {
   .zijbalk__mappen { display: none; }
 }
+
+/* Ontdekken in de zijbalk: ingeklapt, onder de Bibliotheek */
+.zijbalk #ontdekken { margin: 4px 0 0; }
+.zijbalk #ontdekken summary { cursor: pointer; padding: 8px 12px; border-radius: 12px; font-weight: 600; font-size: 14px; color: var(--kleur-wit); }
+.zijbalk #ontdekken summary:hover { background: #ffffff1f; }
+.zijbalk #ontdekken .projecten__lijst { margin-top: 4px; }
+.zijbalk #ontdekken .knop { background: transparent; color: var(--kleur-wit); border: 1px solid #ffffff55; padding: 8px 12px; display: grid; gap: 2px; text-align: left; }
+.zijbalk #ontdekken .knop small { opacity: .75; }

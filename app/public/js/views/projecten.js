@@ -55,13 +55,13 @@ export function start(app) {
     if (!recenteProjecten) return;
     let ontdekken = document.getElementById('ontdekken');
     if (!ontdekken) {
-      ontdekken = document.createElement('div');
+      ontdekken = document.createElement('details');
       ontdekken.id = 'ontdekken';
-      recenteProjecten.after(ontdekken);
+      (bibliotheekMappen ?? recenteProjecten).after(ontdekken);
     }
     ontdekken.replaceChildren();
 
-    const kop = document.createElement('h3');
+    const kop = document.createElement('summary');
     const rij = document.createElement('div');
     kop.textContent = 'Ontdekken';
     rij.className = 'projecten__lijst';
