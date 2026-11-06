@@ -209,3 +209,19 @@ Alle bewerkingen op een stuk (verplaatsNoot, splitsRust, splitsNoot, vulMaatAan 
 `schrijfNootMetOverbinding(partituur, partijId, maatIndex, start, duur, toonhoogte)` schrijft een noot zo nodig over meerdere maten met overbindingen en geeft een nieuwe partituur terug.
 `voegAkkoordNootToe(partituur, partijId, maatIndex, start, toonhoogte)` voegt op de opgegeven plek een toonhoogte aan een bestaande noot toe en geeft een nieuwe partituur terug.
 `herstelMaatrust(partituur, partijId, maatIndex)` herstelt een maat met alleen rusten in stem 1 als maatrust en geeft een nieuwe partituur terug.
+
+## Meermaatsrusten
+Een meermaatsrust heeft `maatrust: N` op de eerste maat; de N-1 volgende maten zijn kopieën met `verborgen: true`.
+Het aantal kan komen uit een hele-maatrust in de MusicXML met een numerieke letter in dezelfde maat, van 2 tot en met 40.
+Die letter wordt na het overnemen van het aantal uit de elementen verwijderd.
+Ontbrekende beginmaten worden afgeleid uit de eerste numerieke letter in de eerste acht maten; vanaf twee maten vormen ze één meermaatsrust.
+Een los getal van 2 tot en met 200 in de paginatekst van de eerste pagina kan eveneens het aantal beginrusten leveren; het laagst geplaatste geldige getal wint.
+Bij numerieke maatnummers worden de verborgen en volgende maten doorgenummerd, en alle maatindexen worden opnieuw gezet.
+
+## Tempowisselingen
+Het tempo van een maat komt uit `maat.tempo` of uit de eerste tempo-aanwijzing; zonder begintempo geldt 120 kwartnoten per minuut.
+Een ingesteld tempo wordt afgerond, moet tussen 20 en 300 liggen en wordt in alle partijen aan het begin van dezelfde maat gezet.
+Tempo uit paginatekst herkent `J`, `♩` of `q`, eventueel met een punt, gevolgd door `=` en een waarde van 30 tot en met 300.
+Teksten als `rall.`, `rit.`, `allargando`, `accel.`, `accelerando` en `stringendo` maken een tempoverloop vanaf hun maat.
+Een rallentando of ritardando eindigt op factor 0,75, met `molto` op 0,6; een versnelling eindigt op factor 1,2.
+Het verloop stopt bij een volgende metronoomaanwijzing of bij `a tempo`, `tempo primo` of `tempo I`; zonder zo'n einde duurt het hoogstens twee maten.
