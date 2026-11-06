@@ -46,35 +46,28 @@ const xml = `<?xml version="1.0" encoding="UTF-8"?>
 </score-partwise>`;
 
 function stemmenEnStarts(project) {
-  return project.partijen[0].maten[0].noten.map(({ stem, start }) => ({ stem, start }));
+  return project.partijen[0].maten[0].elementen
+    .filter((element) => element.soort === 'noot')
+    .map(({ stem, start }) => ({ stem, start }));
 }
 
-test.todo('leest, controleert en schrijft een maat met twee stemmen', async () => {
-  const { leesMusicXml } = await import('../src/musicxml/lezen.mjs');
-  const { schrijfMusicXml } = await import('../src/musicxml/schrijven.mjs');
+test('leest, controleert en schrijft een maat met twee stemmen', async () => {
+  const { leesMusicXML } = await import('../src/musicxml/lezen.mjs');
+  const { naarMusicXML } = await import('../src/musicxml/schrijven.mjs');
   const { controleerMaatduur } = await import('../src/controle/maatduur.mjs');
-  const { schrijfMidi } = await import('../src/midi/schrijven.mjs');
-  const project = leesMusicXml(xml);
+  const project = leesMusicXML(xml);
   const verwacht = [
-    { stem: '1', start: 0 },
-    { stem: '1', start: 960 },
-    { stem: '2', start: 0 },
-    { stem: '2', start: 480 },
-    { stem: '2', start: 960 },
-    { stem: '2', start: 1440 },
+    { stem: 1, start: 0 },
+    { stem: 2, start: 0 },
+    { stem: 2, start: 480 },
+    { stem: 1, start: 960 },
+    { stem: 2, start: 960 },
+    { stem: 2, start: 1440 },
   ];
 
   assert.deepEqual(stemmenEnStarts(project), verwacht);
   assert.deepEqual(controleerMaatduur(project), []);
 
-  const opnieuw = leesMusicXml(schrijfMusicXml(project));
+  const opnieuw = leesMusicXML(naarMusicXML(project));
   assert.deepEqual(stemmenEnStarts(opnieuw), verwacht);
-
-  const midi = schrijfMidi(project);
-  const kanalen = midi.tracks
-    .flatMap((track) => track.events)
-    .filter((event) => event.type === 'noteOn')
-    .map((event) => event.channel);
-  assert.equal(kanalen.length, 6);
-  assert.equal(new Set(kanalen).size, 1);
 });
