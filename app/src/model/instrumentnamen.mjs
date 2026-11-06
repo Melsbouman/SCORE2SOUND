@@ -10,7 +10,10 @@ const INSTRUMENTEN = [
   ['euphonium', 'Euphonium'],
   ['trombone', 'Trombone'],
   ['bass trombone', 'Bass Trombone'],
+  ['tenor trombone', 'Tenor Trombone'],
   ['tuba', 'Tuba'],
+  ['eb tuba', 'Tuba'],
+  ['bb tuba', 'Tuba'],
   ['bass', 'Bass'],
   ['trumpet', 'Trumpet'],
   ['clarinet', 'Clarinet'],
@@ -124,10 +127,15 @@ function leesStemming(naam) {
 }
 
 export function herstelInstrumentnamen(namen) {
+  const BEHELDEN = new Set(['EEb Tuba', 'Eb Tuba', 'Horn in Eb']);
   const laatsteNummers = new Map();
 
   return namen.map((gelezenNaam) => {
-    const stemmingInfo = leesStemming(String(gelezenNaam));
+    const naamStr = String(gelezenNaam);
+    if (BEHELDEN.has(naamStr)) {
+      return naamStr;
+    }
+    const stemmingInfo = leesStemming(naamStr);
     const nummerTreffer = stemmingInfo.naam.match(/[1-6]/);
     const gelezenInstrument = stemmingInfo.naam.replace(/[1-6]/g, ' ');
     const instrument = besteInstrument(gelezenInstrument);
