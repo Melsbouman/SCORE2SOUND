@@ -625,3 +625,6 @@ body.proef .proef-melding {
 .scherm-weg { display: none !important; }
 body:not([data-scherm='editor']) .lint,
 body:not([data-scherm='editor']) #speler { display: none !important; }
+
+/* De kop gebruikt overal dezelfde gewone letter (editor.css zette hem eerder op Bodoni in hoofdletters). */
+header.kop h1 { font-family: var(--letter); font-weight: 600; font-size: 1.35rem; text-transform: none; letter-spacing: 0; }
