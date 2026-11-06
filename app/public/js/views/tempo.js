@@ -31,7 +31,7 @@ export function start(app) {
       .map(
         ({ maat, nummer, bpm }) => `
           <div class="tempo-regel" data-maat-index="${maat}">
-            <label for="tempo-${maat}">Maat ${nummer}</label>
+            <button type="button" data-actie="kies-maat">Maat ${nummer}</button>
             <input id="tempo-${maat}" type="number" min="20" max="300" step="1"
               value="${bpm}" aria-label="Tempo vanaf maat ${nummer}">
             ${maat === 0 ? '' : '<button type="button" data-actie="weghalen">Weghalen</button>'}
@@ -59,6 +59,11 @@ export function start(app) {
       });
       regel.querySelector('[data-actie="weghalen"]')?.addEventListener('click', () => {
         pasAan(() => verwijderTempo(app.stand.partituur, maatIndex), status);
+      });
+      regel.querySelector('[data-actie="kies-maat"]').addEventListener('click', () => {
+        app.meld('kies-noot', { id: null });
+        app.meld('kies-maat', { maat: maatIndex });
+        app.meld('naar-maat', { maat: maatIndex });
       });
     });
 
