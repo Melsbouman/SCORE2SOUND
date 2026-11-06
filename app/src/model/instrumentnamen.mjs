@@ -10,7 +10,10 @@ const INSTRUMENTEN = [
   ['euphonium', 'Euphonium'],
   ['trombone', 'Trombone'],
   ['bass trombone', 'Bass Trombone'],
+  ['tenor trombone', 'Tenor Trombone'],
   ['tuba', 'Tuba'],
+  ['eb tuba', 'Tuba'],
+  ['bb tuba', 'Tuba'],
   ['bass', 'Bass'],
   ['trumpet', 'Trumpet'],
   ['clarinet', 'Clarinet'],
@@ -141,7 +144,9 @@ export function herstelInstrumentnamen(namen) {
     const stemmingInfo = leesStemming(String(gelezenNaam));
     const nummerTreffer = stemmingInfo.naam.match(/[1-6]/);
     const gelezenInstrument = stemmingInfo.naam.replace(/[1-6]/g, ' ');
-    const instrument = besteInstrument(gelezenInstrument);
+    const hasIn = /\bin\b/gi.test(gelezenInstrument);
+    const instrumentForBest = gelezenInstrument.replace(/\bin\b/gi, '').replace(/\s+/g, ' ').trim();
+    const instrument = besteInstrument(instrumentForBest);
     const reeks = `${instrument}|${stemmingInfo.stemming ?? ''}`;
     let nummer = nummerTreffer ? Number(nummerTreffer[0]) : null;
 
@@ -157,6 +162,8 @@ export function herstelInstrumentnamen(namen) {
     const stemmingVoor = stemmingInfo.stemming && stemmingInfo.vooraan
       ? `${stemmingInfo.stemming} `
       : '';
-    return `${stemmingVoor}${instrument}${nummerTekst}${stemmingAchter}`;
+    return hasIn
+      ? `${stemmingVoor}${instrument} in${nummerTekst}${stemmingAchter}`
+      : `${stemmingVoor}${instrument}${nummerTekst}${stemmingAchter}`;
   });
 }
