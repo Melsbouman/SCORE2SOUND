@@ -615,3 +615,13 @@ body.proef .proef-melding {
 
 /* Bodoni Moda heeft een optische-grootte-as: op groot formaat zijn de haarlijnen te dun om te lezen. Overal de stevige stand (zoals de voorpagina); Poppins negeert dit. */
 :root { font-optical-sizing: none; font-variation-settings: 'opsz' 6; }
+
+/* Kop: naam van het scherm in Poppins */
+.kop[hidden] { display: none !important; }
+.kop h1 { font-family: var(--letter); font-weight: 600; font-size: 1.35rem; letter-spacing: 0; font-variation-settings: normal; }
+.kop h1 em { display: none; }
+
+/* Een scherm tegelijk: vlakken die niet bij het huidige scherm horen zijn weg. */
+.scherm-weg { display: none !important; }
+body:not([data-scherm='editor']) .lint,
+body:not([data-scherm='editor']) #speler { display: none !important; }

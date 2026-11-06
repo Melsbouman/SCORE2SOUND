@@ -17,6 +17,7 @@ import * as onzeker from './views/onzeker.js';
 import * as aanduidingen from './views/aanduidingen.js';
 import * as versies from './views/versies.js';
 import * as inloggen from './views/inloggen.js';
+import * as kop from './views/kop.js';
 import * as instellingen from './views/instellingen.js';
 import * as sneltoetsen from './views/sneltoetsen.js';
 import * as slepen from './views/slepen.js';
@@ -62,7 +63,7 @@ window.addEventListener('error', toonAlgemeneFoutmelding);
 window.addEventListener('unhandledrejection', toonAlgemeneFoutmelding);
 
 const app = maakApp();
-const schermen = { inloggen, instellingen, upload, begin, voorbeeld, editor, weergave, lint, slepen, speler, meldingen, mixer, bewerken, exporteren, projecten, titel, corrigeren, onzeker, aanduidingen, versies, sneltoetsen };
+const schermen = { kop, inloggen, instellingen, upload, begin, voorbeeld, editor, weergave, lint, slepen, speler, meldingen, mixer, bewerken, exporteren, projecten, titel, corrigeren, onzeker, aanduidingen, versies, sneltoetsen };
 
 for (const [naam, scherm] of Object.entries(schermen)) {
   try {
@@ -71,6 +72,8 @@ for (const [naam, scherm] of Object.entries(schermen)) {
     console.error(`Het scherm '${naam}' kon niet starten:`, fout);
   }
 }
+
+kop.vernieuw();
 
 // Handig bij het testen in de browser: de stand bekijken in de console.
 window.score2sound = app;

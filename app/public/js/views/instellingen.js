@@ -85,24 +85,14 @@ export function start() {
   pasThemaToe(bewaardThema);
 
   const vlak = document.querySelector('#instellingen');
-  const kopTitel = document.querySelector('.kop__tekst h1');
-  const kopTekst = document.querySelector('.kop__tekst p');
-  if (!vlak || !kopTitel || !kopTekst) return;
+  if (!vlak) return;
 
-  const oorspronkelijkeTitel = kopTitel.innerHTML;
-  const oorspronkelijkeTekst = kopTekst.textContent;
   let geladen = false;
 
   function werkPaginaBij() {
     const open = window.location.hash === '#instellingen';
     document.body.classList.toggle('instellingen-open', open);
-    if (!open) {
-      kopTitel.innerHTML = oorspronkelijkeTitel;
-      kopTekst.textContent = oorspronkelijkeTekst;
-      return;
-    }
-    kopTitel.textContent = 'Instellingen';
-    kopTekst.textContent = 'Beheer je profiel, account en weergave.';
+    if (!open) return;
     vlak.scrollIntoView({ block: 'start' });
     if (!geladen) laadInstellingen();
   }

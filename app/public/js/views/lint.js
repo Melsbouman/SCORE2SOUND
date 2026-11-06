@@ -1,7 +1,7 @@
 import { controleerBereik } from '/src/controle/bereik.mjs';
 
 const tabbladen = [
-  { naam: 'Bestand', vlakken: ['projecten', 'titel', 'export'] },
+  { naam: 'Bestand', vlakken: ['titel', 'export'] },
   { naam: 'Start', vlakken: ['passage', 'tempo'] },
   { naam: 'Noten', vlakken: ['editor', 'corrigeren', 'onzeker'] },
   { naam: 'Aanduidingen', vlakken: ['aanduidingen'] },
@@ -67,9 +67,7 @@ export function start(app) {
       open.className = 'knop';
       open.textContent = 'Ander bestand openen';
       open.addEventListener('click', () => {
-        const vak = document.getElementById('upload');
-        vak?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        (vak?.querySelector('input[type="file"], button'))?.focus();
+        window.location.hash = '#begin';
       });
       paneel.prepend(open);
     }
