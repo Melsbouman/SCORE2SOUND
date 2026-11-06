@@ -3,6 +3,30 @@ import { maakWachtwoordWijzigen } from './inloggen.js';
 const emojis = ['🎵', '🎶', '🎼', '🎺', '🎷', '🎻', '🥁', '🎹', '🎸', '🪗', '🎤', '🎧', '🪕', '🎙️', '🪘', '🎚️'];
 const maximaleBestandsgrootte = 10 * 1024 * 1024;
 
+function pasThemaToe(thema) {
+  if (thema === 'licht' || thema === 'donker') {
+    document.documentElement.dataset.thema = thema;
+  } else {
+    delete document.documentElement.dataset.thema;
+  }
+}
+
+function leesThema() {
+  try {
+    return localStorage.getItem('thema') || 'systeem';
+  } catch {
+    return 'systeem';
+  }
+}
+
+function bewaarThema(thema) {
+  try {
+    localStorage.setItem('thema', thema);
+  } catch {
+    // Het thema blijft voor deze sessie actief als opslaan niet beschikbaar is.
+  }
+}
+
 function afbeeldingElement(avatar, klasse) {
   if (avatar?.soort === 'afbeelding') {
     const afbeelding = document.createElement('img');
@@ -57,6 +81,9 @@ async function snijdAfbeelding(file) {
 }
 
 export function start() {
+  const bewaardThema = leesThema();
+  pasThemaToe(bewaardThema);
+
   const vlak = document.querySelector('#instellingen');
   const kopTitel = document.querySelector('.kop__tekst h1');
   const kopTekst = document.querySelector('.kop__tekst p');
@@ -127,10 +154,12 @@ export function start() {
         </section>
         <section class="instellingen__kaart">
           <h3>Weergave</h3>
-          <label class="instellingen__schakelaar">
-            <input type="checkbox" disabled>
-            <span aria-hidden="true"></span>
-            <span>Donkere modus <small>Komt later</small></span>
+          <label class="instellingen__veld">Thema
+            <select name="thema">
+              <option value="systeem">Systeem</option>
+              <option value="licht">Licht</option>
+              <option value="donker">Donker</option>
+            </select>
           </label>
         </section>
         <div class="instellingen__acties">
@@ -148,6 +177,14 @@ export function start() {
     const melding = vlak.querySelector('.instellingen__acties [role="status"]');
     naam.value = gebruiker.profiel?.naam || '';
     email.value = gebruiker.email || '';
+    formulier.elements.thema.value = ['systeem', 'licht', 'donker'].includes(bewaardThema)
+      ? bewaardThema
+      : 'systeem';
+    formulier.elements.thema.addEventListener('change', () => {
+      const thema = formulier.elements.thema.value;
+      pasThemaToe(thema);
+      bewaarThema(thema);
+    });
 
     function tekenAvatar() {
       voorbeeld.replaceChildren(afbeeldingElement(avatar, 'instellingen__avatarvoorbeeld'));
