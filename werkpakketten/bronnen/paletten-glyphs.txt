@@ -1,0 +1,182 @@
+## Articulaties (20)
+Slur => 
+Accent above => articAccentAbove
+Staccato above => articStaccatoAbove
+Staccatissimo above => articStaccatissimoAbove
+Tenuto above => articTenutoAbove
+Louré (tenuto-staccato) above => articTenutoStaccatoAbove
+Marcato above => articMarcatoAbove
+Accent-staccato above => articAccentStaccatoAbove
+Marcato-staccato above => articMarcatoStaccatoAbove
+Marcato-tenuto above => articMarcatoTenutoAbove
+Staccatissimo stroke above => articStaccatissimoStrokeAbove
+Staccatissimo wedge above => articStaccatissimoWedgeAbove
+Stress above => articStressAbove
+Tenuto-accent above => articTenutoAccentAbove
+Unstress above => articUnstressAbove
+Open => brassMuteOpen
+Muted (closed) => brassMuteClosed
+Harmonic => stringsHarmonic
+Up bow => stringsUpBow
+Down bow => stringsDownBow
+
+## Dynamiek (22)
+ppp (Pianississimo) => ppp
+pp (Pianissimo) => pp
+p (Piano) => p
+mp (Mezzo-piano) => mp
+mf (Mezzo-forte) => mf
+f (Forte) => f
+ff (Fortissimo) => ff
+fff (Fortississimo) => fff
+fp (Fortepiano) => fp
+pf (Pianoforte) => pf
+sf (Sforzando) => sf
+sfz (Sforzato) => sfz
+sff (Sforzando) => sff
+sffz (Sforzato) => sffz
+sfp (Sforzando-piano) => sfp
+rfz (Rinforzando) => rfz
+rf (Rinforzando) => rf
+fz (Forzando) => fz
+Crescendo line => 2
+Diminuendo line => 3
+Crescendo hairpin => 0
+Diminuendo hairpin => 1
+
+## Herhalingen_&_sprongen (19)
+Repeat last bar => 1
+Segno => segno
+Coda => coda
+Fine => 
+To coda => 
+To coda (symbol) => coda
+Da Capo => 
+Da Capo al Fine => 
+Da Capo al Coda => 
+D.S. al Coda => 
+D.S. al Fine => 
+D.S. => 
+Left (start) repeat sign => start-repeat
+Right (end) repeat sign => end-repeat
+Right and left repeat sign => end-start-repeat
+Prima volta => 
+Seconda volta, open => 
+Seconda volta => 
+Terza volta => 
+
+## Maatsoorten (16)
+2/4 => 
+3/4 => 
+4/4 => 
+5/4 => 
+6/4 => 
+3/8 => 
+4/8 => 
+5/8 => 
+6/8 => 
+7/8 => 
+9/8 => 
+12/8 => 
+Common time => 1
+Cut time => 2
+2/2 => 
+3/2 => 
+
+## Maatstrepen (11)
+Single barline => 
+Double barline => double
+Left (start) repeat sign => start-repeat
+Right (end) repeat sign => end-repeat
+Dashed barline => dashed
+Final barline => end
+Right and left repeat sign => end-start-repeat
+Dotted barline => dotted
+Reverse final barline => reverse-end
+Heavy barline => heavy
+Heavy double barline => double-heavy
+
+## Muzieksleutels (12)
+Treble clef => 
+Treble clef 8va alta => 
+Treble clef 15ma alta => 
+Treble clef 8va bassa => 
+Alto clef => 
+Tenor clef => 
+Bass clef => 
+Bass clef 8va alta => 
+Bass clef 8va bassa => 
+Percussion => 
+Tablature => 
+Tablature 4 lines => 
+
+## Tekst (3)
+Staff text line => 
+System text line => 
+Rehearsal mark => 
+
+## Tempo (32)
+Half note = 80 BPM => metNoteHalfUp
+Quarter note = 80 BPM => metNoteQuarterUp
+Eighth note = 80 BPM => metNote8thUp
+Dotted half note = 80 BPM => metNoteHalfUp,space,metAugmentationDot
+Dotted quarter note = 80 BPM => metNoteQuarterUp,space,metAugmentationDot
+Dotted eighth note = 80 BPM => metNote8thUp,space,metAugmentationDot
+Grave => 
+Largo => 
+Lento => 
+Larghetto => 
+Adagio => 
+Andante => 
+Andantino => 
+Moderato => 
+Allegretto => 
+Allegro => 
+Vivace => 
+Presto => 
+Prestissimo => 
+Metric modulation: quarter note = dotted quarter note => metNoteQuarterUp,space,metAugmentationDot
+Metric modulation: dotted quarter note = quarter note => metNoteQuarterUp,space,metAugmentationDot
+Metric modulation: half note = quarter note => metNoteHalfUp,metNoteQuarterUp
+Metric modulation: quarter note = half note => metNoteQuarterUp,metNoteHalfUp
+Metric modulation: eighth note = eighth note => metNote8thUp
+Metric modulation: quarter note = quarter note => metNoteQuarterUp
+Metric modulation: dotted eighth note = quarter note => metNote8thUp,space,metAugmentationDot,metNoteQuarterUp
+accel. => 
+allarg. => 
+rall. => 
+rit. => 
+a tempo => 
+tempo primo => 
+
+## Toonhoogte (5)
+8va alta => 8va
+8va bassa => 8vb
+15ma alta => 15ma
+15ma bassa => 15mb
+Ambitus => 
+
+## Toonsoorten (16)
+G major / E minor => 
+D major / B minor => 
+A major / F♯ minor => 
+E major / C♯ minor => 
+B major / G♯ minor => 
+F♯ major / D♯ minor => 
+C♯ major / A♯ minor => 
+C♭ major / A♭ minor => 
+G♭ major / E♭ minor => 
+D♭ major / B♭ minor => 
+A♭ major / F minor => 
+E♭ major / C minor => 
+B♭ major / G minor => 
+F major / D minor => 
+C major / A minor => 
+Open / Atonal => 
+
+## Voortekens (5)
+Flat => accidentalFlat
+Natural => accidentalNatural
+Sharp => accidentalSharp
+Double sharp => accidentalDoubleSharp
+Double flat => accidentalDoubleFlat
