@@ -28,6 +28,7 @@ const INSTRUMENTEN = [
   ['kornet', 'Kornet'],
   ['althoorn', 'Althoorn'],
   ['bariton', 'Bariton'],
+  ['basses', 'Bass'],
 ];
 
 const SLAGWERKNAMEN = [
@@ -108,18 +109,28 @@ function besteInstrument(gelezen) {
 }
 
 function leesStemming(naam) {
-  const treffer = naam.match(/(^|[^a-z])(bb|eb|kb|bh|es|c|f)(?=$|[^a-z])/i);
+  // Normalize flat sign '♭' to 'b' for stem detection
+  const nameForMatching = naam.replace(/\u266D/g, 'b');
+
+  const treffer = nameForMatching.match(/(^|[^a-z])(bbb|bb|eb|kb|bh|es|c|f)(?=$|[^a-z])/i);
   if (!treffer) return { stemming: null, vooraan: false, naam };
 
-  const gelezen = treffer[2].toLowerCase();
-  const stemming = gelezen === 'bb' || gelezen === 'bh'
-    ? 'Bb'
-    : gelezen === 'c' || gelezen === 'f'
-      ? gelezen.toUpperCase()
-      : 'Eb';
+  const captured = treffer[2]; // original captured case
+  const lower = captured.toLowerCase();
+  let stemming;
+  if (lower === 'bbb') {
+    stemming = captured; // preserve original case
+  } else if (lower === 'bb' || lower === 'bh') {
+    stemming = 'Bb';
+  } else if (lower === 'c' || lower === 'f') {
+    stemming = lower.toUpperCase();
+  } else {
+    stemming = 'Eb';
+  }
+
   const vooraan = naam.slice(0, treffer.index + treffer[1].length).trim().length === 0;
   const begin = treffer.index + treffer[1].length;
-  const zonderStemming = `${naam.slice(0, begin)} ${naam.slice(begin + treffer[2].length)}`;
+  const zonderStemming = `${naam.slice(0, begin)} ${naam.slice(begin + captured.length)}`;
   return { stemming, vooraan, naam: zonderStemming };
 }
 
