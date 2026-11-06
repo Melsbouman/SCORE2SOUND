@@ -64,7 +64,7 @@ test('maatsoort- en toonsoortwisselingen blijven behouden', () => {
   assert.deepEqual(wisselingen(leesMusicXML(naarMusicXML(score))), verwacht);
 });
 
-test.todo('MIDI bevat een maatsoortgebeurtenis voor elke wisseling', () => {
+test('MIDI bevat een maatsoortgebeurtenis voor elke wisseling', () => {
   const score = leesMusicXML(xml);
   const midi = schrijfMidi(score);
   let aantalMaatsoorten = 0;
