@@ -234,7 +234,7 @@ export function start() {
       melding.classList.remove('instellingen__melding--fout');
       melding.textContent = '';
       try {
-        const antwoord = await fetch('/api/inloggen/profiel', {
+        const antwoord = await fetch('/api/account/profiel', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ naam: naam.value, avatar }),
