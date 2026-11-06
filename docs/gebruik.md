@@ -67,6 +67,7 @@ Kies een noot of een maat en open het tabblad Aanduidingen. Klik op een term, bi
 
 ## De speler
 Onderaan staat de speler. Met de knop links ga je naar het begin, de ronde knop speelt af of pauzeert en de knop rechts gaat naar de volgende maat. De balk daaronder toont hoever het stuk is. Rechts stel je het tempo, de metronoom en de voorinteller in. Passage herhalen staat in het tabblad Start.
+Naast de tempoknop zie je het tempo van de maat die klinkt, aangepast aan het gekozen percentage.
 
 ## Het klikspoor
 Onderaan in de speler zet je het klikspoor aan of uit met het vakje Metronoom. Bij Maten vooraf kies je Geen, 1 maat of 2 maten voor de Voorinteller. De speler onthoudt deze keuzes in de browser.
