@@ -186,3 +186,6 @@ Kies bij **Nieuw stuk** eerst of je bladmuziek wilt inscannen (sleep een pdf of 
 ## Bibliotheek, mappen en labels
 In de **Bibliotheek** zie je je recente stukken en je eigen mappen. Geef een map zelf een naam (bijvoorbeeld Orkest of Concert 14 mei), verplaats een stuk naar een map en geef een stuk labels om het later terug te vinden; het zoekveld zoekt in titel, map en labels. Onder Ontdekken staan rechtenvrije voorbeeldstukken die je als eigen kopie kunt openen.
 
+## Instellingen en profiel
+Op de pagina **Instellingen** kun je je weergavenaam aanpassen. Kies als profielfoto een muziek-emoji of een eigen afbeelding in png- of jpg-formaat. Onder **Account** kun je via **Wachtwoord wijzigen** een nieuw wachtwoord instellen. Kies **Uitloggen** in de zijbalk om je sessie te beëindigen.
+
