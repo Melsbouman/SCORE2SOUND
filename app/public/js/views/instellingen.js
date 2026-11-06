@@ -156,7 +156,7 @@ export function start() {
           <h3>Weergave</h3>
           <label class="instellingen__veld">Thema
             <select name="thema">
-              <option value="systeem">Systeem</option>
+              <option value="systeem">Licht (standaard)</option>
               <option value="licht">Licht</option>
               <option value="donker">Donker</option>
             </select>

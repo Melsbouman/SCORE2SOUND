@@ -1,7 +1,7 @@
 .skip { position: fixed; z-index: 100; top: 8px; left: 8px; padding: 10px 14px; transform: translateY(calc(-100% - 12px)); border-radius: 8px; background: var(--kleur-wit); color: var(--kleur-donker); }
 .skip:focus { transform: translateY(0); outline: 3px solid var(--kleur-accent); outline-offset: 3px; }
 .app { display: grid; grid-template-columns: 270px minmax(0, 1fr); min-height: 100vh; }
-.zijbalk { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 4px; padding: 28px 20px 18px; overflow-y: auto; background: linear-gradient(160deg, var(--kleur-accent) 0%, var(--kleur-zijbalk) 78%); color: var(--kleur-wit); }
+.zijbalk { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 4px; padding: 28px 20px 18px; overflow-y: auto; background: var(--kleur-zijbalk-vlak); color: var(--kleur-wit); }
 .zijbalk__logo { margin: 0 10px 20px; font: 400 1.15rem/1.1 var(--letter-logo); text-transform: uppercase; }
 .zijbalk__logo .logo__2 { color: var(--kleur-licht); }
 .zijbalk__account { position: relative; margin-bottom: 18px; }

@@ -46,6 +46,8 @@
   --letter-logo: 'Archivo Black', 'Arial Black', sans-serif;
   --kleur-licht: #c7e3b0;
   --kleur-zijbalk: #1c4a14;
+  --kleur-zijbalk-vlak: #2b6a1f;
+  --kleur-speler: #0d150b;
   --kleur-donker: #0d150b;
   --kleur-wit: #ffffff;
 }
@@ -62,22 +64,6 @@
   --kleur-op-accent: #0d150b;
   --kleur-fout: #ff8a80;
   --kleur-waarschuwing: #ffc861;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-thema='licht']) {
-    color-scheme: dark;
-    --kleur-achtergrond: #11160f;
-    --kleur-vlak: #1a2217;
-    --kleur-tekst: #eef2e8;
-    --kleur-zacht: #b4c2ab;
-    --kleur-lijn: #9fd68433;
-    --kleur-accent: #8fd16f;
-    --kleur-accent-zacht: #24401b;
-    --kleur-op-accent: #0d150b;
-    --kleur-fout: #ff8a80;
-    --kleur-waarschuwing: #ffc861;
-  }
 }
 
 * { box-sizing: border-box; }
@@ -161,7 +147,7 @@ main:has(#weergave g.measure) #hulp { display: none; }
   z-index: 20;
   padding: var(--ruimte-3) max(24px, 4vw);
   color: var(--kleur-wit);
-  background: var(--kleur-donker);
+  background: var(--kleur-speler);
   border: 0;
   border-radius: 0;
   max-height: 40vh;
