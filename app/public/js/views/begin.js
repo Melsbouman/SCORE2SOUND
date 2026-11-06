@@ -335,16 +335,15 @@ export function start(app) {
       return { groep, veld, fout };
     }
 
-    const tempo = maakGetalveld('tempo', 'Tempo', 100, 30, 300);
-    const aantalMaten = maakGetalveld('aantal-maten', 'Aantal maten', 8, 1, 400);
+    // Tempo en aantal maten vraagt het scherm niet meer: tempo 100 en 8 maten, aan te passen in de editor.
+    const STANDAARD_TEMPO = 100;
+    const STANDAARD_MATEN = 8;
     const instrumentFout = maakElement('p', 'begin__veldfout');
     formulier.append(
       titel.groep,
       componist.groep,
       maatsoortGroep,
       toonsoortGroep,
-      tempo.groep,
-      aantalMaten.groep,
       instrumentFout,
     );
 
@@ -366,13 +365,9 @@ export function start(app) {
       voegSamenvattingToe('Instrumenten', instrumentNamen().join(', ') || 'Nog niet gekozen');
       voegSamenvattingToe('Maatsoort', gekozenMaatsoort);
       voegSamenvattingToe('Toonsoort', toonsoort.options[toonsoort.selectedIndex].textContent);
-      voegSamenvattingToe('Tempo', `${tempo.veld.value || '—'} bpm`);
-      voegSamenvattingToe('Aantal maten', aantalMaten.veld.value || '—');
     }
 
-    for (const veld of [toonsoort, tempo.veld, aantalMaten.veld]) {
-      veld.addEventListener('input', werkSamenvattingBij);
-    }
+    toonsoort.addEventListener('input', werkSamenvattingBij);
     werkSamenvattingBij();
 
     const acties = maakElement('div', 'begin__acties begin__acties--details');
@@ -389,17 +384,7 @@ export function start(app) {
     formulier.addEventListener('submit', (gebeurtenis) => {
       gebeurtenis.preventDefault();
       instrumentFout.textContent = gekozenInstrumenten.length ? '' : 'Kies minstens één instrument.';
-      const matenWaarde = Number(aantalMaten.veld.value);
-      if (!Number.isInteger(matenWaarde) || matenWaarde < 1) {
-        aantalMaten.fout.textContent = 'Het aantal maten moet minstens 1 zijn.';
-      } else if (matenWaarde > 400) {
-        aantalMaten.fout.textContent = 'Het aantal maten mag niet meer dan 400 zijn.';
-      } else aantalMaten.fout.textContent = '';
-      const tempoWaarde = Number(tempo.veld.value);
-      tempo.fout.textContent = Number.isFinite(tempoWaarde) && tempoWaarde >= 30 && tempoWaarde <= 300
-        ? ''
-        : 'Kies een tempo tussen 30 en 300.';
-      if (instrumentFout.textContent || aantalMaten.fout.textContent || tempo.fout.textContent) return;
+      if (instrumentFout.textContent) return;
 
       const [teller, noemer] = gekozenMaatsoort.split('/').map(Number);
       const partituur = maakLeegStuk({
@@ -408,8 +393,8 @@ export function start(app) {
         instrumenten: gekozenInstrumenten,
         maatsoort: { teller, noemer },
         kwinten: Number(toonsoort.value),
-        tempo: tempoWaarde,
-        aantalMaten: matenWaarde,
+        tempo: STANDAARD_TEMPO,
+        aantalMaten: STANDAARD_MATEN,
       });
       app.zet({ partituur, meldingen: [], project: null });
       app.meld('bewaar-project', { naam: partituur.titel || 'Nieuw stuk' });

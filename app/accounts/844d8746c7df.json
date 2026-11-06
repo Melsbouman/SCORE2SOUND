@@ -3,5 +3,12 @@
   "email": "melsbouman@ziggo.nl",
   "wachtwoordHash": "b67bf31b662bfacc0e7811236200295c843ec5bce580e6247915b4ba8a040e29380b91c1438141cce1cdba32d5c8f7b08bf98e0893d0e285ef0c34511ece8246",
   "zout": "7909a90ace8c39951b3c8878a4e26f2a",
-  "code": ""
+  "code": "",
+  "profiel": {
+    "naam": "Mels Bouman",
+    "avatar": {
+      "soort": "emoji",
+      "waarde": "🥁"
+    }
+  }
 }
