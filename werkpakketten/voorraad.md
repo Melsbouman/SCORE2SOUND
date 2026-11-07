@@ -20,11 +20,11 @@ Elke regel: wat Mels zei, hoe Claude het begrijpt, de stand en het issue of plan
 - [x] **Opslaan in Accountinstellingen** werkte niet (verkeerde route); opgelost 6 nov, met test.
 - [x] **Ontdekken** (zoals de Spotify-startpagina): zoekbalk, Uitgelicht, Componisten, kaarten; opent stukken uit OpenScore Lieder (1462 stukken, CC0). Gedaan 6 nov.
 - [x] **Ontdekken met afwisseling (7 nov):** catalogus van 2295 stukken in 6 soorten: Liederen (1462), Strijkkwartetten (196), Bach-koralen (410), Klassiek en barok (68), Ragtime en meer (4), Oude muziek (155); bronnen OpenScore en music21; gemaakt met `werkpakketten/bronnen/maak_catalogus.py`.
-- [ ] **Ontdekken verder uitbreiden:** Mutopia (veel piano, gitaar, koper; PDF met herkenning), IMSLP (PDF), brassband en harmonie (weinig rechtenvrij), eigen herkende rechtenvrije scans; zoeken op instrument en tijdperk, favorieten. Plan: `plannen/2026-11-06-editor-roadmap.md`, fase D.
+- [ ] **Ontdekken verder uitbreiden:** Mutopia (veel piano, gitaar, koper; PDF met herkenning), IMSLP (PDF), brassband en harmonie (weinig rechtenvrij), eigen herkende rechtenvrije scans; zoeken op instrument en tijdperk, favorieten. Plan: `plannen/archief/2026-11-06-editor-roadmap.md`, fase D.
 - [ ] **Bibliotheek:** de kaartmenu's (Menu) vielen over elkaar; Bibliotheek moet een eigen schoon scherm zijn (taak 1666 maakt het tabblad Bestand schoon).
 
 ### Editor (zoals MuseScore)
-Mels' voorbeeld: MuseScore Studio. Plannen: `plannen/2026-11-06-musescore-stijl.md`, `2026-11-06-editor-paletten.md`, `2026-11-06-editor-roadmap.md`.
+Mels' voorbeeld: MuseScore Studio. Plannen: `plannen/archief/2026-11-06-musescore-stijl.md`, `archief/2026-11-06-editor-paletten.md`, `archief/2026-11-06-editor-roadmap.md`.
 - [ ] **Lint opgeruimd:** knoppen in nette groepen met pictogram en één regel label, niets over elkaar (1665); Bestand-tabblad zonder bibliotheek (1666); tabbladen logischer: Bestand, Noten, Aanduidingen, Controleren, Partijen, Afspelen (was Start), Weergave; geen "alle maten lijken te kloppen" bij een lege partituur (1667).
 - [ ] **Tempo-paneel in de annotatiebalk:** tempo kunnen zetten op elke maat, zodat het halverwege het stuk langzamer of sneller kan (1662). Wordt later een onderdeel van het paletten-paneel.
 - [ ] **Paletten links met uitklapbare onderdelen** (Muzieksleutels, Toonsoorten, Maatsoorten, Tempo, Toonhoogte, Voortekens, Dynamiek, Articulaties, Tekst, Herhalingen en sprongen, Maatstrepen): lijst (1671), paneel (1668), klikken en slepen in de partituur (1675). Bron: `bronnen/paletten-glyphs.txt` (uit de .mpal-bestanden van Mels).
@@ -33,7 +33,7 @@ Mels' voorbeeld: MuseScore Studio. Plannen: `plannen/2026-11-06-musescore-stijl.
 - [ ] **Nieuwe partij:** eigen scherm voor één partij (1673). Zie Vragen.
 - [ ] **Editor even sterk als die van MuseScore:** roadmap fase B (selectie, stemmen, versieringen, tekst, ongedaan maken), C (weergave, mixer, klank, export), D (databanken). Na fase A een vergelijking met MuseScore op 30 handelingen.
 
-- [ ] **Webapp die puur in de browser werkt, met een eigen domein** (geen server, geen downloads): statische hosting, importeren in de browser, Ontdekken direct bij GitHub, projecten in de browser, .mscz importeren; scan-import later apart. Plan: `plannen/2026-11-07-statische-webapp.md`.
+- [ ] **Webapp die puur in de browser werkt, met een eigen domein** (geen server, geen downloads): statische hosting, importeren in de browser, Ontdekken direct bij GitHub, projecten in de browser, .mscz importeren; scan-import later apart. Plan: `plannen/archief/2026-11-07-statische-webapp.md`.
 - [ ] **Herkenning: eigen meetlat en gerichte verbeteringen.** Eerst een testset (OpenScore pdf + MusicXML, Mutopia, 20 pagina's brassmuziek van Mels) en een vergelijking van Audiveris, homr en oemer; dan rustaantallen en tempogetallen uit het paginabeeld knippen en met OCR lezen (positie uit Audiveris). Eigen model trainen alleen als de meting dat rechtvaardigt.
 
 ### Vragen aan Mels (nog niet duidelijk)
@@ -138,3 +138,5 @@ Gedaan met `VERGELIJK_UIT=<json> bash hermes/echte-controle.sh <pdf> 1`, daarna 
 - [ ] Maat 15, 31 en 40 bij Galop duren 1,5 kwart in plaats van 2 (kleine noot niet gelezen of kwart i.p.v. achtste).
 - [ ] Het scherm Nieuw stuk, partijen toevoegen en noten invoeren in de browser doorlopen met een testaccount en op 375 px (Claude of Mels).
 - [ ] Tesseract als tweede tekstlezer (plan: werkpakketten/plannen/tekstlezer-tesseract.md); akkoord Mels voor de installatie.
+
+> Opmerking (7 nov): de plannen over MuseScore-stijl, paletten, roadmap en de statische webapp zijn op verzoek van Mels naar `werkpakketten/plannen/archief/` verplaatst, tot hij heeft gebrainstormd. De open issues 1660, 1662, 1665 tot en met 1668 en 1670 tot en met 1675 staan zonder label stil.
