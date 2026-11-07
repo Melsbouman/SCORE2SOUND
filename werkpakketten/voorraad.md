@@ -19,7 +19,8 @@ Elke regel: wat Mels zei, hoe Claude het begrijpt, de stand en het issue of plan
 - [x] **Kleuren zoals de voorpagina:** crème, effen groene zijbalk (geen verloop), zwarte speler; donker alleen op keuze in Instellingen; koppen in de stevige Bodoni-stand.
 - [x] **Opslaan in Accountinstellingen** werkte niet (verkeerde route); opgelost 6 nov, met test.
 - [x] **Ontdekken** (zoals de Spotify-startpagina): zoekbalk, Uitgelicht, Componisten, kaarten; opent stukken uit OpenScore Lieder (1462 stukken, CC0). Gedaan 6 nov.
-- [ ] **Ontdekken uitbreiden (databanken):** meer rechtenvrije bronnen (OpenScore String Quartets, Mutopia, eigen herkende rechtenvrije scans), zoeken op instrument en tijdperk, favorieten. Plan: `plannen/2026-11-06-editor-roadmap.md`, fase D.
+- [x] **Ontdekken met afwisseling (7 nov):** catalogus van 2295 stukken in 6 soorten: Liederen (1462), Strijkkwartetten (196), Bach-koralen (410), Klassiek en barok (68), Ragtime en meer (4), Oude muziek (155); bronnen OpenScore en music21; gemaakt met `werkpakketten/bronnen/maak_catalogus.py`.
+- [ ] **Ontdekken verder uitbreiden:** Mutopia (veel piano, gitaar, koper; PDF met herkenning), IMSLP (PDF), brassband en harmonie (weinig rechtenvrij), eigen herkende rechtenvrije scans; zoeken op instrument en tijdperk, favorieten. Plan: `plannen/2026-11-06-editor-roadmap.md`, fase D.
 - [ ] **Bibliotheek:** de kaartmenu's (Menu) vielen over elkaar; Bibliotheek moet een eigen schoon scherm zijn (taak 1666 maakt het tabblad Bestand schoon).
 
 ### Editor (zoals MuseScore)

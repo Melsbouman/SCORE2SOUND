@@ -1,5 +1,5 @@
 // Ontdekken: zoeken in gratis stukken (OpenScore Lieder, CC0) en ze openen in de app.
-import { zoekWerken, uitgelicht, componisten } from '/src/model/ontdekken.mjs';
+import { zoekWerken, componisten, categorieen, perCategorie } from '/src/model/ontdekken.mjs';
 
 export function start(app) {
   const vlak = document.getElementById('ontdekken-scherm');
@@ -7,6 +7,7 @@ export function start(app) {
 
   let werken = null;
   let fout = '';
+  let categorie = null;
 
   const zoek = document.createElement('input');
   zoek.type = 'search';
@@ -20,7 +21,7 @@ export function start(app) {
   inhoud.className = 'ontdekken__inhoud';
   const uitleg = document.createElement('p');
   uitleg.className = 'ontdekken__uitleg';
-  uitleg.textContent = 'Gratis bladmuziek uit het publieke domein (OpenScore Lieder). Zoek een stuk en open het in de editor.';
+  uitleg.textContent = 'Gratis bladmuziek uit het publieke domein (liederen, strijkkwartetten, Bach-koralen, ragtime en meer). Zoek een stuk of blader per soort, en open het in de editor.';
   vlak.replaceChildren(uitleg, zoek, melding, inhoud);
 
   function kaart(werk) {
@@ -56,24 +57,55 @@ export function start(app) {
     return groep;
   }
 
+  function chips() {
+    const balk = document.createElement('div');
+    balk.className = 'ontdekken__pillen ontdekken__categorien';
+    const maak = (naam, tekst) => {
+      const pil = document.createElement('button');
+      pil.type = 'button';
+      pil.className = 'ontdekken__pil';
+      pil.textContent = tekst;
+      pil.setAttribute('aria-pressed', String(categorie === naam));
+      pil.addEventListener('click', () => { categorie = naam; teken(); });
+      return pil;
+    };
+    balk.append(maak(null, 'Alles'));
+    for (const { naam, aantal } of categorieen(werken)) balk.append(maak(naam, `${naam} (${aantal})`));
+    return balk;
+  }
+
   function teken() {
     inhoud.replaceChildren();
     melding.textContent = fout;
     if (!werken) return;
+    inhoud.append(chips());
     const tekst = zoek.value.trim();
-    if (tekst) {
-      const treffers = zoekWerken(werken, tekst);
+    if (tekst || categorie) {
+      const treffers = zoekWerken(werken, tekst, { categorie });
       if (treffers.length === 0) {
         const leeg = document.createElement('p');
         leeg.textContent = 'Niets gevonden.';
         inhoud.append(leeg);
       } else {
-        inhoud.append(rij(`${treffers.length >= 60 ? '60 of meer' : treffers.length} resultaten`, treffers.map(kaart)));
+        const aantal = treffers.length >= 60 ? '60 of meer' : String(treffers.length);
+        inhoud.append(rij(categorie ? `${categorie}: ${aantal} stukken` : `${aantal} resultaten`, treffers.map(kaart)));
       }
       return;
     }
     const dag = Math.floor(Date.now() / 86400000);
-    inhoud.append(rij('Uitgelicht', uitgelicht(werken, 8, dag).map(kaart)));
+    const rijen = perCategorie(werken, 6, dag);
+    const mix = rijen.flatMap((groep) => groep.werken.slice(0, 1)).slice(0, 8);
+    inhoud.append(rij('Uitgelicht', mix.map(kaart)));
+    for (const groep of rijen) {
+      const blok = rij(groep.categorie, groep.werken.map(kaart));
+      const meer = document.createElement('button');
+      meer.type = 'button';
+      meer.className = 'ontdekken__pil';
+      meer.textContent = `Alles in ${groep.categorie}`;
+      meer.addEventListener('click', () => { categorie = groep.categorie; teken(); });
+      blok.append(meer);
+      inhoud.append(blok);
+    }
     const groep = document.createElement('section');
     groep.className = 'ontdekken__groep';
     const h = document.createElement('h3');
@@ -105,7 +137,10 @@ export function start(app) {
       });
       const resultaat = await antwoord.json();
       if (!antwoord.ok) throw new Error(resultaat.fout || 'Het stuk kon niet worden geopend.');
-      app.zet({ partituur: resultaat.partituur, meldingen: resultaat.meldingen, project: null, versies: [] });
+      const partituur = resultaat.partituur;
+      if (!partituur.titel) partituur.titel = werk.titel;
+      if (!partituur.componist) partituur.componist = werk.componist;
+      app.zet({ partituur, meldingen: resultaat.meldingen, project: null, versies: [] });
       melding.textContent = '';
       window.location.hash = '#weergave';
     } catch (e) {
@@ -117,7 +152,7 @@ export function start(app) {
   }
 
   zoek.addEventListener('input', teken);
-  fetch('/ontdekken/lieder.json')
+  fetch('/ontdekken/catalogus.json')
     .then((r) => r.json())
     .then((lijst) => { werken = lijst.werken; teken(); })
     .catch(() => { fout = 'De lijst met stukken kon niet worden geladen.'; teken(); });

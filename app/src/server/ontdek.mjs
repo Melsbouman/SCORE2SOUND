@@ -1,8 +1,8 @@
-// Ontdekken: haalt een stuk uit de catalogus (OpenScore Lieder, CC0) op bij GitHub en geeft het door.
-// GET /api/ontdek/<id>. Alleen id's uit app/public/ontdekken/lieder.json; alleen de host raw.githubusercontent.com.
+// Ontdekken: haalt een stuk uit de catalogus (OpenScore, music21; rechtenvrij) op bij GitHub en geeft het door.
+// GET /api/ontdek/<id>. Alleen id's uit app/public/ontdekken/catalogus.json; alleen de host raw.githubusercontent.com.
 import { readFile } from 'node:fs/promises';
 
-const CATALOGUS = new URL('../../public/ontdekken/lieder.json', import.meta.url);
+const CATALOGUS = new URL('../../public/ontdekken/catalogus.json', import.meta.url);
 let onthouden = null;
 
 async function catalogus() {
@@ -10,16 +10,17 @@ async function catalogus() {
   return onthouden;
 }
 
-export function rawUrl(catalogus, werk) {
+export function rawUrl(werk) {
   const pad = werk.pad.split('/').map(encodeURIComponent).join('/');
-  return `https://raw.githubusercontent.com/${catalogus.repo}/${catalogus.tak}/${pad}`;
+  return `https://raw.githubusercontent.com/${werk.repo}/${werk.tak}/${pad}`;
 }
 
 export async function haalOp(id, { fetch: haal = fetch } = {}) {
   const lijst = await catalogus();
   const werk = lijst.werken.find((item) => item.id === id);
   if (!werk) return { status: 404, body: { fout: 'Onbekend stuk.' } };
-  const url = rawUrl(lijst, werk);
+  if (!lijst.bronnen.some((bron) => bron.repo === werk.repo)) return { status: 404, body: { fout: 'Onbekend stuk.' } };
+  const url = rawUrl(werk);
   if (new URL(url).hostname !== 'raw.githubusercontent.com') return { status: 502, body: { fout: 'Het stuk kon niet worden opgehaald.' } };
   try {
     const antwoord = await haal(url);
