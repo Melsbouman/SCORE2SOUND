@@ -2,6 +2,46 @@
 
 Claude pakt hier werk uit als een nachtplan af is en de eindtijd nog niet bereikt is (zie `.claude/skills/nachtplan/SKILL.md`). Bovenaan staat het belangrijkste. Mels en Claude mogen allebei punten toevoegen; Claude zet bij eigen punten "(Claude)" erachter.
 
+## Wensen van Mels uit de chat van 5 tot 7 november (geordend door Claude)
+Elke regel: wat Mels zei, hoe Claude het begrijpt, de stand en het issue of plan. `[x]` is klaar op `main`; `[ ]` is open. Wat onzeker is staat onder **Vragen**.
+
+### Herkenning en muziek
+- [ ] **Meermaatsrusten goed lezen.** Mels: vaak staat er in het origineel 9, 14 of 5 maten rust, soms met een ander tempo tussen de rusten; de app maakt er een maat van. Begrepen: de aantallen boven een samengestelde rust moeten worden gelezen en aan de juiste maat gekoppeld, ook midden in een stuk. Stand: beginrust uit paginatekst gedaan (`creditBeginRust`, PR 1562); koppeling van aantallen midden in het stuk ontbreekt omdat Audiveris ze als losse paginatekst bewaart zonder maatverwijzing. Volgende stap: een echte herkenning (Audiveris draait niet in de omgeving van Codex) op Galop en Sand and Stars met een kaart van x, y per maat en regel, dan koppelen. Plan: `plannen/2026-11-05-rusten-en-tempowissels.md`, rapporten in `onderzoek/`.
+- [ ] **Tempowisselingen per stuk zien.** Mels: het tempo verandert vaak in een stuk, kan nooit overal hetzelfde zijn. Begrepen: metronoomgetallen en tempowoorden midden in het stuk lezen en bij de goede maat zetten. Stand: `creditTempos` en eerste tempo uit paginatekst gedaan, a tempo en rall. herstellen, tempo in de speler; koppeling van tempo's midden in het stuk aan een maat ontbreekt (zelfde reden als hierboven).
+- [ ] **Betere klank.** Mels: MuseSounds is perfect. Begrepen: een veel mooier en echter geluid, zeker voor brassband. MuseSounds zelf kan niet (gesloten, betaald, alleen in MuseScore). Taak: onderzoek naar betere gratis klankbanken (CC0 of vrije licentie) per instrument en een keuze per partij; MuseScore General blijft de basis.
+- [x] Instrumentnamen en muziektermen herstellen (Drums, Xylophone, BBb Bass, Tenor Trombone, Allegretto) en tempowoorden (6 nov).
+- [ ] Uit de lijst van 5 november: A4 (niets mag wegvallen, ook slagwerkbalken), tweede stem, voorslagen, fermate in notatie, arrangeur/Vivace/Marcato via Windows-OCR controleren op Galop; maat 15, 31, 40 bij Galop duren 1,5 kwart; regelindeling van het origineel; reden voor niet-gekoppelde noten.
+
+### Schermen en indeling
+- [x] **Een scherm tegelijk, kop met de naam van het scherm** (Editor, Bibliotheek, Ontdekken, Instellingen, Inloggen); Partituur valt onder Editor; gewoon lettertype. Gedaan 6 nov (`kop.js`).
+- [x] **Begin-scherm:** bovenste kop weg; na het kiezen opent de editor en is het begin-scherm weg; Tempo en Aantal maten weg uit Details.
+- [x] **Zijbalk onder Maken:** Nieuwe partituur en Nieuwe partij. Het scherm voor Nieuwe partij bestaat nog niet (taak 1673).
+- [x] **Kleuren zoals de voorpagina:** crème, effen groene zijbalk (geen verloop), zwarte speler; donker alleen op keuze in Instellingen; koppen in de stevige Bodoni-stand.
+- [x] **Opslaan in Accountinstellingen** werkte niet (verkeerde route); opgelost 6 nov, met test.
+- [x] **Ontdekken** (zoals de Spotify-startpagina): zoekbalk, Uitgelicht, Componisten, kaarten; opent stukken uit OpenScore Lieder (1462 stukken, CC0). Gedaan 6 nov.
+- [ ] **Ontdekken uitbreiden (databanken):** meer rechtenvrije bronnen (OpenScore String Quartets, Mutopia, eigen herkende rechtenvrije scans), zoeken op instrument en tijdperk, favorieten. Plan: `plannen/2026-11-06-editor-roadmap.md`, fase D.
+- [ ] **Bibliotheek:** de kaartmenu's (Menu) vielen over elkaar; Bibliotheek moet een eigen schoon scherm zijn (taak 1666 maakt het tabblad Bestand schoon).
+
+### Editor (zoals MuseScore)
+Mels' voorbeeld: MuseScore Studio. Plannen: `plannen/2026-11-06-musescore-stijl.md`, `2026-11-06-editor-paletten.md`, `2026-11-06-editor-roadmap.md`.
+- [ ] **Lint opgeruimd:** knoppen in nette groepen met pictogram en één regel label, niets over elkaar (1665); Bestand-tabblad zonder bibliotheek (1666); tabbladen logischer: Bestand, Noten, Aanduidingen, Controleren, Partijen, Afspelen (was Start), Weergave; geen "alle maten lijken te kloppen" bij een lege partituur (1667).
+- [ ] **Tempo-paneel in de annotatiebalk:** tempo kunnen zetten op elke maat, zodat het halverwege het stuk langzamer of sneller kan (1662). Wordt later een onderdeel van het paletten-paneel.
+- [ ] **Paletten links met uitklapbare onderdelen** (Muzieksleutels, Toonsoorten, Maatsoorten, Tempo, Toonhoogte, Voortekens, Dynamiek, Articulaties, Tekst, Herhalingen en sprongen, Maatstrepen): lijst (1671), paneel (1668), klikken en slepen in de partituur (1675). Bron: `bronnen/paletten-glyphs.txt` (uit de .mpal-bestanden van Mels).
+- [ ] **Notenbalk bovenin de editor** (duren, punt, rust, voortekens, ligatuur, triolen met uitklap: duool tot negentool, stemmen 1 tot 4): model (1670), balk (1674).
+- [ ] **Nieuwe partituur: keuzescherm zoals MuseScore** (Kies instrumenten / Maak van sjabloon; Familie met genres Regulier, Alle instrumenten, Pop/Rock, Jazz, Koor, Orkest, Symfonieorkest, Muziekkorps, Brassband, Schoollokaal; Instrumenten met zoeken; Uw partituur met volgorde): model (1669), scherm (1672).
+- [ ] **Nieuwe partij:** eigen scherm voor één partij (1673). Zie Vragen.
+- [ ] **Editor even sterk als die van MuseScore:** roadmap fase B (selectie, stemmen, versieringen, tekst, ongedaan maken), C (weergave, mixer, klank, export), D (databanken). Na fase A een vergelijking met MuseScore op 30 handelingen.
+
+### Vragen aan Mels (nog niet duidelijk)
+1. **Nieuwe partij:** je schreef dat dit "een andere editor opent". Begrijp ik het goed als: dezelfde editor, maar met één notenbalk en de partij-opmaak (grote noten, paginanummer)? Of wil je echt een apart soort editor?
+2. **Ontdekken:** is OpenScore Lieder (liederen, klassiek) genoeg als eerste bron, of wil je eerst iets voor brassband of piano? Zoeken we ook in je eigen bibliotheek?
+3. **MuseScore op de server:** akkoord om later te onderzoeken of MuseScore als losse opdracht op een server kan draaien (zwaar om online te zetten)? Nu doen we het niet.
+4. **Uitvoerders:** Codex is op tot 10 november 15:48, Copilot tot december; wil je Codex bijkopen, of moeten we grote schermtaken door Claude laten doen?
+
+### Eerdere verbeteringen die al bestaan (opgeschoond 7 nov)
+- [x] Scherm Wachtwoord wijzigen en Exportknop .mxl, Metronoom en Voorinteller in de speler, Partijen verbergen in de notatie, extra tests voor speelVolgorde, docs voor klikspoor en verbergen (allemaal aanwezig).
+
+## Oudere voorraad (nog te sorteren)
 - [ ] Bij *Meditation* kon de app 146 van 214 noten niet aan het origineel koppelen (klikken naar het origineel werkt daar niet); uitzoeken waarom, met de echte pagina. (Claude)
 - [ ] Tekst die Audiveris leest bevat OCR-fouten (teneramenre, poco agitate, .m0rend0); een woordenlijst met muziektermen (rall., dolce, poco a poco, a tempo, molto, cresc.) kan ze verbeteren. (Claude)
 - [ ] Fermate: Audiveris leest hem niet overal (bij *A Time for Peace* niet, bij *Apatheia* wel); zoek hem zoals de kaders in het bladbeeld. En de speler houdt een fermate nog niet langer aan. (Claude)
@@ -13,12 +53,12 @@ Claude pakt hier werk uit als een nachtplan af is en de eindtijd nog niet bereik
 - [ ] Knoppen in de editor voor splitsen (splitsRust, splitsNoot) en Maatduur herstellen (vulMaatAan of herstelMaatduur); de toets S bestaat al. (Claude)
 
 ## Open
-- [ ] Scherm voor het wijzigen van het wachtwoord in app/public/js/views/inloggen.js, met POST /api/account/wachtwoord; pas maken als de taak voor wijzigWachtwoord gemerged is (Claude)
-- [ ] Exportknop MusicXML (.mxl) in app/public/js/views/export.js met maakMxl uit app/src/musicxml/mxl.mjs; pas maken als die gemerged is (Claude)
-- [ ] Extra tests voor speelVolgorde bij twee herhalingen na elkaar, een volta gevolgd door een gewone maat en een lege partij (twee pogingen faalden op een test die niet te achterhalen was; probeer één geval per taak) (Claude)
-- [ ] Speler: een keuze Metronoom en Voorinteller (geen, 1 of 2 maten) in app/public/js/speler.js die schrijfMidi met de optie klik gebruikt (app/src/midi/klik.mjs); pas maken als de klik-taak gemerged is (Claude)
-- [ ] Notatie: een keuze per partij Tonen in de notatie, in app/public/js/views/mixer.js, die de optie verberg van naarMusicXML gebruikt (zet app.stand.verborgen en laat weergave.js dat doorgeven); pas maken als de verberg-taak gemerged is (Claude)
-- [ ] Documentatie: docs/gebruik.md aanvullen met meerdere bestanden tegelijk openen, het klikspoor en partijen verbergen, zodra die er zijn (Claude)
+- [x] Scherm voor het wijzigen van het wachtwoord in app/public/js/views/inloggen.js, met POST /api/account/wachtwoord; pas maken als de taak voor wijzigWachtwoord gemerged is (Claude)
+- [x] Exportknop MusicXML (.mxl) in app/public/js/views/export.js met maakMxl uit app/src/musicxml/mxl.mjs; pas maken als die gemerged is (Claude)
+- [x] Extra tests voor speelVolgorde bij twee herhalingen na elkaar, een volta gevolgd door een gewone maat en een lege partij (twee pogingen faalden op een test die niet te achterhalen was; probeer één geval per taak) (Claude)
+- [x] Speler: een keuze Metronoom en Voorinteller (geen, 1 of 2 maten) in app/public/js/speler.js die schrijfMidi met de optie klik gebruikt (app/src/midi/klik.mjs); pas maken als de klik-taak gemerged is (Claude)
+- [x] Notatie: een keuze per partij Tonen in de notatie, in app/public/js/views/mixer.js, die de optie verberg van naarMusicXML gebruikt (zet app.stand.verborgen en laat weergave.js dat doorgeven); pas maken als de verberg-taak gemerged is (Claude)
+- [x] Documentatie: docs/gebruik.md aanvullen met meerdere bestanden tegelijk openen, het klikspoor en partijen verbergen, zodra die er zijn (Claude)
 
 ## Wacht op Mels
 - [ ] Branch protection op `main` aanzetten (PR verplicht, later ook de check `controle`).
