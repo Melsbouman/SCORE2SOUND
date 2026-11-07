@@ -23,6 +23,23 @@ export const INSTRUMENTEN = [
   { id: 'viool', naam: 'Viool', midiProgramma: 40, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 55, hoog: 100 } },
   { id: 'altviool', naam: 'Altviool', midiProgramma: 41, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'C', lijn: 3 }, bereik: { laag: 48, hoog: 88 } },
   { id: 'cello', naam: 'Cello', midiProgramma: 42, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'F', lijn: 4 }, bereik: { laag: 36, hoog: 76 } },
+  { id: 'basstrombone', naam: 'Basstrombone', midiProgramma: 57, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'F', lijn: 4 }, bereik: { laag: 34, hoog: 67 } },
+  { id: 'es-bas', naam: 'Es-bas', midiProgramma: 58, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'F', lijn: 4 }, bereik: { laag: 28, hoog: 65 } },
+  { id: 'kleine-trom', naam: 'Kleine trom', midiProgramma: 0, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'F', lijn: 4 }, bereik: { laag: 35, hoog: 81 } },
+  { id: 'grote-trom', naam: 'Grote trom', midiProgramma: 0, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'F', lijn: 4 }, bereik: { laag: 35, hoog: 81 } },
+  { id: 'bekkens', naam: 'Bekkens', midiProgramma: 0, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'F', lijn: 4 }, bereik: { laag: 35, hoog: 81 } },
+  { id: 'triangel', naam: 'Triangel', midiProgramma: 0, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'F', lijn: 4 }, bereik: { laag: 35, hoog: 81 } },
+  { id: 'xylofoon', naam: 'Xylofoon', midiProgramma: 13, transpositie: { chromatisch: 12, diatonisch: 7 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 65, hoog: 108 } },
+  { id: 'glockenspiel', naam: 'Glockenspiel', midiProgramma: 9, transpositie: { chromatisch: 24, diatonisch: 14 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 79, hoog: 108 } },
+  { id: 'marimba', naam: 'Marimba', midiProgramma: 12, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 45, hoog: 96 } },
+  { id: 'contrabas', naam: 'Contrabas', midiProgramma: 43, transpositie: { chromatisch: -12, diatonisch: -7 }, sleutel: { teken: 'F', lijn: 4 }, bereik: { laag: 28, hoog: 67 } },
+  { id: 'harp', naam: 'Harp', midiProgramma: 46, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 24, hoog: 103 } },
+  { id: 'gitaar', naam: 'Gitaar', midiProgramma: 24, transpositie: { chromatisch: -12, diatonisch: -7 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 40, hoog: 88 } },
+  { id: 'basgitaar', naam: 'Basgitaar', midiProgramma: 33, transpositie: { chromatisch: -12, diatonisch: -7 }, sleutel: { teken: 'F', lijn: 4 }, bereik: { laag: 28, hoog: 67 } },
+  { id: 'sopraan', naam: 'Zang: sopraan', midiProgramma: 52, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 60, hoog: 81 } },
+  { id: 'alt', naam: 'Zang: alt', midiProgramma: 52, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 55, hoog: 77 } },
+  { id: 'tenor', naam: 'Zang: tenor', midiProgramma: 52, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'G', lijn: 2 }, bereik: { laag: 48, hoog: 69 } },
+  { id: 'bas', naam: 'Zang: bas', midiProgramma: 52, transpositie: { chromatisch: 0, diatonisch: 0 }, sleutel: { teken: 'F', lijn: 4 }, bereik: { laag: 40, hoog: 64 } },
 ];
 
 // Herkent een instrument aan een partijnaam uit een partituur. De volgorde telt: de eerste die past, wint.

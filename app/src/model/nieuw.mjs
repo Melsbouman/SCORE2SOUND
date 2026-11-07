@@ -25,7 +25,7 @@ export const FAMILIES = [
   {
     id: 'koper',
     naam: 'Koper',
-    instrumenten: ['bugel', 'es-kornet', 'trompet', 'althoorn', 'hoorn', 'bariton', 'trombone', 'tuba', 'bes-tuba'],
+    instrumenten: ['bugel', 'es-kornet', 'trompet', 'althoorn', 'hoorn', 'bariton', 'trombone', 'basstrombone', 'tuba', 'bes-tuba', 'es-bas'],
   },
   {
     id: 'hout',
@@ -35,12 +35,17 @@ export const FAMILIES = [
   {
     id: 'strijkers',
     naam: 'Strijkers',
-    instrumenten: ['viool', 'altviool', 'cello'],
+    instrumenten: ['viool', 'altviool', 'cello', 'contrabas'],
   },
   {
     id: 'toetsen-slagwerk',
     naam: 'Toetsen en slagwerk',
-    instrumenten: ['piano', 'timpani'],
+    instrumenten: ['piano', 'timpani', 'kleine-trom', 'grote-trom', 'bekkens', 'triangel', 'xylofoon', 'glockenspiel', 'marimba', 'harp'],
+  },
+  {
+    id: 'zang-snaren',
+    naam: 'Zang en gitaar',
+    instrumenten: ['gitaar', 'basgitaar', 'sopraan', 'alt', 'tenor', 'bas'],
   },
 ];
 
