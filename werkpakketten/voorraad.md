@@ -33,6 +33,9 @@ Mels' voorbeeld: MuseScore Studio. Plannen: `plannen/2026-11-06-musescore-stijl.
 - [ ] **Nieuwe partij:** eigen scherm voor één partij (1673). Zie Vragen.
 - [ ] **Editor even sterk als die van MuseScore:** roadmap fase B (selectie, stemmen, versieringen, tekst, ongedaan maken), C (weergave, mixer, klank, export), D (databanken). Na fase A een vergelijking met MuseScore op 30 handelingen.
 
+- [ ] **Webapp die puur in de browser werkt, met een eigen domein** (geen server, geen downloads): statische hosting, importeren in de browser, Ontdekken direct bij GitHub, projecten in de browser, .mscz importeren; scan-import later apart. Plan: `plannen/2026-11-07-statische-webapp.md`.
+- [ ] **Herkenning: eigen meetlat en gerichte verbeteringen.** Eerst een testset (OpenScore pdf + MusicXML, Mutopia, 20 pagina's brassmuziek van Mels) en een vergelijking van Audiveris, homr en oemer; dan rustaantallen en tempogetallen uit het paginabeeld knippen en met OCR lezen (positie uit Audiveris). Eigen model trainen alleen als de meting dat rechtvaardigt.
+
 ### Vragen aan Mels (nog niet duidelijk)
 1. **Nieuwe partij:** je schreef dat dit "een andere editor opent". Begrijp ik het goed als: dezelfde editor, maar met één notenbalk en de partij-opmaak (grote noten, paginanummer)? Of wil je echt een apart soort editor?
 2. **Ontdekken:** is OpenScore Lieder (liederen, klassiek) genoeg als eerste bron, of wil je eerst iets voor brassband of piano? Zoeken we ook in je eigen bibliotheek?
