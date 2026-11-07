@@ -3,7 +3,6 @@
 const TITELS = [
   [/^(bewerken|editor|weergave)\b/, 'Editor'],
   [/^(projecten|bibliotheek)\b/, 'Bibliotheek'],
-  [/^ontdekken\b/, 'Ontdekken'],
   [/^export\b/, 'Exporteren'],
   [/^instellingen\b/, 'Instellingen'],
   [/^inloggen\b/, 'Inloggen'],
@@ -22,13 +21,11 @@ const VLAKKEN = {
   begin: ['nieuw', 'upload', 'voorbeeld', 'hulp'],
   editor: ['zoom', 'weergave'],
   bibliotheek: ['projecten'],
-  ontdekken: ['ontdekken-scherm'],
   inloggen: ['inloggen'],
   instellingen: ['instellingen'],
 };
 const SCHERMEN = [
   [/^(projecten|bibliotheek)\b/, 'bibliotheek'],
-  [/^ontdekken\b/, 'ontdekken'],
   [/^inloggen\b/, 'inloggen'],
   [/^instellingen\b/, 'instellingen'],
   [/^(|begin|nieuw|nieuw-partij|nieuw-partituur|upload|hulp|voorbeeld)$/, 'begin'],

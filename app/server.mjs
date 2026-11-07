@@ -59,7 +59,6 @@ const API = [
   ['/api/herken', './src/server/herken.mjs'],
   ['/api/proef', './src/server/proef.mjs'],
   ['/api/projecten', './src/server/projecten.mjs'],
-  ['/api/ontdek', './src/server/ontdek.mjs'],
 ];
 
 // Bibliotheken importeren elkaar met een kale naam ("spessasynth_core"); een browser zonder bouwstap begrijpt dat niet.
