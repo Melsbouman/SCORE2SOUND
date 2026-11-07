@@ -73,7 +73,7 @@ TMP="$(mktemp)"
   echo "## Bron"; echo "$BRON"
 } > "$TMP"
 if [ -z "$SLA" ]; then bash "$(dirname "$0")/taak-check.sh" "$TMP" || { echo "Taak niet aangemaakt: los de FOUT hierboven op (of --sla-check-over)." >&2; rm -f "$TMP"; exit 3; }; fi
-case "${VOOR:-codex}" in codex|copilot|hermes) ;; *) echo "--voor moet codex, copilot of hermes zijn" >&2; rm -f "$TMP"; exit 2 ;; esac
+case "${VOOR:-codex}" in codex|copilot|gemini|hermes) ;; *) echo "--voor moet codex, copilot, gemini of hermes zijn" >&2; rm -f "$TMP"; exit 2 ;; esac
 EXTRA=(--label "agent-${VOOR:-codex}")
 "$GH" issue create -R "$R" --title "$TITEL" --body-file "$TMP" --label agent-ready "${EXTRA[@]}"
 rm -f "$TMP"
