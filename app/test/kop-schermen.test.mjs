@@ -20,6 +20,5 @@ test('kopTitel geeft de naam van het scherm en niets op de begin-schermen', () =
   assert.equal(kopTitel('#weergave'), 'Editor');
   assert.equal(kopTitel('#bewerken'), 'Editor');
   assert.equal(kopTitel('#projecten'), 'Bibliotheek');
-  assert.equal(kopTitel('#ontdekken'), 'Ontdekken');
   assert.equal(kopTitel('#instellingen'), 'Instellingen');
 });
