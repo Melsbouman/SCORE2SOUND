@@ -1,0 +1,30 @@
+{
+  "versie": 1,
+  "opmerking": "referentie ontbreekt bij eigen pdf's; Mels maakt voor 2 pagina's een correct antwoord",
+  "items": [
+    {
+      "id": "galop-2nd-cornet",
+      "pdf": "C:/Brassmuziek PDF/04 - Galop 2nd Cornet.pdf",
+      "soort": "scan",
+      "referentie": null
+    },
+    {
+      "id": "renaissance-2nd-cornet",
+      "pdf": "C:/Brassmuziek PDF/Renaissance 2nd Cornet.pdf",
+      "soort": "scan",
+      "referentie": null
+    },
+    {
+      "id": "suite-gothique-2nd-cornet",
+      "pdf": "C:/Brassmuziek PDF/Suite Gothique 2nd Cornet.pdf",
+      "soort": "scan",
+      "referentie": null
+    },
+    {
+      "id": "devils-galop-2nd-cornet",
+      "pdf": "C:/Brassmuziek PDF/Devils Galop (Brass Band) - 004 2nd Cornet Bb.pdf",
+      "soort": "digitaal",
+      "referentie": null
+    }
+  ]
+}
