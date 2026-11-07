@@ -23,6 +23,7 @@ standaard_model() {
   case "$1" in
     codex) echo "${AIFLOW_CODEX_MODEL:-standaard}" ;; # "standaard": het model uit ~/.codex/config.toml
     copilot) echo "${AIFLOW_COPILOT_MODEL:-auto}" ;;
+    gemini) echo "${AIFLOW_GEMINI_MODEL:-standaard}" ;;
     hermes) echo "${AIFLOW_HERMES_MODEL:-cohere/north-mini-code:free}" ;;
   esac
 }
@@ -30,6 +31,7 @@ standaard_provider() {
   case "$1" in
     codex) echo "codex-programma" ;;
     copilot) echo "copilot-programma" ;;
+    gemini) echo "gemini-programma" ;;
     hermes) echo "${AIFLOW_HERMES_PROVIDER:-openrouter}" ;;
   esac
 }
@@ -39,13 +41,14 @@ reserves() {
   case "$1" in
     codex) echo "copilot hermes-reserve" ;;
     copilot) echo "codex hermes-reserve" ;;
+    gemini) echo "copilot codex hermes-reserve" ;;
     hermes) echo "hermes-reserve" ;;
   esac
 }
 UITVOERDER="${AIFLOW_UITVOERDER:-${AIFLOW_ALLEEN:-${AIFLOW_STANDAARD:-codex}}}"
 case "$UITVOERDER" in
-  codex|copilot|hermes) ;;
-  *) echo "onbekende uitvoerder: $UITVOERDER (kies codex, copilot of hermes)" >&2; exit 1 ;;
+  codex|copilot|gemini|hermes) ;;
+  *) echo "onbekende uitvoerder: $UITVOERDER (kies codex, copilot, gemini of hermes)" >&2; exit 1 ;;
 esac
 MODEL="$(standaard_model "$UITVOERDER")"
 PROVIDER="$(standaard_provider "$UITVOERDER")"
@@ -121,7 +124,7 @@ import json,os,re,sys
 issues=json.load(open(sys.argv[1],encoding='utf-8')); prs=json.load(open(sys.argv[2],encoding='utf-8'))
 alleen=os.environ['ALLEEN']; standaard=os.environ['STANDAARD']
 def labels(i): return {l['name'] for l in i['labels']}
-def wie(i): return next((u for u in ('codex','copilot','hermes') if 'agent-'+u in labels(i)), standaard)
+def wie(i): return next((u for u in ('codex','copilot','gemini','hermes') if 'agent-'+u in labels(i)), standaard)
 def bestanden(body):
     inn=False; out=set()
     for r in (body or '').splitlines():
@@ -186,7 +189,7 @@ GEKOZEN=$(py "
 import json,sys
 d=json.loads(sys.stdin.buffer.read().decode('utf-8'))
 namen=[l['name'] for l in d.get('labels',[])]
-print(next((u for u in ('codex','copilot','hermes') if 'agent-'+u in namen), ''))" < "$WERK/issue.json")
+print(next((u for u in ('codex','copilot','gemini','hermes') if 'agent-'+u in namen), ''))" < "$WERK/issue.json")
 if [ -n "$GEKOZEN" ] && [ -z "${AIFLOW_UITVOERDER:-}" ]; then
   UITVOERDER="$GEKOZEN"; MODEL="$(standaard_model "$UITVOERDER")"; PROVIDER="$(standaard_provider "$UITVOERDER")"
 fi
@@ -250,6 +253,14 @@ voer_uit() {
   case "$1" in
     hermes)
       timeout 900 "$HERMES" -t terminal,file --provider "$3" -m "$2" -z "$(cat "$WERK/prompt.txt")" > "$WERK/agent.out" 2>&1
+      ;;
+    gemini)
+      # De Gemini CLI met een API-sleutel (GEMINI_API_KEY als gebruikersvariabele).
+      [ -n "${GEMINI_API_KEY:-}" ] || export GEMINI_API_KEY="$(powershell -NoProfile -Command "[Environment]::GetEnvironmentVariable('GEMINI_API_KEY','User')" | tr -d '
+')"
+      local geminimodel=""
+      [ "$2" = "standaard" ] || geminimodel="-m $2"
+      timeout 900 gemini -p "$(cat "$WERK/prompt.txt")" --approval-mode yolo $geminimodel > "$WERK/agent.out" 2>&1
       ;;
     copilot)
       # Het Copilot-programma via node, zodat een opdracht van meerdere regels heel blijft aankomen.

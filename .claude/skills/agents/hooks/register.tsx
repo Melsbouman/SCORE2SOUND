@@ -101,8 +101,8 @@ const tok = (n: number) => {
   return String(n)
 }
 
-const uitvoerderNaam = (u: string) => (u === 'codex' ? 'Codex-programma' : u === 'copilot' ? 'Copilot-programma' : u === 'hermes' ? 'Hermes' : u)
-const uitvoerderKleur = (u: string) => (u === 'codex' ? '#2E9E83' : u === 'hermes' ? '#9B7BE0' : '#5B8DEF')
+const uitvoerderNaam = (u: string) => (u === 'codex' ? 'Codex-programma' : u === 'copilot' ? 'Copilot-programma' : u === 'hermes' ? 'Hermes' : u === 'gemini' ? 'Gemini-programma' : u)
+const uitvoerderKleur = (u: string) => (u === 'codex' ? '#2E9E83' : u === 'hermes' ? '#9B7BE0' : u === 'gemini' ? '#E0A23B' : '#5B8DEF')
 
 // Kleuren voor licht en donker; het paneel volgt het thema van de app.
 const STIJL = `<style>
@@ -470,6 +470,21 @@ function kaarten(nu: number, claude: ClaudeStatus | null, lokaal: Lokaal | null,
           : totaalTekst(lokaal?.geschiedenis ?? [], agent) || (r.taak ? `laatste: ${r.taak}` : ''),
       voortgang: lopend.length > 0 ? Math.max(...lopend.map(x => x.voortgang)) : null,
       detail: r.model,
+    })
+  }
+
+  // Gemini staat altijd in de lijst, ook voor de eerste taak (het statusbestand ontstaat pas bij de eerste run).
+  if (!perAgent.has('gemini')) {
+    lijst.push({
+      naam: uitvoerderNaam('gemini'),
+      rol: 'Uitvoerder',
+      kleur: uitvoerderKleur('gemini'),
+      uitrusting: 'bril',
+      actief: false,
+      status: 'standby',
+      taak: 'laatste: geen taken',
+      voortgang: null,
+      detail: 'Gemini CLI',
     })
   }
 
