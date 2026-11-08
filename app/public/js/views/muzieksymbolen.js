@@ -4,6 +4,8 @@ const symbolen = {
   kwart: "\uE1D5",
   achtste: "\uE1D7",
   zestiende: "\uE1D9",
+  tweeendertigste: "\uE1DB",
+  vierenzestigste: "\uE1DD",
   kruis: "\uE262",
   mol: "\uE260",
   herstellingsteken: "\uE261",

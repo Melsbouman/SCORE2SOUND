@@ -4,7 +4,7 @@ import test from "node:test";
 import { SYMBOOL } from "../public/js/views/muzieksymbolen.js";
 
 const sleutels = [
-  "heel", "half", "kwart", "achtste", "zestiende", "kruis", "mol",
+  "heel", "half", "kwart", "achtste", "zestiende", "tweeendertigste", "vierenzestigste", "kruis", "mol",
   "herstellingsteken", "dubbelkruis", "dubbelmol", "rustkwart", "fermate",
   "staccato", "accent", "tenuto", "punt", "overbinding", "crescendo",
   "decrescendo", "p", "mp", "mf", "f",
