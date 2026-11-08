@@ -33,6 +33,7 @@ import { zetTempo } from '../model/tempo.mjs';
 import { tempoVoorWoord } from '../model/tempotekst.mjs';
 import { kopUitOcr } from '../model/tekstlezerkop.mjs';
 import { woordenNaarMaten } from '../model/tekstlezerwoorden.mjs';
+import { meermaatsRustenUitCijfers } from '../model/meermaatsrust.mjs';
 import { maakLimiet } from './limiet.mjs';
 import { leesBlad } from './tekstlezer.mjs';
 
@@ -365,6 +366,7 @@ export function maakHerken({ map, draaier }) {
       .map((regel) => partijNaamUitKop(herstelOcr(regel))).find(Boolean) ?? null);
     uit.partituur = splitsPartijenOpKoppen(uit.partituur, paginaNamen);
     uit.partituur = woordenNaarMaten(uit.partituur, ocrPerBlad);
+    uit.partituur = meermaatsRustenUitCijfers(uit.partituur, ocrPerBlad);
     verbeterTekstaanwijzingen(uit.partituur);
   const gevuld = vulLegeMaten(uit.partituur);
   const maatMeldingen = controleerMaatduur(gevuld);

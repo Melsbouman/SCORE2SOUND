@@ -213,6 +213,9 @@ export function koppelOmr(partituur, bladen) {
       const rusten = kinderen(inters, 'rest').map(leesSymbool);
       delen.forEach((deel, partijIndex) => {
         const balken = kinderen(deel, 'staff').map((staff) => Number(staff.attr.id));
+        // De hoogte van de partij op het blad: van de bovenste tot de onderste notenbalklijn (voor maat.vak).
+        const lijnen = kinderen(deel, 'staff').flatMap((staff) => kinderen(kind(staff, 'lines'), 'line'))
+          .map((lijn) => Number(kind(lijn, 'point')?.attr.y)).filter(Number.isFinite);
         const eersteMaat = maatBij(partijIndex, maatStart);
         if (stacks.length && eersteMaat) {
           eersteMaat.regelbegin = true;
@@ -220,6 +223,9 @@ export function koppelOmr(partituur, bladen) {
         }
         stacks.forEach((stack, stackIndex) => {
           const maat = maatBij(partijIndex, maatStart + stackIndex);
+          if (maat && lijnen.length > 0) {
+            maat.vak = { blad: blad.nummer, links: Number(stack.attr.left), rechts: Number(stack.attr.right), boven: Math.min(...lijnen), onder: Math.max(...lijnen) };
+          }
           if (maat) {
             const resultaat = koppelMaat(maat, balken, stack, koppen, rusten, blad.nummer);
             nietGekoppeld += resultaat.nietGekoppeld;
