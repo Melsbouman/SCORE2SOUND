@@ -9,7 +9,7 @@ import {
   maakNoot,
   keurGoed,
 } from '/src/model/corrigeren.mjs';
-import { controleerMaatduur } from '/src/controle/maatduur.mjs';
+import { vernieuwMeldingen } from '/src/controle/meldingen.mjs';
 
 const DUUR_OPTIES = [
   ['Hele', 1920],
@@ -49,10 +49,7 @@ export function start(app) {
   function pas(nieuw) {
     app.zet({
       partituur: nieuw,
-      meldingen: [
-        ...app.stand.meldingen.filter((melding) => melding.soort !== 'maatduur'),
-        ...controleerMaatduur(nieuw),
-      ],
+      meldingen: vernieuwMeldingen(app.stand.meldingen, nieuw),
     });
     if (!zoekElement(nieuw, gekozen)) {
       gekozen = null;

@@ -34,7 +34,7 @@ import {
   zetToonsoort,
 } from '/src/model/maten-bewerken.mjs';
 import { opAlle, verwijderAlle } from '/src/model/meerdere.mjs';
-import { controleerMaatduur } from '/src/controle/maatduur.mjs';
+import { vernieuwMeldingen } from '/src/controle/meldingen.mjs';
 import {
   schrijfNoot,
   schrijfNootMetOverbinding,
@@ -881,7 +881,7 @@ export function start(app) {
   function pas(nieuwePartituur) {
     app.zet({
       partituur: nieuwePartituur,
-      meldingen: controleerMaatduur(nieuwePartituur),
+      meldingen: vernieuwMeldingen(app.stand.meldingen, nieuwePartituur),
     });
     app.meld('kies-noot', { id: gekozen, ids: gekozenIds });
   }
@@ -892,7 +892,7 @@ export function start(app) {
     const vorige = ongedaan.pop();
     opnieuw.push(huidige);
     bezigMetGeschiedenis = true;
-    app.zet({ partituur: vorige, meldingen: controleerMaatduur(vorige) });
+    app.zet({ partituur: vorige, meldingen: vernieuwMeldingen(app.stand.meldingen, vorige) });
     bezigMetGeschiedenis = false;
     app.meld('kies-noot', { id: gekozen, ids: gekozenIds });
     teken();
@@ -904,7 +904,7 @@ export function start(app) {
     const volgende = opnieuw.pop();
     ongedaan.push(huidige);
     bezigMetGeschiedenis = true;
-    app.zet({ partituur: volgende, meldingen: controleerMaatduur(volgende) });
+    app.zet({ partituur: volgende, meldingen: vernieuwMeldingen(app.stand.meldingen, volgende) });
     bezigMetGeschiedenis = false;
     app.meld('kies-noot', { id: gekozen, ids: gekozenIds });
     teken();
