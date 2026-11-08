@@ -24,6 +24,7 @@ import {
   verschuifOctaaf,
 } from '/src/model/noten-bewerken.mjs';
 import { maakTriool, maakTriooLos } from '/src/model/triolen.mjs';
+import { TUPLETS, maakTuplet } from '/src/model/tuplets.mjs';
 import {
   voegMaatToe,
   plakMaten,
@@ -545,26 +546,89 @@ export function start(app) {
       balk.append(rij);
     }
 
-    const isNoot = heeftNoot;
-    const heeftKeuze = elementen.length > 0;
-    groep([
-      maakKnop('Halve toon hoger', PICTOGRAMMEN.hoger, () => pasAlle((partituur, id) => verschuifHalvetoon(partituur, id, 1)), !isNoot),
-      maakKnop('Halve toon lager', PICTOGRAMMEN.lager, () => pasAlle((partituur, id) => verschuifHalvetoon(partituur, id, -1)), !isNoot),
-    ]);
-    groep([
-      maakKnop('Kruis', PICTOGRAMMEN.kruis, () => pasAlle((partituur, id) => zetAlter(partituur, id, 1)), !isNoot),
-      maakKnop('Mol', PICTOGRAMMEN.mol, () => pasAlle((partituur, id) => zetAlter(partituur, id, -1)), !isNoot),
-      maakKnop('Herstellingsteken', PICTOGRAMMEN.herstelling, () => pasAlle((partituur, id) => zetAlter(partituur, id, 0)), !isNoot),
-      maakKnop('Dubbelkruis', PICTOGRAMMEN.dubbelkruis, () => pasAlle((partituur, id) => zetAlter(partituur, id, 2)), !isNoot),
-      maakKnop('Dubbelmol', PICTOGRAMMEN.dubbelmol, () => pasAlle((partituur, id) => zetAlter(partituur, id, -2)), !isNoot),
-    ]);
-    groep(Object.entries(DUUR).map(([naam, duur]) => {
-      const labels = { heel: 'Heel', half: 'Half', kwart: 'Kwart', achtste: 'Achtste', zestiende: 'Zestiende' };
-      return maakKnop(labels[naam], PICTOGRAMMEN[naam], () => pasAlle((partituur, id) => zetDuur(partituur, id, duur)), !heeftKeuze);
-    }).concat(
-      maakKnop(
-        'Punt',
-        PICTOGRAMMEN.punt,
+    function maakInvoerbalk({ elementen: gekozenElementen, element: eersteElement, isNoot: metNoot, heeftKeuze: metKeuze }) {
+      const invoerbalk = document.createElement('div');
+      invoerbalk.className = 'editor__invoerbalk';
+      invoerbalk.setAttribute('role', 'group');
+      invoerbalk.setAttribute('aria-label', 'Noten en tekens');
+      const SVG_PAD = {
+        potlood: '<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+        rust: '<path d="M8 4h8l-5 6 5 5c-3 0-5 1-5 4"/>',
+      };
+
+      function basisKnop(naam, inhoud, actie, uitgeschakeld = false, ingedrukt = null) {
+        const knop = document.createElement('button');
+        knop.type = 'button';
+        knop.className = 'editor__invoerknop';
+        knop.title = naam;
+        knop.setAttribute('aria-label', naam);
+        if (ingedrukt !== null) knop.setAttribute('aria-pressed', String(ingedrukt));
+        knop.disabled = uitgeschakeld;
+        knop.append(inhoud);
+        knop.addEventListener('click', actie);
+        return knop;
+      }
+
+      function svgInhoud(pad) {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        svg.setAttribute('width', '20');
+        svg.setAttribute('height', '20');
+        svg.setAttribute('fill', 'none');
+        svg.setAttribute('stroke', 'currentColor');
+        svg.setAttribute('stroke-width', '2');
+        svg.setAttribute('stroke-linecap', 'round');
+        svg.setAttribute('stroke-linejoin', 'round');
+        svg.setAttribute('aria-hidden', 'true');
+        svg.innerHTML = pad;
+        return svg;
+      }
+
+      function glyphInhoud(teken) {
+        const span = document.createElement('span');
+        span.className = 'muzieksymbool';
+        span.setAttribute('aria-hidden', 'true');
+        if (teken.startsWith('<')) span.innerHTML = teken;
+        else span.textContent = teken;
+        return span;
+      }
+
+      function nieuweGroep(knoppen) {
+        const rij = document.createElement('div');
+        rij.className = 'editor__invoergroep';
+        rij.append(...knoppen);
+        invoerbalk.append(rij);
+      }
+
+      const duurKnop = (naam, teken, duur) => basisKnop(
+        naam,
+        glyphInhoud(teken),
+        () => pasAlle((partituur, id) => zetDuur(partituur, id, duur)),
+        !metKeuze,
+      );
+      const alterKnop = (naam, symbool, alter) => basisKnop(
+        naam,
+        glyphInhoud(SYMBOOL[symbool]),
+        () => pasAlle((partituur, id) => zetAlter(partituur, id, alter)),
+        !metNoot,
+      );
+
+      nieuweGroep([
+        basisKnop('Noten invoeren (N)', svgInhoud(SVG_PAD.potlood), openInvoermodus, false, invoermodus),
+        basisKnop('Rust', svgInhoud(SVG_PAD.rust), pasMaakRustAlle, !metNoot),
+      ]);
+      nieuweGroep([
+        duurKnop('64e noot', '', 30),
+        duurKnop('32e noot', '', 60),
+        duurKnop('Zestiende noot (5)', SYMBOOL.zestiende, DUUR.zestiende),
+        duurKnop('Achtste noot (4)', SYMBOOL.achtste, DUUR.achtste),
+        duurKnop('Kwartnoot (3)', SYMBOOL.kwart, DUUR.kwart),
+        duurKnop('Halve noot (2)', SYMBOOL.half, DUUR.half),
+        duurKnop('Hele noot (1)', SYMBOOL.heel, DUUR.heel),
+      ]);
+      nieuweGroep([basisKnop(
+        'Punt (.)',
+        glyphInhoud(SYMBOOL.punt),
         () => {
           pasAlle((huidigePartituur, id) => {
             const gekozenElement = zoekElement(huidigePartituur, id);
@@ -572,17 +636,116 @@ export function start(app) {
             return zetDuur(huidigePartituur, id, nieuweDuur);
           });
         },
-        !heeftKeuze,
-        elementen.length > 0 && elementen.every((item) => GESTIPTE_DUUR.has(item.duur)),
-      ),
-    ));
-    groep([maakTekstKnop(
-      'Triool',
-      pasTriool,
-      elementen.length !== 1 || !['noot', 'rust'].includes(element?.soort),
-    )]);
+        !metKeuze,
+        gekozenElementen.length > 0 && gekozenElementen.every((item) => GESTIPTE_DUUR.has(item.duur)),
+      )]);
+      nieuweGroep([
+        alterKnop('Dubbelmol', 'dubbelmol', -2),
+        alterKnop('Mol (M)', 'mol', -1),
+        alterKnop('Herstellingsteken (H)', 'herstellingsteken', 0),
+        alterKnop('Kruis (K)', 'kruis', 1),
+        alterKnop('Dubbelkruis', 'dubbelkruis', 2),
+      ]);
+      nieuweGroep([basisKnop(
+        'Overbinding',
+        glyphInhoud(SYMBOOL.overbinding),
+        () => {
+          let nieuwePartituur;
+          try {
+            nieuwePartituur = opAlle(app.stand.partituur, idsVoorBewerking(), (partituur, id) => (
+              zetOverbinding(partituur, id, !zoekElement(partituur, id).overbinding.begin)
+            ));
+          } catch (fout) {
+            if (!(fout instanceof Error)) throw fout;
+            statusBalk.textContent = fout.message;
+            return;
+          }
+          pas(nieuwePartituur);
+        },
+        !metNoot,
+        Boolean(eersteElement?.overbinding?.begin),
+      )]);
+
+      // Tuplet-knop met uitklaplijst.
+      const tupletMogelijk = gekozenElementen.length === 1
+        && ['noot', 'rust'].includes(eersteElement?.soort);
+      const tupletWrap = document.createElement('div');
+      tupletWrap.className = 'editor__tupletwrap';
+      const tupletKnop = basisKnop('Tuplet', glyphInhoud(SYMBOOL.triool), () => {}, !tupletMogelijk, false);
+      tupletKnop.classList.add('editor__invoerknop--breed');
+      tupletKnop.setAttribute('aria-haspopup', 'true');
+      tupletKnop.setAttribute('aria-expanded', 'false');
+      const pijl = document.createElement('span');
+      pijl.className = 'editor__pijl';
+      pijl.setAttribute('aria-hidden', 'true');
+      pijl.textContent = '▾';
+      tupletKnop.append(pijl);
+      const lijst = document.createElement('ul');
+      lijst.className = 'editor__tupletlijst';
+      lijst.setAttribute('role', 'menu');
+      lijst.hidden = true;
+      const tupletNamen = {
+        duool: 'Duool', triool: 'Triool', kwartool: 'Kwartool', kwintool: 'Kwintool',
+        sextool: 'Sextool', zeventool: 'Zeventool', achttool: 'Achttool', negentool: 'Negentool',
+      };
+      function sluitLijst() {
+        lijst.hidden = true;
+        tupletKnop.setAttribute('aria-expanded', 'false');
+        document.removeEventListener('keydown', opToets, true);
+        document.removeEventListener('click', opKlik, true);
+      }
+      function opToets(gebeurtenis) {
+        if (!tupletWrap.isConnected) { sluitLijst(); return; }
+        if (gebeurtenis.key === 'Escape') {
+          gebeurtenis.stopPropagation();
+          sluitLijst();
+          tupletKnop.focus();
+        }
+      }
+      function opKlik(gebeurtenis) {
+        if (!tupletWrap.isConnected || !tupletWrap.contains(gebeurtenis.target)) sluitLijst();
+      }
+      for (const tuplet of TUPLETS) {
+        const item = document.createElement('li');
+        item.setAttribute('role', 'none');
+        const keuze = document.createElement('button');
+        keuze.type = 'button';
+        keuze.setAttribute('role', 'menuitem');
+        keuze.textContent = `${tupletNamen[tuplet.id]} (${tuplet.aantal}:${tuplet.normaal})`;
+        keuze.addEventListener('click', () => {
+          sluitLijst();
+          if (!gekozen) return;
+          try {
+            gekozenIds = [gekozen];
+            pas(maakTuplet(app.stand.partituur, gekozen, tuplet.id));
+          } catch (fout) {
+            if (!(fout instanceof Error)) throw fout;
+            statusBalk.textContent = fout.message;
+          }
+        });
+        item.append(keuze);
+        lijst.append(item);
+      }
+      tupletKnop.addEventListener('click', () => {
+        if (!lijst.hidden) { sluitLijst(); return; }
+        lijst.hidden = false;
+        tupletKnop.setAttribute('aria-expanded', 'true');
+        document.addEventListener('keydown', opToets, true);
+        document.addEventListener('click', opKlik, true);
+      });
+      tupletWrap.append(tupletKnop, lijst);
+      nieuweGroep([tupletWrap]);
+      return invoerbalk;
+    }
+
+    const isNoot = heeftNoot;
+    const heeftKeuze = elementen.length > 0;
     groep([
-      maakKnop('Wordt rust', PICTOGRAMMEN.rust, pasMaakRustAlle, !isNoot),
+      maakKnop('Halve toon hoger', PICTOGRAMMEN.hoger, () => pasAlle((partituur, id) => verschuifHalvetoon(partituur, id, 1)), !isNoot),
+      maakKnop('Halve toon lager', PICTOGRAMMEN.lager, () => pasAlle((partituur, id) => verschuifHalvetoon(partituur, id, -1)), !isNoot),
+    ]);
+    const invoerbalk = maakInvoerbalk({ elementen, element, isNoot, heeftKeuze });
+    groep([
       maakKnop('Goedkeuren', PICTOGRAMMEN.goedkeuren, () => pasAlle((partituur, id) => keurGoed(partituur, id)), !heeftKeuze),
     ]);
     if (gekozenMaat !== null) {
@@ -616,9 +779,6 @@ export function start(app) {
         pas(nieuw);
       });
       const maatGroep = [knop, kopieerKnop, leegmaakKnop, herstelKnop];
-      const invoerKnop = maakTekstKnop('Noten invoeren', openInvoermodus);
-      invoerKnop.setAttribute('aria-pressed', String(invoermodus));
-      maatGroep.unshift(invoerKnop);
       if (gekopieerdeReeks !== null) {
         const plakKnop = maakTekstKnop('Plak na deze maat', plakGekopieerdeReeks);
         plakKnop.setAttribute('aria-label', 'Plak de gekopieerde maten na de gekozen maat');
@@ -812,25 +972,6 @@ export function start(app) {
         elementen.length > 0 && elementen.every((item) => item.articulaties?.includes('tenuto')),
       ),
       maakKnop(
-        'Overbinding',
-        PICTOGRAMMEN.overbinding,
-        () => {
-          let nieuwePartituur;
-          try {
-            nieuwePartituur = opAlle(app.stand.partituur, idsVoorBewerking(), (partituur, id) => (
-              zetOverbinding(partituur, id, !zoekElement(partituur, id).overbinding.begin)
-            ));
-          } catch (fout) {
-            if (!(fout instanceof Error)) throw fout;
-            statusBalk.textContent = fout.message;
-            return;
-          }
-          pas(nieuwePartituur);
-        },
-        !isNoot,
-        Boolean(element?.overbinding?.begin),
-      ),
-      maakKnop(
         'Verwijderen',
         PICTOGRAMMEN.verwijderen,
         () => pas(verwijderAlle(app.stand.partituur, idsVoorBewerking())),
@@ -871,9 +1012,9 @@ export function start(app) {
       const invoerDuurNaam = INVOER_DUUR_NAAM[invoerDuur / (invoerGepunteerd ? 1.5 : 1)];
       invoerStatus.textContent = `Duur: ${invoerDuurNaam}${invoerGepunteerd ? ' met punt' : ''}, maat ${invoerMaat + 1}`;
       invoerStatus.setAttribute('aria-live', 'polite');
-      vlak.replaceChildren(balk, hint, invoerStatus);
+      vlak.replaceChildren(invoerbalk, balk, hint, invoerStatus);
     } else {
-      vlak.replaceChildren(balk);
+      vlak.replaceChildren(invoerbalk, balk);
     }
     markeerSelectie();
   }

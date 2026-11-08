@@ -402,6 +402,25 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
 .editor-knoppenbalk .editor-knop--kolom .muzieksymbool { display: inline-flex; align-items: center; justify-content: center; height: 24px; font-size: 1.35rem; line-height: 1; }
 .editor-knop__label { display: block; max-width: 100%; font-size: 11px; line-height: 1.2; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+/* Vaste invoerbalk boven de partituur */
+.editor__invoerbalk { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 0; box-sizing: border-box; max-width: 100%; padding: 6px 10px; color: var(--kleur-donker); background: var(--kleur-vlak); border-bottom: 1px solid var(--kleur-lijn); }
+.editor__invoergroep { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; padding: 0 8px; border-left: 1px solid var(--kleur-lijn); }
+.editor__invoergroep:first-child { padding-left: 0; border-left: 0; }
+.editor__invoerknop { display: inline-flex; align-items: center; justify-content: center; gap: 2px; box-sizing: border-box; min-width: 36px; width: 36px; height: 36px; padding: 0; color: var(--kleur-donker); background: transparent; border: 1px solid transparent; border-radius: 8px; cursor: pointer; }
+.editor__invoerknop--breed { width: auto; min-width: 48px; padding: 0 6px; }
+.editor__invoerknop:hover:not(:disabled) { background: #c7e3b066; border-color: var(--kleur-lijn); }
+.editor__invoerknop[aria-pressed="true"] { color: var(--kleur-wit); background: var(--kleur-accent); }
+.editor__invoerknop:disabled { opacity: 0.4; cursor: not-allowed; }
+.editor__invoerknop:focus-visible, .editor__tupletlijst button:focus-visible { outline: 2px solid var(--kleur-accent); outline-offset: 2px; }
+.editor__invoerknop .muzieksymbool { font-size: 1.4rem; }
+.editor__invoerknop .muzieksymbool svg { width: 1.4rem; height: 1rem; }
+.editor__pijl { font-size: 0.75rem; line-height: 1; }
+.editor__tupletwrap { position: relative; }
+.editor__tupletlijst { position: absolute; top: 100%; left: 0; z-index: 10; min-width: 180px; margin: 2px 0 0; padding: 4px; list-style: none; background: var(--kleur-wit, #fff); border: 1px solid var(--kleur-lijn); border-radius: 8px; box-shadow: 0 4px 14px #0003; }
+.editor__tupletlijst[hidden] { display: none; }
+.editor__tupletlijst button { display: block; width: 100%; padding: 8px 10px; color: var(--kleur-donker); text-align: left; background: transparent; border: 0; border-radius: 6px; cursor: pointer; }
+.editor__tupletlijst button:hover { background: #c7e3b066; }
+@media (max-width: 700px) { .editor__invoerbalk { flex-wrap: nowrap; overflow-x: auto; } .editor__invoergroep { flex-wrap: nowrap; flex: 0 0 auto; } .editor__tupletlijst { position: fixed; top: auto; left: 8px; } }
 
 /* Tempo panel styles */
 .tempo-panel { background:#fff; border:1px solid var(--kleur-lijn); border-radius:var(--hoek); padding:12px; margin-bottom:12px; }
