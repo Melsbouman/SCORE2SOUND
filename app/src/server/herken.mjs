@@ -383,7 +383,7 @@ export function maakHerken({ map, draaier }) {
   const meldingen = [
     ...letters.meldingen.map(herkenMelding),
       ...mislukt.map((nummer) => herkenMelding(`Pagina ${nummer} is overgeslagen: daar kon de app geen muziek lezen.`)),
-      ...uit.overgeslagen.map((nummer) => herkenMelding(`Op pagina ${nummer} is de zekerheid per noot onbekend.`)),
+      ...uit.overgeslagen.map((nummer) => herkenMelding(`Op pagina ${nummer} konden de noten niet aan het blad gekoppeld worden. Ze staan in het rood: kijk ze na.`)),
       ...(uit.nietGekoppeld > 0 ? [herkenMelding(`${uit.nietGekoppeld} noten konden niet aan het origineel worden gekoppeld${koppelRedenenTekst}.`)] : []),
     ...maatMeldingen,
     ];
