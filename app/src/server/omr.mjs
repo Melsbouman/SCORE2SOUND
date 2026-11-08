@@ -1,6 +1,6 @@
 // Haalt zekerheid, plek en pagina's uit een .omr-bestand van Audiveris (een zip met per blad xml en een afbeelding).
 // De MusicXML kent geen zekerheid; daarom koppelen we elke notenkop aan een noot, per maat, notenbalk en lijnpositie.
-import { stapelKaart } from '../model/stapels.mjs';
+import { lijnStapelsUit } from '../model/stapels.mjs';
 import { leesXmlBoom, kind, kinderen } from '../musicxml/xml.mjs';
 import { instrumentBijNaam } from '../model/instrumenten.mjs';
 import { systeemOnder, systemenVan } from './letters.mjs';
@@ -170,6 +170,31 @@ export function maakOnzeker(maat) {
   }
 }
 
+// Per partij het aantal nootkoppen per stapel, in volgorde over alle bladen; null op een systeem waar het aantal partijen niet klopt.
+function koppenPerStapel(bladen, aantalPartijen) {
+  const uit = Array.from({ length: aantalPartijen }, () => []);
+  for (const blad of bladen) {
+    for (const system of kinderen(kind(leesXmlBoom(blad.xml), 'page'), 'system')) {
+      const stacks = kinderen(system, 'stack');
+      const delen = kinderen(system, 'part');
+      if (delen.length !== aantalPartijen) {
+        for (const lijst of uit) lijst.push(...stacks.map(() => null));
+        continue;
+      }
+      const koppen = kinderen(kind(kind(system, 'sig'), 'inters'), 'head').map(leesSymbool);
+      delen.forEach((deel, partijIndex) => {
+        const balken = kinderen(deel, 'staff').map((staff) => Number(staff.attr.id));
+        for (const stack of stacks) {
+          const links = Number(stack.attr.left) - MARGE;
+          const rechts = Number(stack.attr.right) + MARGE;
+          uit[partijIndex].push(koppen.filter((kop) => balken.includes(kop.staff) && kop.x + kop.breedte / 2 >= links && kop.x + kop.breedte / 2 <= rechts).length);
+        }
+      });
+    }
+  }
+  return uit;
+}
+
 export function koppelOmr(partituur, bladen) {
   const uit = structuredClone(partituur);
   uit.bron = { herkenning: null, bladen: bladen.map(({ nummer, breedte, hoogte }) => ({ nummer, breedte, hoogte })) };
@@ -178,7 +203,9 @@ export function koppelOmr(partituur, bladen) {
   const redenen = { geenKopInMaat: 0, andereToonhoogte: 0, alGebruikt: 0 };
   const voltaKandidaten = [];
   let maatStart = 0;
-  const kaarten = uit.partijen.map((partij) => stapelKaart(partij.maten));
+  // Maten aan stapels koppelen door uit te lijnen op het aantal nootkoppen: een stapel zonder maat in de MusicXML wordt een gat.
+  const stapelKoppen = koppenPerStapel(bladen, uit.partijen.length);
+  const kaarten = uit.partijen.map((partij, partijIndex) => lijnStapelsUit(partij.maten, stapelKoppen[partijIndex]));
   const maatBij = (partijIndex, stapel) => uit.partijen[partijIndex].maten[kaarten[partijIndex][stapel]];
 
   for (const blad of bladen) {

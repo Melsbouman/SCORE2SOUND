@@ -19,6 +19,49 @@ export function stapelKaart(maten) {
   return kaart;
 }
 
+// Koppelt de stapels van Audiveris (maten op het blad) aan de maten van de partij door uit te lijnen op het aantal nootkoppen.
+// Audiveris laat in zijn MusicXML soms een lege maat weg die wel als stapel op het blad staat; tel je dan gewoon op volgorde
+// af, dan schuiven alle maten erna een stapel op. Uitlijnen maakt van zo'n stapel een gat.
+// koppen: per stapel (in volgorde over alle bladen) het aantal nootkoppen van deze partij, of null als het onbekend is.
+// Geeft per stapel de index van de maat, of undefined voor een stapel zonder maat.
+const GAT = 0.7;
+
+export function lijnStapelsUit(maten, koppen) {
+  const kandidaten = stapelKaart(maten);
+  const noten = kandidaten.map((index) => maten[index].elementen.filter((element) => element.soort === 'noot').length);
+  const n = koppen.length;
+  const m = kandidaten.length;
+  const prijs = (i, j) => {
+    const k = koppen[i];
+    if (k == null) return 0;
+    return Math.abs(k - noten[j]) / Math.max(1, k, noten[j]);
+  };
+  const kosten = Array.from({ length: n + 1 }, () => new Float64Array(m + 1));
+  for (let i = 1; i <= n; i += 1) kosten[i][0] = i * GAT;
+  for (let j = 1; j <= m; j += 1) kosten[0][j] = j * GAT;
+  for (let i = 1; i <= n; i += 1) {
+    for (let j = 1; j <= m; j += 1) {
+      kosten[i][j] = Math.min(kosten[i - 1][j - 1] + prijs(i - 1, j - 1), kosten[i - 1][j] + GAT, kosten[i][j - 1] + GAT);
+    }
+  }
+  // Terug door de tabel; bij gelijke kosten wint het paar (de gewone volgorde).
+  const kaart = new Array(n).fill(undefined);
+  let i = n;
+  let j = m;
+  while (i > 0 && j > 0) {
+    if (Math.abs(kosten[i][j] - (kosten[i - 1][j - 1] + prijs(i - 1, j - 1))) < 1e-9) {
+      kaart[i - 1] = kandidaten[j - 1];
+      i -= 1;
+      j -= 1;
+    } else if (Math.abs(kosten[i][j] - (kosten[i - 1][j] + GAT)) < 1e-9) {
+      i -= 1;
+    } else {
+      j -= 1;
+    }
+  }
+  return kaart;
+}
+
 export function aantalUitSamengesteldeRust(maat) {
   const heeftHeleMaatrust = maat.elementen.some((element) => element.soort === 'rust' && element.heleMaat);
   if (!heeftHeleMaatrust || maat.elementen.some((element) => element.soort === 'noot')) return null;
