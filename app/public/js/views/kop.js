@@ -19,7 +19,7 @@ export function kopTitel(hash) {
 // Welk scherm bij welke hash hoort, en welke vlakken van de hoofdinhoud daarbij zichtbaar zijn.
 const VLAKKEN = {
   begin: ['nieuw', 'upload', 'voorbeeld', 'hulp'],
-  editor: ['zoom', 'weergave'],
+  editor: ['lint', 'zoom', 'weergave'],
   bibliotheek: ['projecten'],
   inloggen: ['inloggen'],
   instellingen: ['instellingen'],
@@ -31,6 +31,11 @@ const SCHERMEN = [
   [/^(|begin|nieuw|nieuw-partij|nieuw-partituur|upload|hulp|voorbeeld)$/, 'begin'],
 ];
 
+// De vlakken van de hoofdinhoud die bij een scherm zichtbaar zijn.
+export function vlakkenVoor(scherm) {
+  return VLAKKEN[scherm] ?? [];
+}
+
 export function schermVoor(hash) {
   const naam = String(hash ?? '').replace(/^#/, '');
   for (const [patroon, scherm] of SCHERMEN) if (patroon.test(naam)) return scherm;
@@ -39,11 +44,13 @@ export function schermVoor(hash) {
 
 function toonScherm(scherm) {
   document.body.dataset.scherm = scherm;
-  const zichtbaar = new Set(VLAKKEN[scherm] ?? []);
+  const zichtbaar = new Set(vlakkenVoor(scherm));
   const hoofd = document.getElementById('hoofdinhoud');
   for (const vlak of hoofd?.children ?? []) {
     vlak.classList.toggle('scherm-weg', !zichtbaar.has(vlak.id));
   }
+  // Vlakken die het lint in zijn tabbladen heeft gezet, volgen het lint (dat het CSS alleen in de editor toont).
+  for (const vlak of hoofd?.querySelectorAll('.lint__paneel > section') ?? []) vlak.classList.remove('scherm-weg');
 }
 
 export function vernieuw() {
