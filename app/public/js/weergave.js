@@ -438,6 +438,67 @@ export function start(app) {
     app.meld('kies-maat', { maat: maat?.index ?? null });
   });
 
+  vlak.addEventListener('dragover', (gebeurtenis) => {
+    if (!gebeurtenis.dataTransfer.types.includes('application/x-palet')) return;
+    gebeurtenis.preventDefault();
+    gebeurtenis.dataTransfer.dropEffect = 'copy';
+
+    const x = gebeurtenis.clientX;
+    const y = gebeurtenis.clientY;
+    maten().forEach((g, index) => {
+      const kader = g.getBoundingClientRect();
+      const binnen = x >= kader.left && x <= kader.right && y >= kader.top && y <= kader.bottom;
+      if (binnen) {
+        g.classList.add('sleep-doel');
+      } else {
+        g.classList.remove('sleep-doel');
+      }
+    });
+  });
+
+  vlak.addEventListener('dragleave', () => {
+    maten().forEach((g) => g.classList.remove('sleep-doel'));
+  });
+
+  vlak.addEventListener('drop', async (gebeurtenis) => {
+    gebeurtenis.preventDefault();
+    maten().forEach((g) => g.classList.remove('sleep-doel'));
+    const data = gebeurtenis.dataTransfer.getData('application/x-palet');
+    if (!data) return;
+    let payload;
+    try {
+      payload = JSON.parse(data);
+    } catch {
+      return;
+    }
+
+    const x = gebeurtenis.clientX;
+    const y = gebeurtenis.clientY;
+    const maat = maten()
+      .map((element, index) => {
+        const kader = element.getBoundingClientRect();
+        return {
+          index,
+          binnen: x >= kader.left && x <= kader.right && y >= kader.top && y <= kader.bottom,
+          oppervlakte: kader.width * kader.height,
+        };
+      })
+      .filter((kandidaat) => kandidaat.binnen)
+      .sort((a, b) => a.oppervlakte - b.oppervlakte)[0];
+
+    if (!maat || maat.index === undefined) return;
+
+    const { PALETTEN } = await import('/src/model/paletten.mjs');
+    const onderdeel = PALETTEN.find((o) => o.id === payload.onderdeelId);
+    const item = onderdeel?.items.find((i) => i.id === payload.itemId);
+    if (!item || !item.actie) return;
+
+    const { voerPaletActieUit } = await import('./views/paletten.js');
+    if (typeof voerPaletActieUit === 'function') {
+      voerPaletActieUit(app, item.actie, maat.index, null);
+    }
+  });
+
   // De maten in volgorde; Verovio tekent elke maat als <g class="measure">, over alle partijen heen.
   const maten = () => [...vlak.querySelectorAll('g.measure')];
 
