@@ -39,7 +39,7 @@ function nepDraaier({ fout = false, houdVast = false } = {}) {
 
 async function opzet(t, opties) {
   const map = await mkdtemp(join(tmpdir(), 'herken-'));
-  t.after(() => rm(map, { recursive: true, force: true }));
+  t.after(() => rm(map, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }));
   const nep = nepDraaier(opties);
   return { ...nep, api: maakHerken({ map, draaier: nep.draaier }), map };
 }

@@ -102,7 +102,7 @@ async function wachtOp(api, id, ...standen) {
 
 test('twee herkende pagina’s en een afgekeurde pagina leveren een melding op', async (t) => {
   const map = await mkdtemp(join(tmpdir(), 'herken-paginas-'));
-  t.after(() => rm(map, { recursive: true, force: true }));
+  t.after(() => rm(map, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }));
   const draaier = nepDraaier();
   const api = maakHerken({ map, draaier });
   const start = await api(verzoek('POST', '', PNG));
