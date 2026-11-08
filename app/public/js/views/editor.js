@@ -619,9 +619,7 @@ export function start(app) {
       ]);
       nieuweGroep([
         duurKnop('64e noot', SYMBOOL.vierenzestigste, 30),
-        //DEL64'', 30),
         duurKnop('32e noot', SYMBOOL.tweeendertigste, 60),
-        //DEL32'', 60),
         duurKnop('Zestiende noot (5)', SYMBOOL.zestiende, DUUR.zestiende),
         duurKnop('Achtste noot (4)', SYMBOOL.achtste, DUUR.achtste),
         duurKnop('Kwartnoot (3)', SYMBOOL.kwart, DUUR.kwart),
