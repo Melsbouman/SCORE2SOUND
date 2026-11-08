@@ -59,6 +59,13 @@ function zetCijfersOpHunMaat(partij) {
   }
 }
 
+// Een maat met alleen een rust (geen noten), die nog geen meermaatsrust is.
+function alleenEenRust(maten, index) {
+  const maat = maten[index];
+  return Boolean(maat) && !maat.verborgen && !(maat.maatrust > 1) && !maten[index + 1]?.verborgen
+    && maat.elementen.some((element) => element.soort === 'rust') && !maat.elementen.some((element) => element.soort === 'noot');
+}
+
 export function vulOntbrekendeMaten(partituur) {
   const kopie = structuredClone(partituur);
   const eerstePartij = kopie.partijen?.[0];
@@ -125,13 +132,19 @@ export function vulOntbrekendeMaten(partituur) {
     const aantal = verwacht - werkelijk;
     if (verwacht > 0 && aantal > 0 && aantal <= 40) {
       const leeg = [];
+      const rustmaten = [];
       for (let maatIndex = vorige.index; maatIndex < huidige.index; maatIndex += 1) {
         const maat = eerstePartij.maten[maatIndex];
         if (maat && !maat.verborgen && !maat.elementen.some((element) => ['noot', 'rust'].includes(element.soort))) {
           leeg.push(maatIndex);
+        } else if (kopie.partijen.every((partij) => alleenEenRust(partij.maten, maatIndex))) {
+          rustmaten.push(maatIndex);
         }
       }
-      gaten.push({ index: huidige.index, aantal, leeg });
+      // Geen lege maat, wel precies één rustmaat in het gat: dat is meestal een meermaatsrust waarvan het cijfer niet gelezen
+      // is (Devils Galop maat 53, een rust van 3 maten). Die krijgt het ontbrekende aantal, in plaats van nieuwe maten vlak voor
+      // het volgende cijfer.
+      gaten.push({ index: huidige.index, aantal, leeg: leeg.length > 0 ? leeg : rustmaten.length === 1 ? rustmaten : [] });
     }
   }
 
@@ -147,6 +160,7 @@ export function vulOntbrekendeMaten(partituur) {
           if (!maat) return;
           const maatrust = perMaat + (index < extra ? 1 : 0);
           maat.maatrust = maatrust;
+          // Een repetitiecijfer of tekst op de maat blijft staan.
           maat.elementen = [{
             soort: 'rust',
             start: 0,
@@ -155,7 +169,7 @@ export function vulOntbrekendeMaten(partituur) {
             notenbalk: 1,
             heleMaat: true,
             zekerheid: 0.3,
-          }];
+          }, ...maat.elementen.filter((element) => element.soort !== 'noot' && element.soort !== 'rust')];
         });
         continue;
       }
