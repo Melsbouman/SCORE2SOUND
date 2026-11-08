@@ -102,9 +102,8 @@ export function start(app) {
       return null;
     }
 
-    if (!batch) {
-      app.zet({ partituur: resultaat.partituur, meldingen: resultaat.meldingen, project: null });
-    }
+    app.zet({ partituur: resultaat.partituur, meldingen: resultaat.meldingen, project: null });
+    window.location.hash = '#bewerken';
     toonStatus(`Geopend: ${bestand.name}`);
     return { partituur: resultaat.partituur, meldingen: resultaat.meldingen };
   }
@@ -224,6 +223,7 @@ export function start(app) {
               meldingen: voortgang.meldingen,
               project: null,
             });
+            window.location.hash = '#bewerken';
           }
           toonStatus(`Geopend: ${bestand.name}`);
         } else if (voortgang.stand === 'fout') {
@@ -284,6 +284,7 @@ export function start(app) {
 
     if (basis) {
       app.zet({ partituur: basis, meldingen, project: null });
+      window.location.hash = '#bewerken';
     }
     if (mislukt.length) {
       status.textContent = basis
