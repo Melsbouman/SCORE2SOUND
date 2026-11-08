@@ -23,7 +23,7 @@ standaard_model() {
   case "$1" in
     codex) echo "${AIFLOW_CODEX_MODEL:-standaard}" ;; # "standaard": het model uit ~/.codex/config.toml
     copilot) echo "${AIFLOW_COPILOT_MODEL:-auto}" ;;
-    gemini) echo "${AIFLOW_GEMINI_MODEL:-standaard}" ;;
+    gemini) echo "${AIFLOW_GEMINI_MODEL:-gemini-flash-lite-latest}" ;;
     hermes) echo "${AIFLOW_HERMES_MODEL:-cohere/north-mini-code:free}" ;;
   esac
 }
