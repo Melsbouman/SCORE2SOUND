@@ -86,7 +86,7 @@ test('koppelOmr slaat een blad met een ander aantal notenbalken over en meldt da
   const bladen = bladenUitOmr(leesZip(await voorbeeld('herkenning.omr')), [1]);
   const uit = koppelOmr(partituur, bladen);
   assert.deepEqual(uit.overgeslagen, [1]);
-  assert.ok(noten(uit.partituur).every((n) => n.zekerheid === 1));
+  assert.ok(noten(uit.partituur).every((n) => n.zekerheid <= 0.5));
 });
 
 test('voegPaginasSamen zet partijen die per pagina anders heten weer op een lijn', () => {

@@ -163,6 +163,13 @@ export function zetHokjes(partituur, kaarten, kandidaten) {
   }
 }
 
+// Een maat op een pagina die niet aan het blad gekoppeld kon worden: de zekerheid is onbekend, dus hooguit 0,5 (rood in de editor).
+export function maakOnzeker(maat) {
+  for (const element of maat?.elementen ?? []) {
+    if (element.soort === 'noot' || element.soort === 'rust') element.zekerheid = Math.min(element.zekerheid ?? 1, 0.5);
+  }
+}
+
 export function koppelOmr(partituur, bladen) {
   const uit = structuredClone(partituur);
   uit.bron = { herkenning: null, bladen: bladen.map(({ nummer, breedte, hoogte }) => ({ nummer, breedte, hoogte })) };
@@ -195,6 +202,9 @@ export function koppelOmr(partituur, bladen) {
       const delen = kinderen(system, 'part');
       if (delen.length !== uit.partijen.length) {
         if (!overgeslagen.includes(blad.nummer)) overgeslagen.push(blad.nummer);
+        for (let stapel = 0; stapel < stacks.length; stapel += 1) {
+          uit.partijen.forEach((_, partijIndex) => maakOnzeker(maatBij(partijIndex, maatStart + stapel)));
+        }
         maatStart += stacks.length;
         continue;
       }
