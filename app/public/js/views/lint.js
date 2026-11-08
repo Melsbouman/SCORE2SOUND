@@ -2,7 +2,7 @@ import { controleerBereik } from '/src/controle/bereik.mjs';
 import { iconSvg } from '../iconen.js';
 
 const tabbladen = [
-  { naam: 'Bestand', vlakken: ['projecten', 'titel', 'export'] },
+  { naam: 'Bestand', vlakken: ['titel', 'export'] },
   { naam: 'Noten', vlakken: ['editor', 'corrigeren', 'onzeker'] },
   { naam: 'Controleren', vlakken: ['corrigeren', 'onzeker', 'meldingen'] },
   { naam: 'Partijen', vlakken: ['mixer', 'bewerken'] },
@@ -63,6 +63,9 @@ export function start(app) {
     }
 
     if (tabblad.naam === 'Bestand') {
+      // Het paneel hangt nog niet in het document: zoek de vlakken in het paneel, vóór het leegmaken.
+      const titelVlak = paneel.querySelector('#titel');
+      const exportVlak = paneel.querySelector('#export');
       paneel.replaceChildren();
 
       const groepProject = document.createElement('div');
@@ -95,7 +98,6 @@ export function start(app) {
       groepTitel.className = 'lint__groep';
       const kopTitel = document.createElement('h3');
       kopTitel.textContent = 'Titelgegevens';
-      const titelVlak = document.getElementById('titel');
       if (titelVlak) {
         groepTitel.append(kopTitel, titelVlak);
       }
@@ -104,7 +106,6 @@ export function start(app) {
       groepExport.className = 'lint__groep';
       const kopExport = document.createElement('h3');
       kopExport.textContent = 'Exporteren';
-      const exportVlak = document.getElementById('export');
       if (exportVlak) {
         const downloadKnop = exportVlak.querySelector('button') || exportVlak.querySelector('a');
         if (downloadKnop && !downloadKnop.querySelector('svg')) {
