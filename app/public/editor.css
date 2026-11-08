@@ -396,3 +396,4 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
 .tempo-snelkeuze { padding:6px 12px; font-size:0.85rem; }
 .tempo-acties { display:flex; gap:8px; margin-top:12px; }
 .tempo-acties .knop { padding:8px 16px; }
+.tempo-uitleg { margin-top:8px; color:#555; font-size:0.9rem; }

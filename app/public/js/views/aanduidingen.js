@@ -124,6 +124,10 @@ export function start(app) {
         snelContainer.appendChild(knop);
       });
       inhoud.appendChild(snelContainer);
+      const uitleg = document.createElement('p');
+      uitleg.className = 'tempo-uitleg';
+      uitleg.textContent = 'Het tempo geldt vanaf deze maat tot het volgende tempo.';
+      inhoud.appendChild(uitleg);
       // Action buttons
       const acties = document.createElement('div');
       acties.className = 'tempo-acties';
