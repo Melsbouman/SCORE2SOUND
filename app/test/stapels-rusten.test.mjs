@@ -20,7 +20,8 @@ test('een samengestelde rust kan niet langer zijn dan 40 maten', () => {
 });
 
 test('stapelKaart slaat rusten van 9 en 5 maten over', () => {
-  const maten = Array.from({ length: 16 }, () => maat());
+  // Zoals de lezer ze maakt: de maten binnen een meermaatsrust zijn verborgen.
+  const maten = Array.from({ length: 16 }, (_, index) => ({ ...maat(), verborgen: (index >= 1 && index <= 8) || (index >= 11 && index <= 14) }));
   maten[0] = maat([], 9);
   maten[9] = maat([], 1);
   maten[10] = maat([], 5);
