@@ -34,6 +34,7 @@ import { kopUitOcr } from '../model/tekstlezerkop.mjs';
 import { woordenNaarMaten } from '../model/tekstlezerwoorden.mjs';
 import { meermaatsRustenUitCijfers } from '../model/meermaatsrust.mjs';
 import { tweedeMening, woordenUitPdf } from '../model/digitaal.mjs';
+import { vergelijkGedrukteMaatnummers } from '../model/gedruktenummers.mjs';
 import { leesPdfTekens } from './pdftekens.mjs';
 import { maakLimiet } from './limiet.mjs';
 import { leesBlad } from './tekstlezer.mjs';
@@ -389,6 +390,9 @@ export function maakHerken({ map, draaier }) {
   uit.partituur = markeerVerdachteNoten(letters.partituur);
   // Digitale pdf: de nootkoppen in de pdf als tweede mening per maat.
   const digitaal = pdfTekens ? tweedeMening(uit.partituur, pdfTekens) : [];
+  // Het gedrukte maatnummer aan het begin van elke regel naast de nummering van de herkenning (tekstherkenning en, bij een
+  // digitale pdf, de tekst uit de pdf).
+  const nummers = vergelijkGedrukteMaatnummers(uit.partituur, [...ocrPerBlad, ...(pdfTekens ? woordenUitPdf(pdfTekens, bladenGoed) : [])]);
   const koppelRedenen = [
     [uit.redenen.geenKopInMaat, 'geen kop in de maat'],
     [uit.redenen.andereToonhoogte, 'andere toonhoogte'],
@@ -403,6 +407,7 @@ export function maakHerken({ map, draaier }) {
       ...uit.overgeslagen.map((nummer) => herkenMelding(`Op pagina ${nummer} konden de noten niet aan het blad gekoppeld worden. Ze staan in het rood: kijk ze na.`)),
       ...(uit.nietGekoppeld > 0 ? [herkenMelding(`${uit.nietGekoppeld} noten konden niet aan het origineel worden gekoppeld${koppelRedenenTekst}.`)] : []),
     ...digitaal,
+    ...nummers.meldingen,
     ...maatMeldingen,
     ];
   await writeFile(join(taak.uitmap, 'resultaat.json'), JSON.stringify({
