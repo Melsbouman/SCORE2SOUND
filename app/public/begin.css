@@ -89,7 +89,7 @@
 .begin__knop--licht:hover { background: var(--begin-groen); color: #fff; }
 .begin__knop:disabled { cursor: not-allowed; opacity: .42; }
 .begin__details { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(260px, .65fr); gap: 2rem; align-items: start; text-align: left; }
-.begin__formulier { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
+.begin__formulier { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; text-align: left; }
 .begin__veld { display: flex; min-width: 0; flex-direction: column; gap: .5rem; margin: 0; padding: 0; border: 0; }
 .begin__veldlabel { color: var(--begin-donkergroen); font-size: .84rem; font-weight: 700; }
 .begin__veld input, .begin__veld select { width: 100%; min-width: 0; padding: .8rem .9rem; border: 1px solid #2b6a1f66; border-radius: 12px; background: #fff; color: inherit; font: inherit; }
@@ -120,16 +120,26 @@
 .begin__recent-project time { margin-top: .35rem; color: #52604f; font-size: .82rem; }
 .begin__inhoud > * { animation: begin-stap-in .2s ease both; }
 
+.nieuwe-partij__zoekbalk { margin-bottom: 1rem; }
+.nieuwe-partij__zoekinput { width: 100%; padding: .8rem .9rem; border: 1px solid #2b6a1f66; border-radius: 12px; background: #fff; font: inherit; }
+.nieuwe-partij__kolommen { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 1rem; max-height: 360px; overflow-y: auto; }
+.nieuwe-partij__kolom { display: flex; flex-direction: column; gap: .4rem; }
+.nieuwe-partij__kolom--instrumenten { display: flex; flex-wrap: wrap; align-content: flex-start; gap: .6rem; }
+.nieuwe-partij__familie-knop { padding: .75rem 1rem; border: 1px solid #2b6a1f66; border-radius: 12px; background: #fff; color: inherit; font: inherit; font-weight: 600; text-align: left; cursor: pointer; }
+.nieuwe-partij__familie-knop:hover { background: #edf4e8; }
+.nieuwe-partij__familie-knop--actief { background: var(--begin-groen); color: #fff; }
+.nieuwe-partij__geen-resultaat { color: #52604f; font-style: italic; }
+
 @keyframes begin-stap-in {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 800px) {
   .werkvlak > .begin { padding: 24px 16px; overflow-x: hidden; }
   .begin__stappen { gap: .75rem; }
   .begin__stap { flex-direction: column; gap: .25rem; font-size: .7rem; }
-  .begin__keuzekaarten, .begin__combinaties, .begin__details, .begin__formulier, .begin__recente-projecten { grid-template-columns: minmax(0, 1fr); }
+  .begin__keuzekaarten, .begin__combinaties, .begin__details, .begin__formulier, .begin__recente-projecten, .nieuwe-partij__kolommen { grid-template-columns: minmax(0, 1fr); max-height: none; }
   .begin__maatsoorten { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .begin__acties { flex-wrap: wrap; }
 }
