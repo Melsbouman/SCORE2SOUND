@@ -380,6 +380,17 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
   z-index: 1000;
 }
 
+/* Knoppenbalk tabblad Noten: groepen met titel, knoppen als kolom van pictogram boven label */
+.editor-knoppenbalk, .editor-knoppenbalk.editor-knoppenbalk { flex-wrap: wrap; overflow-x: visible; max-width: 100%; }
+.editor-knoppenbalk .editor-knoppengroep { display: flex; flex-direction: column; justify-content: space-between; gap: 4px; min-width: 0; max-width: 100%; padding-right: 12px; border-right: 1px solid var(--kleur-lijn); }
+.editor-knoppenbalk .editor-knoppengroep:last-child { padding-right: 0; border-right: 0; }
+.editor-knoppenbalk .editor-knoppengroep__knoppen { display: flex; flex-wrap: wrap; gap: 2px; min-width: 0; }
+.editor-knoppenbalk .editor-knoppengroep__kop { display: block; text-align: center; color: #0d150b99; font-size: 0.65rem; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.editor-knoppenbalk button.editor-knop--kolom { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; box-sizing: border-box; width: 68px; min-width: 64px; max-width: 72px; height: auto; min-height: 50px; padding: 4px 2px; overflow: hidden; }
+.editor-knop__icoon { display: inline-flex; align-items: center; justify-content: center; height: 24px; line-height: 1; }
+.editor-knoppenbalk .editor-knop--kolom .muzieksymbool { display: inline-flex; align-items: center; justify-content: center; height: 24px; font-size: 1.35rem; line-height: 1; }
+.editor-knop__label { display: block; max-width: 100%; font-size: 11px; line-height: 1.2; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
 
 /* Tempo panel styles */
 .tempo-panel { background:#fff; border:1px solid var(--kleur-lijn); border-radius:var(--hoek); padding:12px; margin-bottom:12px; }
