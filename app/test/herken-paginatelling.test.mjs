@@ -10,7 +10,7 @@ const pdf = (paginas) => Buffer.from(`%PDF-1.7\n${Array(paginas).fill('/Type /Pa
 
 async function opzet(t) {
   const map = await mkdtemp(join(tmpdir(), 'herken-paginatelling-'));
-  t.after(() => rm(map, { recursive: true, force: true }));
+  t.after(() => rm(map, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }));
   const draaier = {
     transcribeer: () => ({ klaar: new Promise(() => {}), stop() {} }),
   };

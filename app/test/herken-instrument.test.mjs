@@ -34,7 +34,7 @@ function nepDraaier(creditWoorden) {
 
 async function herken(t, creditWoorden) {
   const map = await mkdtemp(join(tmpdir(), 'herken-instrument-'));
-  t.after(() => rm(map, { recursive: true, force: true }));
+  t.after(() => rm(map, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }));
   const api = maakHerken({ map, draaier: nepDraaier(creditWoorden) });
   const start = await api(verzoek('POST', '', PNG));
   for (let i = 0; i < 500; i++) {

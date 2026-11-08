@@ -26,7 +26,7 @@ const nepDraaier = ({ fout = false } = {}) => ({
 
 async function draai(t, draaier) {
   const map = await mkdtemp(join(tmpdir(), 'score2sound-herken-'));
-  t.after(() => rm(map, { recursive: true, force: true }));
+  t.after(() => rm(map, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }));
   const afhandelaar = maakHerken({ map, draaier });
   const { body: { id } } = await afhandelaar(verzoek('POST', '', PNG));
   let stand;

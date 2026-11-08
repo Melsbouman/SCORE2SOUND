@@ -43,7 +43,7 @@ async function wachtOp(api, id, gebruiker) {
 
 test('een afgeronde herkenning blijft na een serverherstart beschikbaar', async (t) => {
   const map = await mkdtemp(join(tmpdir(), 'herken-bewaard-'));
-  t.after(() => rm(map, { recursive: true, force: true }));
+  t.after(() => rm(map, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }));
   const eigenaar = 'gebruiker-1';
   const api = maakHerken({ map, draaier: nepDraaier() });
   const gestart = await api(verzoek('POST', '', PNG, eigenaar));

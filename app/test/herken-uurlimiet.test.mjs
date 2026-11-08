@@ -32,7 +32,7 @@ function nepDraaier() {
 
 async function opzet(t) {
   const map = await mkdtemp(join(tmpdir(), 'herken-uurlimiet-'));
-  t.after(() => rm(map, { recursive: true, force: true }));
+  t.after(() => rm(map, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }));
   const vorigeLimiet = process.env.SCORE2SOUND_HERKENNINGEN_PER_UUR;
   process.env.SCORE2SOUND_HERKENNINGEN_PER_UUR = '2';
   try {

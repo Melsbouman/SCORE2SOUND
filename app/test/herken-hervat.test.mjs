@@ -81,7 +81,7 @@ function nepDraaier({ eersteBoek, herstelt = true, houdVast = false }) {
 
 async function opzet(t, draaier) {
   const map = await mkdtemp(join(tmpdir(), 'herken-hervat-'));
-  t.after(() => rm(map, { recursive: true, force: true }));
+  t.after(() => rm(map, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }));
   const api = maakHerken({ map, draaier });
   const { body } = await api(verzoek('POST', '', PNG));
   return { api, id: body.id };
