@@ -11,12 +11,23 @@ function matenOpBlad(maten, van, tot) {
   return aantal;
 }
 
+const isCijfer = (element) => element.soort === 'aanwijzing' && element.type === 'letter'
+  && /^\d+$/.test(String(element.waarde ?? '').trim());
+
+// Repetitiecijfers die maatnummers zijn (22, 26, 30, 38 ... zoals in Distant Land): minstens drie getallen, oplopend, en een
+// ervan boven de 40 (zo lang is een meermaatsrust nooit). Dan is een cijfer op een rustmaat het nummer van die maat en niet het
+// aantal maten van een meermaatsrust.
+function cijfersZijnMaatnummers(partij) {
+  const getallen = partij.maten.flatMap((maat) => maat.elementen.filter(isCijfer).map((element) => Number(String(element.waarde).trim())));
+  return getallen.length >= 3 && Math.max(...getallen) > 40 && getallen.every((getal, index) => index === 0 || getal >= getallen[index - 1]);
+}
+
 export function vulOntbrekendeMaten(partituur) {
   const kopie = structuredClone(partituur);
   const eerstePartij = kopie.partijen?.[0];
   if (!eerstePartij) return kopie;
 
-  const samengesteldeRusten = eerstePartij.maten.flatMap((maat, index) => {
+  const samengesteldeRusten = cijfersZijnMaatnummers(eerstePartij) ? [] : eerstePartij.maten.flatMap((maat, index) => {
     const aantal = aantalUitSamengesteldeRust(maat);
     return aantal === null ? [] : [{ index, aantal }];
   });
@@ -31,13 +42,18 @@ export function vulOntbrekendeMaten(partituur) {
         && String(element.waarde ?? '').trim() === String(aantal)
       ));
       const nummer = Number(maat.nummer);
+      // Een verborgen maat krijgt alleen de rust: een repetitiecijfer of tekst op de rustmaat hoort maar één keer in het stuk.
       const verborgenMaten = Array.from({ length: aantal - 1 }, (_, positie) => {
         const verborgen = {
           ...structuredClone(maat),
           ...(Number.isInteger(nummer) ? { nummer: String(nummer + positie + 1) } : {}),
           verborgen: true,
+          regelbegin: false,
+          paginabegin: false,
+          tempo: null,
+          elementen: maat.elementen.filter((element) => element.soort === 'rust').map((rust) => structuredClone(rust)),
         };
-        delete verborgen.maatrust;
+        for (const veld of ['maatrust', 'vak', 'herhaling', 'volta', 'sprong']) delete verborgen[veld];
         return verborgen;
       });
       partij.maten.splice(index + 1, 0, ...verborgenMaten);

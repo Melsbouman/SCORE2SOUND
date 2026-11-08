@@ -15,12 +15,11 @@ import { leesMusicXML } from '../musicxml/lezen.mjs';
 import { herstelMaatsoorten as herstelMaatsoortenZonderBeginrust } from '../model/maatsoorten.mjs';
 import { vulBeginRust as vulOorspronkelijkeBeginRust } from '../model/beginrust.mjs';
 import { creditBeginRust, eersteBalkBoven } from '../model/creditrusten.mjs';
-import { vulOntbrekendeMaten } from '../model/ontbrekend.mjs';
 import { markeerVerdachteNoten } from '../model/verdacht.mjs';
 
-const vulBeginRust = (partituur) => vulOntbrekendeMaten(vulOorspronkelijkeBeginRust(partituur));
-
-const herstelMaatsoorten = (partituur) => vulBeginRust(herstelMaatsoortenZonderBeginrust(partituur));
+// Begin-rust en ontbrekende maten vult herstelHerkenning pas aan, na de tekstherkenning: eerder telt het gat zonder de
+// meermaatsrusten uit de cijfers boven de balk, en een ingevoegde maat haalt een latere ronde niet meer weg.
+const herstelMaatsoorten = (partituur) => herstelMaatsoortenZonderBeginrust(partituur);
 import { kinderen, leesXml, tekst } from '../musicxml/xml.mjs';
 import { controleerMaatduur } from '../controle/maatduur.mjs';
 import { vulLegeMaten, markeerFouteMaten } from '../controle/nabewerken.mjs';
