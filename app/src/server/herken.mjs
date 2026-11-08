@@ -370,6 +370,7 @@ export function maakHerken({ map, draaier }) {
     uit.partituur = woordenNaarMaten(uit.partituur, ocrPerBlad);
     uit.partituur = meermaatsRustenUitCijfers(uit.partituur, ocrPerBlad);
     verbeterTekstaanwijzingen(uit.partituur);
+    uit.partituur = herstelHerkenning(uit.partituur);
   const gevuld = vulLegeMaten(uit.partituur);
   const maatMeldingen = controleerMaatduur(gevuld);
   const nagekeken = markeerFouteMaten(gevuld, maatMeldingen);
