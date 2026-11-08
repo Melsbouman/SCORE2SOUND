@@ -3,12 +3,18 @@
 // herkende noten. Wijkt het af, dan komt er een melding, zodat je die maat nakijkt. Bij een gescande pdf (geen tekens) gebeurt niets.
 
 const MIN_KOPPEN = 20;
+// Een gescande pdf heeft soms een onzichtbare tekstlaag (Helvetica, Times, ...). Spaties, letters en tekstlettertypen zijn nooit
+// een nootkop; anders zou de tweede mening tekst als noten tellen.
+const TEKSTLETTERTYPE = /helvetica|arial|times|courier|glyphless|calibri|verdana|georgia|tahoma/i;
+const isTekst = (teken) => TEKSTLETTERTYPE.test(teken.lettertype) || teken.code === 32
+  || (teken.code >= 65 && teken.code <= 90) || (teken.code >= 97 && teken.code <= 122);
 
 // De zwarte nootkop: het teken dat het vaakst voorkomt in de pdf (lettertype en code). Te weinig tekens: geen digitale pdf.
 export function nootkopTeken(paginas) {
   const telling = new Map();
   for (const pagina of paginas ?? []) {
     for (const teken of pagina.tekens ?? []) {
+      if (isTekst(teken)) continue;
       const sleutel = `${teken.lettertype}\^@${teken.code}`;
       telling.set(sleutel, (telling.get(sleutel) ?? 0) + 1);
     }
@@ -61,4 +67,52 @@ export function tweedeMening(partituur, paginas) {
     }
   }
   return meldingen;
+}
+
+// De tekst uit een digitale pdf in de vorm van de tekstherkenning (zoals leesBlad): per blad regels met woorden en hun vak in
+// pixels van het blad. Zo kan de meermaatsrust-stap het cijfer boven een rustbalk uit de pdf lezen, ook als het klein gedrukt is.
+// Tekens met dezelfde basislijn en grootte vormen een regel; een gat van meer dan een derde letter begint een nieuw woord.
+// Het muzieklettertype (de nootkoppen) doet niet mee. Breedte van een teken: ongeveer een halve letter; hoogte: 0,7 letter.
+export function woordenUitPdf(paginas, bladen) {
+  const kop = nootkopTeken(paginas);
+  return (paginas ?? []).map((pagina) => {
+    const blad = (bladen ?? []).find((item) => item.nummer === pagina.pagina);
+    if (!blad || !(pagina.breedte > 0) || !(pagina.hoogte > 0)) return { blad: pagina.pagina, regels: [] };
+    const sx = blad.breedte / pagina.breedte;
+    const sy = blad.hoogte / pagina.hoogte;
+    const tekens = pagina.tekens
+      .filter((teken) => !(kop && teken.lettertype === kop.lettertype) && teken.code > 32 && teken.code < 127)
+      .sort((a, b) => b.y - a.y || a.x - b.x);
+    const regels = [];
+    for (const teken of tekens) {
+      const regel = regels.find((r) => Math.abs(r.y - teken.y) < 0.3 * teken.grootte && Math.abs(r.grootte - teken.grootte) < 0.5);
+      if (regel) regel.tekens.push(teken);
+      else regels.push({ y: teken.y, grootte: teken.grootte, tekens: [teken] });
+    }
+    return {
+      blad: pagina.pagina,
+      regels: regels.map((regel) => {
+        const woorden = [];
+        for (const teken of regel.tekens.sort((a, b) => a.x - b.x)) {
+          const laatste = woorden.at(-1);
+          if (laatste && teken.x - laatste.eind <= regel.grootte / 3) {
+            laatste.tekst += String.fromCharCode(teken.code);
+            laatste.eind = teken.x + regel.grootte / 2;
+          } else {
+            woorden.push({ tekst: String.fromCharCode(teken.code), begin: teken.x, eind: teken.x + regel.grootte / 2 });
+          }
+        }
+        const hoogte = 0.7 * regel.grootte * sy;
+        const basis = (pagina.hoogte - regel.y) * sy;
+        const vakken = woorden.map((woord) => ({
+          tekst: woord.tekst,
+          x: Math.round(woord.begin * sx),
+          y: Math.round(basis - hoogte),
+          breedte: Math.round((woord.eind - woord.begin) * sx),
+          hoogte: Math.round(hoogte),
+        }));
+        return { tekst: vakken.map((woord) => woord.tekst).join(' '), woorden: vakken };
+      }),
+    };
+  });
 }

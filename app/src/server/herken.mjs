@@ -34,7 +34,7 @@ import { tempoVoorWoord } from '../model/tempotekst.mjs';
 import { kopUitOcr } from '../model/tekstlezerkop.mjs';
 import { woordenNaarMaten } from '../model/tekstlezerwoorden.mjs';
 import { meermaatsRustenUitCijfers } from '../model/meermaatsrust.mjs';
-import { tweedeMening } from '../model/digitaal.mjs';
+import { tweedeMening, woordenUitPdf } from '../model/digitaal.mjs';
 import { leesPdfTekens } from './pdftekens.mjs';
 import { maakLimiet } from './limiet.mjs';
 import { leesBlad } from './tekstlezer.mjs';
@@ -369,6 +369,17 @@ export function maakHerken({ map, draaier }) {
     uit.partituur = splitsPartijenOpKoppen(uit.partituur, paginaNamen);
     uit.partituur = woordenNaarMaten(uit.partituur, ocrPerBlad);
     uit.partituur = meermaatsRustenUitCijfers(uit.partituur, ocrPerBlad);
+    // Digitale pdf (Finale, Sibelius, Dorico): de tekens uit de pdf zelf. Een klein gedrukt cijfer boven een rustbalk leest de
+    // tekstherkenning vaak niet; in de pdf staat het als teken. Een scan heeft geen tekens.
+    let pdfTekens = null;
+    if (/\.pdf$/i.test(taak.invoer)) {
+      try {
+        pdfTekens = leesPdfTekens(await readFile(taak.invoer));
+      } catch {
+        pdfTekens = null;
+      }
+    }
+    if (pdfTekens) uit.partituur = meermaatsRustenUitCijfers(uit.partituur, woordenUitPdf(pdfTekens, bladenGoed));
     verbeterTekstaanwijzingen(uit.partituur);
     uit.partituur = herstelHerkenning(uit.partituur);
   const gevuld = vulLegeMaten(uit.partituur);
@@ -377,15 +388,8 @@ export function maakHerken({ map, draaier }) {
   uit.partituur = nagekeken;
   const letters = voegLettersToe(uit.partituur, bladenGoed);
   uit.partituur = markeerVerdachteNoten(letters.partituur);
-  // Digitale pdf (Finale, Sibelius, Dorico): de nootkoppen in de pdf als tweede mening per maat. Een scan heeft geen tekens.
-  let digitaal = [];
-  if (/\.pdf$/i.test(taak.invoer)) {
-    try {
-      digitaal = tweedeMening(uit.partituur, leesPdfTekens(await readFile(taak.invoer)));
-    } catch {
-      digitaal = [];
-    }
-  }
+  // Digitale pdf: de nootkoppen in de pdf als tweede mening per maat.
+  const digitaal = pdfTekens ? tweedeMening(uit.partituur, pdfTekens) : [];
   const koppelRedenen = [
     [uit.redenen.geenKopInMaat, 'geen kop in de maat'],
     [uit.redenen.andereToonhoogte, 'andere toonhoogte'],
