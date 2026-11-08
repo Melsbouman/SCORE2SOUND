@@ -9,10 +9,13 @@ function alleenRust(maat) {
   return Boolean(maat) && !maat.verborgen && !(maat.maatrust > 1) && !(maat.elementen ?? []).some((element) => element.soort === 'noot');
 }
 
-// Het cijfer (2 tot 99) waarvan het midden boven deze maat staat, het dichtst boven de bovenste lijn van de balk.
+// Het cijfer (2 tot 99) midden boven deze maat, het dichtst boven de bovenste lijn van de balk. Een rustcijfer staat in het midden
+// van de maat en is groot (ongeveer een halve balk hoog, zoals een maatsoortcijfer); een maatnummer staat links en is klein.
 function cijferBoven(vak, ocr) {
   const hoogte = vak.onder - vak.boven;
   if (!(hoogte > 0)) return null;
+  const midden = (vak.links + vak.rechts) / 2;
+  const marge = (vak.rechts - vak.links) / 4;
   let beste = null;
   for (const regel of ocr?.regels ?? []) {
     for (const woord of regel.woorden ?? []) {
@@ -20,8 +23,8 @@ function cijferBoven(vak, ocr) {
       if (!/^\d{1,2}$/.test(tekst)) continue;
       const aantal = Number(tekst);
       if (aantal < 2 || aantal > MAX_AANTAL) continue;
-      const midden = woord.x + woord.breedte / 2;
-      if (midden < vak.links || midden > vak.rechts) continue;
+      if (Math.abs(woord.x + woord.breedte / 2 - midden) > marge) continue;
+      if (woord.hoogte < 0.35 * hoogte) continue;
       const afstand = vak.boven - (woord.y + woord.hoogte);
       if (afstand < -0.1 * hoogte || afstand > 1.5 * hoogte) continue;
       if (!beste || afstand < beste.afstand) beste = { aantal, afstand };
