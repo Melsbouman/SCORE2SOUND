@@ -81,11 +81,11 @@ print(json.dumps({'agent':os.environ['AG'],'status':os.environ['ST'],'taak':os.e
 }
 # Voegt een regel toe aan de geschiedenis (voor het paneel): wie deed welke taak, hoe lang en met welk resultaat.
 UITV_GEBRUIKT=""
-historie() { # $1 = resultaat
+historie() { # $1 = resultaat, $2 = reden (alleen bij vast; het paneel toont die)
   [ -n "${ISSUE:-}" ] || return 0
-  HIS="$1" IS="$ISSUE" TT="${TITEL:-}" UV="${UITV_GEBRUIKT:-$UITVOERDER}" MD="$MODEL" SC="$(( $(date +%s) - START ))" MO="${MODUS:-}" TI="${TOK_IN:-0}" TU="${TOK_UIT:-0}" PYTHONUTF8=1 python -I -X utf8 -c "
+  HIS="$1" RD="${2:-}" IS="$ISSUE" TT="${TITEL:-}" UV="${UITV_GEBRUIKT:-$UITVOERDER}" MD="$MODEL" SC="$(( $(date +%s) - START ))" MO="${MODUS:-}" TI="${TOK_IN:-0}" TU="${TOK_UIT:-0}" PYTHONUTF8=1 python -I -X utf8 -c "
 import json,os,time
-print(json.dumps({'tijd':int(time.time()),'issue':int(os.environ['IS']),'titel':os.environ['TT'],'uitvoerder':os.environ['UV'],'model':os.environ['MD'],'seconden':int(os.environ['SC']),'resultaat':os.environ['HIS'],'modus':os.environ['MO'],'tokens_in':int(os.environ['TI']),'tokens_uit':int(os.environ['TU'])},ensure_ascii=False))" >> "$STATUS/geschiedenis.jsonl" 2>/dev/null
+print(json.dumps({'tijd':int(time.time()),'issue':int(os.environ['IS']),'titel':os.environ['TT'],'uitvoerder':os.environ['UV'],'model':os.environ['MD'],'seconden':int(os.environ['SC']),'resultaat':os.environ['HIS'],'reden':os.environ['RD'][:300],'modus':os.environ['MO'],'tokens_in':int(os.environ['TI']),'tokens_uit':int(os.environ['TU'])},ensure_ascii=False))" >> "$STATUS/geschiedenis.jsonl" 2>/dev/null
 }
 
 # Een parallelle werker ruimt zijn eigen statusbestand op; de gewone runner laat "standby" met het laatste resultaat staan.
@@ -110,7 +110,7 @@ vast() { # $1 issue, $2 tekst
   "$GH" issue comment "$1" -R "$R" --body "De runner liep vast: $2" >/dev/null 2>&1
   zet_labels "$1" agent-vast
   LAATSTE="vast op #$1: $2"
-  historie "vast"
+  historie "vast" "$2"
   log "vast op #$1: $2"
   exit 1
 }
