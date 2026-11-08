@@ -81,6 +81,7 @@ In de stand is `verborgen` `true` als de stand niet wordt getoond.
 }
 ```
 `maatrust: N` staat op de eerste maat van een meermaats-rust, en de N-1 volgende maten hebben `verborgen: true`; alleen als ze er zijn.
+Na een scan heeft een maat ook `vak: { blad, links, rechts, boven, onder }`: de plek van de maat op de bladafbeelding in pixels (links en rechts van de maat, boven en onder van de bovenste en onderste notenbalklijn). Daarmee koppelt de herkenning tekst van de tekstherkenning aan een maat, zoals het cijfer boven een meermaatsrust.
 `maatsoort`, `toonsoort` en `sleutels` staan in **elke** maat, ook als ze niet veranderen. Dan hoeft geen enkel onderdeel terug te zoeken.
 
 ### Sleutel
