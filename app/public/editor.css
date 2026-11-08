@@ -380,3 +380,20 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
   z-index: 1000;
 }
 
+
+/* Tempo panel styles */
+.tempo-panel { background:#fff; border:1px solid var(--kleur-lijn); border-radius:var(--hoek); padding:12px; margin-bottom:12px; }
+.tempo-overzicht { display:flex; flex-direction:column; gap:8px; }
+.tempo-overzicht__regel { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--kleur-lijn); }
+.tempo-overzicht__regel.selected { background:#c7e3b066; }
+.tempo-overzicht__verwijderknop { padding:4px 10px; font-size:0.85rem; }
+.tempo-bij-maat { margin-top:12px; }
+.tempo-bij-maat__inhoud { display:flex; flex-direction:column; gap:12px; }
+.tempo-input__container { display:flex; align-items:center; gap:8px; }
+.tempo-input__container input { width:4.5em; }
+.tempo-input__container button { min-width:38px; height:38px; padding:0 8px; }
+.tempo-snelkeuzes { display:flex; flex-wrap:wrap; gap:8px; }
+.tempo-snelkeuze { padding:6px 12px; font-size:0.85rem; }
+.tempo-acties { display:flex; gap:8px; margin-top:12px; }
+.tempo-acties .knop { padding:8px 16px; }
+.tempo-uitleg { margin-top:8px; color:#555; font-size:0.9rem; }
