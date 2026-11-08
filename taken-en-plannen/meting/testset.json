@@ -1,6 +1,6 @@
 {
   "versie": 1,
-  "opmerking": "referentie ontbreekt bij eigen pdf's; Mels maakt voor 2 pagina's een correct antwoord",
+  "opmerking": "synthetisch: referentie wordt met Verovio naar pdf gerenderd en dan herkend; eigen pdf's hebben nog geen referentie (Mels maakt 2 pagina's)",
   "items": [
     {
       "id": "galop-2nd-cornet",
@@ -25,6 +25,24 @@
       "pdf": "C:/Brassmuziek PDF/Devils Galop (Brass Band) - 004 2nd Cornet Bb.pdf",
       "soort": "digitaal",
       "referentie": null
+    },
+    {
+      "id": "synth-eenvoudig",
+      "soort": "synthetisch",
+      "pdf": null,
+      "referentie": "app/test/voorbeelden/eenvoudig.musicxml"
+    },
+    {
+      "id": "synth-ensemble",
+      "soort": "synthetisch",
+      "pdf": null,
+      "referentie": "app/test/voorbeelden/ensemble.musicxml"
+    },
+    {
+      "id": "synth-gemengd",
+      "soort": "synthetisch",
+      "pdf": null,
+      "referentie": "app/test/voorbeelden/gemengd.musicxml"
     }
   ]
 }
