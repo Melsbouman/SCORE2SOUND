@@ -22,6 +22,7 @@ import * as instellingen from './views/instellingen.js';
 import * as sneltoetsen from './views/sneltoetsen.js';
 import * as slepen from './views/slepen.js';
 import * as voorbeeld from './views/voorbeeld.js';
+import * as nieuwePartij from './views/nieuwe-partij.js';
 
 let algemeneFoutmelding;
 
@@ -63,7 +64,7 @@ window.addEventListener('error', toonAlgemeneFoutmelding);
 window.addEventListener('unhandledrejection', toonAlgemeneFoutmelding);
 
 const app = maakApp();
-const schermen = { kop, inloggen, instellingen, upload, begin, voorbeeld, editor, weergave, lint, slepen, speler, meldingen, mixer, bewerken, exporteren, projecten, titel, corrigeren, onzeker, aanduidingen, versies, sneltoetsen };
+const schermen = { kop, inloggen, instellingen, upload, begin, voorbeeld, editor, weergave, lint, slepen, speler, meldingen, mixer, bewerken, exporteren, projecten, titel, corrigeren, onzeker, aanduidingen, versies, sneltoetsen, nieuwePartij };
 
 for (const [naam, scherm] of Object.entries(schermen)) {
   try {
