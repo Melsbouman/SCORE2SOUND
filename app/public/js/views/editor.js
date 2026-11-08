@@ -1222,15 +1222,38 @@ export function start(app) {
   teken();
 }
 import { SYMBOOL } from "./muzieksymbolen.js";
+import { iconSvg } from "../iconen.js";
 
 
 const KNOPPENBALK_GROEPEN = [
-  ["Noten", ["noten invoeren", "heel", "half", "kwart", "achtste", "zestiende", "rust", "punt", "triool"]],
+  ["Noot", ["noten invoeren", "heel", "half", "kwart", "achtste", "zestiende", "rust", "punt", "triool"]],
   ["Voortekens", ["kruis", "mol", "herstelling", "dubbelkruis", "dubbelmol"]],
   ["Toonhoogte", ["hoger", "lager"]],
-  ["Tekens", ["fermate", "staccato", "accent", "tenuto", "overbinding"]],
-  ["Bewerken", ["ongedaan", "opnieuw", "verwijderen", "goedkeuren", "maat klopt", "maatduur herstellen"]],
+  ["Spelwijze", ["fermate", "staccato", "accent", "tenuto", "overbinding"]],
+  ["Maat", ["maat klopt", "maatduur herstellen", "maat verwijderen", "kopieer maat", "maten leegmaken"]],
+  ["Herhaling", ["herhaling begin", "herhaling eind"]],
+  ["Bewerken", ["ongedaan", "opnieuw", "goedkeuren"]],
 ];
+
+// Korte label (en eventueel pictogram) per knop in de balk.
+const KNOP_LABEL = {
+  "noten invoeren": ["Invoeren", "music"],
+  heel: ["Heel"], half: ["Half"], kwart: ["Kwart"], achtste: ["Achtste"], zestiende: ["Zestiende"],
+  rust: ["Rust"], punt: ["Punt"], triool: ["Triool"],
+  kruis: ["Kruis"], mol: ["Mol"], herstelling: ["Herstel"], dubbelkruis: ["Dubbelkruis"], dubbelmol: ["Dubbelmol"],
+  hoger: ["Omhoog", "arrow-up"], lager: ["Omlaag", "arrow-down"],
+  fermate: ["Fermate"], staccato: ["Staccato"], accent: ["Accent"], tenuto: ["Tenuto"], overbinding: ["Legato"],
+  "maat klopt": ["Maat klopt", "check"],
+  "maatduur herstellen": ["Maatduur", "rotate-ccw"],
+  "maat verwijderen": ["Maat wissen", "trash-2"],
+  "kopieer maat": ["Kopieer", "copy"],
+  "maten leegmaken": ["Leegmaken", "eraser"],
+  "herhaling begin": ["Begin", "repeat"],
+  "herhaling eind": ["Eind", "repeat"],
+  ongedaan: ["Ongedaan", "undo-2"],
+  opnieuw: ["Opnieuw", "redo-2"],
+  goedkeuren: ["Goedkeuren", "check-check"],
+};
 
 const KNOP_INFO = {
   heel: ["Hele noot", "1", "heel"],
@@ -1281,19 +1304,33 @@ function groepeerEditorKnoppenbalk() {
       if (!actie) return false;
       gebruikt.add(knop);
       const info = KNOP_INFO[actie];
+      const [labelTekst, icoon] = KNOP_LABEL[actie] || [null, null];
+      let volledig = knop.getAttribute("aria-label") || knop.title || knop.textContent.trim();
+      if (actie === "goedkeuren" && !info) volledig = "Alles goedkeuren";
+      let voorkant = null;
       if (info) {
         const [naam, sneltoets, symbool] = info;
-        knop.title = sneltoets ? `${naam} (${sneltoets})` : naam;
-        knop.setAttribute("aria-label", knop.title);
+        volledig = sneltoets ? `${naam} (${sneltoets})` : naam;
         const waarde = SYMBOOL[symbool];
-        knop.replaceChildren();
-        const span = document.createElement("span");
-        span.className = "muzieksymbool";
-        if (symbool === "overbinding" || symbool === "triool") span.innerHTML = waarde;
-        else span.textContent = waarde;
-        knop.append(span);
-      } else if (!knop.getAttribute("aria-label")) {
-        knop.setAttribute("aria-label", knop.title || knop.textContent.trim());
+        voorkant = document.createElement("span");
+        voorkant.className = "muzieksymbool";
+        if (symbool === "overbinding" || symbool === "triool") voorkant.innerHTML = waarde;
+        else voorkant.textContent = waarde;
+      } else if (icoon) {
+        voorkant = document.createElement("span");
+        voorkant.className = "editor-knop__icoon";
+        voorkant.innerHTML = iconSvg(icoon, 20);
+      }
+      knop.title = volledig;
+      knop.setAttribute("aria-label", volledig);
+      if (labelTekst) {
+        const tekst = document.createElement("span");
+        tekst.className = "editor-knop__label";
+        tekst.textContent = labelTekst;
+        knop.replaceChildren(...(voorkant ? [voorkant, tekst] : [tekst]));
+        knop.classList.add("editor-knop--kolom");
+      } else if (voorkant) {
+        knop.replaceChildren(voorkant);
       }
       return true;
     });
