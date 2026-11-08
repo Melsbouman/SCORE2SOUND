@@ -90,13 +90,6 @@ export function start(app) {
       knopBib.setAttribute('aria-label', 'Bibliotheek');
       knopBib.innerHTML = iconSvg('list-music') + ' Bibliotheek';
 
-      const naamContainer = document.createElement('div');
-      naamContainer.className = 'lint__projectnaam';
-      const projectenVlak = document.getElementById('projecten');
-      if (projectenVlak) {
-        // We look for form or input for project name or create one if needed
-      }
-
       groepProject.append(kopProject, knopNieuw, knopAnder, knopBib);
 
       const groepTitel = document.createElement('div');
@@ -114,7 +107,6 @@ export function start(app) {
       kopExport.textContent = 'Exporteren';
       const exportVlak = document.getElementById('export');
       if (exportVlak) {
-        // Prepend export icon to export button or similar if appropriate, but requirement says: "Gebruik iconSvg uit app/public/js/iconen.js voor ... Exporteren (download)"
         const downloadKnop = exportVlak.querySelector('button') || exportVlak.querySelector('a');
         if (downloadKnop && !downloadKnop.querySelector('svg')) {
           downloadKnop.innerHTML = iconSvg('download') + ' ' + downloadKnop.textContent;
@@ -122,7 +114,6 @@ export function start(app) {
         groepExport.append(kopExport, exportVlak);
       }
 
-      // Also add save button for project name as requested: "veld Naam van het project met Wijzigingen bewaren ... Wijzigingen bewaren (save)"
       const bewaarForm = document.createElement('form');
       const bewaarLabel = document.createElement('label');
       bewaarLabel.textContent = 'Naam van het project';
@@ -141,7 +132,7 @@ export function start(app) {
         e.preventDefault();
         const naam = bewaarInput.value.trim();
         if (!naam) return;
-        app.uit('bewaar-project', { naam });
+        app.meld('bewaar-project', { naam });
       });
       groepProject.append(bewaarForm);
 
