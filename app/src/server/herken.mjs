@@ -14,7 +14,7 @@ import { bladenUitOmr, koppelOmr, voegPaginasSamen } from './omr.mjs';
 import { leesMusicXML } from '../musicxml/lezen.mjs';
 import { herstelMaatsoorten as herstelMaatsoortenZonderBeginrust } from '../model/maatsoorten.mjs';
 import { vulBeginRust as vulOorspronkelijkeBeginRust } from '../model/beginrust.mjs';
-import { creditBeginRust } from '../model/creditrusten.mjs';
+import { creditBeginRust, eersteBalkBoven } from '../model/creditrusten.mjs';
 import { vulOntbrekendeMaten } from '../model/ontbrekend.mjs';
 import { markeerVerdachteNoten } from '../model/verdacht.mjs';
 
@@ -119,7 +119,7 @@ async function leesUitvoer(uitmap) {
       for (const maat of partij.maten) maten.push({ ...maat, index: maten.length });
     });
   }
-  return { partituur, creditWoorden, creditGegevens, paginaKopregels };
+  return { partituur, creditWoorden, creditGegevens, paginaKopregels, eersteBalkBoven: eersteBalkBoven(xmlTeksten[0]) };
 }
 
 function herstelOcr(waarde) {
@@ -192,13 +192,13 @@ function tempowoordInKop(waarde) {
   return TEMPOWOORDEN.find((tempowoord) => afstandLevenshtein(klein, tempowoord.toLocaleLowerCase('nl')) <= 1) ?? null;
 }
 
-export function maakNetjes(partituur, naam, credits) {
+export function maakNetjes(partituur, naam, credits, { eersteBalkBoven: balkBoven = null } = {}) {
   const creditGegevens = credits.map((credit) => typeof credit === 'string'
     ? { tekst: credit, type: null, y: null }
     : credit);
   const creditWoorden = creditGegevens.map((credit) => credit.tekst);
   const eersteMaatVoorCreditrust = partituur.partijen?.[0]?.maten?.[0];
-  const aantalCreditrusten = eersteMaatVoorCreditrust?.maatrust == null ? creditBeginRust(creditGegevens) : null;
+  const aantalCreditrusten = eersteMaatVoorCreditrust?.maatrust == null ? creditBeginRust(creditGegevens, { eersteBalkBoven: balkBoven }) : null;
   if (aantalCreditrusten) {
     const creditrust = structuredClone(partituur);
     creditrust.partijen[0].maten[0].elementen.unshift({
@@ -336,7 +336,7 @@ export function maakHerken({ map, draaier }) {
     if (taak.stand === 'afgebroken') return;
     const uitvoer = await leesUitvoer(taak.uitmap);
     if (!uitvoer) throw new Error('De bladmuziek is niet herkend.');
-    const { partituur, creditGegevens, paginaKopregels } = uitvoer;
+    const { partituur, creditGegevens, paginaKopregels, eersteBalkBoven: balkBoven } = uitvoer;
 
     const bladenGoed = bladen.filter((blad) => goed.includes(blad.nummer));
     const uit = koppelOmr(voegPaginasSamen(partituur, boek, bladenGoed), bladenGoed);
@@ -344,7 +344,7 @@ export function maakHerken({ map, draaier }) {
       herkenning: taak.id,
       bladen: bladen.map(({ nummer, breedte, hoogte }) => ({ nummer, breedte, hoogte })),
     };
-    maakNetjes(uit.partituur, taak.naam, creditGegevens);
+    maakNetjes(uit.partituur, taak.naam, creditGegevens, { eersteBalkBoven: balkBoven });
     const eersteMaat = uit.partituur.partijen?.[0]?.maten?.[0];
     const tempoBekend = eersteMaat?.tempo != null
       || eersteMaat?.elementen?.some((element) => element.soort === 'aanwijzing' && element.type === 'tempo');
