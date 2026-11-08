@@ -35,7 +35,7 @@
 
 ## Richting (Mels, 8 nov avond)
 - Volle focus op een werkende scanner, met de uitkomst als concept in de editor om te verbeteren. Geen nieuwe functies zoals meespeelmodus of speelbaarheidscontrole. De lopende editor-taken mogen af; nieuwe taken gaan over scannen.
-- AGPL: advies van Claude is accepteren (Audiveris en homr alleen als los programma, eigen aanpassingen openbaar, licentiepagina). Besluit van Mels volgt.
+- AGPL: besloten (Mels liet het aan Claude). Scanmotoren onder AGPL accepteren als losse programma's; eigen code alle rechten voorbehouden (`LICENSE.md`). Regels en gevolgen in `docs/licenties.md`. Later: pagina Licenties en broncode in de app.
 
 ## Valkuil (8 nov)
 - De hartslag (Windows-taak, elk uur om :36) start zelf wachtrijen. Pas `automatisering/*.sh` dus nooit aan zonder eerst te kijken of er een `werkpakket.sh` draait: een aanpassing tijdens een run brak #1675 af.

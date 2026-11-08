@@ -30,6 +30,7 @@ SCORE2SOUND is een web-app die bladmuziek omzet naar bewerkbare, hoorbare muziek
 - **Het muziekmodel in `docs/model.md` is het contract.** Tijd in tikken (480 per kwartnoot), genoteerde toonhoogte, meldingen in vaste vorm. Wijk er niet van af.
 - Tests in `app/test/*.test.mjs` met `node:test` en `node:assert/strict`; testvoorbeelden in `app/test/voorbeelden/`. Staat een test in je taak, neem hem dan letterlijk over.
 - Bibliotheken: alleen `verovio`, `fast-xml-parser` en `spessasynth_lib`. Geen andere.
+- Audiveris, homr en andere scanmotoren (AGPL) roep je alleen aan als los programma. Kopieer nooit hun code in de app en bouw ze niet in als bibliotheek (zie `docs/licenties.md`).
 - Teksten in de app in het Nederlands, rustig en concreet, met "je". Muziektermen zoals een Nederlandse muzikant ze kent (maat, maatsoort, voortekens, partij, stemming).
 
 ## Voor je de PR opent (handmatig)
