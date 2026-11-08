@@ -22,12 +22,51 @@ function cijfersZijnMaatnummers(partij) {
   return getallen.length >= 3 && Math.max(...getallen) > 40 && getallen.every((getal, index) => index === 0 || getal >= getallen[index - 1]);
 }
 
+const cijferWaarde = (element) => Number(String(element.waarde).trim());
+
+// Audiveris hangt een repetitiecijfer dat boven het begin van een maat staat vaak aan de maat ervoor: het kader 30 van Distant
+// Land komt op de rust van 4 maten (26 tot 29), het kader 41 van Sand and Stars op de rust van 6 maten ervoor. Bij cijfers die
+// maatnummers zijn gaat zo'n cijfer naar de volgende maat als het op een meermaatsrust staat en het aantal maten sinds het vorige
+// cijfer (of sinds het begin) alleen dan klopt. Bij een gewone maat kan dat ook een ontbrekende maat zijn; die blijft staan.
+// Staan er twee cijfers in één maat, dan gaat het hoogste naar de volgende maat.
+function zetCijfersOpHunMaat(partij) {
+  const maten = partij.maten;
+  const volgendeZichtbare = (index) => {
+    let volgende = index + 1;
+    while (maten[volgende]?.verborgen) volgende += 1;
+    return volgende < maten.length ? volgende : null;
+  };
+  let vorige = { index: maten[0]?.opmaat ? 1 : 0, nummer: 1 };
+  for (let index = 0; index < maten.length; index += 1) {
+    const cijfers = maten[index].elementen.filter(isCijfer).sort((a, b) => cijferWaarde(a) - cijferWaarde(b));
+    if (cijfers.length === 0) continue;
+    const naIndex = volgendeZichtbare(index);
+    const verplaats = (cijfer) => {
+      maten[index].elementen = maten[index].elementen.filter((element) => element !== cijfer);
+      maten[naIndex].elementen.unshift(cijfer);
+    };
+    if (naIndex !== null) cijfers.slice(1).forEach(verplaats);
+    const nummer = cijferWaarde(cijfers[0]);
+    const verschil = nummer - vorige.nummer;
+    if (naIndex !== null && index >= vorige.index && matenOpBlad(maten, index, naIndex) >= 2
+      && verschil !== matenOpBlad(maten, vorige.index, index)
+      && verschil === matenOpBlad(maten, vorige.index, naIndex)) {
+      verplaats(cijfers[0]);
+      vorige = { index: naIndex, nummer };
+    } else {
+      vorige = { index, nummer };
+    }
+  }
+}
+
 export function vulOntbrekendeMaten(partituur) {
   const kopie = structuredClone(partituur);
   const eerstePartij = kopie.partijen?.[0];
   if (!eerstePartij) return kopie;
 
-  const samengesteldeRusten = cijfersZijnMaatnummers(eerstePartij) ? [] : eerstePartij.maten.flatMap((maat, index) => {
+  const maatnummers = cijfersZijnMaatnummers(eerstePartij);
+  if (maatnummers) kopie.partijen.forEach(zetCijfersOpHunMaat);
+  const samengesteldeRusten = maatnummers ? [] : eerstePartij.maten.flatMap((maat, index) => {
     const aantal = aantalUitSamengesteldeRust(maat);
     return aantal === null ? [] : [{ index, aantal }];
   });

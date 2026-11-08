@@ -381,13 +381,14 @@ export function maakHerken({ map, draaier }) {
     }
     if (pdfTekens) uit.partituur = meermaatsRustenUitCijfers(uit.partituur, woordenUitPdf(pdfTekens, bladenGoed));
     verbeterTekstaanwijzingen(uit.partituur);
-    uit.partituur = herstelHerkenning(uit.partituur);
+    // Repetitiecijfers van het blad (met hun plek) vóór het herstel: het aanvullen van ontbrekende maten rekent met die cijfers,
+    // en Audiveris hangt een kader vaak aan de maat ervoor.
+    const letters = voegLettersToe(uit.partituur, bladenGoed);
+    uit.partituur = herstelHerkenning(letters.partituur);
   const gevuld = vulLegeMaten(uit.partituur);
   const maatMeldingen = controleerMaatduur(gevuld);
   const nagekeken = markeerFouteMaten(gevuld, maatMeldingen);
-  uit.partituur = nagekeken;
-  const letters = voegLettersToe(uit.partituur, bladenGoed);
-  uit.partituur = markeerVerdachteNoten(letters.partituur);
+  uit.partituur = markeerVerdachteNoten(nagekeken);
   // Digitale pdf: de nootkoppen in de pdf als tweede mening per maat.
   const digitaal = pdfTekens ? tweedeMening(uit.partituur, pdfTekens) : [];
   // Het gedrukte maatnummer aan het begin van elke regel naast de nummering van de herkenning (tekstherkenning en, bij een
