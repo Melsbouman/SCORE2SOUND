@@ -1,5 +1,16 @@
 import { aantalUitSamengesteldeRust } from './stapels.mjs';
 
+// Het aantal maten tussen twee plekken zoals op het blad: een meermaatsrust zonder verborgen maten erachter telt voor zijn volle
+// aantal. Zonder dit ziet een tweede ronde (vulBeginRust roept deze functie ook aan) het gat opnieuw en vult hem dubbel.
+function matenOpBlad(maten, van, tot) {
+  let aantal = 0;
+  for (let index = van; index < tot; index += 1) {
+    const maat = maten[index];
+    aantal += maat.maatrust > 1 && !maten[index + 1]?.verborgen ? maat.maatrust : 1;
+  }
+  return aantal;
+}
+
 export function vulOntbrekendeMaten(partituur) {
   const kopie = structuredClone(partituur);
   const eerstePartij = kopie.partijen?.[0];
@@ -55,7 +66,7 @@ export function vulOntbrekendeMaten(partituur) {
     const vorige = cijfers[index - 1];
     const huidige = cijfers[index];
     const verwacht = huidige.nummer - vorige.nummer;
-    const werkelijk = huidige.index - vorige.index;
+    const werkelijk = matenOpBlad(eerstePartij.maten, vorige.index, huidige.index);
     const aantal = verwacht - werkelijk;
     if (verwacht > 0 && aantal > 0 && aantal <= 40) {
       const leeg = [];
