@@ -11,7 +11,14 @@ function alleenRust(maat) {
 
 // Het cijfer (2 tot 99) midden boven deze maat, het dichtst boven de bovenste lijn van de balk. Een rustcijfer staat in het midden
 // van de maat en is groot (ongeveer een halve balk hoog, zoals een maatsoortcijfer); een maatnummer staat links en is klein.
-function cijferBoven(vak, ocr) {
+// Een getal in een zin ("from bar 41") staat vlak naast een ander woord; een rustcijfer staat vrij: de afstand tot het dichtste
+// woord op dezelfde regel is minstens de eigen breedte. Een repetitiecijfer in een kader staat al als letter in de maat.
+function staatVrij(woord, regel) {
+  return (regel.woorden ?? []).every((ander) => ander === woord
+    || Math.max(ander.x - (woord.x + woord.breedte), woord.x - (ander.x + ander.breedte)) >= woord.breedte);
+}
+
+function cijferBoven(vak, ocr, letters = []) {
   const hoogte = vak.onder - vak.boven;
   if (!(hoogte > 0)) return null;
   const midden = (vak.links + vak.rechts) / 2;
@@ -23,6 +30,7 @@ function cijferBoven(vak, ocr) {
       if (!/^\d{1,2}$/.test(tekst)) continue;
       const aantal = Number(tekst);
       if (aantal < 2 || aantal > MAX_AANTAL) continue;
+      if (!staatVrij(woord, regel) || letters.includes(tekst)) continue;
       if (Math.abs(woord.x + woord.breedte / 2 - midden) > marge) continue;
       if (woord.hoogte < 0.35 * hoogte) continue;
       const afstand = vak.boven - (woord.y + woord.hoogte);
@@ -47,7 +55,8 @@ export function meermaatsRustenUitCijfers(partituur, ocrPerBlad) {
   for (let index = 0; index < lengte; index += 1) {
     const maten = partijen.map((partij) => partij.maten[index]);
     if (!maten.every(alleenRust)) continue;
-    const aantal = maten.map((maat) => (maat.vak ? cijferBoven(maat.vak, ocrVoor(maat.vak.blad)) : null)).find(Boolean);
+    const letters = (maat) => maat.elementen.filter((element) => element.soort === 'aanwijzing' && element.type === 'letter').map((element) => String(element.waarde ?? '').trim());
+    const aantal = maten.map((maat) => (maat.vak ? cijferBoven(maat.vak, ocrVoor(maat.vak.blad), letters(maat)) : null)).find(Boolean);
     if (aantal) vondsten.push({ index, aantal });
   }
 
