@@ -27,6 +27,7 @@ Een octaafteken verandert de genoteerde toonhoogte niet. Binnen het teken heeft 
   arrangeur: '',                 // '' als onbekend
   partijen: [Partij, ...],
   bron: Bron,                    // alleen na herkenning, anders ontbreekt het veld
+  nagekeken: true,               // alleen na herkenning: de gebruiker drukte op Klaar met nakijken (zonder dit veld is de scan een concept)
 }
 ```
 

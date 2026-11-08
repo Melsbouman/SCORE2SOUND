@@ -130,6 +130,8 @@ main:has(#weergave g.measure) #hulp { display: none; }
 .onzeker__status { flex: 1 1 12em; margin: 0; color: var(--kleur-zacht); }
 .onzeker__knoppen { display: flex; flex-wrap: wrap; gap: var(--ruimte-1); }
 .onzeker__knoppen .knop { padding: 6px 8px; font-size: 0.875rem; }
+.onzeker__concept { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ruimte-2); box-sizing: border-box; max-width: min(46rem, calc(100vw - 3rem)); margin: 0 0 var(--ruimte-2); padding: var(--ruimte-2) var(--ruimte-3); background: var(--kleur-accent-zacht); border-radius: var(--hoek); }
+.onzeker__concept p { flex: 1 1 16rem; margin: 0; }
 #weergave {
   grid-area: weergave;
   padding: var(--ruimte-3);

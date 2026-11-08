@@ -6,12 +6,14 @@ import {
 } from '/src/model/corrigeren.mjs';
 import { herstelHerkenning } from '/src/model/herstel.mjs';
 import { vernieuwMeldingen } from '/src/controle/meldingen.mjs';
+import { isConcept, nakijkStand, conceptTekst, markeerNagekeken } from '/src/model/concept.mjs';
 
 export function start(app) {
   const vlak = document.getElementById('onzeker');
   let gekozen = null;
   let bevestigen = false;
   let laatsteMelding = null;
+  let bevestigKlaar = false;
 
   function kiesOnzeker(richting) {
     const partituur = app.stand.partituur;
@@ -48,6 +50,31 @@ export function start(app) {
     knop.disabled = uitgeschakeld;
     knop.addEventListener('click', actie);
     return knop;
+  }
+
+  // Balk bovenaan zolang een gescande partituur nog niet is nagekeken. Met onzekere noten vraagt de knop eerst om bevestiging.
+  function conceptBalk(partituur) {
+    const stand = nakijkStand(partituur, app.stand.meldingen);
+    const balk = document.createElement('div');
+    balk.className = 'onzeker__concept';
+    const tekst = document.createElement('p');
+    tekst.textContent = conceptTekst(stand);
+    const klaar = maakKnop(bevestigKlaar ? `Toch klaar (nog ${stand.onzeker} onzeker)` : 'Klaar met nakijken', () => {
+      if (stand.onzeker > 0 && !bevestigKlaar) {
+        bevestigKlaar = true;
+        teken();
+        return;
+      }
+      bevestigKlaar = false;
+      app.zet({
+        partituur: markeerNagekeken(app.stand.partituur),
+        meldingen: (app.stand.meldingen ?? []).filter((melding) => melding.soort !== 'herkenning'),
+      });
+    });
+    klaar.classList.add('knop--hoofd');
+    klaar.setAttribute('aria-label', 'Markeer de gescande partituur als nagekeken');
+    balk.append(tekst, klaar);
+    return balk;
   }
 
   function teken() {
@@ -112,7 +139,7 @@ export function start(app) {
         ids.length === 0,
       ),
     );
-    vlak.replaceChildren(status, knoppen);
+    vlak.replaceChildren(...(isConcept(partituur) ? [conceptBalk(partituur)] : []), status, knoppen);
   }
 
   document.addEventListener('keydown', (gebeurtenis) => {
@@ -128,6 +155,7 @@ export function start(app) {
 
   app.op('partituur', () => {
     bevestigen = false;
+    bevestigKlaar = false;
     teken();
   });
   app.op('kies-noot', ({ id }) => {
