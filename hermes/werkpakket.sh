@@ -21,7 +21,7 @@ KLOON="${AIFLOW_KLOON:-/c/Users/mels1/SCORE2SOUND-agent}"
 # Zonder label krijgt AIFLOW_STANDAARD (codex) de taak. AIFLOW_UITVOERDER dwingt een uitvoerder af, ook boven het label.
 standaard_model() {
   case "$1" in
-    codex) echo "${AIFLOW_CODEX_MODEL:-standaard}" ;; # "standaard": het model uit ~/.codex/config.toml
+    codex) echo "${AIFLOW_CODEX_MODEL:-gpt-6-luna}" ;; # goedkoop model voor kleine taken (Codex-lijst: "fast and affordable")
     copilot) echo "${AIFLOW_COPILOT_MODEL:-auto}" ;;
     gemini) echo "${AIFLOW_GEMINI_MODEL:-gemini-flash-lite-latest}" ;;
     hermes) echo "${AIFLOW_HERMES_MODEL:-cohere/north-mini-code:free}" ;;

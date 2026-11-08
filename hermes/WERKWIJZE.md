@@ -108,7 +108,7 @@ Start de scripts vanuit je eigen werkmap (`C:\SCORE2SOUND`); ze werken in de apa
 | `AIFLOW_ALLEEN` | leeg | alleen de wachtrij van deze uitvoerder (zet `werkpakketten.sh --alle` zelf) |
 | `AIFLOW_STANDAARD` | `codex` | uitvoerder voor een taak zonder label |
 | `AIFLOW_UITVOERDER` | leeg | dwingt een uitvoerder af, ook boven het label (voor testen) |
-| `AIFLOW_CODEX_MODEL` | `standaard` | model van het Codex-programma; `standaard` is het model uit `~/.codex/config.toml` |
+| `AIFLOW_CODEX_MODEL` | `gpt-6-luna` | model van het Codex-programma; `standaard` is het model uit `~/.codex/config.toml` |
 | `AIFLOW_COPILOT_MODEL` | `auto` | model van het Copilot-programma |
 | `AIFLOW_HERMES_MODEL`, `AIFLOW_HERMES_PROVIDER` | `cohere/north-mini-code:free`, `openrouter` | model voor `agent-hermes` |
 | `AIFLOW_FALLBACK_MODEL` | `cohere/north-mini-code:free` | reserve bij niets doen; leeg zet de reserve uit |
