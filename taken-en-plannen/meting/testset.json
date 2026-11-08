@@ -43,6 +43,20 @@
       "soort": "synthetisch",
       "pdf": null,
       "referentie": "app/test/voorbeelden/gemengd.musicxml"
+    },
+    {
+      "id": "synth-eenvoudig-vervuild",
+      "soort": "synthetisch-vervuild",
+      "pdf": null,
+      "vervuild": true,
+      "referentie": "app/test/voorbeelden/eenvoudig.musicxml"
+    },
+    {
+      "id": "synth-gemengd-vervuild",
+      "soort": "synthetisch-vervuild",
+      "pdf": null,
+      "vervuild": true,
+      "referentie": "app/test/voorbeelden/gemengd.musicxml"
     }
   ]
 }

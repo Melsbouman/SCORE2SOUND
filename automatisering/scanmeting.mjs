@@ -28,6 +28,11 @@ const stappen = {
     await writeFile(uit, await maakPdf(await readFile(pad(referentie), 'utf8'), { watermerk: false }));
     return uit;
   },
+  async vervuil(pdf, id) {
+    const uit = join(werkmap, `${id}-vervuild.pdf`);
+    spawnSync('python', ['-I', join(root, 'automatisering/vervuil.py'), pdf, uit], { encoding: 'utf8', timeout: 10 * 60 * 1000 });
+    return uit;
+  },
   async herken(pdf, paginas) {
     const json = join(werkmap, `${basename(pdf, '.pdf')}.herkend.json`);
     const begin = Date.now();
