@@ -118,6 +118,11 @@ export function start(app) {
         knop.type = 'button';
         knop.className = 'knop tempo-snelkeuze';
         knop.textContent = `${naam} ${bpm}`;
+        const uitleg = uitlegVan(naam);
+        if (uitleg) {
+          knop.title = uitleg;
+          knop.setAttribute('aria-label', `${naam} ${bpm}: ${uitleg}`);
+        }
         knop.addEventListener('click', () => {
           bpmInput.value = String(bpm);
         });
