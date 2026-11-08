@@ -1,5 +1,5 @@
 import { zoekElement, verschuif } from '/src/model/corrigeren.mjs';
-import { controleerMaatduur } from '/src/controle/maatduur.mjs';
+import { vernieuwMeldingen } from '/src/controle/meldingen.mjs';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const LETTERS = 'CDEFGAB';
@@ -159,7 +159,7 @@ export function start(app) {
     ruimOp();
     if (!geannuleerd && Math.abs(deltaY) >= huidige.stapHoogte / 2 && stappen !== 0) {
       const nieuwe = verschuif(app.stand.partituur, huidige.id, stappen);
-      app.zet({ partituur: nieuwe, meldingen: controleerMaatduur(nieuwe) });
+      app.zet({ partituur: nieuwe, meldingen: vernieuwMeldingen(app.stand.meldingen, nieuwe) });
     }
   }
 

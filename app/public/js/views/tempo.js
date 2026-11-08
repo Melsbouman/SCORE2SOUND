@@ -1,5 +1,5 @@
 import { tempoLijst, verwijderTempo, zetTempo } from '../../../src/model/tempo.mjs';
-import { controleerMaatduur } from '../../../src/controle/maatduur.mjs';
+import { vernieuwMeldingen } from '../../../src/controle/meldingen.mjs';
 
 function fouttekst(fout) {
   return fout instanceof Error ? fout.message : String(fout);
@@ -13,7 +13,7 @@ export function start(app) {
   function pasAan(bewerking, status) {
     try {
       const nieuwe = bewerking();
-      app.zet({ partituur: nieuwe, meldingen: controleerMaatduur(nieuwe) });
+      app.zet({ partituur: nieuwe, meldingen: vernieuwMeldingen(app.stand.meldingen, nieuwe) });
       status.textContent = '';
     } catch (fout) {
       status.textContent = fouttekst(fout);

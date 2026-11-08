@@ -5,7 +5,7 @@ import {
   zetToonhoogte,
 } from '/src/model/corrigeren.mjs';
 import { herstelHerkenning } from '/src/model/herstel.mjs';
-import { controleerMaatduur } from '/src/controle/maatduur.mjs';
+import { vernieuwMeldingen } from '/src/controle/meldingen.mjs';
 
 export function start(app) {
   const vlak = document.getElementById('onzeker');
@@ -94,7 +94,7 @@ export function start(app) {
     suggestieKnop.setAttribute('aria-label', 'Pas de voorgestelde toonhoogte toe op de gekozen noot');
     const herstelKnop = maakKnop('Herkenning herstellen', () => {
       const nieuw = herstelHerkenning(app.stand.partituur);
-      app.zet({ partituur: nieuw, meldingen: controleerMaatduur(nieuw) });
+      app.zet({ partituur: nieuw, meldingen: vernieuwMeldingen(app.stand.meldingen, nieuw) });
       app.meld('kies-noot', { id: null });
       laatsteMelding = `Herkenning hersteld: ${nieuw.partijen[0].maten.length} maten.`;
       const status = vlak.querySelector('p.onzeker__status');
