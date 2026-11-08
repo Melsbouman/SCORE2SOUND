@@ -111,21 +111,22 @@ function lettertypen(paginaWoordenboek, objecten) {
 function paginas(objecten) {
   const catalogus = [...objecten.values()].find((o) => /\/Type\s*\/Catalog/.test(o.woordenboek));
   const uit = [];
-  const bezoek = (nummer, geerfd) => {
+  const bezoek = (nummer, geerfd, geerfdeMaat) => {
     const object = objecten.get(nummer);
     if (!object) return;
     const eigen = woordenboekBij(object.woordenboek, 'Resources', objecten);
     const bronnen = eigen != null ? `/Resources << ${eigen} >>` : geerfd;
     const woordenboek = `${object.woordenboek} ${bronnen}`;
+    const maat = object.woordenboek.match(/\/MediaBox\s*\[([^\]]*)\]/)?.[1].trim().split(/\s+/).map(Number) ?? geerfdeMaat;
     if (/\/Type\s*\/Pages/.test(object.woordenboek)) {
       const kinderen = object.woordenboek.match(/\/Kids\s*\[([^\]]*)\]/)?.[1] ?? '';
-      for (const [, kind] of kinderen.matchAll(/(\d+)\s+\d+\s+R/g)) bezoek(Number(kind), bronnen);
+      for (const [, kind] of kinderen.matchAll(/(\d+)\s+\d+\s+R/g)) bezoek(Number(kind), bronnen, maat);
     } else if (/\/Type\s*\/Page\b/.test(object.woordenboek)) {
-      uit.push(woordenboek);
+      uit.push({ woordenboek, maat: maat ?? [0, 0, 612, 792] });
     }
   };
   const wortel = catalogus ? verwijzing(catalogus.woordenboek, 'Pages') : null;
-  if (wortel != null) bezoek(wortel, '');
+  if (wortel != null) bezoek(wortel, '', null);
   return uit;
 }
 
@@ -281,11 +282,14 @@ function tekensOpPagina(data, fonts) {
   return tekens;
 }
 
-// [{ pagina: 1, tekens: [{ lettertype, code, x, y, grootte }] }]; x en y in pdf-punten vanaf linksonder.
+// [{ pagina: 1, breedte, hoogte, tekens: [{ lettertype, code, x, y, grootte }] }]; x en y in pdf-punten vanaf linksonder,
+// breedte en hoogte van de pagina (MediaBox) in punten.
 export function leesPdfTekens(buffer) {
   const objecten = leesObjecten(Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer));
-  return paginas(objecten).map((pagina, index) => ({
+  return paginas(objecten).map(({ woordenboek, maat }, index) => ({
     pagina: index + 1,
-    tekens: tekensOpPagina(inhoudVan(pagina, objecten), lettertypen(pagina, objecten)),
+    breedte: rond(maat[2] - maat[0]),
+    hoogte: rond(maat[3] - maat[1]),
+    tekens: tekensOpPagina(inhoudVan(woordenboek, objecten), lettertypen(woordenboek, objecten)),
   }));
 }
