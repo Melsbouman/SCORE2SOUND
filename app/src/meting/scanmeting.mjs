@@ -2,10 +2,12 @@
 // De echte stappen (pdf maken, herkennen, inlezen) komen van buiten, zodat dit zonder Audiveris te testen is.
 import { vergelijkPartituren } from './vergelijk.mjs';
 
-// Meet één stuk. stappen: { render(referentie) -> pdf-pad, herken(pdf, paginas) -> { partituur, seconden }, lees(referentie) -> partituur }.
+// Meet één stuk. stappen: { render(referentie) -> pdf-pad, herken(pdf, paginas) -> { partituur, seconden }, lees(referentie) -> partituur },
+// en voor een stuk met vervuild: true ook vervuil(pdf, id) -> pdf-pad (een gescande variant: scheef, ruis, 200 dpi).
 export async function meetStuk(item, stappen) {
   if (!item.referentie) return { id: item.id, soort: item.soort ?? '', overgeslagen: 'geen referentie' };
-  const pdf = item.pdf ?? (await stappen.render(item.referentie, item.id));
+  const schoon = item.pdf ?? (await stappen.render(item.referentie, item.id));
+  const pdf = item.vervuild ? await stappen.vervuil(schoon, item.id) : schoon;
   const { partituur, seconden } = await stappen.herken(pdf, item.paginas ?? '');
   if (!partituur) return { id: item.id, soort: item.soort ?? '', overgeslagen: 'herkenning gaf geen partituur', seconden };
   const juist = await stappen.lees(item.referentie);
