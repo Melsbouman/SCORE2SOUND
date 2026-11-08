@@ -78,6 +78,7 @@ let toolkitBelofte;
 function zetVerovioOpties(tk, schaal, metTitelblok) {
   tk.setOptions({
     breaks: 'auto',
+    multiRestStyle: 'block',
     pageMarginBottom: 250,
     header: 'none',
     footer: 'none',
