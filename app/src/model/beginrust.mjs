@@ -33,7 +33,13 @@ export function vulBeginRust(partituur) {
         }],
         ...(aantal >= 2 && index === 0 ? { maatrust: aantal } : {}),
         ...(aantal >= 2 && index > 0 ? { verborgen: true } : {}),
+        // Alleen de eerste ingevoegde maat begint de regel en de pagina; de rest is verborgen.
+        ...(index > 0 ? { regelbegin: false, paginabegin: false } : {}),
       }));
+    for (const maat of ingevoegd) delete maat.vak;
+    // De meermaatsrust staat nu vooraan: de oorspronkelijke eerste maat begint geen regel of pagina meer.
+    if (eersteMaat.regelbegin) eersteMaat.regelbegin = false;
+    if (eersteMaat.paginabegin) eersteMaat.paginabegin = false;
     for (const maat of huidigePartij.maten) {
       maat.index += aantal;
       if (/^-?\d+$/.test(String(maat.nummer))) {
