@@ -6,7 +6,7 @@
 - Richting: `plannen/2026-11-07-richting.md`. Laatste nachtrapport: `nacht/rapport-2026-11-07.md`. Wensen: `voorraad.md`.
 
 ## Uitvoerders (getest 8 nov, 20:45)
-- Claude (`agent-claude`): Claude Code met een tweede account, inlog in `~/.claude-uitvoerder` (`automatisering/claude-inloggen.ps1`). Model `sonnet`, alleen Read/Edit/Write/Glob/Grep. Eerste reserve voor Codex, Copilot en Gemini. Let op: de inlog pakte het account dat in de browser openstond (mels123.nl, Max); deze chat draait op jumbobros9. Welk account de uitvoerder hoort te zijn, beslist Mels.
+- Claude (`agent-claude`): Claude Code met een tweede account, inlog in `~/.claude-uitvoerder` (`automatisering/claude-inloggen.ps1`). Model `sonnet`, alleen Read/Edit/Write/Glob/Grep. Eerste reserve voor Codex, Copilot en Gemini. Het Max-account is voor de chat, het Pro-account hoort bij de uitvoerder. De eerste inlog pakte per ongeluk het Max-account; opnieuw inloggen met `claude-inloggen.ps1 -Account <adres van het Pro-account>` na uitloggen op claude.ai.
 - Hermes: gratis model `cohere/north-mini-code:free`, werkt weer (pad was fout na het hernoemen), ~50 s per aanroep.
 - Gemini: `gemini-flash-lite-latest` (API-sleutel in GEMINI_API_KEY), werkt.
 - Codex: op tot 10 nov 15:48 (getest).
@@ -32,6 +32,10 @@
 - Hermes-pad hersteld: na het hernoemen wees `werkpakket.sh` naar `AppData\Local\automatisering\...`, waardoor elke Hermes-reserve faalde en 1665, 1666, 1668, 1674 en 1670 vastliepen (niet door de taak zelf).
 - Runner bewaart nu de reden van `vast` in `geschiedenis.jsonl`; het Agents-paneel is opnieuw ingedeeld (Actie nodig met reden, compacte taken, rij per uitvoerder).
 - Open: 1665, 1666, 1668, 1674 opnieuw starten (liefst bij `agent-claude`, na het accountbesluit van Mels); 1672 splitsen.
+
+## Richting (Mels, 8 nov avond)
+- Volle focus op een werkende scanner, met de uitkomst als concept in de editor om te verbeteren. Geen nieuwe functies zoals meespeelmodus of speelbaarheidscontrole. De lopende editor-taken mogen af; nieuwe taken gaan over scannen.
+- AGPL: advies van Claude is accepteren (Audiveris en homr alleen als los programma, eigen aanpassingen openbaar, licentiepagina). Besluit van Mels volgt.
 
 ## Valkuil (8 nov)
 - De hartslag (Windows-taak, elk uur om :36) start zelf wachtrijen. Pas `automatisering/*.sh` dus nooit aan zonder eerst te kijken of er een `werkpakket.sh` draait: een aanpassing tijdens een run brak #1675 af.
