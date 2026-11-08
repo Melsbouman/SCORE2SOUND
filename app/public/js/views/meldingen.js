@@ -9,6 +9,16 @@ export function start(app) {
       return;
     }
 
+    // Check if partituur has any notes
+    const heeftNoten = partituur.partijen.some(partij =>
+      partij.maten.some(maat => maat.elementen.some(e => e.soort === 'noot'))
+    );
+
+    if (!heeftNoten) {
+      vlak.replaceChildren();
+      return;
+    }
+
     const kop = document.createElement('h2');
     if (meldingen.length === 0) {
       kop.textContent = 'Meldingen';

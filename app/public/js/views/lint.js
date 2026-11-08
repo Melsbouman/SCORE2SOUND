@@ -2,15 +2,16 @@ import { controleerBereik } from '/src/controle/bereik.mjs';
 
 const tabbladen = [
   { naam: 'Bestand', vlakken: ['titel', 'export'] },
-  { naam: 'Start', vlakken: ['passage', 'tempo'] },
   { naam: 'Noten', vlakken: ['editor', 'corrigeren', 'onzeker'] },
   { naam: 'Aanduidingen', vlakken: ['aanduidingen'] },
-  { naam: 'Partij', vlakken: ['mixer', 'bewerken'] },
+  { naam: 'Controleren', vlakken: ['corrigeren', 'onzeker', 'meldingen'] },
+  { naam: 'Partijen', vlakken: ['mixer', 'bewerken'] },
+  { naam: 'Afspelen', vlakken: ['passage', 'tempo'] },
   { naam: 'Weergave', vlakken: ['zoom', 'versies', 'meldingen'] },
 ];
 
 export function start(app) {
-  let geselecteerd = 2;
+  let geselecteerd = 1;
   try {
     const opgeslagen = localStorage.getItem('score2sound-lint-tab');
     const index = tabbladen.findIndex((tabblad) => tabblad.naam === opgeslagen);

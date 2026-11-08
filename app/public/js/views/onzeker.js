@@ -57,6 +57,16 @@ export function start(app) {
       return;
     }
 
+    // Check if partituur has any notes
+    const heeftNoten = partituur.partijen.some(partij =>
+      partij.maten.some(maat => maat.elementen.some(e => e.soort === 'noot'))
+    );
+
+    if (!heeftNoten) {
+      vlak.replaceChildren();
+      return;
+    }
+
     const ids = onzekereElementen(partituur);
     const status = document.createElement('p');
     status.className = 'onzeker__status';
