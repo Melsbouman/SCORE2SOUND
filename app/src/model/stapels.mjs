@@ -1,10 +1,20 @@
 // Audiveris telt een samengestelde rust (bijvoorbeeld 6 maten rust) als één stapel (maat op het blad), de MusicXML heeft er zes maten voor.
 // Deze kaart zet het nummer van een stapel om in de index van de maat in de partij.
+// Een maatrust mag ook zonder de verborgen maten erachter staan (docs/model.md: "alleen als ze er zijn"); sla daarom alleen de
+// verborgen maten over die er echt zijn, anders schuiven alle stapels erna een of meer maten op.
 export function stapelKaart(maten) {
   const kaart = [];
   for (let index = 0; index < maten.length;) {
+    // Een maat die de herkenning zelf invoegde (omdat hij ontbrak), staat niet op het blad en heeft dus geen stapel.
+    if (maten[index].ingevoegd) {
+      index += 1;
+      continue;
+    }
     kaart.push(index);
-    index += maten[index].maatrust > 1 ? maten[index].maatrust : 1;
+    let volgende = index + 1;
+    const einde = index + (maten[index].maatrust > 1 ? maten[index].maatrust : 1);
+    while (volgende < einde && volgende < maten.length && maten[volgende].verborgen) volgende += 1;
+    index = volgende;
   }
   return kaart;
 }

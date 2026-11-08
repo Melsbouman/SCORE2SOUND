@@ -105,6 +105,7 @@ export function vulOntbrekendeMaten(partituur) {
             ? String(nummerVolgende + eerderIngevoegd + index)
             : volgende.nummer,
           index: gat.index + index,
+          ingevoegd: true,
           opmaat: false,
           maatsoort,
           toonsoort: structuredClone(volgende.toonsoort ?? partij.maten[gat.index - 1]?.toonsoort),
