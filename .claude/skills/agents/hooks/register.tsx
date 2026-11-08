@@ -16,13 +16,23 @@ const EXTERN_MS = 30000
 // Een agent die langer dan dit niets heeft laten weten, geldt als mogelijk vastgelopen.
 const VERLOOP_MS = 15 * 60 * 1000
 
+const KLEI = '#D97757'
+const INKT = '#1F1E1D'
+const GROEN = '#3FB68B'
+const ROOD = '#E5534B'
+const BLAUW = '#4C8DF6'
+const AMBER = '#E0A030'
+const PAARS = '#C16BD9'
+const GRIJS = '#8A8A85'
+const LETTERTYPE = "-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+
 // Fase per label op een issue: kleur en korte tekst.
 const FASEN: Record<string, { tekst: string; kleur: string }> = {
-  'agent-ready': { tekst: 'in wachtrij', kleur: '#8A8A85' },
-  'agent-bezig': { tekst: 'wordt uitgevoerd', kleur: '#E0A030' },
-  'agent-review': { tekst: 'wacht op Claude', kleur: '#4C8DF6' },
-  'agent-terug': { tekst: 'terug naar de uitvoerder', kleur: '#C16BD9' },
-  'agent-vast': { tekst: 'vastgelopen', kleur: '#E5534B' },
+  'agent-ready': { tekst: 'in de wachtrij', kleur: GRIJS },
+  'agent-bezig': { tekst: 'wordt uitgevoerd', kleur: AMBER },
+  'agent-review': { tekst: 'wacht op review', kleur: BLAUW },
+  'agent-terug': { tekst: 'terug naar de uitvoerder', kleur: PAARS },
+  'agent-vast': { tekst: 'vastgelopen', kleur: ROOD },
 }
 const VOLGORDE = ['agent-vast', 'agent-terug', 'agent-bezig', 'agent-review', 'agent-ready']
 
@@ -30,18 +40,20 @@ const VOLGORDE = ['agent-vast', 'agent-terug', 'agent-bezig', 'agent-review', 'a
 const STAPPEN = ['Plan', 'Wachtrij', 'Uitvoeren', 'Controle', 'PR', 'Review']
 
 type Uitrusting = 'bril' | 'helm' | 'zwaar' | 'jury' | 'schild' | 'baret' | 'geen'
-type Kaart = {
-  naam: string
-  rol: string
-  kleur: string
-  uitrusting: Uitrusting
-  actief: boolean
-  status: string
-  taak: string
-  voortgang: number | null
-  detail: string
-  staat?: 'wacht' | 'bezig' | 'klaar' | 'vast'
+
+// De uitvoerders in vaste volgorde, met een eigen kleur en uitrusting voor de krab.
+// De volgorde van het label kiezen is die van werkpakket.sh: codex, copilot, gemini, hermes, claude.
+const UITVOERDERS = ['claude', 'gemini', 'hermes', 'codex', 'copilot']
+const LABEL_VOLGORDE = ['codex', 'copilot', 'gemini', 'hermes', 'claude']
+const INFO: Record<string, { naam: string; kleur: string; uitrusting: Uitrusting; soort: string }> = {
+  claude: { naam: 'Claude-uitvoerder', kleur: '#C8673F', uitrusting: 'baret', soort: 'tweede account' },
+  gemini: { naam: 'Gemini', kleur: '#E0A23B', uitrusting: 'helm', soort: 'API-sleutel' },
+  hermes: { naam: 'Hermes', kleur: '#9B7BE0', uitrusting: 'jury', soort: 'gratis, kleine taken' },
+  codex: { naam: 'Codex', kleur: '#2E9E83', uitrusting: 'zwaar', soort: 'ChatGPT-account' },
+  copilot: { naam: 'Copilot', kleur: '#5B8DEF', uitrusting: 'bril', soort: 'studentenabonnement' },
 }
+const info = (u: string) => INFO[u] ?? { naam: u || 'standaard (Codex)', kleur: GRIJS, uitrusting: 'geen' as Uitrusting, soort: '' }
+
 // Een taak als stroom door de workflow.
 type Pijp = {
   nummer: number
@@ -55,16 +67,25 @@ type Pijp = {
   seconden: number
   pr: number
   exact: boolean
-  ontwerp: boolean
-  bestanden: string[]
   tokensIn: number
   tokensUit: number
 }
-
-const KLEI = '#D97757'
-const INKT = '#1F1E1D'
-const GROEN = '#3FB68B'
-const LETTERTYPE = "-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+// Iets wat aandacht vraagt: een vastgelopen of afgekeurde taak, of een PR die op review wacht.
+type Actie = { nummer: number; titel: string; label: string; kleur: string; regel: string }
+// Een rij in het overzicht van wie er kan werken.
+type Rij = {
+  sleutel: string
+  naam: string
+  detail: string
+  kleur: string
+  uitrusting: Uitrusting
+  actief: boolean
+  status: string
+  statusKleur?: string
+  regel: string
+  punten: string[]
+  voortgang: number | null
+}
 
 // Het paneel weigert stuurtekens (zoals kleurcodes uit de uitvoer van een programma).
 const STUURTEKENS = new RegExp('[' + String.fromCharCode(0) + '-' + String.fromCharCode(31) + String.fromCharCode(127) + '-' + String.fromCharCode(159) + ']', 'g')
@@ -82,7 +103,21 @@ const pas = (t: string, maat: number, max: number) => {
 const duurTekst = (ms: number) => {
   if (!Number.isFinite(ms) || ms < 0) return ''
   const min = Math.floor(ms / 60000)
-  return min < 1 ? `${Math.floor(ms / 1000)} s` : `${min} min`
+  if (min < 1) return `${Math.floor(ms / 1000)} s`
+  if (min < 120) return `${min} min`
+  return `${Math.floor(min / 60)} uur`
+}
+
+// "3 min geleden", "5 uur geleden", "2 dagen geleden"; tijd in seconden.
+const geleden = (nu: number, tijd: number) => {
+  if (!tijd) return ''
+  const min = Math.floor((nu - tijd * 1000) / 60000)
+  if (min < 1) return 'net'
+  if (min < 60) return `${min} min geleden`
+  const uur = Math.floor(min / 60)
+  if (uur < 24) return `${uur} uur geleden`
+  const dagen = Math.floor(uur / 24)
+  return dagen === 1 ? 'gisteren' : `${dagen} dagen geleden`
 }
 
 const json = (tekst: string) => {
@@ -101,8 +136,21 @@ const tok = (n: number) => {
   return String(n)
 }
 
-const uitvoerderNaam = (u: string) => (u === 'codex' ? 'Codex-programma' : u === 'copilot' ? 'Copilot-programma' : u === 'hermes' ? 'Hermes' : u === 'gemini' ? 'Gemini-programma' : u)
-const uitvoerderKleur = (u: string) => (u === 'codex' ? '#2E9E83' : u === 'hermes' ? '#9B7BE0' : u === 'gemini' ? '#E0A23B' : '#5B8DEF')
+const kortModel = (m: string) => (m && m !== 'auto' && m !== 'standaard' ? m.split('/').pop() ?? m : '')
+
+// Waarom een taak vastliep, in een paar woorden, uit de melding van het runner-script.
+const oorzaak = (reden: string) => {
+  const r = reden.toLowerCase()
+  if (!r) return 'vastgelopen'
+  if (/usage limit|quota|credits|rate limit|limit reached/.test(r)) return 'tegoed op'
+  if (/no such file|command not found|not recognized/.test(r)) return 'programma niet gevonden'
+  if (/argument list too long/.test(r)) return 'opdracht te lang'
+  if (/regels|diffgrens|te groot/.test(r)) return 'wijziging te groot'
+  if (/action|test/.test(r)) return 'controle faalt'
+  if (/niets gewijzigd/.test(r)) return 'niets gewijzigd'
+  return 'vastgelopen'
+}
+const zonderAanloop = (reden: string) => reden.replace(/^het model heeft niets gewijzigd\.\s*Laatste woorden:\s*/i, '').replace(/^timeout:\s*/i, '')
 
 // Kleuren voor licht en donker; het paneel volgt het thema van de app.
 const STIJL = `<style>
@@ -111,10 +159,13 @@ const STIJL = `<style>
 </style>`
 const svg = (b: number, h: number, inhoud: string) =>
   `<svg xmlns="http://www.w3.org/2000/svg" width="${b}" height="${h}" viewBox="0 0 ${b} ${h}">${STIJL}${inhoud}</svg>`
+const tekst = (x: number, y: number, maat: number, inhoud: string, extra = '') =>
+  `<text x="${x}" y="${y}" font-family="${LETTERTYPE}" font-size="${maat}" ${extra}>${xml(inhoud)}</text>`
+const kleurAttr = (kleur: string | undefined, klasse = 's') => (kleur ? `fill="${kleur}"` : `class="${klasse}"`)
 
 // Een pixelkrab op een raster van 20 bij 16, met per agent andere uitrusting.
 const krab = (x: number, y: number, uitrusting: Uitrusting, gedimd: boolean) => {
-  const u = 1.7
+  const u = 1.6
   const r = (px: number, py: number, w: number, h: number, kleur: string) =>
     `<rect x="${(x + px * u).toFixed(1)}" y="${(y + py * u).toFixed(1)}" width="${(w * u).toFixed(1)}" height="${(h * u).toFixed(1)}" fill="${kleur}"/>`
   const zwaar = uitrusting === 'zwaar'
@@ -130,82 +181,125 @@ const krab = (x: number, y: number, uitrusting: Uitrusting, gedimd: boolean) => 
   if (uitrusting === 'helm') d += r(5, 3, 10, 3, '#F2C14E') + r(4, 5, 12, 1, '#F2C14E')
   if (zwaar) d += r(4, 2, 12, 4, '#E07A2F') + r(3, 5, 14, 1, '#E07A2F')
   if (uitrusting === 'jury') d += r(5, 3, 10, 3, '#9AA0A6') + r(8, 13, 4, 1, '#FFFFFF')
-  if (uitrusting === 'schild') d += r(0, 7, 3, 6, '#4C8DF6') + r(1, 8, 1, 4, '#CFE0FF')
+  if (uitrusting === 'schild') d += r(0, 7, 3, 6, BLAUW) + r(1, 8, 1, 4, '#CFE0FF')
   if (uitrusting === 'baret') d += r(5, 3, 10, 2, '#D9534F') + r(8, 2, 4, 1, '#D9534F') + r(13, 4, 4, 1, '#D9534F')
   return `<g opacity="${gedimd ? 0.45 : 1}">${d}</g>`
 }
 
-const kopSvg = (b: number, bezig: number, totaal: number, taken: Taak[]) => {
+// Kop: naam, een pil met de algemene stand en vier tegels.
+const kopSvg = (b: number, t: { bezig: number; wachtrij: number; vast: number; review: number }) => {
   const gap = 6
-  const tw = (b - gap * 2) / 3
-  const druk = bezig > 0
-  const pillTekst = druk ? 'Busy' : 'Sleeping'
-  const pillKleur = druk ? GROEN : '#8A8A85'
-  const pillB = 22 + tekstBreedte(pillTekst, 12) + 6
-  const tegel = (i: number, k: string, v: string, kleur?: string) =>
-    `<rect class="tegel" x="${i * (tw + gap)}" y="34" width="${tw}" height="46" rx="8"/>
-<text class="s" x="${i * (tw + gap) + 11}" y="51" font-family="${LETTERTYPE}" font-size="11">${xml(k)}</text>
-<text ${kleur ? `fill="${kleur}"` : 'class="t"'} x="${i * (tw + gap) + 11}" y="71" font-family="${LETTERTYPE}" font-size="16" font-weight="600">${xml(pas(v, 16, tw - 20))}</text>`
-  const aantal = (f: string) => taken.filter(t => t.fase === f).length
+  const tw = (b - gap * 3) / 4
+  const stil = t.wachtrij > 0 && t.bezig === 0
+  const pil = t.vast > 0 ? { tekst: 'Actie nodig', kleur: ROOD } : t.bezig > 0 ? { tekst: 'Bezig', kleur: GROEN } : stil ? { tekst: 'Wachtrij staat stil', kleur: AMBER } : { tekst: 'Rust', kleur: GRIJS }
+  const pilB = 24 + tekstBreedte(pil.tekst, 12) + 6
+  const tegel = (i: number, naam: string, waarde: number, kleur: string | undefined) =>
+    `<rect class="tegel" x="${i * (tw + gap)}" y="30" width="${tw}" height="44" rx="8"/>` +
+    tekst(i * (tw + gap) + 10, 46, 11, naam, 'class="s"') +
+    tekst(i * (tw + gap) + 10, 66, 17, String(waarde), `${kleurAttr(waarde > 0 ? kleur : undefined, 't')} font-weight="600"`)
   return svg(
     b,
-    90,
-    `<text class="t" x="1" y="19" font-family="${LETTERTYPE}" font-size="17" font-weight="700">SCORE2SOUND</text>
-<rect x="${b - pillB}" y="3" width="${pillB}" height="22" rx="11" fill="${pillKleur}" opacity="0.16"/>
-<circle cx="${b - pillB + 12}" cy="14" r="4" fill="${pillKleur}"/>
-<text fill="${pillKleur}" x="${b - pillB + 22}" y="18" font-family="${LETTERTYPE}" font-size="12" font-weight="600">${pillTekst}</text>
-${tegel(0, 'Aan het werk', `${bezig} van ${totaal}`, druk ? GROEN : undefined)}
-${tegel(1, 'Taken open', `${taken.length}`)}
-${tegel(2, 'Wacht op review', `${aantal('agent-review')}`, aantal('agent-review') > 0 ? '#4C8DF6' : undefined)}`,
+    78,
+    tekst(1, 18, 15, 'SCORE2SOUND', 'class="t" font-weight="700"') +
+      tekst(126, 18, 12, 'agents', 'class="s"') +
+      `<rect x="${b - pilB}" y="3" width="${pilB}" height="22" rx="11" fill="${pil.kleur}" opacity="0.16"/>` +
+      `<circle cx="${b - pilB + 12}" cy="14" r="4" fill="${pil.kleur}"/>` +
+      tekst(b - pilB + 22, 18, 12, pil.tekst, `fill="${pil.kleur}" font-weight="600"`) +
+      tegel(0, 'Bezig', t.bezig, GROEN) +
+      tegel(1, 'Wachtrij', t.wachtrij, undefined) +
+      tegel(2, 'Vast', t.vast, ROOD) +
+      tegel(3, 'Review', t.review, BLAUW),
   )
 }
 
-// Eén taak als stroom: Plan, Wachtrij, Uitvoeren, Controle, PR, Review. Onder de stap staat wie het doet.
-const pijpSvg = (b: number, p: Pijp) => {
-  const marge = 22
+// Een taak die aandacht vraagt: nummer en titel, het soort actie, en waarom.
+const actieSvg = (b: number, a: Actie) =>
+  svg(
+    b,
+    46,
+    `<circle cx="7" cy="13" r="4.5" fill="${a.kleur}"/>` +
+      tekst(20, 17, 13, pas(`#${a.nummer} ${a.titel}`, 13, b - 90), 'class="t" font-weight="600"') +
+      tekst(b - 2, 17, 11, a.label, `fill="${a.kleur}" text-anchor="end" font-weight="600"`) +
+      tekst(20, 35, 11, pas(a.regel, 11, b - 24), 'class="s"') +
+      `<line class="ln" x1="0" y1="45.5" x2="${b}" y2="45.5"/>`,
+  )
+
+// Eén taak als stroom: Plan, Wachtrij, Uitvoeren, Controle, PR, Review; daaronder wie het doet.
+const pijpSvg = (b: number, p: Pijp, nu: number, laatst: number) => {
+  const marge = 18
   const stap = (b - marge * 2) / (STAPPEN.length - 1)
-  const y = 42
+  const y = 36
   const klaar = p.staat === 'klaar'
   const knopen = STAPPEN.map((naam, i) => {
     const x = marge + i * stap
     const gedaan = klaar || i < p.huidig
-    const nu = !klaar && i === p.huidig
-    const lijnKleur = gedaan ? GROEN : undefined
+    const hier = !klaar && i === p.huidig
     const lijn =
       i < STAPPEN.length - 1
-        ? `<line ${lijnKleur ? `stroke="${lijnKleur}"` : 'class="lijn"'} stroke-width="2" x1="${x + 8}" y1="${y}" x2="${x + stap - 8}" y2="${y}"/>`
+        ? `<line ${gedaan ? `stroke="${GROEN}"` : 'class="lijn"'} stroke-width="2" x1="${x + 8}" y1="${y}" x2="${x + stap - 8}" y2="${y}"/>`
         : ''
-    let knoop = ''
-    if (gedaan) {
-      knoop = `<circle cx="${x}" cy="${y}" r="7" fill="${GROEN}"/><path d="M${x - 3} ${y} l2.4 2.6 l4.2 -5" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>`
-    } else if (nu) {
-      knoop = `<circle cx="${x}" cy="${y}" r="10" fill="${p.kleur}" opacity="0.22"/><circle cx="${x}" cy="${y}" r="6.5" fill="${p.kleur}"/>`
-    } else {
-      knoop = `<circle class="leeg" cx="${x}" cy="${y}" r="6.5" stroke-width="1.6"/>`
-    }
-    const label = `<text ${nu ? `fill="${p.kleur}"` : 'class="s"'} x="${x}" y="64" text-anchor="middle" font-family="${LETTERTYPE}" font-size="10" ${nu ? 'font-weight="600"' : ''}>${xml(naam)}</text>`
-    return lijn + knoop + label
+    const knoop = gedaan
+      ? `<circle cx="${x}" cy="${y}" r="6.5" fill="${GROEN}"/><path d="M${x - 3} ${y} l2.3 2.5 l4 -4.8" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>`
+      : hier
+        ? `<circle cx="${x}" cy="${y}" r="9.5" fill="${p.kleur}" opacity="0.22"/><circle cx="${x}" cy="${y}" r="6" fill="${p.kleur}"/>`
+        : `<circle class="leeg" cx="${x}" cy="${y}" r="6" stroke-width="1.6"/>`
+    return lijn + knoop + tekst(x, 56, 10, naam, `${hier ? `fill="${p.kleur}" font-weight="600"` : 'class="s"'} text-anchor="middle"`)
   }).join('')
-
-  // Wie doet welke stap.
-  const onder = (i: number, tekst: string, kleur?: string) =>
-    tekst
-      ? `<text ${kleur ? `fill="${kleur}"` : 'class="s"'} x="${marge + i * stap}" y="77" text-anchor="middle" font-family="${LETTERTYPE}" font-size="10">${xml(pas(tekst, 10, stap * 2.1))}</text>`
-      : ''
-  const uitv = p.uitvoerder ? `${uitvoerderNaam(p.uitvoerder)}${p.model && p.model !== 'auto' ? ', ' + (p.model.split('/').pop() ?? p.model) : ''}` : 'nog niet gekozen'
-  const sub =
-    onder(0, 'Claude') +
-    onder(2, uitv, p.uitvoerder ? '#5B8DEF' : undefined) +
-    onder(4, p.pr > 0 ? `#${p.pr}${p.exact ? ' exact' : ''}` : '', p.exact ? GROEN : undefined) +
-    onder(5, 'Claude')
-  const rechts = klaar ? `klaar${p.seconden ? `, ${p.seconden} s` : ''}` : p.statusTekst
+  const wie = p.uitvoerder ? info(p.uitvoerder).naam : 'uitvoerder nog niet gekozen'
+  const delen = [
+    [wie, kortModel(p.model)].filter(Boolean).join(', '),
+    p.seconden ? duurTekst(p.seconden * 1000) : '',
+    p.tokensIn + p.tokensUit > 0 ? `${tok(p.tokensIn + p.tokensUit)} tokens` : '',
+    p.pr > 0 ? `PR #${p.pr}${p.exact ? ' exact' : ''}` : '',
+    klaar && laatst ? geleden(nu, laatst) : '',
+  ].filter(Boolean)
+  const rechts = klaar ? 'gemerged' : p.statusTekst
   return svg(
     b,
-    90,
-    `<text class="t" x="2" y="16" font-family="${LETTERTYPE}" font-size="13" font-weight="600">${xml(pas(`#${p.nummer} ${p.titel}`, 13, b - 130))}</text>
-<text ${klaar ? `fill="${GROEN}"` : `fill="${p.kleur}"`} x="${b - 2}" y="16" text-anchor="end" font-family="${LETTERTYPE}" font-size="11">${xml(pas(rechts, 11, 128))}</text>
-${knopen}${sub}
-<line class="ln" x1="0" y1="89.5" x2="${b}" y2="89.5"/>`,
+    80,
+    tekst(2, 15, 13, pas(`#${p.nummer} ${p.titel}`, 13, b - 140), 'class="t" font-weight="600"') +
+      tekst(b - 2, 15, 11, pas(rechts, 11, 136), `fill="${klaar ? GROEN : p.kleur}" text-anchor="end"`) +
+      knopen +
+      tekst(2, 72, 11, pas(delen.join(' · '), 11, b - 4), `${kleurAttr(p.uitvoerder && !klaar ? info(p.uitvoerder).kleur : undefined)}`) +
+      `<line class="ln" x1="0" y1="79.5" x2="${b}" y2="79.5"/>`,
+  )
+}
+
+// Een taak in de wachtrij: één regel met de uitvoerder die hem krijgt.
+const wachtSvg = (b: number, p: Pijp) => {
+  const i = info(p.uitvoerder)
+  return svg(
+    b,
+    24,
+    `<circle class="leeg" cx="7" cy="12" r="4" stroke-width="1.5"/>` +
+      tekst(20, 16, 12, pas(`#${p.nummer} ${p.titel}`, 12, b - 150), 'class="t"') +
+      tekst(b - 2, 16, 11, i.naam, `fill="${i.kleur}" text-anchor="end"`),
+  )
+}
+
+// Een uitvoerder (of Claude zelf): krab, naam, model, stand, en de laatste uitslagen als stippen.
+const rijSvg = (b: number, r: Rij) => {
+  const links = 44
+  const tekstB = b - links - 2
+  const statusT = pas(r.status, 11, 170)
+  const naamB = tekstBreedte(r.naam, 13) * 1.12
+  const ruimteDetail = tekstB - naamB - 10 - tekstBreedte(statusT, 11) - 12
+  const puntB = r.punten.length * 10
+  const balk =
+    r.voortgang !== null
+      ? `<rect class="k" x="${links}" y="45" width="${tekstB}" height="3" rx="1.5"/><rect x="${links}" y="45" width="${Math.round(tekstB * Math.max(0.04, Math.min(1, r.voortgang)))}" height="3" rx="1.5" fill="${r.kleur}"/>`
+      : ''
+  return svg(
+    b,
+    54,
+    krab(2, 12, r.uitrusting, !r.actief) +
+      tekst(links, 18, 13, r.naam, `class="t" font-weight="600" opacity="${r.actief ? 1 : 0.8}"`) +
+      (ruimteDetail > 30 ? tekst(links + naamB + 10, 18, 11, pas(r.detail, 11, ruimteDetail), 'class="s"') : '') +
+      tekst(b - 2, 18, 11, statusT, `${kleurAttr(r.statusKleur)} text-anchor="end" ${r.actief ? 'font-weight="600"' : ''}`) +
+      r.punten.map((k, i) => `<circle cx="${links + 4 + i * 10}" cy="32" r="3.5" fill="${k}"/>`).join('') +
+      tekst(links + (puntB ? puntB + 4 : 0), 36, 11, pas(r.regel, 11, tekstB - puntB - 4), 'class="s"') +
+      balk +
+      `<line class="ln" x1="0" y1="53.5" x2="${b}" y2="53.5"/>`,
   )
 }
 
@@ -213,65 +307,43 @@ ${knopen}${sub}
 const benchSvg = (b: number, model: string, rijen: Bench[], bezig: string) => {
   const kort = model.split('/').pop() ?? model
   const gratis = model.endsWith(':free')
-  const klaar = rijen.length > 0 && rijen.every(r => r.ok)
-  const kleur = bezig ? '#E0A030' : rijen.length === 0 ? '#8A8A85' : klaar ? GROEN : '#E5534B'
+  const goed = rijen.length > 0 && rijen.every(r => r.ok)
+  const kleur = bezig ? AMBER : rijen.length === 0 ? GRIJS : goed ? GROEN : ROOD
   const delen = rijen.map(r => `${r.taak}: ${r.seconden} s, ${r.kosten === 0 ? 'gratis' : '$' + r.kosten.toFixed(3)}, ${r.ok ? 'goed' : 'niet goed'}${r.detail ? ' (' + r.detail + ')' : ''}`)
   if (bezig) delen.push(`taak ${bezig} bezig...`)
-  const regel = delen.join('   ')
   return svg(
     b,
     50,
-    `<circle cx="8" cy="12" r="4" fill="${kleur}"/>
-<text class="t" x="20" y="16" font-family="${LETTERTYPE}" font-size="13" font-weight="600">${xml(pas(kort, 13, b - 110))}</text>
-<text class="s" x="${b - 2}" y="16" text-anchor="end" font-family="${LETTERTYPE}" font-size="11">${gratis ? 'gratis model' : 'betaald model'}</text>
-<text class="s" x="20" y="34" font-family="${LETTERTYPE}" font-size="11">${xml(pas(regel, 11, b - 24))}</text>
-<line class="ln" x1="0" y1="49.5" x2="${b}" y2="49.5"/>`,
+    `<circle cx="8" cy="12" r="4" fill="${kleur}"/>` +
+      tekst(20, 16, 13, pas(kort, 13, b - 110), 'class="t" font-weight="600"') +
+      tekst(b - 2, 16, 11, gratis ? 'gratis model' : 'betaald model', 'class="s" text-anchor="end"') +
+      tekst(20, 34, 11, pas(delen.join('   '), 11, b - 24), 'class="s"') +
+      `<line class="ln" x1="0" y1="49.5" x2="${b}" y2="49.5"/>`,
   )
 }
 
-const kaartSvg = (b: number, k: Kaart) => {
-  const links = 46
-  const tekstB = b - links - 14
-  const klaar = k.staat === 'klaar'
-  const vast = k.staat === 'vast'
-  const wacht = k.staat === 'wacht'
-  const vul = klaar ? tekstB : k.actief && k.voortgang !== null ? Math.round(tekstB * Math.max(0.03, Math.min(1, k.voortgang))) : vast ? Math.round(tekstB * 0.4) : 0
-  const onbekend = k.actief && k.voortgang === null && !klaar
-  const balkKleur = vast ? '#E5534B' : klaar ? GROEN : k.kleur
-  const statusTekst = pas(k.status, 11, tekstB - 90)
-  const vinkX = links + tekstB - tekstBreedte(statusTekst, 11) - 12
-  const vink = klaar
-    ? `<circle cx="${vinkX}" cy="14" r="6" fill="${GROEN}"/><path d="M${vinkX - 2.6} 14 l1.8 2 l3.4 -4" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>`
-    : ''
-  return svg(
-    b,
-    70,
-    `${krab(2, 14, k.uitrusting, wacht || (!k.actief && !klaar && !vast))}
-<text class="t" x="${links}" y="18" font-family="${LETTERTYPE}" font-size="13" font-weight="600" opacity="${wacht ? 0.6 : 1}">${xml(k.naam)}</text>
-<text x="${links}" y="34" font-family="${LETTERTYPE}" font-size="11"><tspan fill="${k.kleur}">${xml(k.rol)}</tspan><tspan class="s">  ${xml(pas(k.detail, 11, tekstB - 90))}</tspan></text>
-${vink}<text ${vast ? 'fill="#E5534B"' : 'class="s"'} x="${links + tekstB}" y="18" text-anchor="end" font-family="${LETTERTYPE}" font-size="11">${xml(statusTekst)}</text>
-<text class="s" x="${links}" y="50" font-family="${LETTERTYPE}" font-size="11">${xml(pas(k.taak, 11, tekstB))}</text>
-<rect class="k" x="${links}" y="57" width="${tekstB}" height="4" rx="2"/>
-${vul > 0 ? `<rect x="${links}" y="57" width="${vul}" height="4" rx="2" fill="${balkKleur}"/>` : ''}
-${onbekend ? `<rect x="${links}" y="57" width="${tekstB}" height="4" rx="2" fill="${k.kleur}" opacity="0.25"/>` : ''}
-<line class="ln" x1="0" y1="69.5" x2="${b}" y2="69.5"/>`,
-  )
+const laatsteVoor = (historie: Geschied[], nummer: number): Geschied | undefined => {
+  for (let i = historie.length - 1; i >= 0; i--) {
+    const h = historie[i]
+    if (h && h.issue === nummer) return h
+  }
+  return undefined
 }
+const loopt = (r: Runner, nu: number) => r.status === 'bezig' && nu - r.bijgewerkt * 1000 <= VERLOOP_MS
 
 // Pure functie: maakt van open en recent afgeronde taken een stroom door de workflow.
 function pijplijnen(nu: number, extern: Extern | null, lokaal: Lokaal | null): Pijp[] {
   const runners = lokaal?.runners ?? []
   const historie = lokaal?.geschiedenis ?? []
-  const laatsteVoor = (nummer: number): Geschied | undefined => [...historie].reverse().find(h => h.issue === nummer)
   const lijst: Pijp[] = []
 
   for (const t of extern?.taken ?? []) {
-    const f = FASEN[t.fase]
-    // Wie voert deze taak nu uit? Eerst de lopende runner, anders de laatste keer uit de geschiedenis.
-    const run = runners.find(r => r.status === 'bezig' && r.taak.startsWith(`#${t.nummer} `) && nu - r.bijgewerkt * 1000 <= VERLOOP_MS)
-    const hist = laatsteVoor(t.nummer)
-    const uitvoerder = run ? run.agent : hist ? hist.uitvoerder : ''
-    const model = run ? run.model : hist ? hist.model : ''
+    const f = FASEN[t.fase] ?? { tekst: t.status, kleur: GRIJS }
+    // Wie voert deze taak uit? Eerst de lopende runner, dan de laatste keer uit de geschiedenis, dan het label.
+    const run = runners.find(r => loopt(r, nu) && r.taak.startsWith(`#${t.nummer} `))
+    const hist = laatsteVoor(historie, t.nummer)
+    const uitvoerder = run ? run.agent : t.fase === 'agent-ready' ? t.uitvoerder ?? '' : hist ? hist.uitvoerder : t.uitvoerder ?? ''
+    const model = run ? run.model : hist && t.fase !== 'agent-ready' ? hist.model : ''
     let huidig = 1
     let staat: Pijp['staat'] = 'wacht'
     if (t.fase === 'agent-bezig') {
@@ -288,21 +360,18 @@ function pijplijnen(nu: number, extern: Extern | null, lokaal: Lokaal | null): P
       staat = 'vast'
       huidig = hist ? 3 : 2
     }
-    const extra = staat === 'bezig' && run?.fase ? `${run.fase}, ${duurTekst(nu - run.start * 1000)}` : f.tekst
     lijst.push({
       nummer: t.nummer,
       titel: t.titel,
       huidig,
       staat,
-      statusTekst: extra,
+      statusTekst: staat === 'bezig' && run?.fase ? `${run.fase}, ${duurTekst(nu - run.start * 1000)}` : f.tekst,
       kleur: f.kleur,
       uitvoerder,
       model,
-      seconden: hist ? hist.seconden : 0,
+      seconden: staat === 'bezig' && run ? 0 : hist ? hist.seconden : 0,
       pr: t.pr,
       exact: t.exact,
-      ontwerp: t.bestanden.some(f => /[.](css|html|svg|webp|png)$/.test(f)),
-      bestanden: t.bestanden,
       tokensIn: hist ? hist.tokensIn : 0,
       tokensUit: hist ? hist.tokensUit : 0,
     })
@@ -310,21 +379,19 @@ function pijplijnen(nu: number, extern: Extern | null, lokaal: Lokaal | null): P
 
   // Recent afgerond (gemerged): alle stappen groen.
   for (const k of (extern?.klaar ?? []).slice(0, 3)) {
-    const hist = laatsteVoor(k.nummer)
+    const hist = laatsteVoor(historie, k.nummer)
     lijst.push({
       nummer: k.nummer,
       titel: k.titel,
       huidig: STAPPEN.length,
       staat: 'klaar',
-      statusTekst: 'klaar',
+      statusTekst: 'gemerged',
       kleur: GROEN,
       uitvoerder: hist ? hist.uitvoerder : '',
       model: hist ? hist.model : '',
       seconden: hist ? hist.seconden : 0,
       pr: 0,
       exact: false,
-      ontwerp: false,
-      bestanden: [],
       tokensIn: hist ? hist.tokensIn : 0,
       tokensUit: hist ? hist.tokensUit : 0,
     })
@@ -332,178 +399,98 @@ function pijplijnen(nu: number, extern: Extern | null, lokaal: Lokaal | null): P
   return lijst
 }
 
-// Pure functie: wie werkt aan deze taak en met welke rol? Planner, Builder, Poortwachter en Judge.
-function rollenVoor(p: Pijp, nu: number, lokaal: Lokaal | null): Kaart[] {
-  const run = (lokaal?.runners ?? []).find(r => r.status === 'bezig' && r.taak.startsWith(`#${p.nummer} `) && nu - r.bijgewerkt * 1000 <= VERLOOP_MS)
-  const gestart = (stap: number): Kaart['staat'] => (p.staat === 'vast' && p.huidig === stap ? 'vast' : p.huidig > stap ? 'klaar' : p.huidig === stap && p.staat !== 'wacht' ? 'bezig' : 'wacht')
-  const uitv = p.uitvoerder
-  const builderNaam = uitv ? uitvoerderNaam(uitv) : 'nog niet gekozen'
-  const builderModel = uitv ? (p.model && p.model !== 'auto' ? p.model.split('/').pop() ?? p.model : 'automatisch model') : 'de runner kiest bij de start'
-  const builderStaat = gestart(2)
-  const poortStaat = gestart(3)
-  const judgeStaat: Kaart['staat'] = p.staat === 'klaar' ? 'klaar' : p.huidig === 5 ? 'bezig' : 'wacht'
-  const kaartenLijst: Kaart[] = [
-    {
-      naam: 'Claude',
-      rol: 'Planner',
-      kleur: KLEI,
-      uitrusting: 'bril',
-      actief: false,
-      staat: 'klaar',
-      status: 'klaar',
-      taak: 'schreef de taak en koos de bestanden',
-      voortgang: null,
-      detail: p.bestanden.length > 0 ? `${p.bestanden.length} bestand${p.bestanden.length === 1 ? '' : 'en'}` : '',
-    },
-    {
-      naam: builderNaam,
-      rol: p.ontwerp ? 'Builder en designer' : 'Builder',
-      kleur: p.ontwerp ? '#C16BD9' : uitvoerderKleur(uitv),
-      uitrusting: p.ontwerp ? 'baret' : 'helm',
-      actief: builderStaat === 'bezig',
-      staat: builderStaat,
-      status: builderStaat === 'bezig' ? `${run?.fase || 'bezig'} ${run ? duurTekst(nu - run.start * 1000) : ''}`.trim() : builderStaat === 'klaar' ? (p.seconden ? `klaar, ${p.seconden} s` : 'klaar') : builderStaat === 'vast' ? 'vastgelopen' : 'wacht',
-      taak: p.tokensIn + p.tokensUit > 0 ? `${tok(p.tokensIn)} tokens erin, ${tok(p.tokensUit)} eruit` : p.ontwerp ? 'bewerkt de pagina en de stijl' : 'bewerkt de bestanden uit de taak',
-      voortgang: builderStaat === 'bezig' ? run?.voortgang ?? 0.3 : null,
-      detail: builderModel,
-    },
-    {
-      naam: 'Runner-script',
-      rol: 'Poortwachter',
-      kleur: '#E0A030',
-      uitrusting: 'schild',
-      actief: poortStaat === 'bezig',
-      staat: poortStaat,
-      status: poortStaat === 'bezig' ? 'controleert' : poortStaat === 'klaar' ? 'geslaagd' : poortStaat === 'vast' ? 'afgekeurd' : 'wacht',
-      taak: 'bestanden, regels en tests',
-      voortgang: poortStaat === 'bezig' ? run?.voortgang ?? 0.65 : null,
-      detail: p.exact ? 'exact zoals verwacht' : 'regelcontrole en tests',
-    },
-    {
-      naam: 'Claude',
-      rol: 'Judge',
-      kleur: KLEI,
-      uitrusting: 'jury',
-      actief: judgeStaat === 'bezig',
-      staat: judgeStaat,
-      status: judgeStaat === 'klaar' ? 'gemerged' : judgeStaat === 'bezig' ? 'wacht op oordeel' : 'wacht',
-      taak: p.pr > 0 ? `PR #${p.pr}: bekijkt de diff en merget` : 'bekijkt de diff en merget',
-      voortgang: null,
-      detail: 'laatste woord',
-    },
-  ]
-  return kaartenLijst
+// Pure functie: wat er nu aandacht vraagt, met de reden uit de geschiedenis van het runner-script.
+function acties(pijpen: Pijp[], lokaal: Lokaal | null): Actie[] {
+  const historie = lokaal?.geschiedenis ?? []
+  const uit: Actie[] = []
+  for (const p of pijpen) {
+    if (p.staat === 'vast') {
+      const hist = laatsteVoor(historie, p.nummer)
+      const reden = hist?.resultaat === 'vast' ? hist.reden ?? '' : ''
+      const wie = info(hist?.uitvoerder || p.uitvoerder).naam
+      uit.push({
+        nummer: p.nummer,
+        titel: p.titel,
+        label: 'vast',
+        kleur: ROOD,
+        regel: reden ? `${wie}: ${oorzaak(reden)} · ${zonderAanloop(reden)}` : `${wie}: de reden staat als commentaar op het issue`,
+      })
+    } else if (p.staat === 'terug') {
+      uit.push({ nummer: p.nummer, titel: p.titel, label: 'afgekeurd', kleur: PAARS, regel: `${info(p.uitvoerder).naam} past de PR aan` })
+    } else if (p.staat === 'review') {
+      uit.push({ nummer: p.nummer, titel: p.titel, label: 'review', kleur: BLAUW, regel: p.pr > 0 ? `PR #${p.pr}${p.exact ? ', precies zoals verwacht' : ''}: bekijk de diff en merge` : 'PR nog niet gevonden' })
+    }
+  }
+  return uit
 }
 
-// Totaal van een uitvoerder over alle taken in de geschiedenis, bijvoorbeeld "4 taken, 312k tokens erin, 4,2k eruit".
-function totaalTekst(historie: Geschied[], uitvoerder: string): string {
-  const van = historie.filter(h => h.uitvoerder === uitvoerder && h.tokensIn + h.tokensUit > 0)
-  if (van.length === 0) return ''
-  const erin = van.reduce((som, h) => som + h.tokensIn, 0)
-  const eruit = van.reduce((som, h) => som + h.tokensUit, 0)
-  return `${van.length} ${van.length === 1 ? 'taak' : 'taken'}: ${tok(erin)} tokens erin, ${tok(eruit)} eruit`
-}
+// Pure functie: een rij voor Claude, actieve subagents en elke uitvoerder.
+function rijen(nu: number, claude: ClaudeStatus | null, lokaal: Lokaal | null, extern: Extern | null): Rij[] {
+  const lijst: Rij[] = []
+  const historie = lokaal?.geschiedenis ?? []
 
-// Pure functie: maakt de kaarten voor iedereen die kan werken.
-function kaarten(nu: number, claude: ClaudeStatus | null, lokaal: Lokaal | null, extern: Extern | null): Kaart[] {
-  const lijst: Kaart[] = []
-
-  // Claude zelf, in deze sessie.
   const claudeActief = !!claude && claude.bezig && nu - claude.bijgewerkt < VERLOOP_MS
   lijst.push({
+    sleutel: 'planner',
     naam: 'Claude',
-    rol: 'Planner en controleur',
-    kleur: '#D97757',
+    detail: 'planner en controleur, deze chat',
+    kleur: KLEI,
     uitrusting: 'geen',
     actief: claudeActief,
     status: claudeActief && claude ? `bezig ${duurTekst(nu - claude.sinds)}` : 'wacht op jou',
-    taak: claudeActief && claude ? `${claude.tool} | ${claude.aantal} acties | ${tok(claude.tokensIn)} tokens erin, ${tok(claude.tokensUit)} eruit` : claude && claude.tokensIn > 0 ? `sessie: ${tok(claude.tokensIn)} tokens erin, ${tok(claude.tokensUit)} eruit` : '',
+    statusKleur: claudeActief ? KLEI : undefined,
+    regel: claudeActief && claude ? `${claude.tool} · ${claude.aantal} acties · ${tok(claude.tokensIn)} tokens erin` : claude && claude.tokensIn > 0 ? `deze chat: ${tok(claude.tokensIn)} tokens erin, ${tok(claude.tokensUit)} eruit` : '',
+    punten: [],
     voortgang: null,
-    detail: 'deze sessie',
   })
 
-  // Subagents van Claude.
   for (const s of lokaal?.subs ?? []) {
-    const actief = s.status === 'running' || s.status === 'waiting' || s.status === 'pending'
-    if (!actief) continue
-    lijst.push({
-      naam: 'Subagent',
-      rol: 'Claude',
-      kleur: GROEN,
-      uitrusting: 'helm',
-      actief: true,
-      status: s.status === 'waiting' ? 'wacht' : 'bezig',
-      taak: s.naam,
-      voortgang: null,
-      detail: '',
-    })
+    if (!['running', 'waiting', 'pending'].includes(s.status)) continue
+    lijst.push({ sleutel: `sub-${s.id}`, naam: 'Subagent', detail: 'van Claude', kleur: GROEN, uitrusting: 'helm', actief: true, status: s.status === 'waiting' ? 'wacht' : 'bezig', statusKleur: GROEN, regel: s.naam, punten: [], voortgang: null })
   }
 
-  // Het runner-script en de agent die het aanstuurt (Codex-programma, Copilot-programma of Hermes).
-  // Een agent is een agent, ook als er meerdere taken tegelijk lopen: een kaart per soort uitvoerder.
-  const perAgent = new Map<string, Runner[]>()
-  for (const r of lokaal?.runners ?? []) perAgent.set(r.agent, [...(perAgent.get(r.agent) ?? []), r])
-  for (const [agent, runs] of perAgent) {
-    const lopend = runs.filter(r => r.status === 'bezig' && nu - r.bijgewerkt * 1000 <= VERLOOP_MS)
-    const vast = runs.filter(r => r.status === 'bezig' && nu - r.bijgewerkt * 1000 > VERLOOP_MS)
-    const nieuwste = [...runs].sort((x, y) => y.bijgewerkt - x.bijgewerkt)[0]
-    const r = lopend[0] ?? nieuwste
-    const viaHermes = agent === 'hermes'
-    const meerdere = lopend.length > 1
+  const runners = lokaal?.runners ?? []
+  for (const u of UITVOERDERS) {
+    const i = info(u)
+    const runs = runners.filter(r => r.agent === u)
+    const lopend = runs.filter(r => loopt(r, nu))
+    const hangt = runs.some(r => r.status === 'bezig' && !loopt(r, nu))
+    const van = historie.filter(h => h.uitvoerder === u)
+    const laatste = van[van.length - 1]
+    const goed = van.filter(h => h.resultaat === 'klaar').length
+    const tokens = van.reduce((som, h) => som + h.tokensIn + h.tokensUit, 0)
+    const model = kortModel(lopend[0]?.model ?? laatste?.model ?? '')
+    let status = 'standby'
+    let statusKleur: string | undefined
+    let regel = laatste ? `${goed} van ${van.length} klaar · ${tok(tokens)} tokens · laatst ${geleden(nu, laatste.tijd)}` : 'nog geen taken in de geschiedenis'
+    const r = lopend[0]
+    if (r) {
+      status = lopend.length > 1 ? `${lopend.length} taken tegelijk` : `${r.fase || 'bezig'} ${duurTekst(nu - r.start * 1000)}`
+      statusKleur = i.kleur
+      regel = lopend.length > 1 ? lopend.map(x => x.taak.split(' ')[0]).join(', ') : r.taak
+    } else if (hangt) {
+      status = 'mogelijk vastgelopen'
+      statusKleur = ROOD
+    } else if (laatste && laatste.resultaat === 'vast') {
+      regel = `laatste taak: ${oorzaak(laatste.reden ?? '')} · ${regel}`
+    }
+    const extra = u === 'hermes' && extern?.hermesRun ? `geplande run ${extern.hermesDuur}` : ''
     lijst.push({
-      naam: viaHermes ? 'Hermes-uitvoerder' : uitvoerderNaam(agent),
-      rol: viaHermes ? 'Uitvoerder via Hermes' : 'Uitvoerder',
-      kleur: uitvoerderKleur(agent),
-      uitrusting: viaHermes ? 'jury' : agent === 'codex' ? 'zwaar' : 'bril',
+      sleutel: u,
+      naam: i.naam,
+      detail: [model, i.soort, extra].filter(Boolean).join(' · '),
+      kleur: i.kleur,
+      uitrusting: i.uitrusting,
       actief: lopend.length > 0,
-      status:
-        lopend.length > 0
-          ? meerdere
-            ? `${lopend.length} taken tegelijk`
-            : `${r.fase || 'bezig'} ${duurTekst(nu - r.start * 1000)}`
-          : vast.length > 0
-            ? 'mogelijk vastgelopen'
-            : 'standby',
-      taak:
-        lopend.length > 0
-          ? (meerdere ? lopend.map(x => x.taak.split(' ')[0]).join(', ') : r.taak)
-          : totaalTekst(lokaal?.geschiedenis ?? [], agent) || (r.taak ? `laatste: ${r.taak}` : ''),
+      status,
+      statusKleur,
+      regel,
+      punten: van.slice(-8).map(h => (h.resultaat === 'klaar' ? GROEN : h.resultaat === 'vast' ? ROOD : AMBER)),
       voortgang: lopend.length > 0 ? Math.max(...lopend.map(x => x.voortgang)) : null,
-      detail: r.model,
-    })
-  }
-
-  // Gemini staat altijd in de lijst, ook voor de eerste taak (het statusbestand ontstaat pas bij de eerste run).
-  if (!perAgent.has('gemini')) {
-    lijst.push({
-      naam: uitvoerderNaam('gemini'),
-      rol: 'Uitvoerder',
-      kleur: uitvoerderKleur('gemini'),
-      uitrusting: 'bril',
-      actief: false,
-      status: 'standby',
-      taak: 'laatste: geen taken',
-      voortgang: null,
-      detail: 'Gemini CLI',
-    })
-  }
-
-  // Hermes zelf (geplande taak), als die draait.
-  if (extern) {
-    lijst.push({
-      naam: 'Hermes',
-      rol: 'Geplande taak',
-      kleur: '#9B7BE0',
-      uitrusting: 'jury',
-      actief: extern.hermesRun,
-      status: extern.hermesRun ? `run bezig ${extern.hermesDuur}` : extern.gateway.includes('running') ? 'standby' : 'gestopt',
-      taak: '',
-      voortgang: null,
-      detail: extern.model,
     })
   }
   // Wie bezig is staat bovenaan.
-  return [...lijst.filter(k => k.actief), ...lijst.filter(k => !k.actief)]
+  return [...lijst.filter(r => r.actief), ...lijst.filter(r => !r.actief)]
 }
 
 // De paden onder "## Bestanden" in een issue: regels die met "- " en een pad tussen backticks beginnen.
@@ -516,7 +503,7 @@ function bestandenUit(body: string): string[] {
       continue
     }
     const m = binnen ? regel.match(/^- `([^`]+)`/) : null
-    if (m) uit.push(schoon(m[1]))
+    if (m && m[1]) uit.push(schoon(m[1]))
   }
   return uit
 }
@@ -542,12 +529,21 @@ function bouwExtern(status: string, runs: string, issues: string, gesloten: stri
     const fase = VOLGORDE.find(f => labels.includes(f))
     if (!fase) continue
     const pr = prPerIssue.get(i.number)
-    taken.push({ nummer: i.number, titel: schoon(i.title), fase, status: FASEN[fase].tekst, pr: pr?.nummer ?? 0, exact: pr?.exact ?? false, bestanden: bestandenUit(i.body ?? '') })
+    taken.push({
+      nummer: i.number,
+      titel: schoon(i.title),
+      fase,
+      status: FASEN[fase]?.tekst ?? fase,
+      pr: pr?.nummer ?? 0,
+      exact: pr?.exact ?? false,
+      bestanden: bestandenUit(i.body ?? ''),
+      uitvoerder: LABEL_VOLGORDE.find(u => labels.includes(`agent-${u}`)) ?? '',
+    })
   }
   const klaar: Klaar[] = []
   for (const i of (json(gesloten) ?? []) as { number: number; title: string }[]) klaar.push({ nummer: i.number, titel: schoon(i.title) })
 
-  const fout = status || issues ? '' : `Hermes en GitHub gaven geen antwoord: ${schoon(diag)}`
+  const fout = issues ? '' : `GitHub gaf geen antwoord: ${schoon(diag)}`
   return {
     bijgewerkt: new Date().toLocaleTimeString('nl-NL'),
     gateway,
@@ -626,8 +622,8 @@ export const register: Register = on => {
       const geschiedenis: Geschied[] = []
       try {
         const gelezen = await $.fs.read(`${STATUSMAP}/geschiedenis.jsonl`)
-        const tekst = typeof gelezen === 'string' ? gelezen : String((gelezen as { text?: string }).text ?? '')
-        for (const regel of tekst.split(NIEUWE_REGEL).slice(-40)) {
+        const inhoud = typeof gelezen === 'string' ? gelezen : String((gelezen as { text?: string }).text ?? '')
+        for (const regel of inhoud.split(NIEUWE_REGEL).slice(-80)) {
           const d = json(regel)
           if (!d || !d.issue) continue
           geschiedenis.push({
@@ -638,6 +634,7 @@ export const register: Register = on => {
             model: schoon(String(d.model ?? '')),
             seconden: Number(d.seconden) || 0,
             resultaat: schoon(String(d.resultaat ?? '')),
+            reden: schoon(String(d.reden ?? '')),
             modus: schoon(String(d.modus ?? '')),
             tokensIn: Number(d.tokens_in) || 0,
             tokensUit: Number(d.tokens_uit) || 0,
@@ -658,9 +655,9 @@ export const register: Register = on => {
       let benchBezig = ''
       try {
         const gelezen = await $.fs.read(`${BENCHMAP}/resultaten.jsonl`)
-        const tekst = typeof gelezen === 'string' ? gelezen : String((gelezen as { text?: string }).text ?? '')
+        const inhoud = typeof gelezen === 'string' ? gelezen : String((gelezen as { text?: string }).text ?? '')
         const klaarSleutels = new Set<string>()
-        for (const regel of tekst.split(NIEUWE_REGEL)) {
+        for (const regel of inhoud.split(NIEUWE_REGEL)) {
           const d = json(regel)
           if (!d || !d.model) continue
           const ev = d.eval ?? {}
@@ -685,17 +682,17 @@ export const register: Register = on => {
       await $.state.set({ plugin: 'agents', key: 'lokaal' } as const, { bijgewerkt: Date.now(), runners, subs, bench, benchBezig, geschiedenis })
     }
 
-    // Trage ronde: GitHub-issues, open PR's en Hermes.
+    // Trage ronde: GitHub-issues, open PR's en de geplande taak van Hermes.
     const externVernieuwen = async () => {
       const opties = { timeoutMs: 20000 }
       const [status, runs, issues, gesloten, prs] = await Promise.allSettled([
         $.process.run([HERMES, 'status'], opties),
         $.process.run([HERMES, 'cron', 'runs'], opties),
-        $.process.run([GH, 'issue', 'list', '-R', REPO, '--state', 'open', '--limit', '30', '--json', 'number,title,labels,body'], opties),
+        $.process.run([GH, 'issue', 'list', '-R', REPO, '--state', 'open', '--limit', '40', '--json', 'number,title,labels,body'], opties),
         $.process.run([GH, 'issue', 'list', '-R', REPO, '--state', 'closed', '--label', 'agent-review', '--limit', '3', '--json', 'number,title'], opties),
         $.process.run([GH, 'pr', 'list', '-R', REPO, '--state', 'open', '--json', 'number,body,labels'], opties),
       ])
-      const tekst = (r: PromiseSettledResult<{ exitCode: number; stdout: string }>) =>
+      const uitvoer = (r: PromiseSettledResult<{ exitCode: number; stdout: string }>) =>
         r.status === 'fulfilled' && r.value.exitCode === 0 ? String(r.value.stdout) : ''
       const reden = (r: PromiseSettledResult<{ exitCode: number; stdout: string; stderr?: string }>) =>
         r.status === 'rejected'
@@ -703,8 +700,7 @@ export const register: Register = on => {
           : r.value.exitCode !== 0
             ? `exit ${r.value.exitCode}: ${String(r.value.stderr ?? '').slice(0, 160)}`
             : 'ok'
-      const diag = [status, issues].map(reden).join(' | ')
-      await $.state.set({ plugin: 'agents', key: 'extern' } as const, bouwExtern(tekst(status), tekst(runs), tekst(issues), tekst(gesloten), tekst(prs), diag))
+      await $.state.set({ plugin: 'agents', key: 'extern' } as const, bouwExtern(uitvoer(status), uitvoer(runs), uitvoer(issues), uitvoer(gesloten), uitvoer(prs), reden(issues)))
     }
 
     $.clock.after(300, lokaalVernieuwen)
@@ -727,10 +723,19 @@ export const register: Register = on => {
     const { value: lokaal } = await $.state.get({ plugin: 'agents', key: 'lokaal' } as const)
     const { value: extern } = await $.state.get({ plugin: 'agents', key: 'extern' } as const)
     const nu = Date.now()
-    // Claude's eigen tijden komen van de klok van de sessie; die loopt gelijk met deze.
-    const lijst = kaarten(nu, claude ?? null, lokaal ?? null, extern ?? null)
+    const historie = lokaal?.geschiedenis ?? []
     const pijpen = pijplijnen(nu, extern ?? null, lokaal ?? null)
-    const bezig = lijst.filter(k => k.actief).length
+    const actieLijst = acties(pijpen, lokaal ?? null)
+    const bezigPijpen = pijpen.filter(p => p.staat === 'bezig')
+    const wachtPijpen = pijpen.filter(p => p.staat === 'wacht')
+    const alleKlaar = pijpen.filter(p => p.staat === 'klaar')
+    const lijst = rijen(nu, claude ?? null, lokaal ?? null, extern ?? null)
+    const tellers = {
+      bezig: lijst.filter(r => r.actief && INFO[r.sleutel]).length,
+      wachtrij: wachtPijpen.length,
+      vast: pijpen.filter(p => p.staat === 'vast').length,
+      review: pijpen.filter(p => p.staat === 'review').length,
+    }
     // Modeltest: per model de resultaten, en het model dat nu draait (de mapnaam eindigt op -A of -B).
     const perModel = new Map<string, Bench[]>()
     for (const r of lokaal?.bench ?? []) perModel.set(r.model, [...(perModel.get(r.model) ?? []), r])
@@ -738,8 +743,6 @@ export const register: Register = on => {
     const sleutel = (m: string) => m.split('/').join('-').split(':').join('-').split('.').join('-')
     const benchBezigVoor = (m: string) => (benchBezigNaam && benchBezigNaam.startsWith(sleutel(m) + '-') ? benchBezigNaam.slice(-1) : '')
     const benchModellen: [string, Bench[]][] = [...perModel.entries()]
-    const taken = extern?.taken ?? []
-    const hermesDraait = !!extern && extern.gateway.includes('running')
 
     if (e.surface === 'desktop' && 'Svg' in ui) {
       const { Svg } = ui
@@ -755,32 +758,41 @@ export const register: Register = on => {
         await $.store.set('verborgen', nieuw)
         await $.state.set({ plugin: 'agents', key: 'paneel' } as const, { dicht, verborgen: nieuw })
       }
-      const kop = (naam: string, tekst: string, aantal: number) => (
-        <Button key={`kop-${naam}`} label={`${isOpen(naam) ? '▾' : '▸'} ${tekst} · ${aantal}`} plain onPress={() => wissel(naam)} />
+      const kop = (naam: string, titel: string, aantal: number) => (
+        <Button key={`kop-${naam}`} label={`${isOpen(naam) ? '▾' : '▸'} ${titel} · ${aantal}`} plain onPress={() => wissel(naam)} />
       )
-      const lopend = pijpen.filter(p => p.staat !== 'klaar')
-      const alleKlaar = pijpen.filter(p => p.staat === 'klaar')
       const afgerond = alleKlaar.filter(p => !verborgen.includes(p.nummer))
       const wisKlaar = () => bewaarVerborgen([...new Set([...verborgen, ...alleKlaar.map(p => p.nummer)])])
+      const openTaken = bezigPijpen.length + wachtPijpen.length
       return (
         <Box flexDirection="column" gap={1}>
-          <Svg source={kopSvg(b, bezig, lijst.length, taken)} alt={`${bezig} van ${lijst.length} agents aan het werk`} width={b} height={90} />
+          <Svg source={kopSvg(b, tellers)} alt={`${tellers.bezig} bezig, ${tellers.wachtrij} in de wachtrij, ${tellers.vast} vast, ${tellers.review} wachten op review`} width={b} height={78} />
           {extern && extern.fout !== '' && <Text color="red">{extern.fout}</Text>}
-          {kop('taken', 'Taken', lopend.length)}
+          {actieLijst.length > 0 && kop('actie', 'Actie nodig', actieLijst.length)}
+          {actieLijst.length > 0 && isOpen('actie') && (
+            <Box flexDirection="column">
+              {actieLijst.map(a => (
+                <Svg key={`a-${a.nummer}`} source={actieSvg(b, a)} alt={`#${a.nummer} ${a.titel}: ${a.label}, ${a.regel}`} width={b} height={46} />
+              ))}
+            </Box>
+          )}
+          {kop('taken', 'Taken', openTaken)}
           {isOpen('taken') && (
-            <Box flexDirection="column" gap={1}>
-              {lopend.length === 0 && <Text dimColor>Geen open taken.</Text>}
-              {lopend.map(p => (
-                <Box key={`p-${p.nummer}`} flexDirection="column">
-                  <Svg source={pijpSvg(b, p)} alt={`#${p.nummer} ${p.titel}: ${p.statusTekst}`} width={b} height={90} />
-                  {p.staat !== 'wacht' && (
-                    <Box flexDirection="column" paddingLeft={2}>
-                      {rollenVoor(p, nu, lokaal ?? null).map((k, i) => (
-                        <Svg key={`r-${p.nummer}-${i}`} source={kaartSvg(b - 16, k)} alt={`${k.rol}: ${k.naam}, ${k.status}`} width={b - 16} height={70} />
-                      ))}
-                    </Box>
-                  )}
-                </Box>
+            <Box flexDirection="column">
+              {openTaken === 0 && <Text dimColor>Geen taken bezig of in de wachtrij.</Text>}
+              {bezigPijpen.map(p => (
+                <Svg key={`p-${p.nummer}`} source={pijpSvg(b, p, nu, 0)} alt={`#${p.nummer} ${p.titel}: ${p.statusTekst}`} width={b} height={80} />
+              ))}
+              {wachtPijpen.map(p => (
+                <Svg key={`w-${p.nummer}`} source={wachtSvg(b, p)} alt={`#${p.nummer} ${p.titel}: in de wachtrij voor ${info(p.uitvoerder).naam}`} width={b} height={24} />
+              ))}
+            </Box>
+          )}
+          {kop('agents', 'Uitvoerders', lijst.length)}
+          {isOpen('agents') && (
+            <Box flexDirection="column">
+              {lijst.map(r => (
+                <Svg key={`r-${r.sleutel}`} source={rijSvg(b, r)} alt={`${r.naam}: ${r.status}. ${r.regel}`} width={b} height={54} />
               ))}
             </Box>
           )}
@@ -793,26 +805,19 @@ export const register: Register = on => {
           {afgerond.length > 0 && isOpen('klaar') && (
             <Box flexDirection="column">
               {afgerond.map(p => (
-                <Svg key={`k-${p.nummer}`} source={pijpSvg(b, p)} alt={`#${p.nummer} ${p.titel}: klaar`} width={b} height={90} />
-              ))}
-            </Box>
-          )}
-          {kop('agents', 'Alle agents', lijst.length)}
-          {isOpen('agents') && (
-            <Box flexDirection="column">
-              {lijst.map((k, i) => (
-                <Svg key={`${k.naam}-${i}`} source={kaartSvg(b, k)} alt={`${k.naam}: ${k.actief ? 'bezig' : 'standby'}`} width={b} height={70} />
+                <Svg key={`k-${p.nummer}`} source={pijpSvg(b, p, nu, laatsteVoor(historie, p.nummer)?.tijd ?? 0)} alt={`#${p.nummer} ${p.titel}: gemerged`} width={b} height={80} />
               ))}
             </Box>
           )}
           {benchModellen.length > 0 && kop('test', 'Modeltest', benchModellen.length)}
           {benchModellen.length > 0 && isOpen('test') && (
             <Box flexDirection="column">
-              {benchModellen.map(([model, rijen]) => (
-                <Svg key={model} source={benchSvg(b, model, rijen, benchBezigVoor(model))} alt={`${model}: modeltest`} width={b} height={50} />
+              {benchModellen.map(([model, rij]) => (
+                <Svg key={model} source={benchSvg(b, model, rij, benchBezigVoor(model))} alt={`${model}: modeltest`} width={b} height={50} />
               ))}
             </Box>
           )}
+          <Text dimColor>{extern ? `GitHub bijgewerkt om ${extern.bijgewerkt}` : 'GitHub wordt opgehaald...'}</Text>
         </Box>
       )
     }
@@ -820,16 +825,22 @@ export const register: Register = on => {
     // Zonder tekenvlak (terminal): gewone tekst.
     return (
       <Box flexDirection="column" gap={1}>
-        <Text bold>Agents: {bezig} aan het werk</Text>
-        {pijpen.map(p => (
-          <Text>
-            #{p.nummer} {p.titel}: {p.statusTekst}
-            {p.uitvoerder ? ` (${uitvoerderNaam(p.uitvoerder)})` : ''}
+        <Text bold>
+          Agents: {tellers.bezig} bezig, {tellers.wachtrij} in de wachtrij, {tellers.vast} vast, {tellers.review} review
+        </Text>
+        {actieLijst.map(a => (
+          <Text color="red">
+            #{a.nummer} {a.titel}: {a.label}, {a.regel}
           </Text>
         ))}
-        {lijst.map(k => (
+        {[...bezigPijpen, ...wachtPijpen].map(p => (
           <Text>
-            {k.naam}: {k.actief ? `${k.status} ${k.taak}` : 'standby'}
+            #{p.nummer} {p.titel}: {p.statusTekst} ({info(p.uitvoerder).naam})
+          </Text>
+        ))}
+        {lijst.map(r => (
+          <Text dimColor={!r.actief}>
+            {r.naam}: {r.status}. {r.regel}
           </Text>
         ))}
       </Box>
