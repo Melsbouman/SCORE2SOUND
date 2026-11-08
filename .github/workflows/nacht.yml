@@ -17,7 +17,7 @@ jobs:
         with:
           node-version: 24
       - name: Run tests
-        run: bash hermes/tests.sh
+        run: bash automatisering/tests.sh
 
   container:
     runs-on: ubuntu-latest

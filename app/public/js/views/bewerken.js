@@ -1,5 +1,5 @@
 // Partijen bewerken: een partij transponeren naar een ander instrument, of een losse partij maken.
-// Wordt gebouwd in fase 3 van werkpakketten/plannen/2026-10-29-score2sound-app.md.
+// Wordt gebouwd in fase 3 van taken-en-plannen/plannen/2026-10-29-score2sound-app.md.
 import { INSTRUMENTEN } from '/src/model/instrumenten.mjs';
 import { sorteerPartijen } from '/src/model/partituurvolgorde.mjs';
 import { transponeerPartij } from '/src/model/transponeren.mjs';

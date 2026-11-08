@@ -20,7 +20,7 @@
 
 ## Waar je dingen ziet
 - De GitHub-pagina van de repository voor taken en pull requests.
-- `hermes/review.sh` en `hermes/hartslag.sh`.
+- `automatisering/review.sh` en `automatisering/hartslag.sh`.
 
 ## Van pdf tot geluid
 1. De server verwerkt de aangeleverde pdf met Audiveris via `app/src/server/audiveris.mjs`.
@@ -32,7 +32,7 @@
 
 ## Wat te doen als er niets gebeurt
 - 1. Kijk of de laptop wakker is.
-- 2. Draai `bash hermes/hartslag.sh`.
+- 2. Draai `bash automatisering/hartslag.sh`.
 - 3. Kijk of er een taak met het label `agent-stuck` staat.
 
 ## De PDF

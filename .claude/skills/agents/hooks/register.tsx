@@ -4,7 +4,7 @@ import type { Bench, ClaudeStatus, Extern, Geschied, Klaar, Lokaal, Runner, Sub,
 
 // Een eigen naam, zodat dit paneel niet botst met andere mods die een paneel 'agents' openen.
 const PANE = 'score2sound-agents'
-const HERMES = 'C:/Users/mels1/AppData/Local/hermes/bin/hermes.exe'
+const HERMES = 'C:/Users/mels1/AppData/Local/automatisering/bin/hermes.exe'
 const GH = 'C:/Program Files/GitHub CLI/gh.exe'
 const REPO = 'Melsbouman/SCORE2SOUND'
 // Map waar het runner-script zijn statusbestanden en de geschiedenis neerzet.

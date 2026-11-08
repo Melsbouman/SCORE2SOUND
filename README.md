@@ -31,7 +31,7 @@ npm install
 npm start
 ```
 
-Open daarna http://localhost:5175. Je kunt ook vanuit de hoofdmap `bash scripts/start-lokaal.sh` uitvoeren; dat script installeert zo nodig de afhankelijkheden en waarschuwt als Audiveris of de klankbank ontbreekt.
+Open daarna http://localhost:5175. Je kunt ook vanuit de hoofdmap `bash beheer/start-lokaal.sh` uitvoeren; dat script installeert zo nodig de afhankelijkheden en waarschuwt als Audiveris of de klankbank ontbreekt.
 
 ## Testen
 
@@ -42,8 +42,8 @@ npm test
 
 ## Plannen en werkwijze
 
-- De plannen staan in `werkpakketten/plannen/`.
-- De werkwijze met agents staat in `hermes/WERKWIJZE.md`.
+- De plannen staan in `taken-en-plannen/plannen/`.
+- De werkwijze met agents staat in `automatisering/WERKWIJZE.md`.
 
 ## Online zetten
 

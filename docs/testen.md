@@ -11,7 +11,7 @@ Fixtures in `app/test/fixtures/`:
 
 ## Hoe je de tests draait
 
-- Voer de tests uit vanuit de hoofdmap van de repo met `bash hermes/tests.sh`
+- Voer de tests uit vanuit de hoofdmap van de repo met `bash automatisering/tests.sh`
 - Je kunt ook rechtstreeks in `app` draaien met `npm test`
 
 ## Indeling in groepen
@@ -70,7 +70,7 @@ Alle tests gebruiken testvoorbeelden uit `app/test/voorbeelden/`:
 ## Opmerkingen
 - Alle tests zijn geschreven in JavaScript-modules (`.mjs`) met `node:test` en `node:assert/strict`.
 - De testvoorbeelden zijn kleine, doelbewuste partituren die de functionaliteit van elk gedeelte van de code uittesten.
-- Het script `hermes/tests.sh` voert de volledige testsuite uit en controleert de regels.
+- Het script `automatisering/tests.sh` voert de volledige testsuite uit en controleert de regels.
 
 ## Tests voor de grote editor
 Nieuw zijn onder meer eerste-account.test.mjs, speelvolgorde-herhaling.test.mjs, maatduur.test.mjs, titelgegevens.test.mjs, maat-goedkeuren.test.mjs en pdf-watermerk.test.mjs. Draai ze allemaal met npm test in de map app.

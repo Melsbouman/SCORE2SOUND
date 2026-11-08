@@ -17,10 +17,10 @@ Alleen deze bestanden mogen veranderen:
 
 ## Acceptatiecriteria
 - [ ] 
-- [ ] De regelcontrole en de tests (`bash hermes/tests.sh`) slagen
+- [ ] De regelcontrole en de tests (`bash automatisering/tests.sh`) slagen
 
 ## Niet doen
 - 
 
 ## Bron
-Verwijzing naar plan of werkpakket, bijvoorbeeld `werkpakketten/voorraad.md`.
+Verwijzing naar plan of werkpakket, bijvoorbeeld `taken-en-plannen/voorraad.md`.

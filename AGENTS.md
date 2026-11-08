@@ -1,13 +1,13 @@
 # Afspraken voor agents (Codex, Copilot, Hermes en andere uitvoerders)
 
-Je voert één taak uit, meestal een GitHub-issue. Claude maakt de plannen en controleert je PR. Jij bouwt alleen wat in de taak staat. Hoe een taak van idee tot merge loopt, staat in `hermes/WERKWIJZE.md`.
+Je voert één taak uit, meestal een GitHub-issue. Claude maakt de plannen en controleert je PR. Jij bouwt alleen wat in de taak staat. Hoe een taak van idee tot merge loopt, staat in `automatisering/WERKWIJZE.md`.
 
 ## Hoe je draait
-- **Via het runner-script** (`hermes/werkpakket.sh`, de gewone route): jij bewerkt alleen de bestanden uit het issue. Draai zelf geen tests, geen git-commando's en geen andere commando's, en open geen PR: het script controleert, commit, pusht, opent de PR en zet de labels. Laat het regeleinde aan het einde van elk bestand staan en verander verder niets.
+- **Via het runner-script** (`automatisering/werkpakket.sh`, de gewone route): jij bewerkt alleen de bestanden uit het issue. Draai zelf geen tests, geen git-commando's en geen andere commando's, en open geen PR: het script controleert, commit, pusht, opent de PR en zet de labels. Laat het regeleinde aan het einde van elk bestand staan en verander verder niets.
 - **Handmatig** (zonder script): lees ook "Voor je begint" en "Voor je de PR opent" hieronder.
 
 ## Voor je begint (handmatig)
-1. Lees `werkpakketten/00-werkwijze.md`. De harde regels daar gelden altijd.
+1. Lees `taken-en-plannen/00-werkwijze.md`. De harde regels daar gelden altijd.
 2. Lees de taak helemaal, inclusief de acceptatiecriteria.
 3. Klopt de taak niet met de code, of ontbreekt er iets? Stop en meld het. Gok niet.
 
@@ -22,7 +22,7 @@ Je voert één taak uit, meestal een GitHub-issue. Claude maakt de plannen en co
 - Een taak met een blok `## Verwacht` wil precies die regels toegevoegd hebben, met de inspringing van de omliggende regels, en niets verwijderd.
 
 ## Project
-SCORE2SOUND is een web-app die bladmuziek omzet naar bewerkbare, hoorbare muziek. Het plan staat in `werkpakketten/plannen/2026-10-29-score2sound-app.md`.
+SCORE2SOUND is een web-app die bladmuziek omzet naar bewerkbare, hoorbare muziek. Het plan staat in `taken-en-plannen/plannen/2026-10-29-score2sound-app.md`.
 - Alles staat in `app/`: Node 24, JavaScript-modules (`.mjs` op de server, `.js` in de browser), geen framework en geen bouwstap.
 - `app/src/` bevat de logica: `model/` (rekenwerk), `musicxml/`, `controle/`, `midi/`, `project/`, en `server/` (API-afhandeling). Alles behalve `server/`, `musicxml/xml.mjs` en `musicxml/lezen.mjs` draait ook in de browser: gebruik daar geen Node-modules zoals `node:fs`.
 - `app/public/` is de browserkant: `index.html`, `app.css`, `js/main.js` start elk scherm, `js/app.js` is de gedeelde stand. Elk scherm exporteert `start(app)` en tekent alleen in zijn eigen `<section id="...">`.
@@ -35,8 +35,8 @@ SCORE2SOUND is een web-app die bladmuziek omzet naar bewerkbare, hoorbare muziek
 ## Voor je de PR opent (handmatig)
 ```bash
 # vanuit de hoofdmap van de repo:
-bash hermes/tests.sh pad1 pad2
-node hermes/regels-controle.mjs --basis main --toegestaan "pad1,pad2"
+bash automatisering/tests.sh pad1 pad2
+node automatisering/regels-controle.mjs --basis main --toegestaan "pad1,pad2"
 ```
 Zet de letterlijke uitkomst in de PR-beschrijving, met `Hoort bij #<nummer>`, en daarnaast:
 - per gewijzigd bestand één zin wat er veranderde;

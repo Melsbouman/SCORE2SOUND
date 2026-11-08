@@ -5,7 +5,7 @@
 3. Inloggen met ssh, Docker en docker compose installeren.
 4. De repository klonen.
 5. .env maken uit .env.example met DOMEIN en SCORE2SOUND_CODES.
-6. De klankbank neerzetten in ./klankbank/standaard.sf3 (de klankbank is MuseScore_General.sf3, zie de lijst Klaar in werkpakketten/voorraad.md).
+6. De klankbank neerzetten in ./klankbank/standaard.sf3 (de klankbank is MuseScore_General.sf3, zie de lijst Klaar in taken-en-plannen/voorraad.md).
 7. docker compose up -d --build.
 8. Controleren in de browser dat de site met slotje opent en dat registreren met een code werkt.
 9. Een back-up: wekelijks ./data kopiëren (een voorbeeld met tar in cron).
@@ -21,16 +21,16 @@ docker compose logs app.
 De container meldt zijn gezondheid via /api/gezond. Bekijk de status met `docker compose ps`.
 
 ## Back-ups maken en terugzetten
-Het script `scripts/backup.sh` maakt een back-up van `./data` in `./back-ups` en bewaart alleen de laatste 8.
-Het script `scripts/herstel.sh` zet een back-up terug over `./data`. Voer ze uit met:
+Het script `beheer/backup.sh` maakt een back-up van `./data` in `./back-ups` en bewaart alleen de laatste 8.
+Het script `beheer/herstel.sh` zet een back-up terug over `./data`. Voer ze uit met:
 
 ```bash
-scripts/backup.sh
+beheer/backup.sh
 ```
 
 Voor een wekelijkse back-up in cron:
 ```
-0 2 * * 0 scripts/backup.sh
+0 2 * * 0 beheer/backup.sh
 ```
 
 ## Een korte demo zonder server
@@ -38,7 +38,7 @@ Verwijs naar docs/demo.md voor een demo die lokale projecten via een tijdelijke 
 
 Start met:
 ```bash
-bash scripts/demo-online.sh
+bash beheer/demo-online.sh
 ```
 
 ## Het eerste account

@@ -8,14 +8,14 @@ argument-hint: "<het idee in je eigen woorden>"
 
 Mels stuurt Claude aan met ideeën. Claude werkt een idee uit tot een plan, knipt het in kleine taakpakketten, verdeelt die over de uitvoerders, laat ze bouwen en controleert alles. Mels beslist; Claude zet niets klaar zonder akkoord op het plan.
 
-Verder gelden `CLAUDE.md`, `AGENTS.md`, `hermes/WERKWIJZE.md` en `werkpakketten/00-werkwijze.md`.
+Verder gelden `CLAUDE.md`, `AGENTS.md`, `automatisering/WERKWIJZE.md` en `taken-en-plannen/00-werkwijze.md`.
 
 ## 1. Begrijpen
 1. Lees het idee en de delen van de code die het raakt. Lees niet het hele project.
 2. Ontbreekt er iets wat alleen Mels kan beslissen (wat de gebruiker ziet, wat er gebeurt bij een fout, wat er buiten valt)? Stel die vragen **in één keer**, kort, met jouw voorstel erbij. Wat je zelf kunt beslissen, beslis je en schrijf je op.
 
 ## 2. Plan schrijven
-Schrijf `werkpakketten/plannen/<jjjj-mm-dd>-<korte-naam>.md` met:
+Schrijf `taken-en-plannen/plannen/<jjjj-mm-dd>-<korte-naam>.md` met:
 - **Idee:** in twee of drie zinnen, in je eigen woorden.
 - **Keuzes:** wat je hebt besloten en waarom, en wat er buiten valt.
 - **Pakketten:** een tabel met per pakket: nummer, titel, bestanden, uitvoerder, hangt af van, golf.
@@ -42,17 +42,17 @@ Elk pakket is klein: één doel, de exacte bestanden, controleerbare criteria, l
 1. Schrijf eerst de tests van de golf (zelf, of als pakket voor Codex met de exacte testcode).
 2. Maak per pakket een issue:
    ```bash
-   bash hermes/maak-taak.sh --voor codex --titel "..." --doel "..." --bestand pad --stap "..." [--verwacht "..."] --bron "werkpakketten/plannen/<plan>.md"
+   bash automatisering/maak-taak.sh --voor codex --titel "..." --doel "..." --bestand pad --stap "..." [--verwacht "..."] --bron "taken-en-plannen/plannen/<plan>.md"
    ```
 3. Zet de issuenummers in de tabel van het plan.
 4. Start op de achtergrond, vanuit `C:\SCORE2SOUND`:
    ```bash
-   bash hermes/werkpakketten.sh --alle
+   bash automatisering/werkpakketten.sh --alle
    ```
    Elke uitvoerder werkt dan zijn eigen wachtrij af, in een eigen kloon. Werk intussen zelf aan wat voor jou is.
 
 ## 5. Controleren en afronden
-1. Het script filtert de fouten eruit en merget zelf wat precies volgens de taak is. Draai `bash hermes/review.sh` en doe alleen wat daar staat. Doe de controles van het script niet opnieuw.
+1. Het script filtert de fouten eruit en merget zelf wat precies volgens de taak is. Draai `bash automatisering/review.sh` en doe alleen wat daar staat. Doe de controles van het script niet opnieuw.
 2. Merge, of keur af met korte punten per bestand en `agent-terug` (start daarna `werkpakketten.sh --alle` opnieuw). Een taak met `agent-vast`: maak hem kleiner of preciezer, of doe hem zelf.
 3. Is een golf gemerged, zet dan de volgende klaar.
-4. Is het plan af: draai `bash hermes/tests.sh` op `main`, werk het plan bij (wat gedaan is, door wie, wat open is) en meld het kort aan Mels. Ideeën voor later gaan naar `werkpakketten/voorraad.md`.
+4. Is het plan af: draai `bash automatisering/tests.sh` op `main`, werk het plan bij (wat gedaan is, door wie, wat open is) en meld het kort aan Mels. Ideeën voor later gaan naar `taken-en-plannen/voorraad.md`.

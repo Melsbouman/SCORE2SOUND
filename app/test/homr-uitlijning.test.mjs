@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { vergelijkMotoren } from '../../hermes/homr-vergelijk.mjs';
+import { vergelijkMotoren } from '../../automatisering/homr-vergelijk.mjs';
 
 const homrXml = `<?xml version="1.0" encoding="UTF-8"?>
 <score-partwise version="4.0">

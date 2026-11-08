@@ -1,5 +1,5 @@
 // Export-knoppen voor MusicXML en MIDI.
-// Wordt gebouwd in pakket 17 van werkpakketten/plannen/2026-10-29-score2sound-app.md.
+// Wordt gebouwd in pakket 17 van taken-en-plannen/plannen/2026-10-29-score2sound-app.md.
 const AUDIO_FOUTEN = {
   klankbank: 'Er is nog geen klankbank. Zet een General MIDI-klankbank in app/public/klankbank/standaard.sf3.',
   stil: 'Alle partijen staan uit in de mixer. Zet er minstens één aan.',
