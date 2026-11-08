@@ -19,7 +19,7 @@ export function kopTitel(hash) {
 // Welk scherm bij welke hash hoort, en welke vlakken van de hoofdinhoud daarbij zichtbaar zijn.
 const VLAKKEN = {
   begin: ['nieuw', 'upload', 'voorbeeld', 'hulp'],
-  editor: ['lint', 'zoom', 'weergave'],
+  editor: ['lint', 'paletten', 'zoom', 'weergave'],
   bibliotheek: ['projecten'],
   inloggen: ['inloggen'],
   instellingen: ['instellingen'],
@@ -49,8 +49,8 @@ function toonScherm(scherm) {
   for (const vlak of hoofd?.children ?? []) {
     vlak.classList.toggle('scherm-weg', !zichtbaar.has(vlak.id));
   }
-  // Vlakken die het lint in zijn tabbladen heeft gezet, volgen het lint (dat het CSS alleen in de editor toont).
-  for (const vlak of hoofd?.querySelectorAll('.lint__paneel > section') ?? []) vlak.classList.remove('scherm-weg');
+  // Vlakken die het lint in zijn tabbladen of het palettenpaneel in zich heeft gezet, volgen dat lint of paneel.
+  for (const vlak of hoofd?.querySelectorAll('.lint__paneel > section, .paletten > section') ?? []) vlak.classList.remove('scherm-weg');
 }
 
 export function vernieuw() {
