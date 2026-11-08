@@ -97,7 +97,7 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
 #paletten .paletten__raster { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 0; }
 .werkvlak { grid-template-areas: "lint" "paletten" "weergave" "inloggen" "upload" "voorbeeld" "hulp"; }
 @media (min-width: 900px) {
-  .werkvlak { grid-template-columns: 260px minmax(0, 1fr); grid-template-areas: "lint lint" "paletten weergave" "inloggen inloggen" "upload upload" "voorbeeld voorbeeld" "hulp hulp"; column-gap: var(--ruimte-3); }
+  body[data-scherm='editor'] .werkvlak { grid-template-columns: 260px minmax(0, 1fr); grid-template-areas: "lint lint" "paletten weergave" "inloggen inloggen" "upload upload" "voorbeeld voorbeeld" "hulp hulp"; column-gap: var(--ruimte-3); }
   #paletten { position: sticky; top: 56px; align-self: start; max-height: calc(100vh - 64px); overflow-y: auto; }
 }
 
