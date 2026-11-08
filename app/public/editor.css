@@ -89,6 +89,17 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
 #voorbeeld { grid-area: voorbeeld; }
 #hulp { grid-area: hulp; }
 #weergave { grid-area: weergave; }
+#paletten { grid-area: paletten; min-width: 0; }
+.paletten__schakel { width: 100%; padding: 8px 12px; text-align: left; font: inherit; font-weight: 600; color: var(--kleur-tekst); background: var(--kleur-vlak); border: 1px solid var(--kleur-lijn); border-radius: var(--hoek); cursor: pointer; }
+#paletten[data-open="false"] > #aanduidingen { display: none; }
+#paletten > #aanduidingen { padding: 4px 8px; background: var(--kleur-vlak); border: 1px solid var(--kleur-lijn); border-top: 0; }
+#paletten .paletten__kop { cursor: pointer; padding: 6px 0; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; border-bottom: 1px solid var(--kleur-lijn); }
+#paletten .paletten__raster { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 0; }
+.werkvlak { grid-template-areas: "lint" "paletten" "weergave" "inloggen" "upload" "voorbeeld" "hulp"; }
+@media (min-width: 900px) {
+  .werkvlak { grid-template-columns: 260px minmax(0, 1fr); grid-template-areas: "lint lint" "paletten weergave" "inloggen inloggen" "upload upload" "voorbeeld voorbeeld" "hulp hulp"; column-gap: var(--ruimte-3); }
+  #paletten { position: sticky; top: 56px; align-self: start; max-height: calc(100vh - 64px); overflow-y: auto; }
+}
 
 .lint label { display: inline-flex; flex-direction: row; align-items: center; gap: 6px; margin: 0; white-space: nowrap; }
 .lint .speler__passage { flex-wrap: nowrap; }

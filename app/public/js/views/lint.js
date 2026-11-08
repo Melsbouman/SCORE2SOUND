@@ -4,7 +4,6 @@ import { iconSvg } from '../iconen.js';
 const tabbladen = [
   { naam: 'Bestand', vlakken: ['projecten', 'titel', 'export'] },
   { naam: 'Noten', vlakken: ['editor', 'corrigeren', 'onzeker'] },
-  { naam: 'Aanduidingen', vlakken: ['aanduidingen'] },
   { naam: 'Controleren', vlakken: ['corrigeren', 'onzeker', 'meldingen'] },
   { naam: 'Partijen', vlakken: ['mixer', 'bewerken'] },
   { naam: 'Afspelen', vlakken: ['passage', 'tempo'] },
@@ -170,7 +169,7 @@ export function start(app) {
   document.addEventListener('keydown', (gebeurtenis) => {
       if (!gebeurtenis.altKey || gebeurtenis.ctrlKey || gebeurtenis.metaKey) return;
       if (gebeurtenis.target instanceof Element && gebeurtenis.target.matches('input, select, textarea')) return;
-      if (!/^[1-7]$/.test(gebeurtenis.key)) return;
+      if (!/^[1-6]$/.test(gebeurtenis.key)) return;
       gebeurtenis.preventDefault();
       selecteer(Number(gebeurtenis.key) - 1, true);
     });
@@ -178,6 +177,43 @@ export function start(app) {
   lijst.append(...knoppen);
   lint.append(lijst, ...panelen);
   lint.hidden = app.stand.partituur == null;
+
+  const paletten = document.createElement('aside');
+  paletten.id = 'paletten';
+  paletten.className = 'paletten';
+  paletten.setAttribute('aria-label', 'Paletten');
+  const palettenKnop = document.createElement('button');
+  palettenKnop.setAttribute('aria-label', 'Paletten in- of uitklappen');
+  palettenKnop.type = 'button';
+  palettenKnop.className = 'paletten__schakel';
+  palettenKnop.setAttribute('aria-controls', 'aanduidingen');
+  const aanduidingenVlak = document.getElementById('aanduidingen');
+  paletten.append(palettenKnop);
+  if (aanduidingenVlak) paletten.append(aanduidingenVlak);
+  weergave.before(paletten);
+
+  let palettenOpen = window.matchMedia ? window.matchMedia('(min-width: 900px)').matches : true;
+  try {
+    const opgeslagen = localStorage.getItem('paletten-open');
+    if (opgeslagen === 'true' || opgeslagen === 'false') palettenOpen = opgeslagen === 'true';
+  } catch {}
+  function zetPalettenOpen(open) {
+    palettenOpen = open;
+    paletten.dataset.open = String(open);
+    palettenKnop.setAttribute('aria-expanded', String(open));
+    palettenKnop.textContent = `${open ? '▾' : '▸'} Paletten`;
+  }
+  zetPalettenOpen(palettenOpen);
+  palettenKnop.addEventListener('click', () => {
+    zetPalettenOpen(!palettenOpen);
+    try {
+      localStorage.setItem('paletten-open', String(palettenOpen));
+    } catch {}
+  });
+  paletten.hidden = app.stand.partituur == null;
+  app.op('partituur', (partituur) => {
+    paletten.hidden = partituur == null;
+  });
 
   const zoomSleutel = 'score2sound-zoom';
   const zoomenPerPartituurSleutel = `${zoomSleutel}-partituren`;
