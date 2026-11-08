@@ -113,8 +113,8 @@ export function start(app) {
     voorbeeld.addEventListener('click', () => {
       const partituur = maakVoorbeeldStuk();
       app.zet({ partituur, meldingen: [], project: null });
-      app.meld('bewaar-project', { naam: partituur.titel });
-      window.location.hash = '#weergave';
+      app.meld('bewaar-project', { naam: partituur.titel || 'Nieuw stuk' });
+      window.location.hash = '#bewerken';
     });
     inhoud.append(kop, uitleg, kaarten, voorbeeld);
     toonRecenteProjecten();
@@ -153,13 +153,13 @@ export function start(app) {
           const antwoord = await fetch(`/api/projecten/${encodeURIComponent(project.id)}`);
           if (!antwoord.ok) return;
           const geopend = await antwoord.json();
-          app.zet({
-            partituur: geopend.partituur,
-            meldingen: controleerMaatduur(geopend.partituur),
-            project: { id: geopend.id, naam: geopend.naam },
-            versies: geopend.versies ?? [],
-          });
-          window.location.hash = '#weergave';
+                    app.zet({
+                      partituur: geopend.partituur,
+                      meldingen: controleerMaatduur(geopend.partituur),
+                      project: { id: geopend.id, naam: geopend.naam },
+                      versies: geopend.versies ?? [],
+                    });
+                    window.location.hash = '#bewerken';
         } catch {
           // Het projectenscherm toont eventuele verbindingsfouten.
         }
@@ -399,7 +399,7 @@ export function start(app) {
       app.zet({ partituur, meldingen: [], project: null });
       app.meld('bewaar-project', { naam: partituur.titel || 'Nieuw stuk' });
       app.meld('start-invoermodus', { partijId: partituur.partijen[0].id, maat: 0 });
-      window.location.hash = '#weergave';
+      window.location.hash = '#bewerken';
     });
   }
 
