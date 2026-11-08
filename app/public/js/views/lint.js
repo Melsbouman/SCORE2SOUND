@@ -1,7 +1,8 @@
 import { controleerBereik } from '/src/controle/bereik.mjs';
+import { iconSvg } from '../iconen.js';
 
 const tabbladen = [
-  { naam: 'Bestand', vlakken: ['titel', 'export'] },
+  { naam: 'Bestand', vlakken: ['projecten', 'titel', 'export'] },
   { naam: 'Noten', vlakken: ['editor', 'corrigeren', 'onzeker'] },
   { naam: 'Aanduidingen', vlakken: ['aanduidingen'] },
   { naam: 'Controleren', vlakken: ['corrigeren', 'onzeker', 'meldingen'] },
@@ -63,14 +64,88 @@ export function start(app) {
     }
 
     if (tabblad.naam === 'Bestand') {
-      const open = document.createElement('button');
-      open.type = 'button';
-      open.className = 'knop';
-      open.textContent = 'Ander bestand openen';
-      open.addEventListener('click', () => {
+      paneel.replaceChildren();
+
+      const groepProject = document.createElement('div');
+      groepProject.className = 'lint__groep';
+      const kopProject = document.createElement('h3');
+      kopProject.textContent = 'Project';
+      const knopNieuw = document.createElement('a');
+      knopNieuw.className = 'knop';
+      knopNieuw.href = '#begin';
+      knopNieuw.innerHTML = iconSvg('file-plus') + ' Nieuw project';
+
+      const knopAnder = document.createElement('button');
+      knopAnder.type = 'button';
+      knopAnder.className = 'knop';
+      knopAnder.setAttribute('aria-label', 'Ander bestand openen');
+      knopAnder.innerHTML = iconSvg('folder-open') + ' Ander bestand';
+      knopAnder.addEventListener('click', () => {
         window.location.hash = '#begin';
       });
-      paneel.prepend(open);
+
+      const knopBib = document.createElement('a');
+      knopBib.className = 'knop';
+      knopBib.href = '#projecten';
+      knopBib.setAttribute('aria-label', 'Bibliotheek');
+      knopBib.innerHTML = iconSvg('list-music') + ' Bibliotheek';
+
+      const naamContainer = document.createElement('div');
+      naamContainer.className = 'lint__projectnaam';
+      const projectenVlak = document.getElementById('projecten');
+      if (projectenVlak) {
+        // We look for form or input for project name or create one if needed
+      }
+
+      groepProject.append(kopProject, knopNieuw, knopAnder, knopBib);
+
+      const groepTitel = document.createElement('div');
+      groepTitel.className = 'lint__groep';
+      const kopTitel = document.createElement('h3');
+      kopTitel.textContent = 'Titelgegevens';
+      const titelVlak = document.getElementById('titel');
+      if (titelVlak) {
+        groepTitel.append(kopTitel, titelVlak);
+      }
+
+      const groepExport = document.createElement('div');
+      groepExport.className = 'lint__groep';
+      const kopExport = document.createElement('h3');
+      kopExport.textContent = 'Exporteren';
+      const exportVlak = document.getElementById('export');
+      if (exportVlak) {
+        // Prepend export icon to export button or similar if appropriate, but requirement says: "Gebruik iconSvg uit app/public/js/iconen.js voor ... Exporteren (download)"
+        const downloadKnop = exportVlak.querySelector('button') || exportVlak.querySelector('a');
+        if (downloadKnop && !downloadKnop.querySelector('svg')) {
+          downloadKnop.innerHTML = iconSvg('download') + ' ' + downloadKnop.textContent;
+        }
+        groepExport.append(kopExport, exportVlak);
+      }
+
+      // Also add save button for project name as requested: "veld Naam van het project met Wijzigingen bewaren ... Wijzigingen bewaren (save)"
+      const bewaarForm = document.createElement('form');
+      const bewaarLabel = document.createElement('label');
+      bewaarLabel.textContent = 'Naam van het project';
+      const bewaarInput = document.createElement('input');
+      bewaarInput.type = 'text';
+      bewaarInput.name = 'naam';
+      bewaarInput.required = true;
+      bewaarInput.value = app.stand.project?.naam || app.stand.partituur?.titel || '';
+      const bewaarKnop = document.createElement('button');
+      bewaarKnop.type = 'submit';
+      bewaarKnop.className = 'knop knop--hoofd';
+      bewaarKnop.textContent = 'Wijzigingen bewaren';
+      bewaarKnop.innerHTML = iconSvg('save') + ' Wijzigingen bewaren';
+      bewaarForm.append(bewaarLabel, bewaarInput, bewaarKnop);
+      bewaarForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const naam = bewaarInput.value.trim();
+        if (!naam) return;
+        app.uit('bewaar-project', { naam });
+      });
+      groepProject.append(bewaarForm);
+
+      paneel.append(groepProject, groepTitel, groepExport);
     }
 
     knop.addEventListener('click', () => selecteer(index));
