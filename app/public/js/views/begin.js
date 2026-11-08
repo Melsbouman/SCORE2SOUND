@@ -1,6 +1,8 @@
 import { INSTRUMENTEN } from '/src/model/instrumenten.mjs';
-import { FAMILIES, combinatieKaarten, maakLeegStuk, maakVoorbeeldStuk } from '/src/model/nieuw.mjs';
+import { maakLeegStuk, maakVoorbeeldStuk } from '/src/model/nieuw.mjs';
+import { sorteerPartituur } from '/src/model/instrumentkiezer.mjs';
 import { controleerMaatduur } from '/src/controle/maatduur.mjs';
+import { maakKiezer } from './nieuwe-partituur.js';
 
 const TOONSOORTEN = [
   [-7, 'Ces majeur'],
@@ -33,10 +35,11 @@ export function start(app) {
   vlak.className = 'begin';
   vlak.tabIndex = -1;
   let gekozenInstrumenten = [];
+  let gekozenGenre = 'regulier';
   let huidigeStap = 1;
 
   const stappen = maakElement('ol', 'begin__stappen');
-  const stapNamen = ['Begin', 'Voor wie', 'Details'];
+  const stapNamen = ['Begin', 'Details'];
   const stapKnoppen = stapNamen.map((naam, index) => {
     const stap = maakElement('li', 'begin__stap');
     const nummer = maakElement('span', 'begin__stapnummer', String(index + 1));
@@ -56,8 +59,7 @@ export function start(app) {
       else stap.removeAttribute('aria-current');
     });
     if (nummer === 1) toonBegin();
-    if (nummer === 2) toonVoorWie();
-    if (nummer === 3) toonDetails();
+    if (nummer === 2) toonDetails();
     const kop = inhoud.querySelector('h2');
     if (kop) {
       kop.tabIndex = -1;
@@ -77,7 +79,7 @@ export function start(app) {
   function toonBegin() {
     inhoud.replaceChildren();
     const kop = maakKop('Stap 1', 'beginnen?', 'Hoe wil je');
-    const uitleg = maakElement('p', 'begin__intro', 'Open bestaande bladmuziek of begin met een leeg muziekblad.');
+    const uitleg = maakElement('p', 'begin__intro', 'Open bestaande bladmuziek of kies de instrumenten voor een nieuwe partituur.');
     const kaarten = maakElement('div', 'begin__keuzekaarten');
 
     const scanKaart = maakElement('article', 'begin__hoofdkaart');
@@ -97,16 +99,22 @@ export function start(app) {
     if (uploadUitleg) uploadUitleg.textContent = 'Sleep een pdf of foto hierheen of kies een bestand.';
     scanKaart.append(uploadVlak);
 
-    const leegKnop = maakElement('button', 'begin__hoofdkaart begin__hoofdkaart--knop');
-    leegKnop.type = 'button';
-    leegKnop.append(
-      maakElement('span', 'begin__kaarticoon', '+'),
-      maakElement('h3', '', 'Leeg blad'),
-      maakElement('p', '', 'Kies voor wie je schrijft en stel daarna je nieuwe stuk samen.'),
-      maakElement('span', 'begin__pill', 'Kies instrumenten'),
-    );
-    leegKnop.addEventListener('click', () => toonStap(2));
-    kaarten.append(scanKaart, leegKnop);
+    kaarten.append(scanKaart);
+    const kiezer = maakKiezer({
+      gekozen: gekozenInstrumenten,
+      genre: gekozenGenre,
+      onAnnuleren: () => { window.location.hash = '#projecten'; },
+      onVolgende: (ids, genre) => {
+        gekozenInstrumenten = ids;
+        gekozenGenre = genre;
+        toonStap(2);
+      },
+      onKlaar: (ids, genre) => {
+        gekozenInstrumenten = ids;
+        gekozenGenre = genre;
+        maakStuk({ titel: '', componist: '', maatsoort: '4/4', kwinten: 0 });
+      },
+    });
 
     const voorbeeld = maakElement('button', 'begin__voorbeeld', 'Voorbeeld bekijken');
     voorbeeld.type = 'button';
@@ -116,7 +124,7 @@ export function start(app) {
       app.meld('bewaar-project', { naam: partituur.titel || 'Nieuw stuk' });
       window.location.hash = '#bewerken';
     });
-    inhoud.append(kop, uitleg, kaarten, voorbeeld);
+    inhoud.append(kop, uitleg, kaarten, kiezer, voorbeeld);
     toonRecenteProjecten();
   }
 
@@ -170,80 +178,26 @@ export function start(app) {
     inhoud.append(blok);
   }
 
-  function toonVoorWie() {
-    inhoud.replaceChildren();
-    const kop = maakKop('Stap 2', 'schrijf je?', 'Voor wie');
-    const uitleg = maakElement('p', 'begin__intro', 'Kies een bezetting. Bij Eigen keuze stel je zelf de instrumenten samen.');
-    const kaarten = maakElement('div', 'begin__combinaties');
-    const eigenKeuze = maakElement('div', 'begin__families');
-    eigenKeuze.hidden = true;
-    let gekozenKaart = null;
-    const eigenInstrumenten = new Set();
-
-    const verder = maakElement('button', 'begin__knop begin__knop--hoofd', 'Verder');
-    verder.type = 'button';
-    verder.disabled = true;
-
-    function werkVerderBij() {
-      verder.disabled = !gekozenKaart || (gekozenKaart.id === 'eigen' && eigenInstrumenten.size === 0);
-    }
-
-    for (const combinatie of combinatieKaarten()) {
-      const kaart = maakElement('button', 'begin__combinatie');
-      kaart.type = 'button';
-      kaart.setAttribute('aria-pressed', 'false');
-      kaart.append(maakElement('strong', '', combinatie.naam), maakElement('span', '', combinatie.beschrijving));
-      kaart.addEventListener('click', () => {
-        gekozenKaart = combinatie;
-        gekozenInstrumenten = combinatie.id === 'eigen' ? [...eigenInstrumenten] : [...combinatie.instrumenten];
-        for (const andereKaart of kaarten.children) {
-          const gekozen = andereKaart === kaart;
-          andereKaart.classList.toggle('begin__combinatie--gekozen', gekozen);
-          andereKaart.setAttribute('aria-pressed', String(gekozen));
-        }
-        eigenKeuze.hidden = combinatie.id !== 'eigen';
-        werkVerderBij();
-      });
-      kaarten.append(kaart);
-    }
-
-    for (const familie of FAMILIES) {
-      const groep = maakElement('fieldset', 'begin__familie');
-      groep.append(maakElement('legend', '', familie.naam));
-      const blokken = maakElement('div', 'begin__instrumenten');
-      for (const id of familie.instrumenten) {
-        const instrument = INSTRUMENTEN.find((item) => item.id === id);
-        if (!instrument) continue;
-        const knop = maakElement('button', 'begin__instrument', instrument.naam);
-        knop.type = 'button';
-        knop.setAttribute('aria-pressed', 'false');
-        knop.addEventListener('click', () => {
-          if (eigenInstrumenten.has(id)) eigenInstrumenten.delete(id);
-          else eigenInstrumenten.add(id);
-          gekozenInstrumenten = [...eigenInstrumenten];
-          const gekozen = eigenInstrumenten.has(id);
-          knop.classList.toggle('begin__instrument--gekozen', gekozen);
-          knop.setAttribute('aria-pressed', String(gekozen));
-          werkVerderBij();
-        });
-        blokken.append(knop);
-      }
-      groep.append(blokken);
-      eigenKeuze.append(groep);
-    }
-
-    const acties = maakElement('div', 'begin__acties');
-    const terug = maakElement('button', 'begin__knop begin__knop--licht', 'Terug');
-    terug.type = 'button';
-    terug.addEventListener('click', () => toonStap(1));
-    verder.addEventListener('click', () => toonStap(3));
-    acties.append(terug, verder);
-    inhoud.append(kop, uitleg, kaarten, eigenKeuze, acties);
+  function maakStuk({ titel, componist, maatsoort, kwinten }) {
+    const [teller, noemer] = maatsoort.split('/').map(Number);
+    const partituur = maakLeegStuk({
+      titel,
+      componist,
+      instrumenten: sorteerPartituur(gekozenInstrumenten, gekozenGenre),
+      maatsoort: { teller, noemer },
+      kwinten,
+      tempo: 100,
+      aantalMaten: 8,
+    });
+    app.zet({ partituur, meldingen: [], project: null });
+    app.meld('bewaar-project', { naam: partituur.titel || 'Nieuw stuk' });
+    app.meld('start-invoermodus', { partijId: partituur.partijen[0].id, maat: 0 });
+    window.location.hash = '#bewerken';
   }
 
   function toonDetails() {
     inhoud.replaceChildren();
-    const kop = maakKop('Stap 3', 'details', 'Vul de');
+    const kop = maakKop('Stap 2', 'details', 'Vul de');
     const uitleg = maakElement('p', 'begin__intro', 'Geef je stuk een naam en kies de muzikale basis. Je kunt dit later nog aanpassen.');
     const indeling = maakElement('div', 'begin__details');
     const formulier = maakElement('form', 'begin__formulier');
@@ -335,9 +289,7 @@ export function start(app) {
       return { groep, veld, fout };
     }
 
-    // Tempo en aantal maten vraagt het scherm niet meer: tempo 100 en 8 maten, aan te passen in de editor.
-    const STANDAARD_TEMPO = 100;
-    const STANDAARD_MATEN = 8;
+    // Tempo en aantal maten vraagt het scherm niet meer: tempo 100 en 8 maten (zie maakStuk), aan te passen in de editor.
     const instrumentFout = maakElement('p', 'begin__veldfout');
     formulier.append(
       titel.groep,
@@ -373,8 +325,8 @@ export function start(app) {
     const acties = maakElement('div', 'begin__acties begin__acties--details');
     const terug = maakElement('button', 'begin__knop begin__knop--licht', 'Terug');
     terug.type = 'button';
-    terug.addEventListener('click', () => toonStap(2));
-    const maken = maakElement('button', 'begin__knop begin__knop--hoofd', 'Maak mijn stuk');
+    terug.addEventListener('click', () => toonStap(1));
+    const maken = maakElement('button', 'begin__knop begin__knop--hoofd', 'Klaar');
     maken.type = 'submit';
     acties.append(terug, maken);
     formulier.append(acties);
@@ -386,20 +338,12 @@ export function start(app) {
       instrumentFout.textContent = gekozenInstrumenten.length ? '' : 'Kies minstens één instrument.';
       if (instrumentFout.textContent) return;
 
-      const [teller, noemer] = gekozenMaatsoort.split('/').map(Number);
-      const partituur = maakLeegStuk({
+      maakStuk({
         titel: titel.veld.value.trim(),
         componist: componist.veld.value.trim(),
-        instrumenten: gekozenInstrumenten,
-        maatsoort: { teller, noemer },
+        maatsoort: gekozenMaatsoort,
         kwinten: Number(toonsoort.value),
-        tempo: STANDAARD_TEMPO,
-        aantalMaten: STANDAARD_MATEN,
       });
-      app.zet({ partituur, meldingen: [], project: null });
-      app.meld('bewaar-project', { naam: partituur.titel || 'Nieuw stuk' });
-      app.meld('start-invoermodus', { partijId: partituur.partijen[0].id, maat: 0 });
-      window.location.hash = '#bewerken';
     });
   }
 
