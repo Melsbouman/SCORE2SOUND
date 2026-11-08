@@ -135,7 +135,33 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+.kiezer { margin-top: 1.5rem; text-align: left; }
+.kiezer__tabs { display: flex; gap: .5rem; margin-bottom: 1rem; border-bottom: 1px solid var(--begin-lichtgroen); }
+.kiezer__tab { padding: .6rem 1.1rem; border: 0; border-bottom: 3px solid transparent; background: none; color: var(--begin-donkergroen); font: 700 1rem 'Bodoni Moda', Georgia, serif; cursor: pointer; }
+.kiezer__tab--actief { border-bottom-color: var(--begin-groen); color: var(--begin-groen); }
+.kiezer__kolommen { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto minmax(0, 1fr); gap: 1rem; align-items: start; }
+.kiezer__kolom { display: flex; flex-direction: column; gap: .6rem; padding: 1rem; border: 1px solid var(--begin-lichtgroen); border-radius: 8px; background: #fff; min-width: 0; }
+.kiezer__kolom--pijl { align-self: center; padding: 0; border: 0; background: none; }
+.kiezer__kolom h3 { margin: 0; font: 700 1.2rem 'Bodoni Moda', Georgia, serif; color: var(--begin-donkergroen); }
+.kiezer__keuzelijst, .kiezer__zoek { width: 100%; padding: .5rem; border: 1px solid var(--begin-lichtgroen); border-radius: 6px; background: var(--begin-creme); font: inherit; }
+.kiezer__lijst { list-style: none; margin: 0; padding: 0; max-height: 18rem; overflow-y: auto; border: 1px solid var(--begin-lichtgroen); border-radius: 6px; }
+.kiezer__item { display: block; width: 100%; padding: .45rem .7rem; border: 0; background: none; font: inherit; text-align: left; cursor: pointer; }
+.kiezer__item:hover { background: var(--begin-creme); }
+.kiezer__item--gekozen, .kiezer__item--gekozen:hover { background: var(--begin-groen); color: #fff; }
+.kiezer__leeg { padding: .6rem .7rem; color: #666; }
+.kiezer__pijl, .kiezer__klein { padding: .5rem .9rem; border: 0; border-radius: 6px; background: var(--begin-groen); color: #fff; font-size: 1.1rem; cursor: pointer; }
+.kiezer__pijl:hover:not(:disabled), .kiezer__klein:hover:not(:disabled) { background: var(--begin-donkergroen); }
+.kiezer__pijl:disabled, .kiezer__klein:disabled, .kiezer__acties .begin__knop:disabled { opacity: .45; cursor: not-allowed; }
+.kiezer__rijknoppen { display: flex; gap: .5rem; }
+.kiezer__sjablonen { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 1rem; }
+.kiezer__sjabloon { display: flex; flex-direction: column; gap: .3rem; padding: 1rem; border: 1px solid var(--begin-lichtgroen); border-radius: 8px; background: #fff; font: inherit; text-align: left; cursor: pointer; }
+.kiezer__sjabloon:hover { border-color: var(--begin-groen); }
+.kiezer__sjabloon strong { font: 700 1.1rem 'Bodoni Moda', Georgia, serif; }
+
 @media (max-width: 800px) {
+  .kiezer__kolommen { grid-template-columns: minmax(0, 1fr); }
+  .kiezer__kolom--pijl { align-self: stretch; }
+  .kiezer__pijl { transform: rotate(90deg); }
   .werkvlak > .begin { padding: 24px 16px; overflow-x: hidden; }
   .begin__stappen { gap: .75rem; }
   .begin__stap { flex-direction: column; gap: .25rem; font-size: .7rem; }
