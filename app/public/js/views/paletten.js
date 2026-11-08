@@ -1,6 +1,7 @@
-import { PALETTEN, uitlegVan } from '/src/model/paletten.mjs';
+import { PALETTEN } from '/src/model/paletten.mjs';
+import { uitlegVan } from '/src/model/aanduidingen.mjs';
 import { voegAanwijzingToe, verwijderAanwijzing, leesId, zoekElement } from '/src/model/corrigeren.mjs';
-import { zetTempo, verwijderTempo, tempoLijst, tempoUitMaat } from '/src/model/tempo.mjs';
+import { zetTempo, verwijderTempo, tempoLijst } from '/src/model/tempo.mjs';
 import { zetSleutel, zetToonsoort, zetMaatsoort, zetHerhaling } from '/src/model/maten-bewerken.mjs';
 
 const dynamiekTermen = ['pp', 'p', 'mp', 'mf', 'f', 'ff', 'fff', 'sf', 'sfz', 'fp'];
