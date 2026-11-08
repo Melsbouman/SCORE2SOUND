@@ -25,6 +25,16 @@ export function systeemOnder(systemen, onder) {
 }
 
 // Systemen van een blad met hun maten (links en rechts in pixels) en de y van de bovenste notenlijn.
+// De maat bij een stapel op een blad. Na koppelOmr kent elke gekoppelde maat zijn vak: de randen van de stapel en de hoogte van
+// de balk. Een maat hoort bij de stapel als de randen gelijk zijn en de balk in dat systeem ligt (van de bovenkant van het systeem
+// tot die van het volgende). Zo komt een letter ook goed terecht als Audiveris een maat wegliet. Zonder vak: de maat op volgorde.
+export function maatBijStapel(maten, bladNummer, stapel, terugval, systeem = {}) {
+  const boven = systeem.boven ?? -Infinity;
+  const tot = systeem.tot ?? Infinity;
+  return maten.find((maat) => maat.vak?.blad === bladNummer && stapel && maat.vak.links === stapel.links && maat.vak.rechts === stapel.rechts
+    && maat.vak.boven >= boven - 2 && maat.vak.boven < tot - 2) ?? maten[terugval];
+}
+
 export function systemenVan(xml) {
   const pagina = kind(leesXmlBoom(xml), 'page');
   return kinderen(pagina, 'system').map((system) => {
@@ -112,7 +122,8 @@ export function voegLettersToe(partituur, bladen) {
     for (const letter of letters) {
       const begin = maatStart + eerder.slice(0, letter.systeem).reduce((a, b) => a + b, 0) + letter.stack;
       for (const partij of uit.partijen) {
-        const maat = partij.maten[stapelKaart(partij.maten)[begin]];
+        const systeem = { boven: systemen[letter.systeem]?.boven, tot: systemen[letter.systeem + 1]?.boven };
+        const maat = maatBijStapel(partij.maten, blad.nummer, systemen[letter.systeem]?.stacks[letter.stack], stapelKaart(partij.maten)[begin], systeem);
         if (!maat || maat.elementen.some((e) => e.type === 'letter')) continue;
         maat.elementen.unshift({ soort: 'aanwijzing', start: 0, type: 'letter', waarde: letter.waarde, zekerheid: letter.zekerheid });
       }
