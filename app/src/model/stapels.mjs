@@ -63,6 +63,8 @@ export function lijnStapelsUit(maten, koppen) {
 }
 
 export function aantalUitSamengesteldeRust(maat) {
+  // Een verborgen maat of een maat die al een meermaatsrust is, wordt het niet nog een keer.
+  if (maat.verborgen || maat.maatrust > 1) return null;
   const heeftHeleMaatrust = maat.elementen.some((element) => element.soort === 'rust' && element.heleMaat);
   if (!heeftHeleMaatrust || maat.elementen.some((element) => element.soort === 'noot')) return null;
   const cijfer = maat.elementen.find((element) => (
