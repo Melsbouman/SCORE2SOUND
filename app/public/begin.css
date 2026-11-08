@@ -138,3 +138,181 @@
   .begin__inhoud > * { animation: none; }
   .begin__hoofdkaart, .begin__combinatie, .begin__recent-project { transition: none; }
 }
+
+/* Nieuwe partituur-scherm CSS */
+.nieuwe-partituur__tabs {
+  display: flex;
+  border-bottom: 1px solid var(--kleur-lijn);
+}
+.nieuwe-partituur__tab {
+  flex: 1;
+  padding: .8rem 1rem;
+  border: 0;
+  background: transparent;
+  color: var(--kleur-zacht);
+  font: inherit;
+  cursor: pointer;
+}
+.nieuwe-partituur__tab--actief {
+  color: var(--kleur-accent);
+  border-bottom: 2px solid var(--kleur-accent);
+}
+.nieuwe-partituur__paneel-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ruimte-4);
+}
+.nieuwe-partituur__kolom {
+  padding: var(--ruimte-3);
+  border: 1px solid var(--kleur-lijn);
+  border-radius: var(--hoek);
+  background: #fff;
+}
+.nieuwe-partituur__kolom--familie { order: 1; }
+.nieuwe-partituur__kolom--instrumenten { order: 2; }
+.nieuwe-partituur__kolom--pfeil { order: 3; }
+.nieuwe-partituur__kolom--partituur { order: 4; }
+@media (min-width: 800px) {
+  .nieuwe-partituur__paneel-container {
+    flex-direction: row;
+  }
+  .nieuwe-partituur__kolom {
+    flex: 1;
+  }
+}
+.nieuwe-partituur__genre-select {
+  width: 100%;
+  padding: .6rem .8rem;
+  border: 1px solid var(--kleur-lijn);
+  border-radius: var(--hoek);
+}
+.nieuwe-partituur__families-list {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  margin-top: var(--ruimte-2);
+}
+.nieuwe-partituur__familie-knop {
+  padding: .6rem .9rem;
+  border: 1px solid var(--kleur-lijn);
+  border-radius: var(--hoek);
+  background: #fff;
+  cursor: pointer;
+}
+.nieuwe-partituur__familie-knop--gekozen {
+  background: var(--kleur-accent);
+  color: #fff;
+}
+.nieuwe-partituur__zoek-input {
+  width: 100%;
+  padding: .6rem .8rem;
+  border: 1px solid var(--kleur-lijn);
+  border-radius: var(--hoek);
+  margin-bottom: var(--ruimte-2);
+}
+.nieuwe-partituur__instrumenten-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+}
+.nieuwe-partituur__instrument-knop {
+  padding: .5rem .8rem;
+  border: 1px solid var(--kleur-lijn);
+  border-radius: var(--hoek);
+  background: #fff;
+  cursor: pointer;
+}
+.nieuwe-partituur__instrument-knop--gekozen {
+  background: var(--kleur-accent-zacht);
+  color: var(--kleur-accent);
+  border-color: var(--kleur-accent);
+}
+.nieuwe-partituur__pfeil-knop {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid var(--kleur-lijn);
+  border-radius: var(--hoek);
+  background: var(--kleur-licht);
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+.nieuwe-partituur__volgorde-select {
+  width: 100%;
+  padding: .6rem .8rem;
+  border: 1px solid var(--kleur-lijn);
+  border-radius: var(--hoek);
+}
+.nieuwe-partituur__partituur-list {
+  list-style: none;
+  padding: 0;
+  margin-top: var(--ruimte-2);
+}
+.nieuwe-partituur__partij-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .5rem .8rem;
+  border-bottom: 1px solid var(--kleur-lijn);
+}
+.nieuwe-partituur__partij-acties {
+  display: flex;
+  gap: .4rem;
+}
+.nieuwe-partituur__verplaats-knop,
+.nieuwe-partituur__verwijder-knop {
+  padding: .2rem .5rem;
+  border: 1px solid var(--kleur-lijn);
+  border-radius: var(--hoek);
+  background: #fff;
+  cursor: pointer;
+}
+.nieuwe-partituur__verwijder-knop {
+  color: var(--kleur-fout);
+}
+.nieuwe-partituur__sjabloon-lijst {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--ruimte-3);
+}
+.nieuwe-partituur__sjabloon-kaart {
+  padding: var(--ruimte-3);
+  border: 1px solid var(--kleur-lijn);
+  border-radius: var(--hoek);
+  background: #fff;
+  text-align: center;
+}
+.nieuwe-partituur__sjabloon-knop {
+  margin-top: var(--ruimte-2);
+  padding: .6rem 1rem;
+  border: 1px solid var(--kleur-accent);
+  border-radius: var(--hoek);
+  background: #fff;
+  color: var(--kleur-accent);
+  cursor: pointer;
+}
+.nieuwe-partituur__onder-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--ruimte-2);
+  margin-top: var(--ruimte-4);
+}
+.nieuwe-partituur__annuleer-knop,
+.nieuwe-partituur__volgende-knop,
+.nieuwe-partituur__klaar-knop {
+  padding: .8rem 1.2rem;
+  border: 0;
+  border-radius: var(--hoek);
+  background: var(--kleur-accent);
+  color: #fff;
+  cursor: pointer;
+}
+.nieuwe-partituur__annuleer-knop {
+  background: transparent;
+  color: var(--kleur-zacht);
+  border: 1px solid var(--kleur-lijn);
+}
+.nieuwe-partituur__volgende-knop:disabled,
+.nieuwe-partituur__klaar-knop:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}

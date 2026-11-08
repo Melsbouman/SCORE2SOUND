@@ -2,7 +2,7 @@
 // Exporteert de startfunctie die called wordt wanneer het #begin scherm actief is.
 
 import { INSTRUMENTEN } from '/src/model/instrumenten.mjs';
-import { FAMILIES_KIEZER, GENRES, instrumentenVoorFamilie, zoekInstrumenten, sorteerPartituur } from '/src/model/instrumentkiezer.mjs';
+import { FAMILIES_KIEZER, GENRES, instrumentenVoorFamilie, zoekInstrumenten, sorteerPartituur, FAMILIE_VAN } from '/src/model/instrumentkiezer.mjs';
 import { SJABLONEN, maakLeegStuk, maakVoorbeeldStuk } from '/src/model/nieuw.mjs';
 
 // Hulpfuncties voor DOM manipulatie (gekopieerd uit begin.js)
