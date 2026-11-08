@@ -20,3 +20,8 @@
 - Gebruik nooit `agent-terug` om een nieuwe taak voor te trekken.
 - Een bestand `nul` in een agent-kloon breekt de schoonmaak (verwijderen met `[System.IO.File]::Delete('\?\...\nul')`).
 - Mels moet nog: 2 pagina's referentie, AGPL-besluit.
+
+## 8 nov, middag
+- Mappen hernoemd: hermes -> automatisering, werkpakketten -> taken-en-plannen, scripts -> beheer (scripts `werkpakket.sh` e.d. houden hun naam). Hartslag-taak wijst naar het nieuwe pad.
+- 1672 (nieuwe partituur) is `agent-vast`: Gemini maakte een PR van 649 regels (max 600); splits de taak in kleinere. Hermes kan lange taken niet aan ("Argument list too long"): geef Hermes alleen korte taken.
+- 1662, 1660, 1667 zijn gemerged.
