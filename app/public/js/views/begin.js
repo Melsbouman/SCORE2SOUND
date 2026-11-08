@@ -153,13 +153,13 @@ export function start(app) {
           const antwoord = await fetch(`/api/projecten/${encodeURIComponent(project.id)}`);
           if (!antwoord.ok) return;
           const geopend = await antwoord.json();
-          app.zet({
-            partituur: geopend.partituur,
-            meldingen: controleerMaatduur(geopend.partituur),
-            project: { id: geopend.id, naam: geopend.naam },
-            versies: geopend.versies ?? [],
-          });
-          window.location.hash = '#weergave';
+                    app.zet({
+                      partituur: geopend.partituur,
+                      meldingen: controleerMaatduur(geopend.partituur),
+                      project: { id: geopend.id, naam: geopend.naam },
+                      versies: geopend.versies ?? [],
+                    });
+                    window.location.hash = '#bewerken';
         } catch {
           // Het projectenscherm toont eventuele verbindingsfouten.
         }
