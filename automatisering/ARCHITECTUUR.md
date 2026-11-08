@@ -1,6 +1,6 @@
 # Architectuur (kort)
 
-Claude plant en controleert; goedkope agents (Codex, Copilot, Gemini, Hermes) bouwen op eigen branches; `automatisering/werkpakket.sh` doet alles eromheen (controleren, committen, pushen, PR, labels, mergen). De commando's staan in `WERKWIJZE.md`. De volledige oude tekst staat in de git-geschiedenis.
+Claude plant en controleert; agents (Codex, Copilot, Gemini, Claude Code met het tweede account, Hermes) bouwen op eigen branches; `automatisering/werkpakket.sh` doet alles eromheen (controleren, committen, pushen, PR, labels, mergen). De commando's staan in `WERKWIJZE.md`. De volledige oude tekst staat in de git-geschiedenis.
 
 Het contract is het issue: `## Doel`, `## Bestanden` (verplicht, alleen deze mogen veranderen), `## Wat je doet`, `## Verwacht` (optioneel, exacte regels), `## Acceptatiecriteria`, `## Niet doen`. Het script draait wijzigingen buiten `## Bestanden` terug, controleert syntax en tests, geeft fouten maximaal twee keer terug en merget zelf bij `## Verwacht` plus groen.
 

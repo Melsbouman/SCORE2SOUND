@@ -4,26 +4,31 @@
 # Gebruik: met de hand of via werkpakketten.sh; later eventueel elke 15 minuten met de Windows Taakplanner.
 # Exitcode 0 = taak afgerond, 1 = vastgelopen, 10 = niets te doen.
 # Instellingen via omgevingsvariabelen: AIFLOW_ALLEEN (alleen de wachtrij van één uitvoerder), AIFLOW_UITVOERDER,
-# AIFLOW_CODEX_MODEL, AIFLOW_COPILOT_MODEL, AIFLOW_HERMES_MODEL, AIFLOW_FALLBACK_MODEL, AIFLOW_KLOON en AIFLOW_STATUS.
+# AIFLOW_CODEX_MODEL, AIFLOW_COPILOT_MODEL, AIFLOW_CLAUDE_MODEL, AIFLOW_HERMES_MODEL, AIFLOW_FALLBACK_MODEL, AIFLOW_KLOON
+# en AIFLOW_STATUS.
 set -u
 export PYTHONUTF8=1
 
 GH="${GH:-/c/Program Files/GitHub CLI/gh.exe}"
-HERMES="${HERMES:-$LOCALAPPDATA/automatisering/bin/hermes.exe}"
-HERMES_LOG="${HERMES_LOG:-$LOCALAPPDATA/automatisering/logs/agent.log}"
+# Hermes is als programma geïnstalleerd in AppData\Local\hermes; die map heeft niets met de map automatisering te maken.
+HERMES="${HERMES:-$LOCALAPPDATA/hermes/bin/hermes.exe}"
+HERMES_LOG="${HERMES_LOG:-$LOCALAPPDATA/hermes/logs/agent.log}"
 R="${AIFLOW_REPO:-Melsbouman/SCORE2SOUND}"
 KLOON="${AIFLOW_KLOON:-/c/Users/mels1/SCORE2SOUND-agent}"
 
-# Drie uitvoerders. Claude kiest per taak wie hem krijgt, met een label op het issue:
+# Vijf uitvoerders. Claude kiest per taak wie hem krijgt, met een label op het issue:
 #   agent-codex    het Codex-programma met het ChatGPT-account (bouwer)
 #   agent-copilot  het Copilot-programma met het studentenabonnement (bouwer)
-#   agent-hermes   Hermes via OpenRouter, voor kleine achtergrondtaken (eerst een gratis model)
+#   agent-gemini   de Gemini CLI met een API-sleutel (bouwer, licht model)
+#   agent-claude   Claude Code met het tweede account (Pro), in een eigen configuratiemap (bouwer voor lastige taken)
+#   agent-hermes   Hermes via OpenRouter, voor kleine achtergrondtaken (gratis model)
 # Zonder label krijgt AIFLOW_STANDAARD (codex) de taak. AIFLOW_UITVOERDER dwingt een uitvoerder af, ook boven het label.
 standaard_model() {
   case "$1" in
     codex) echo "${AIFLOW_CODEX_MODEL:-gpt-6-luna}" ;; # goedkoop model voor kleine taken (Codex-lijst: "fast and affordable")
     copilot) echo "${AIFLOW_COPILOT_MODEL:-auto}" ;;
     gemini) echo "${AIFLOW_GEMINI_MODEL:-gemini-flash-lite-latest}" ;;
+    claude) echo "${AIFLOW_CLAUDE_MODEL:-sonnet}" ;;
     hermes) echo "${AIFLOW_HERMES_MODEL:-cohere/north-mini-code:free}" ;;
   esac
 }
@@ -32,23 +37,26 @@ standaard_provider() {
     codex) echo "codex-programma" ;;
     copilot) echo "copilot-programma" ;;
     gemini) echo "gemini-programma" ;;
+    claude) echo "claude-programma" ;;
     hermes) echo "${AIFLOW_HERMES_PROVIDER:-openrouter}" ;;
   esac
 }
 # Wie het overneemt als een uitvoerder niets heeft gewijzigd (limiet op, abonnement nog niet actief, model faalt).
 # "hermes-reserve" is Hermes met het reserve-model; leeg AIFLOW_FALLBACK_MODEL= slaat die stap over.
+# Claude (Pro) is de eerste reserve voor de bouwers; zelf valt hij terug op Codex en Gemini.
 reserves() {
   case "$1" in
-    codex) echo "copilot hermes-reserve" ;;
-    copilot) echo "codex hermes-reserve" ;;
-    gemini) echo "copilot codex hermes-reserve" ;;
+    codex) echo "claude copilot hermes-reserve" ;;
+    copilot) echo "claude codex hermes-reserve" ;;
+    gemini) echo "claude copilot codex hermes-reserve" ;;
+    claude) echo "codex gemini hermes-reserve" ;;
     hermes) echo "hermes-reserve" ;;
   esac
 }
 UITVOERDER="${AIFLOW_UITVOERDER:-${AIFLOW_ALLEEN:-${AIFLOW_STANDAARD:-codex}}}"
 case "$UITVOERDER" in
-  codex|copilot|gemini|hermes) ;;
-  *) echo "onbekende uitvoerder: $UITVOERDER (kies codex, copilot, gemini of hermes)" >&2; exit 1 ;;
+  codex|copilot|gemini|claude|hermes) ;;
+  *) echo "onbekende uitvoerder: $UITVOERDER (kies codex, copilot, gemini, claude of hermes)" >&2; exit 1 ;;
 esac
 MODEL="$(standaard_model "$UITVOERDER")"
 PROVIDER="$(standaard_provider "$UITVOERDER")"
@@ -124,7 +132,7 @@ import json,os,re,sys
 issues=json.load(open(sys.argv[1],encoding='utf-8')); prs=json.load(open(sys.argv[2],encoding='utf-8'))
 alleen=os.environ['ALLEEN']; standaard=os.environ['STANDAARD']
 def labels(i): return {l['name'] for l in i['labels']}
-def wie(i): return next((u for u in ('codex','copilot','gemini','hermes') if 'agent-'+u in labels(i)), standaard)
+def wie(i): return next((u for u in ('codex','copilot','gemini','hermes','claude') if 'agent-'+u in labels(i)), standaard)
 def bestanden(body):
     inn=False; out=set()
     for r in (body or '').splitlines():
@@ -189,7 +197,7 @@ GEKOZEN=$(py "
 import json,sys
 d=json.loads(sys.stdin.buffer.read().decode('utf-8'))
 namen=[l['name'] for l in d.get('labels',[])]
-print(next((u for u in ('codex','copilot','gemini','hermes') if 'agent-'+u in namen), ''))" < "$WERK/issue.json")
+print(next((u for u in ('codex','copilot','gemini','hermes','claude') if 'agent-'+u in namen), ''))" < "$WERK/issue.json")
 if [ -n "$GEKOZEN" ] && [ -z "${AIFLOW_UITVOERDER:-}" ]; then
   UITVOERDER="$GEKOZEN"; MODEL="$(standaard_model "$UITVOERDER")"; PROVIDER="$(standaard_provider "$UITVOERDER")"
 fi
@@ -243,7 +251,7 @@ status_zet bezig "#$ISSUE $TITEL" 0.15 "voorbereiden"
   fi
 } > "$WERK/prompt.txt"
 
-# Roept het model aan: $1 = codex, copilot of hermes, $2 = model, $3 = provider (alleen voor hermes).
+# Roept het model aan: $1 = codex, copilot, gemini, claude of hermes, $2 = model, $3 = provider (alleen voor hermes).
 # Telt daarna de tokens van deze aanroep op bij TOK_IN en TOK_UIT.
 TOK_IN=0; TOK_UIT=0
 voer_uit() {
@@ -278,6 +286,25 @@ voer_uit() {
       codex_js="${AIFLOW_CODEX_JS:-$(npm root -g)/@openai/codex/bin/codex.js}"
       [ "$2" = "standaard" ] || modelarg=(-m "$2")
       timeout 900 node "$codex_js" exec --ephemeral --json --color never -s workspace-write "${modelarg[@]}" -o "$WERK/laatste.txt" - < "$WERK/prompt.txt" > "$WERK/agent.out" 2>&1
+      ;;
+    claude)
+      # Claude Code met het tweede account (Pro). De inlog staat in een eigen configuratiemap (AIFLOW_CLAUDE_MAP), los van
+      # het Max-account van de Claude-app. Alle CLAUDE_*- en ANTHROPIC_*-variabelen gaan eruit: die komen van de app en
+      # zouden het programma via het Max-account laten praten. Alleen lezen en schrijven: geen shell, geen web, geen
+      # MCP-servers of skills. De opdracht gaat via stdin, zodat een lange opdracht heel aankomt.
+      local claude_exe
+      claude_exe="${AIFLOW_CLAUDE_EXE:-$(npm root -g)/@anthropic-ai/claude-code/bin/claude.exe}"
+      (
+        for v in $(env | sed -n 's/^\(\(CLAUDE\|ANTHROPIC\)[A-Za-z0-9_]*\)=.*/\1/p'); do unset "$v"; done
+        export CLAUDE_CONFIG_DIR="${AIFLOW_CLAUDE_MAP:-$USERPROFILE\\.claude-uitvoerder}"
+        timeout 900 "$claude_exe" -p --model "$2" --output-format json --permission-mode acceptEdits \
+          --tools "Read,Edit,Write,Glob,Grep" --setting-sources user --strict-mcp-config --disable-slash-commands \
+          --no-session-persistence \
+          --append-system-prompt "Je bent een uitvoerder (agent-claude) die via automatisering/werkpakket.sh draait. CLAUDE.md is geschreven voor de plannende Claude en geldt niet voor jou: volg AGENTS.md en de taak. Bewerk alleen de bestanden uit de taak en draai geen commando's; het script controleert, commit en opent de PR." \
+          < "$WERK/prompt.txt"
+      ) > "$WERK/agent.out" 2>&1
+      # Het eindantwoord apart, voor de melding als er niets veranderde (bijvoorbeeld "usage limit reached").
+      python -I -X utf8 "$DIR/tokens.py" claude-tekst "$WERK/agent.out" > "$WERK/laatste.txt" 2>/dev/null || rm -f "$WERK/laatste.txt"
       ;;
   esac
   if [ "$(git rev-parse HEAD)" != "$BASIS_HEAD" ]; then

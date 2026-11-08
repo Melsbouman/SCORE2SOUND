@@ -51,7 +51,7 @@ De labels op een issue geven de stand aan:
 - `agent-review`: PR is open, Claude controleert;
 - `agent-terug`: Claude heeft de PR afgekeurd, de agent past hem aan;
 - `agent-vast`: de agent kon niet verder, de reden staat als comment op het issue;
-- `agent-codex`, `agent-copilot`, `agent-hermes`: wie de taak bouwt;
+- `agent-codex`, `agent-copilot`, `agent-gemini`, `agent-claude`, `agent-hermes`: wie de taak bouwt;
 - `agent-exact` (op de PR): de wijziging komt precies overeen met `## Verwacht`.
 
 Merge nooit zelf en push nooit naar `main`.

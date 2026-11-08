@@ -31,7 +31,7 @@ BEZIG=${REST%% *}
 VAST=${REST#* }
 
 # Een rij die al lang "bezig" meldt maar niet meer draait (pc uit, venster gesloten): zet de taak terug en de status op standby.
-for UITVOERDER in codex copilot hermes; do
+for UITVOERDER in codex copilot gemini claude hermes; do
   SF="$STATUS/$UITVOERDER.json"
   [ -f "$SF" ] || continue
   OUD=$(SF="$SF" python -I -X utf8 -c '
@@ -52,7 +52,7 @@ json.dump(d,open(os.environ["SF"],"w",encoding="utf-8"))'
   fi
 done
 
-for UITVOERDER in codex copilot hermes; do
+for UITVOERDER in codex copilot gemini claude hermes; do
   TOESTAND=$(U="$UITVOERDER" ISSUES="$WERK/issues.json" STATUSBESTAND="$STATUS/$UITVOERDER.json" python -I -X utf8 -c '
 import json,os
 issues=json.load(open(os.environ["ISSUES"],encoding="utf-8"))

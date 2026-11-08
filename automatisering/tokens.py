@@ -5,6 +5,10 @@ Gebruik:
       Leest de JSON-regels van het Codex-programma (codex exec --json) en telt het "usage" van elke beurt op.
   python tokens.py copilot <uitvoerbestand>
       Leest de samenvatting van het Copilot-programma (regel "Tokens" met een pijl omhoog en omlaag).
+  python tokens.py claude <uitvoerbestand>
+      Leest het JSON-antwoord van Claude Code (claude -p --output-format json) en telt "usage" op, met de cache.
+  python tokens.py claude-tekst <uitvoerbestand>
+      Schrijft alleen het eindantwoord van Claude Code (voor de melding als er niets veranderde).
   python tokens.py hermes <logbestand> <starttijd in seconden> <model>
       Telt de aanroepen van dat model in het logboek van Hermes vanaf de starttijd bij elkaar op.
 
@@ -46,6 +50,28 @@ def copilot(pad):
     return (getal(*erin.groups()) if erin else 0, getal(*eruit.groups()) if eruit else 0)
 
 
+def claude_resultaat(pad):
+    """Het laatste JSON-object met "type": "result" in de uitvoer (meldingen ervoor of erna worden overgeslagen)."""
+    gevonden = {}
+    for regel in open(pad, encoding="utf-8", errors="replace"):
+        regel = regel.strip()
+        if not regel.startswith("{"):
+            continue
+        try:
+            d = json.loads(regel)
+        except ValueError:
+            continue
+        if isinstance(d, dict) and d.get("type") == "result":
+            gevonden = d
+    return gevonden
+
+
+def claude(pad):
+    gebruik = claude_resultaat(pad).get("usage") or {}
+    erin = sum(int(gebruik.get(k, 0) or 0) for k in ("input_tokens", "cache_creation_input_tokens", "cache_read_input_tokens"))
+    return erin, int(gebruik.get("output_tokens", 0) or 0)
+
+
 def hermes(pad, start, model):
     erin = 0
     eruit = 0
@@ -71,6 +97,11 @@ try:
         a, b = codex(sys.argv[2])
     elif sys.argv[1] == "copilot":
         a, b = copilot(sys.argv[2])
+    elif sys.argv[1] == "claude":
+        a, b = claude(sys.argv[2])
+    elif sys.argv[1] == "claude-tekst":
+        print(claude_resultaat(sys.argv[2]).get("result", ""))
+        sys.exit(0)
     else:
         a, b = hermes(sys.argv[2], float(sys.argv[3]), sys.argv[4])
 except Exception:

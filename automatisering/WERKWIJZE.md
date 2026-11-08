@@ -9,7 +9,7 @@ Claude plant en controleert, agents bouwen, `automatisering/werkpakket.sh` doet 
 `bash automatisering/werkpakketten.sh --alle` (een wachtrij per uitvoerder, elk in een eigen kloon). Taken die een bestand delen met lopend werk wachten. Per taak: kiezen, branch `agent/<nr>-<naam>`, agent aanroepen (alleen schrijven), wijzigingen buiten `## Bestanden` terugdraaien, regelcontrole en tests, twee herstelrondes, push, PR, en mergen als de wijziging precies `## Verwacht` is of `## Controle` slaagt en alles groen is (`AIFLOW_AUTOMERGE=uit` zet dat uit). Vastgelopen: eenmalig overzetten naar de reserve; daarna `agent-vast` voor Claude. Faalt de Action drie keer, dan `agent-vast`.
 
 ## Labels
-`agent-ready` klaar; `agent-bezig` (een per uitvoerder); `agent-review` PR open; `agent-terug` afgekeurd; `agent-vast` script kon niet verder; `agent-codex|copilot|gemini|hermes` wie bouwt; `agent-exact` (op de PR) diff is precies `## Verwacht`. Gebruik `agent-terug` nooit om een nieuwe taak voor te trekken.
+`agent-ready` klaar; `agent-bezig` (een per uitvoerder); `agent-review` PR open; `agent-terug` afgekeurd; `agent-vast` script kon niet verder; `agent-codex|copilot|gemini|claude|hermes` wie bouwt; `agent-exact` (op de PR) diff is precies `## Verwacht`. Gebruik `agent-terug` nooit om een nieuwe taak voor te trekken.
 
 ## Controleren (Claude)
 `bash automatisering/review.sh` toont wat nog nodig is. "Action faalt": alleen `gh pr checks <nr>`, dan `agent-terug` met de melding en script opnieuw. `agent-vast`: taak kleiner of zelf doen. Afkeuren: korte punten per bestand. Merge: `gh pr merge <nr> --merge --delete-branch`, issue sluiten.
@@ -28,6 +28,8 @@ Claude plant en controleert, agents bouwen, `automatisering/werkpakket.sh` doet 
 | `AIFLOW_CODEX_MODEL` | `gpt-6-luna` | model van het Codex-programma; `standaard` is het model uit `~/.codex/config.toml` |
 | `AIFLOW_COPILOT_MODEL` | `auto` | model van het Copilot-programma |
 | `AIFLOW_GEMINI_MODEL` | `gemini-flash-lite-latest` | model van de Gemini CLI |
+| `AIFLOW_CLAUDE_MODEL` | `sonnet` | model van Claude Code voor `agent-claude` (tweede account) |
+| `AIFLOW_CLAUDE_MAP` | `%USERPROFILE%\.claude-uitvoerder` | configuratiemap met de inlog van het tweede account; inloggen met `claude-inloggen.ps1` |
 | `AIFLOW_HERMES_MODEL`, `AIFLOW_HERMES_PROVIDER` | `cohere/north-mini-code:free`, `openrouter` | model voor `agent-hermes` |
 | `AIFLOW_FALLBACK_MODEL` | `cohere/north-mini-code:free` | reserve bij niets doen; leeg zet de reserve uit |
 | `AIFLOW_FALLBACK_PROVIDER` | `openrouter` | provider van de reserve |

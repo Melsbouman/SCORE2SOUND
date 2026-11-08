@@ -9,8 +9,8 @@
 #     [--controle "opdracht die moet slagen"] [--controle "..."] \
 #     [--criterium "extra criterium"] [--niet "wat niet mag"] [--bron "verwijzing"]
 #     [--maxregels N]   hogere diffgrens voor deze taak (standaard 600)
-#     [--voor codex|copilot|hermes]   wie de taak bouwt (label agent-codex, agent-copilot of agent-hermes);
-#                  zonder --voor: codex. hermes is voor kleine achtergrondtaken, liefst met --verwacht.
+#     [--voor codex|copilot|gemini|claude|hermes]   wie de taak bouwt (label agent-<naam>);
+#                  zonder --voor: codex. claude (Pro) voor lastige taken; hermes voor kleine achtergrondtaken, met --verwacht.
 #
 # Met --verwacht controleert het runner-script na afloop of de wijziging precies die regels toevoegt en
 # niets verwijdert. Dat maakt het nakijken van mechanische taken veel sneller.
@@ -73,7 +73,7 @@ TMP="$(mktemp)"
   echo "## Bron"; echo "$BRON"
 } > "$TMP"
 if [ -z "$SLA" ]; then bash "$(dirname "$0")/taak-check.sh" "$TMP" || { echo "Taak niet aangemaakt: los de FOUT hierboven op (of --sla-check-over)." >&2; rm -f "$TMP"; exit 3; }; fi
-case "${VOOR:-codex}" in codex|copilot|gemini|hermes) ;; *) echo "--voor moet codex, copilot, gemini of hermes zijn" >&2; rm -f "$TMP"; exit 2 ;; esac
+case "${VOOR:-codex}" in codex|copilot|gemini|claude|hermes) ;; *) echo "--voor moet codex, copilot, gemini, claude of hermes zijn" >&2; rm -f "$TMP"; exit 2 ;; esac
 EXTRA=(--label "agent-${VOOR:-codex}")
 "$GH" issue create -R "$R" --title "$TITEL" --body-file "$TMP" --label agent-ready "${EXTRA[@]}"
 rm -f "$TMP"
