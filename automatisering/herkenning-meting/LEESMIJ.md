@@ -42,3 +42,8 @@ Meet de herkenning op Devils Galop (2nd Cornet): nootkoppen (plek), voortekens b
 Meet de opbouw tot het muziekmodel op Devils Galop: vergelijkt per maat de noten en rusten van het model naast de referentie, vóór en na de herstelketen, inclusief maatduurmeldingen.
 * **Gebruik:** `node automatisering/herkenning-meting/opbouw-devils-galop.mjs <map> [--toon]`
 * **Uitvoer:** Vergelijking per maat van model en referentie; met `--toon` worden de verschillen per maat gedetailleerd weergegeven.
+
+### 8. `maatsoorten.mjs`
+Toont per stuk waar de maatsoort in het model verandert, en per deel hoeveel maten een maatduur-melding hebben na de herstelketen.
+* **Gebruik:** `node automatisering/herkenning-meting/maatsoorten.mjs "<map>/goth-p1.pgm+<map>/goth-p2.pgm"`
+* **Uitvoer:** Per stuk het aantal maten, en per deel de maatsoort, de eerste maat, het blad en het aantal foute maten.
