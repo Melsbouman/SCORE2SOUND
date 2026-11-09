@@ -223,3 +223,61 @@ test('opbouw: een groepje met een cijfer wordt een triool (3 in de tijd van 2)',
   // Een onbekend cijfer (9) verandert niets.
   assert.equal(maat.elementen[3].tuplet, undefined);
 });
+
+// Secundes in een akkoord: twee koppen een stap uit elkaar staan naast elkaar. Maat 1: twee hele noten (g en a, zonder stok).
+// Maat 2: een achtste g met stok omhoog en de a rechts tegen die stok (duren.mjs vond voor de a geen stok), dan een achtste rust
+// en een kwart. Maat 3: stok omlaag, de g links tegen de stok zonder eigen stok, de a met de stok (een achtste). Maat 4: twee
+// gewone kwarten naast elkaar (g, a) met elk een stok: geen akkoord.
+test('opbouw: een secunde in een akkoord (koppen naast elkaar) start samen en duurt even lang', () => {
+  const y0 = 200;
+  const metStok = (k, richting, x) => ({ ...k, stok: { richting, x, eind: k.y + (richting === 'op' ? -70 : 70) } });
+  const pagina = {
+    blad: 1, breedte: 1200, hoogte: 600, schaal: { lijnafstand: ia },
+    raster: { balken: [balk(y0)] },
+    balkkoppen: [{ sleutel: { soort: 'G', lijn: 2 }, voortekening: { aantal: 0, tekens: [] }, maatsoort: { teller: 2, noemer: 4 }, einde: 150 }],
+    maten: [{ strepen: [], maten: [vak(150, 350, y0), vak(350, 600, y0), vak(600, 850, y0), vak(850, 1100, y0)] }],
+    noten: [[
+      kop(200, y0, 6, 1920, 'heel'), kop(233, y0, 5, 1920, 'heel'),
+      metStok(kop(400, y0, 6, 240), 'op', 411), kop(423, y0, 5, 480),
+      kop(650, y0, 6, 480), metStok(kop(673, y0, 5, 240), 'neer', 662),
+      metStok(kop(900, y0, 6, 480), 'op', 911), metStok(kop(935, y0, 5, 480), 'op', 946),
+    ]],
+    voortekens: [[]],
+    rusten: [[rust(480, '8'), rust(530, 'kwart'), rust(720, '8'), rust(780, 'kwart')]],
+  };
+  const maten = bouwPartituur([pagina]).partijen[0].maten;
+  const kort = (maat) => maat.elementen.map((e) => (e.soort === 'noot' ? `${e.toonhoogte.stap}${e.start}:${e.duur}${e.akkoord ? '+' : ''}` : `r${e.start}:${e.duur}`));
+  assert.deepEqual(kort(maten[0]), ['G0:1920', 'A0:1920+']);
+  assert.deepEqual(kort(maten[1]), ['G0:240', 'A0:240+', 'r240:240', 'r480:480']);
+  assert.deepEqual(kort(maten[2]), ['G0:240', 'A0:240+', 'r240:240', 'r480:480']);
+  assert.deepEqual(kort(maten[3]), ['G0:480', 'A480:480']);
+});
+
+// Secundes binnen grotere akkoorden en onder een waardestreep: de kop met de stok bepaalt het akkoord.
+test('opbouw: een secunde in een akkoord van drie, tegen een andere kop dan de eerste, en onder een waardestreep', () => {
+  const y0 = 200;
+  const stok = (k, richting, x, balkLinks, balkRechts) => ({ ...k, stok: { richting, x, eind: k.y + (richting === 'op' ? -70 : 70) },
+    ...(balkLinks !== undefined ? { balk: { links: balkLinks, rechts: balkRechts } } : {}) });
+  const pagina = {
+    blad: 1, breedte: 1200, hoogte: 600, schaal: { lijnafstand: ia },
+    raster: { balken: [balk(y0)] },
+    balkkoppen: [{ sleutel: { soort: 'G', lijn: 2 }, voortekening: { aantal: 0, tekens: [] }, maatsoort: { teller: 2, noemer: 4 }, einde: 150 }],
+    maten: [{ strepen: [], maten: [vak(150, 350, y0), vak(350, 600, y0), vak(600, 1100, y0)] }],
+    noten: [[
+      // Maat 1: e-g-a, stok omlaag: de g links zonder stok, de a en de e rechts met de stok.
+      kop(200, y0, 6, 480), stok(kop(223, y0, 5, 480), 'neer', 212), stok(kop(223, y0, 8, 480), 'neer', 212),
+      // Maat 2: a en e links met een stok omhoog, de f rechts tegen de stok (een secunde met de e, niet met de a).
+      stok(kop(400, y0, 5, 480), 'op', 411), stok(kop(400, y0, 8, 480), 'op', 411), kop(423, y0, 7, 480),
+      // Maat 3: vier achtsten onder één waardestreep (stok omlaag); de tweede is een secunde g-a met de g links zonder stok.
+      stok(kop(650, y0, 4, 240), 'neer', 639, 639, 900), kop(727, y0, 6, 480), stok(kop(750, y0, 5, 240), 'neer', 739, 639, 900),
+      stok(kop(820, y0, 4, 240), 'neer', 809, 639, 900), stok(kop(900, y0, 3, 240), 'neer', 889, 639, 900),
+    ]],
+    voortekens: [[]],
+    rusten: [[]],
+  };
+  const maten = bouwPartituur([pagina]).partijen[0].maten;
+  const kort = (maat) => maat.elementen.map((e) => `${e.toonhoogte.stap}${e.start}:${e.duur}${e.akkoord ? '+' : ''}${e.balk ? `/${e.balk}` : ''}`);
+  assert.deepEqual(kort(maten[0]), ['G0:480', 'A0:480+', 'E0:480+']);
+  assert.deepEqual(kort(maten[1]), ['A0:480', 'E0:480+', 'F0:480+']);
+  assert.deepEqual(kort(maten[2]), ['B0:240/begin', 'G240:240/midden', 'A240:240+', 'B480:240/midden', 'C720:240/eind']);
+});
