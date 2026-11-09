@@ -142,8 +142,9 @@ export function vulOntbrekendeMaten(partituur) {
     // Een gedrukt nummer kan verkeerd gelezen zijn (106 als 166): alleen aanvullen als het volgende anker het bevestigt, dus als er
     // daarna niet te veel maten zouden staan.
     const volgende = cijfers[index + 1];
-    const bevestigd = !(vorige.gedrukt || huidige.gedrukt) || !volgende
-      || volgende.nummer - huidige.nummer >= matenOpBlad(eerstePartij.maten, huidige.index, volgende.index);
+    // Ook het laatste gedrukte nummer: zonder volgend nummer geen bevestiging, dus niet aanvullen.
+    const bevestigd = !(vorige.gedrukt || huidige.gedrukt)
+      || (volgende && volgende.nummer - huidige.nummer >= matenOpBlad(eerstePartij.maten, huidige.index, volgende.index));
     if (verwacht > 0 && aantal > 0 && aantal <= 40 && bevestigd) {
       const leeg = [];
       const rustmaten = [];
@@ -152,11 +153,12 @@ export function vulOntbrekendeMaten(partituur) {
         // Leeg in alle partijen: anders zou de rust de noten van een andere partij wissen.
         const leegInAlle = kopie.partijen.every((partij) => {
           const kandidaat = partij.maten[maatIndex];
-          return Boolean(kandidaat) && !kandidaat.elementen.some((element) => ['noot', 'rust'].includes(element.soort));
+          // Een partij zonder maat op die plek (korter, of een andere partij na het splitsen) houdt het niet tegen.
+          return !kandidaat || !kandidaat.elementen.some((element) => ['noot', 'rust'].includes(element.soort));
         });
         if (maat && !maat.verborgen && leegInAlle) {
           leeg.push(maatIndex);
-        } else if (kopie.partijen.every((partij) => alleenEenRust(partij.maten, maatIndex))) {
+        } else if (kopie.partijen.every((partij) => (partij === eerstePartij || partij.maten[maatIndex]) ? alleenEenRust(partij.maten, maatIndex) : true)) {
           rustmaten.push(maatIndex);
         }
       }
