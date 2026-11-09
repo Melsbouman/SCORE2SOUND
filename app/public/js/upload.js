@@ -92,9 +92,101 @@ export function start(app) {
     return { partituur: resultaat.partituur, meldingen: resultaat.meldingen };
   }
 
+  // Herkennen in de browser (de eigen herkenning, in een Web Worker: herken-worker.js). Geeft { partituur, meldingen } als het
+  // lukte, null als het misging of afgebroken werd, of TERUGVAL als de browser dit bestand nog niet goed kan lezen (een digitale
+  // pdf, geen notenbalken gevonden, een onleesbaar bestand, of een browser zonder module-workers): dan probeert de server het.
+  // Met 'server' in de browseropslag onder 'score2sound-herkenning' gaat het altijd via de server.
+  const TERUGVAL = Symbol('terugval');
+  const NAAR_SERVER = new Set(['geen-beelden', 'geen-notenbalken', 'onleesbaar']);
+  function herkenInBrowser(bestand, taak, toonStatus, batch) {
+    let voorkeur = null;
+    try { voorkeur = localStorage.getItem('score2sound-herkenning'); } catch {}
+    if (voorkeur === 'server' || typeof Worker === 'undefined') return Promise.resolve(TERUGVAL);
+    return new Promise((klaar) => {
+      let werker;
+      try {
+        werker = new Worker('/js/herken-worker.js', { type: 'module' });
+      } catch {
+        klaar(TERUGVAL);
+        return;
+      }
+      const ruimOp = () => {
+        taak.voortgang?.remove();
+        taak.afbreken?.remove();
+        werker.terminate();
+      };
+      taak.voortgang = document.createElement('progress');
+      taak.voortgang.max = 100;
+      taak.voortgang.value = 0;
+      taak.afbreken = document.createElement('button');
+      taak.afbreken.type = 'button';
+      taak.afbreken.className = 'knop';
+      taak.afbreken.textContent = 'Afbreken';
+      vlak.append(taak.voortgang, taak.afbreken);
+      taak.afbreken.addEventListener('click', () => {
+        ruimOp();
+        toonStatus('Afgebroken.');
+        klaar(null);
+      });
+      werker.addEventListener('error', () => {
+        ruimOp();
+        klaar(TERUGVAL);
+      });
+      werker.addEventListener('message', ({ data }) => {
+        if (data.soort === 'voortgang') {
+          taak.voortgang.value = data.procent;
+          toonStatus(data.tekst);
+          return;
+        }
+        ruimOp();
+        if (data.soort === 'fout') {
+          if (NAAR_SERVER.has(data.code)) {
+            klaar(TERUGVAL);
+          } else {
+            toonStatus(`Herkennen lukte niet: ${data.tekst}`);
+            klaar(null);
+          }
+          return;
+        }
+        try {
+          // Klaar: een eigen id voor deze herkenning (een herkenning op de server heeft er ook een).
+          const partituur = { ...data.partituur, bron: { ...data.partituur.bron, herkenning: `browser-${Date.now().toString(36)}` } };
+          if (!batch) {
+            app.zet({ partituur, meldingen: data.meldingen, project: null });
+            window.location.hash = '#bewerken';
+          }
+          const zonder = data.bladenZonderBalken ?? [];
+          toonStatus(`Geopend: ${bestand.name}${zonder.length ? ` (op bladzijde ${zonder.join(', ')} zijn geen notenbalken gevonden)` : ''}`);
+          klaar({ partituur, meldingen: data.meldingen });
+        } catch (fout) {
+          toonStatus(`Openen lukte niet: ${fout.message}`);
+          klaar(null);
+        }
+      });
+      toonStatus(`Bezig met lezen van ${bestand.name}…`);
+      bestand.arrayBuffer().then((bytes) => {
+        werker.postMessage({ bytes, naam: bestand.name, bladen: paginaVeld.value.trim() }, [bytes]);
+      }, () => {
+        ruimOp();
+        toonStatus('Het bestand kon niet worden gelezen.');
+        klaar(null);
+      });
+    });
+  }
+
   async function herken(bestand, toonStatus = (tekst) => { status.textContent = tekst; }, batch = false) {
     const taak = { stop: false, voortgang: null, afbreken: null };
     herkenning = taak;
+    // Eerst in de browser; lukt dat niet omdat de browser dit bestand nog niet kan lezen, dan via de server.
+    try {
+      const inBrowser = await herkenInBrowser(bestand, taak, toonStatus, batch);
+      if (inBrowser !== TERUGVAL) {
+        if (herkenning === taak) herkenning = null;
+        return inBrowser;
+      }
+    } catch {
+      // Valt terug op de server.
+    }
     toonStatus(`Bezig met uploaden van ${bestand.name}…`);
     let geopend = null;
 
