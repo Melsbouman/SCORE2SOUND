@@ -127,3 +127,36 @@ test('duur: korte stokken, een vlag boven een gaatje, stokken naast de kop, een 
   }
   assert.equal(noten[2].balk, undefined, 'een vlag is geen waardestreep');
 });
+
+// Op een scan is een stok soms maar een pixel breed en wiebelt hij tussen twee kolommen. Twee achtsten onder een waardestreep
+// met zo'n stok: de stok wordt gevonden en de duur is een achtste.
+test('duren: een stok van een pixel die tussen twee kolommen wiebelt, wordt gevonden', () => {
+  const { beeld, verwacht } = maakBlad({ balken: 1, koppen: false, maatstrepen: false, lijnafstand: ia });
+  const lijn0 = verwacht.balken[0].lijnen[0].a;
+  const yOp = (stap) => Math.round(lijn0 + (stap * ia) / 2);
+  const zet = (x, y) => { beeld.pixels[Math.round(y) * beeld.breedte + Math.round(x)] = 0; };
+  const stempel = (naam, ax, ay) => {
+    const t = sjabloon(naam, ia);
+    for (let y = 0; y < t.hoogte; y += 1) for (let x = 0; x < t.breedte; x += 1) if (t.pixels[y * t.breedte + x]) zet(ax - t.ankerX + x, ay - t.ankerY + y);
+  };
+  const breedteKop = sjabloon('kop-zwart', ia).breedte;
+  const stokken = [];
+  for (const [ax, stap] of [[300, 7], [380, 6]]) {
+    stempel('kop-zwart', ax, yOp(stap));
+    const stokX = ax + breedteKop - 1;
+    const eind = yOp(2) - ia;
+    // Om de twee rijen een kolom verschoven.
+    for (let y = eind; y <= yOp(stap) - 2; y += 1) zet(stokX - (Math.floor(y / 2) % 2), y);
+    stokken.push({ stokX, eind });
+  }
+  // De waardestreep over beide stokken.
+  for (let x = stokken[0].stokX - 1; x <= stokken[1].stokX; x += 1) for (let y = stokken[0].eind; y <= stokken[0].eind + 4; y += 1) zet(x, y);
+  const zw = zwartWit(beeld);
+  const schaal = meetSchaal(zw);
+  const raster = vindBalken(zw, schaal);
+  const kaal = verwijderLijnen(zw, raster, schaal);
+  const [noten] = bepaalDuren(kaal, raster, schaal, zoekNootkoppen(kaal, raster, schaal));
+  assert.equal(noten.length, 2);
+  assert.ok(noten.every((noot) => noot.stok), 'beide noten hebben een stok');
+  assert.deepEqual(noten.map((noot) => noot.duur), [240, 240]);
+});

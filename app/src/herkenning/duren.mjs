@@ -71,19 +71,25 @@ export function bepaalDuren(kaal, raster, schaal, koppenPerBalk) {
     }
     return false;
   };
-  // De langste verticale strook in een paar kolommen, vanaf rij y in richting stap (-1 omhoog, 1 omlaag).
+  // De langste verticale strook in een paar kolommen, vanaf rij y in richting stap (-1 omhoog, 1 omlaag). Een stok van één
+  // pixel breed wiebelt op een scan tussen twee kolommen: we volgen daarom een band van twee kolommen (x en x + 1).
   const strook = (kolommen, y, stap) => {
     let beste = { x: kolommen[0], lengte: 0, eind: y };
     for (const x of kolommen) {
       let p = y;
       let leeg = 0;
       let laatste = y;
+      // Hoeveel zwart er in elke kolom van de band zat: de stok is de kolom met het meeste.
+      let inX = 0;
+      let inX1 = 0;
       while (p >= 0 && p < hoogte && leeg <= 1) {
-        if (zwart(x, p)) { laatste = p; leeg = 0; } else leeg += 1;
+        const a = zwart(x, p);
+        const b = zwart(x + 1, p);
+        if (a || b) { laatste = p; leeg = 0; inX += a ? 1 : 0; inX1 += b ? 1 : 0; } else leeg += 1;
         p += stap;
       }
       const lengte = Math.abs(laatste - y);
-      if (lengte > beste.lengte) beste = { x, lengte, eind: laatste };
+      if (lengte > beste.lengte) beste = { x: inX >= inX1 ? x : x + 1, lengte, eind: laatste };
     }
     return beste;
   };
