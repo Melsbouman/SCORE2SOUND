@@ -36,6 +36,7 @@ import { meermaatsRustenUitCijfers } from '../model/meermaatsrust.mjs';
 import { tweedeMening, woordenUitPdf } from '../model/digitaal.mjs';
 import { vergelijkGedrukteMaatnummers } from '../model/gedruktenummers.mjs';
 import { meldVerlorenRusten } from './verlorenrusten.mjs';
+import { vulRustGaten } from '../model/rustgaten.mjs';
 import { leesPdfTekens } from './pdftekens.mjs';
 import { maakLimiet } from './limiet.mjs';
 import { leesBlad } from './tekstlezer.mjs';
@@ -386,6 +387,9 @@ export function maakHerken({ map, draaier }) {
     // en Audiveris hangt een kader vaak aan de maat ervoor.
     const letters = voegLettersToe(uit.partituur, bladenGoed);
     uit.partituur = herstelHerkenning(letters.partituur);
+    // Een rust die Audiveris miste (de maat is een notenwaarde te kort en op het blad zit daar een gat).
+    const rustGaten = vulRustGaten(uit.partituur);
+    uit.partituur = rustGaten.partituur;
   const gevuld = vulLegeMaten(uit.partituur);
   const maatMeldingen = controleerMaatduur(gevuld);
   const nagekeken = markeerFouteMaten(gevuld, maatMeldingen);
@@ -414,6 +418,7 @@ export function maakHerken({ map, draaier }) {
     ...digitaal,
     ...nummers.meldingen,
     ...verloren,
+    ...rustGaten.meldingen,
     ...maatMeldingen,
     ];
   await writeFile(join(taak.uitmap, 'resultaat.json'), JSON.stringify({
