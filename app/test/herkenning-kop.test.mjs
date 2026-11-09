@@ -160,3 +160,19 @@ test('balkkop: alla breve, 3/2, 9/16, kruisen bij een tenorsleutel, en een noot 
   ]);
   assert.deepEqual(koppen[3].voortekening.tekens.map((t) => t.stap), [6, 2]);
 });
+
+// Een 1 als noemer komt niet voor: 4 boven 1 is geen maatsoort (op een grof blad leek de onderste 4 zonder punt een 1).
+test('balkkop: een noemer 1 wordt niet gelezen', () => {
+  const { beeld, verwacht } = maakBlad({ balken: 1, koppen: false, maatstrepen: false, lijnafstand: ia });
+  const y = (stap) => Math.round(verwacht.balken[0].lijnen[0].a + (stap * ia) / 2);
+  const stempel = (naam, ax, ay) => {
+    const t = sjabloon(naam, ia);
+    for (let dy = 0; dy < t.hoogte; dy += 1) for (let dx = 0; dx < t.breedte; dx += 1) if (t.pixels[dy * t.breedte + dx]) beeld.pixels[(ay - t.ankerY + dy) * beeld.breedte + ax - t.ankerX + dx] = 0;
+  };
+  stempel('sleutel-g', 110, y(6));
+  stempel('cijfer-4', 185, y(2));
+  stempel('cijfer-1', 190, y(6));
+  const [kop] = lees(beeld);
+  assert.equal(kop.sleutel?.soort, 'G');
+  assert.equal(kop.maatsoort, null);
+});
