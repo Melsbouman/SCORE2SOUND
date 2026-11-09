@@ -99,9 +99,10 @@ const maatLengte = (maat) => ((maat.maatsoort?.teller ?? 4) * 1920) / (maat.maat
 // verlorenRust: N, zodat meldIngevoegdeRusten aan het eind (als de nummering vaststaat) de meldingen kan maken.
 export function voegVerlorenRustenIn(partituur, bladen, woordenPerBlad) {
   const kopie = structuredClone(partituur);
-  const eerste = kopie.partijen?.[0];
-  if (!eerste) return kopie;
-  const invoegingen = [];
+  if (!kopie.partijen?.length) return kopie;
+  // Per partij de invoegingen: gesplitste partijen (een boek met partijen na elkaar) lopen niet per maat gelijk, dus elke partij
+  // zoekt haar eigen samengevoegde maat op het blad.
+  const perPartij = new Map(kopie.partijen.map((partij) => [partij, []]));
   for (const blad of bladen ?? []) {
     let plekken = [];
     try {
@@ -112,32 +113,47 @@ export function voegVerlorenRustenIn(partituur, bladen, woordenPerBlad) {
     const woorden = (woordenPerBlad ?? []).filter((item) => item?.blad === blad.nummer)
       .flatMap((item) => (item.regels ?? []).flatMap((regel) => regel.woorden ?? []));
     for (const plek of plekken) {
-      const index = eerste.maten.findIndex((kandidaat) => kandidaat.vak?.blad === blad.nummer && kandidaat.vak.links === plek.stackLinks
-        && kandidaat.vak.rechts === plek.stackRechts && Math.abs(kandidaat.vak.boven - plek.boven) < plek.onder - plek.boven);
-      if (index < 0) continue;
-      const ervoor = eerste.maten.slice(0, index).findLast((kandidaat) => !kandidaat.verborgen);
-      if (ervoor && !ervoor.vak && ervoor.elementen?.some((element) => element.soort === 'rust')) continue;
+      const opStapel = (kandidaat) => kandidaat.vak?.blad === blad.nummer && kandidaat.vak.links === plek.stackLinks
+        && kandidaat.vak.rechts === plek.stackRechts;
+      const gevonden = kopie.partijen.map((partij) => ({
+        partij,
+        index: partij.maten.findIndex((kandidaat) => opStapel(kandidaat) && Math.abs(kandidaat.vak.boven - plek.boven) < plek.onder - plek.boven),
+      }));
+      // Een systeem met meer balken (een partituur): de andere partijen hebben een maat op dezelfde stapel maar op een andere balk.
+      // Die zijn niet nagekeken, dus niets invoegen (de melding blijft); anders lopen de partijen uit de pas.
+      if (gevonden.some(({ partij, index }) => index < 0 && partij.maten.some(opStapel))) continue;
       const aantal = cijferBoven(plek, woorden);
-      if (aantal) invoegingen.push({ index, aantal, plek, blad: blad.nummer });
+      if (!aantal) continue;
+      for (const { partij, index } of gevonden) {
+        if (index < 0) continue;
+        const ervoor = partij.maten.slice(0, index).findLast((kandidaat) => !kandidaat.verborgen);
+        if (ervoor && !ervoor.vak && ervoor.elementen?.some((element) => element.soort === 'rust')) continue;
+        perPartij.get(partij).push({ index, aantal, plek, blad: blad.nummer });
+      }
     }
   }
-  for (const { index, aantal, plek, blad } of invoegingen.sort((a, b) => b.index - a.index)) {
-    for (const partij of kopie.partijen) {
+  for (const [partij, invoegingen] of perPartij) {
+    for (const { index, aantal, plek, blad } of invoegingen.sort((a, b) => b.index - a.index)) {
       const maat = partij.maten[index];
-      if (!maat) continue;
       const nummer = Number(maat.nummer);
       const rust = { soort: 'rust', start: 0, duur: maatLengte(maat), stem: 1, notenbalk: 1, heleMaat: true };
-      const letters = maat.elementen.filter((element) => element.soort === 'aanwijzing' && element.type === 'letter');
+      // Alleen een kader dat boven de lege plek of het begin van de regel staat, hoort bij de rust; een kader boven de inzet erna
+      // blijft bij de maat. Zonder plek (een letter van Audiveris) blijft de letter staan.
+      const bijRust = (element) => element.soort === 'aanwijzing'
+        && ((element.type === 'letter' && Number.isFinite(element.plek?.x) && element.plek.x < plek.rechts)
+          || (element.type === 'tempo' && element.start === 0));
+      const naarRust = maat.elementen.filter(bijRust);
       const rustMaat = {
         ...structuredClone(maat),
         ...(aantal > 1 ? { maatrust: aantal } : {}),
         ingevoegd: true,
         verlorenRust: aantal,
-        herhaling: { begin: false, eind: false, keer: 2 },
+        // Een herhaalteken of segno aan het begin van de regel staat vóór de rust.
+        herhaling: { begin: Boolean(maat.herhaling?.begin), eind: false, keer: maat.herhaling?.keer ?? 2 },
         vak: { blad, links: plek.links, rechts: plek.rechts, boven: maat.vak?.boven ?? plek.boven, onder: maat.vak?.onder ?? plek.onder },
-        elementen: [{ ...rust, zekerheid: 0.75 }, ...letters],
+        elementen: [{ ...rust, zekerheid: 0.75 }, ...naarRust],
       };
-      for (const veld of ['volta', 'sprong', 'verborgen']) delete rustMaat[veld];
+      for (const veld of ['volta', 'verborgen']) delete rustMaat[veld];
       const verborgenMaten = Array.from({ length: aantal - 1 }, (_, plekInRust) => {
         const verborgen = {
           ...structuredClone(rustMaat),
@@ -147,16 +163,19 @@ export function voegVerlorenRustenIn(partituur, bladen, woordenPerBlad) {
           paginabegin: false,
           tempo: null,
           sleutels: [],
+          herhaling: { begin: false, eind: false, keer: 2 },
           elementen: [{ ...rust, zekerheid: 1 }],
         };
-        for (const veld of ['maatrust', 'vak', 'verlorenRust']) delete verborgen[veld];
+        for (const veld of ['maatrust', 'vak', 'verlorenRust', 'sprong']) delete verborgen[veld];
         return verborgen;
       });
-      maat.elementen = maat.elementen.filter((element) => !letters.includes(element));
+      maat.elementen = maat.elementen.filter((element) => !naarRust.includes(element));
       maat.sleutels = [];
       maat.regelbegin = false;
       maat.paginabegin = false;
       maat.tempo = null;
+      if (maat.herhaling) maat.herhaling = { ...maat.herhaling, begin: false };
+      delete maat.sprong;
       if (maat.vak) maat.vak = { ...maat.vak, links: plek.rechts };
       partij.maten.splice(index, 0, rustMaat, ...verborgenMaten);
       if (Number.isInteger(nummer)) {

@@ -64,7 +64,7 @@ function woordenVan(xml) {
 
 const volgende = (letter) => (/^[A-Z]$/.test(letter) ? String.fromCharCode(letter.charCodeAt(0) + 1) : 'A');
 
-// Per blad de letters met hun plaats: [{ systeem, stack, waarde, zekerheid }]. `volgendeLetter` loopt door over bladen heen.
+// Per blad de letters met hun plaats: [{ systeem, stack, waarde, zekerheid, x }] (x: het midden van het kader). `volgendeLetter` loopt door over bladen heen.
 export function lettersVoorBlad({ xml, png }, status = { volgende: 'A' }) {
   const kaders = vindKaders(leesPng(png));
   const systemen = systemenVan(xml);
@@ -85,10 +85,10 @@ export function lettersVoorBlad({ xml, png }, status = { volgende: 'A' }) {
     if (kader.tekens === 1 || kader.w < 60) {
       const waarde = status.volgende;
       const zekerheid = gelezen === waarde ? 0.9 : 0.5;
-      uit.push({ systeem, stack, waarde, zekerheid });
+      uit.push({ systeem, stack, waarde, zekerheid, x: Math.round(midden) });
       status.volgende = volgende(status.volgende);
     } else if (/^\d{1,4}$/.test(gelezen)) {
-      uit.push({ systeem, stack, waarde: gelezen, zekerheid: 0.9 });
+      uit.push({ systeem, stack, waarde: gelezen, zekerheid: 0.9, x: Math.round(midden) });
     }
   }
   return uit;
@@ -126,7 +126,11 @@ export function voegLettersToe(partituur, bladen) {
         const maat = maatBijStapel(partij.maten, blad.nummer, systemen[letter.systeem]?.stacks[letter.stack], stapelKaart(partij.maten)[begin], systeem);
         if (!maat || maat.elementen.some((e) => e.type === 'letter')) continue;
         // kader: het cijfer staat in een kader op het blad (een repetitiecijfer), nooit het aantal maten van een rust.
-        maat.elementen.unshift({ soort: 'aanwijzing', start: 0, type: 'letter', waarde: letter.waarde, zekerheid: letter.zekerheid, kader: true });
+        // plek: waar het kader op het blad staat (het midden), zodat een latere stap weet boven welk deel van de maat het staat.
+        maat.elementen.unshift({
+          soort: 'aanwijzing', start: 0, type: 'letter', waarde: letter.waarde, zekerheid: letter.zekerheid, kader: true,
+          ...(Number.isFinite(letter.x) ? { plek: { blad: blad.nummer, x: letter.x } } : {}),
+        });
       }
       if (letter.zekerheid < 0.8) aangenomen.push(letter.waarde);
     }

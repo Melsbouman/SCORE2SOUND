@@ -4,8 +4,9 @@
 // woordenPerBlad: zoals leesBlad of woordenUitPdf ({ blad, regels: [{ woorden: [{ tekst, x, y, breedte, hoogte }] }] }).
 
 // Het getal links boven de eerste maat van een regel: midden tussen vier balkhoogtes links en drie rechts van het begin van de
-// maat, met de onderkant tussen anderhalve balkhoogte boven en net onder de bovenste lijn.
-function nummerBijRegelbegin(vak, woorden) {
+// maat, met de onderkant tussen anderhalve balkhoogte boven en net onder de bovenste lijn. Bij een meermaatsrust telt het cijfer
+// midden boven de rust (het aantal maten) niet.
+function nummerBijRegelbegin(vak, woorden, maat = null) {
   const hoogte = vak.onder - vak.boven;
   if (!(hoogte > 0)) return null;
   const kandidaten = woorden.filter((woord) => {
@@ -13,6 +14,8 @@ function nummerBijRegelbegin(vak, woorden) {
     if (!/^\d{1,3}$/.test(tekst) || Number(tekst) < 2) return false;
     const midden = woord.x + woord.breedte / 2;
     const voet = woord.y + woord.hoogte;
+    const breedte = vak.rechts - vak.links;
+    if (maat?.maatrust > 1 && midden > vak.links + breedte / 4 && midden < vak.rechts - breedte / 4) return false;
     return midden >= vak.links - 4 * hoogte && midden <= vak.links + 3 * hoogte
       && voet >= vak.boven - 1.5 * hoogte && voet <= vak.boven + 0.2 * hoogte;
   });
@@ -29,7 +32,7 @@ export function zetGedrukteNummers(partituur, woordenPerBlad) {
   const woordenVan = (blad) => (woordenPerBlad ?? []).filter((item) => item?.blad === blad).flatMap((item) => (item.regels ?? []).flatMap((regel) => regel.woorden ?? []));
   for (const maat of partij.maten ?? []) {
     if (!maat.regelbegin || !maat.vak) continue;
-    const gedrukt = nummerBijRegelbegin(maat.vak, woordenVan(maat.vak.blad));
+    const gedrukt = nummerBijRegelbegin(maat.vak, woordenVan(maat.vak.blad), maat);
     if (gedrukt != null) maat.gedruktNummer = gedrukt;
   }
   return kopie;
@@ -42,15 +45,18 @@ export function vergelijkGedrukteMaatnummers(partituur, woordenPerBlad) {
   const uitkomst = { gelijk: 0, regels: 0, meldingen: [] };
   if (!partij) return uitkomst;
   const woordenVan = (blad) => (woordenPerBlad ?? []).filter((item) => item?.blad === blad).flatMap((item) => (item.regels ?? []).flatMap((regel) => regel.woorden ?? []));
-  let vorigVerschil = 0;
+  // Bij een scan vanaf een latere pagina is de nummering van het begin onbekend: de eerste regel met een nummer is dan het
+  // uitgangspunt, geen melding.
+  let vorigVerschil = (partituur?.bron?.bladen?.[0]?.nummer ?? 1) > 1 ? null : 0;
   for (const maat of partij.maten ?? []) {
     if (!maat.regelbegin || !maat.vak || !/^\d+$/.test(String(maat.nummer ?? ''))) continue;
-    const gedrukt = nummerBijRegelbegin(maat.vak, woordenVan(maat.vak.blad));
+    const gedrukt = nummerBijRegelbegin(maat.vak, woordenVan(maat.vak.blad), maat);
     if (gedrukt == null) continue;
     uitkomst.regels += 1;
     const verschil = gedrukt - Number(maat.nummer);
-    // Meer dan 40 maten verschil is een verkeerd gelezen getal (864 voor 364), geen ontbrekende maten.
-    if (Math.abs(verschil) > 40) continue;
+    if (vorigVerschil === null) vorigVerschil = verschil;
+    // Een sprong van meer dan 40 maten ten opzichte van de vorige regel is een verkeerd gelezen getal (864 voor 364).
+    if (Math.abs(verschil - vorigVerschil) > 40) continue;
     if (verschil === 0) uitkomst.gelijk += 1;
     if (verschil !== vorigVerschil) {
       const hoeveel = Math.abs(verschil - vorigVerschil);
