@@ -61,7 +61,7 @@ export const SJABLOONNAMEN = Object.keys(gegevens.sjablonen);
 // Dunne lijnen (een achtste rust) vallen na het schalen net naast elkaar; daarom telt een pixel als raak als de ander binnen
 // één pixel ligt. De score is het gemiddelde van beide kanten: hoeveel van de vorm bij het sjabloon past, en hoeveel van het
 // sjabloon bij de vorm.
-export function vergelijkVorm(isZwart, kader, t, { streng = false } = {}) {
+export function vergelijkVorm(isZwart, kader, t) {
   const w = kader.rechts - kader.links + 1;
   const h = kader.onder - kader.boven + 1;
   if (w <= 0 || h <= 0) return 0;
@@ -74,13 +74,6 @@ export function vergelijkVorm(isZwart, kader, t, { streng = false } = {}) {
       v[y * w + x] = isZwart(kader.links + x, kader.boven + y) ? 1 : 0;
       s[y * w + x] = t.pixels[ty * t.breedte + tx];
     }
-  }
-  // Streng: het deel van alle zwarte pixels (van vorm en sjabloon samen) dat in beide zwart is, zonder speling. Zo zijn
-  // tekens die veel op elkaar lijken (een 3 en een 9) beter uit elkaar te houden.
-  if (streng) {
-    let beide = 0; let een = 0;
-    for (let i = 0; i < w * h; i += 1) { if (v[i] && s[i]) beide += 1; if (v[i] || s[i]) een += 1; }
-    return een ? beide / een : 0;
   }
   const dichtbij = (masker, x, y) => {
     for (let dy = -1; dy <= 1; dy += 1) {

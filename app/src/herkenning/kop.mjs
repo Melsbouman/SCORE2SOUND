@@ -8,11 +8,15 @@
 //    mollen op b, e, a, d, g, c, f). Een vorm die niet op de volgende plek staat of geen voorteken is, hoort er niet meer bij.
 // 4. De maatsoort: twee cijfers boven elkaar (de teller boven de middelste lijn, de noemer eronder), of een C (met of zonder
 //    streep) midden op de balk. De cijfers vergelijken we met de sjablonen; de noemer is 1, 2, 4, 8 of 16.
+//    Staan er duidelijk twee cijfers boven elkaar maar lijken ze op een vage scan te veel op andere cijfers (een 2 op een 9, een
+//    3 op een 5), dan geven we de maatsoorten die erop lijken mee (`maatsoortOpties`); de opbouw kiest daaruit met de lengte
+//    van de maten. Ook bij zeker gelezen cijfers gaan die opties mee (een 2 kan toch een 9 blijken).
 // 5. Waar de laatste van die tekens ophoudt, begint de muziek (`einde`); daar zoeken de stappen hierna naar noten en rusten.
 // 6. Midden in de regel, direct na een maatstreep: een nieuwe maatsoort, en na een dubbele streep (of eind- of herhaalstreep)
 //    ook een nieuwe voortekening (herstellingstekens op de plekken van de oude tekens, dan eventueel nieuwe kruisen of mollen).
 // Uitkomst per balk: { sleutel: { soort: 'G' | 'F' | 'C', lijn, links, rechts } | null, voortekening: { aantal, tekens },
-// maatsoort: { teller, noemer, symbool? } | null, einde, wissels: [{ x, rechts, maatsoort?, voortekening? }] }. Aantal is
+// maatsoort: { teller, noemer, symbool? } | null, maatsoortOpties?: [{ teller, noemer }] (bij cijfers: wat er ook op lijkt,
+// een zekere maatsoort vooraan), einde, wissels: [{ x, rechts, maatsoort?, maatsoortOpties?, voortekening? }] }. Aantal is
 // positief voor kruisen en negatief voor mollen; lijn telt van onder (de G-sleutel staat op lijn 2). Een wissel is een nieuwe
 // maatsoort en/of voortekening midden in de regel, van x (de maatstreep ervoor) tot rechts.
 import { vindVormen } from './vormen.mjs';
@@ -27,6 +31,11 @@ const KRUISEN_TENOR = [6, 2, 5, 1, 4, 0, 3];
 const MOLLEN = [4, 1, 5, 2, 6, 3, 7];
 // (Een noemer 1 komt in de praktijk niet voor; zonder 1 is een 4 met een afgeknipte punt geen 1.)
 const NOEMERS = [2, 4, 8, 16];
+// Het onderste deel van een sjabloon, `hoogte` pixels hoog: voor een mol waarvan de stok op een vage scan bijna wegvalt.
+const onderDeel = (t, hoogte) => {
+  const van = t.hoogte - Math.min(t.hoogte, hoogte);
+  return { ...t, hoogte: t.hoogte - van, pixels: t.pixels.subarray(van * t.breedte), ankerY: t.ankerY - van };
+};
 const SYMBOLEN = ['maat-c', 'maat-alla-breve'];
 const RUSTEN = ['rust-kwart', 'rust-8', 'rust-16', 'rust-32'];
 // Welke cijfers passen bij de gaten die een cijfer heeft op het beeld met notenbalklijnen (de lijnen door het cijfer heen
@@ -37,12 +46,12 @@ const BIJ_GATEN = {
   geen: [1, 2, 3, 4, 5, 7], boven: [2, 4, 8, 9], onder: [2, 4, 5, 6, 8], beide: [0, 2, 8],
 };
 
-// De gaten (wit dat niet met de rand verbonden is) in een kader van een zwart-witbeeld: { boven, onder } of er een groot gat
-// in de bovenste of onderste helft zit.
-function gatenIn(zw, k, minGrootte) {
+// De gaten (wit dat niet met de rand verbonden is) in een kader: { boven, onder } of er een groot gat in de bovenste of
+// onderste helft zit. `isZwart(x, y)` zegt of een pixel van het blad zwart is.
+function gatenIn(isZwart, k, minGrootte) {
   const w = k.rechts - k.links + 3;
   const h = k.onder - k.boven + 3;
-  const zwart = (x, y) => x > 0 && y > 0 && x < w - 1 && y < h - 1 && zw.pixels[(k.boven - 1 + y) * zw.breedte + k.links - 1 + x] === 1;
+  const zwart = (x, y) => x > 0 && y > 0 && x < w - 1 && y < h - 1 && isZwart(k.links - 1 + x, k.boven - 1 + y);
   const gezien = new Uint8Array(w * h);
   const uit = { boven: false, onder: false };
   let eerste = true;
@@ -81,6 +90,25 @@ export function leesBalkkoppen(kaal, raster, schaal, { zw = null, gevonden = nul
   const cijfers = Array.from({ length: 10 }, (_, n) => ({ n, ...sjabloon(`cijfer-${n}`, ia) }));
   const sleutels = ['g', 'f', 'c'].map((s) => ({ soort: s.toUpperCase(), ...sjabloon(`sleutel-${s}`, ia) }));
   const tekens = ['kruis', 'mol', 'herstel'].map((naam) => ({ naam, ...sjabloon(naam, ia) }));
+  const molSjabloon = tekens[1];
+  // Het midden van de buik van een mol: de rijen waar de vorm minstens 0,6 keer zo breed is als het kader.
+  const buikVan = (isZwart, kader) => {
+    const w = kader.rechts - kader.links + 1;
+    let som = 0;
+    let aantal = 0;
+    for (let y = kader.boven; y <= kader.onder; y += 1) {
+      let l = Infinity;
+      let r = -Infinity;
+      for (let x = kader.links; x <= kader.rechts; x += 1) {
+        if (isZwart(x, y)) { if (x < l) l = x; r = x; }
+      }
+      if (r - l + 1 >= w * 0.6) { som += y; aantal += 1; }
+    }
+    return aantal ? som / aantal : null;
+  };
+  // Waar de buik van het mol-sjabloon zit ten opzichte van zijn anker.
+  const molBuik = buikVan((x, y) => molSjabloon.pixels[y * molSjabloon.breedte + x] === 1,
+    { links: 0, rechts: molSjabloon.breedte - 1, boven: 0, onder: molSjabloon.hoogte - 1 }) - molSjabloon.ankerY;
   const kopScore = maakKopScore(kaal, ia);
   const kopSjablonen = ['kop-zwart', 'kop-half', 'kop-heel'].map((naam) => sjabloon(naam, ia));
 
@@ -165,30 +193,70 @@ export function leesBalkkoppen(kaal, raster, schaal, { zw = null, gevonden = nul
     const plekVan = (naam, k) => (naam === 'mol' ? MOLLEN[k] + schuif : soort === 'C' && lijn === 4 ? KRUISEN_TENOR[k] : KRUISEN[k] + schuif);
     // Eén teken vanaf vorm j in `lijst`: het best passende sjabloon moet een van `namen` zijn en op `plek(naam)` staan. Op een
     // scan valt een voorteken soms in stukken (de buik van een mol los van de stok, waar de notenbalklijn hem raakte); daarom
-    // proberen we ook twee of drie vormen naast elkaar samen, zolang ze samen zo smal zijn als één voorteken.
+    // proberen we ook twee tot vijf vormen naast elkaar samen, zolang ze samen zo smal zijn als één voorteken.
+    // Op een vage scan is de stok van een mol soms veel korter of langer dan in het sjabloon; daarom telt bij een mol ook de
+    // plek van de buik, en na een eerste mol mag een volgende mol ook alleen een buik met een stukje stok zijn (dan vergelijken
+    // we met het onderste deel van het sjabloon, en moet het duidelijk lijken).
     // Geeft { n (aantal vormen), kader, soort, plek, score } of null.
     const leesTeken = (lijst, j, namen, plek) => {
       let beste = null;
-      for (let n = 1; n <= 3 && j + n <= lijst.length; n += 1) {
+      for (let n = 1; n <= 5 && j + n <= lijst.length; n += 1) {
         const deel = lijst.slice(j, j + n);
         const kader = kaderVan(deel);
         const w = (kader.rechts - kader.links + 1) / ia;
         const h = (kader.onder - kader.boven + 1) / ia;
         if (w > 1.4) break;
-        if (w < 0.4 || h < 1.7 || h > 3.4) continue;
+        const kort = h < 1.7;
+        if (w < 0.4 || h < 1.1 || h > 3.4 || (kort && (w < 0.65 || !(namen.length === 1 && namen[0] === 'mol')))) continue;
         const isZwart = bijVormen(deel);
-        const best = tekens.map((t) => ({ t, score: vergelijkVorm(isZwart, kader, t) })).sort((p, q) => q.score - p.score)[0];
-        if (!namen.includes(best.t.naam) || best.score < 0.6) continue;
+        const kandidaten = kort ? [onderDeel(molSjabloon, kader.onder - kader.boven + 1)] : tekens;
+        const best = kandidaten.map((t) => ({ t, score: vergelijkVorm(isZwart, kader, t) })).sort((p, q) => q.score - p.score)[0];
+        if (!namen.includes(best.t.naam) || best.score < (kort ? 0.75 : 0.6)) continue;
+        // Een zwarte nootkop waarvan de stok wegviel, lijkt ook op het onderste deel van een mol (maar is gevuld).
+        if (kort && zwarteKopIn(kader)) continue;
         // De plek van het teken: bij een kruis en een herstellingsteken het midden, bij een mol de buik (het anker van het
-        // sjabloon, naar verhouding).
+        // sjabloon, naar verhouding, of bij een hele mol het midden van de brede rijen).
         const t = best.t;
-        const ankerY = kader.boven + (t.ankerY / t.hoogte) * (kader.onder - kader.boven + 1);
-        const stap = stapVan(ankerY, (kader.links + kader.rechts) / 2);
+        const xm = (kader.links + kader.rechts) / 2;
         const juist = plek(t.naam);
-        if (Math.abs(stap - juist) > 0.8) continue;
+        const ankers = [kader.boven + (t.ankerY / t.hoogte) * (kader.onder - kader.boven + 1)];
+        if (t.naam === 'mol' && !kort) {
+          const buik = buikVan(isZwart, kader);
+          if (buik !== null) ankers.push(buik - molBuik);
+        }
+        if (!ankers.some((y) => Math.abs(stapVan(y, xm) - juist) <= 0.8)) continue;
         if (!beste || best.score > beste.score) beste = { n, kader, soort: t.naam, plek: juist, score: best.score };
       }
       return beste;
+    };
+    // Of een zwarte nootkop (bijna) midden in een kader past.
+    const zwarteKopIn = (k) => {
+      const xm = Math.round((k.links + k.rechts) / 2);
+      const ym = Math.round((k.boven + k.onder) / 2);
+      const t = kopSjablonen[0];
+      for (let dx = -2; dx <= 2; dx += 1) {
+        for (let dy = -2; dy <= 2; dy += 1) {
+          if (kopScore(t, xm + dx - Math.round(t.breedte / 2) + t.ankerX, ym + dy) >= 0.8) return true;
+        }
+      }
+      return false;
+    };
+    // Kruimels van een teken dat net gelezen is (een stukje van de stok of de buik dat het weghalen van de notenbalklijnen
+    // losknipte): lage vormen binnen de kolommen van dat teken horen erbij. Geeft de eerste vorm erna.
+    const naKruimels = (lijst, j, kader) => {
+      while (j < lijst.length && lijst[j].links >= kader.links && lijst[j].rechts <= kader.rechts + 1
+        && lijst[j].onder - lijst[j].boven + 1 < ia) j += 1;
+      return j;
+    };
+    // Of er een duidelijke nootkop in een kader staat (op een lijn of in een tussenruimte, van stap `van` tot `tot`).
+    const kopIn = (k, van, tot, drempel = 0.85) => {
+      for (let stap = Math.floor(van); stap <= Math.ceil(tot); stap += 1) {
+        for (let x = k.links; x <= k.rechts; x += 1) {
+          const y = Math.round(yOp(stap, x));
+          if (kopSjablonen.some((t) => kopScore(t, x, y) >= drempel)) return true;
+        }
+      }
+      return false;
     };
     // Staat er vlak na een teken (tot ongeveer 0,3 lijnafstand) een nootkop op dezelfde plek, dan is het een voorteken van die
     // noot, geen deel van een voortekening. Na een voortekening staat de eerste noot verder weg.
@@ -206,9 +274,10 @@ export function leesBalkkoppen(kaal, raster, schaal, { zw = null, gevonden = nul
       const beste = leesTeken(daarna, i, voorteken ? [voorteken] : ['kruis', 'mol'], (naam) => plekVan(naam, k));
       if (!beste) break;
       voorteken = beste.soort;
-      uit.voortekening.tekens.push({ soort: beste.soort, stap: beste.plek, links: beste.kader.links, rechts: beste.kader.rechts, delen: beste.n });
+      const volgende = naKruimels(daarna, i + beste.n, beste.kader);
+      uit.voortekening.tekens.push({ soort: beste.soort, stap: beste.plek, links: beste.kader.links, rechts: beste.kader.rechts, delen: volgende - i });
       vorigeRechts = beste.kader.rechts;
-      i += beste.n;
+      i = volgende;
     }
     // Een mol vlak voor de eerste noot van de regel is een voorteken van die noot, geen voortekening.
     const laatste = uit.voortekening.tekens.at(-1);
@@ -280,50 +349,77 @@ export function leesBalkkoppen(kaal, raster, schaal, { zw = null, gevonden = nul
         return beste === null ? [k] : [{ ...k, rechts: beste - 1 }, { ...k, links: beste + 1 }];
       };
       // Een getal in een strook van de balk (van stap `van` tot `tot`): elk cijfer is ongeveer twee lijnafstanden hoog, niet
-      // te smal (een stok is geen 1), en lijkt duidelijk op een cijfer uit het sjabloon.
+      // te smal (een stok is geen 1), en lijkt duidelijk op een cijfer uit het sjabloon. Geeft { n, opties }: n is het getal
+      // als het zeker genoeg is (anders null). Opties zijn de getallen die er redelijk op lijken ({ n, score }, beste eerst):
+      // bij één cijfer de cijfers vanaf 2 met een score van minstens 0,7 (ook als de gaten niet passen: een notenbalklijn door
+      // een 4 maakt soms een extra gat), met een zeker cijfer vooraan; bij meer cijfers alleen het zekere getal.
       const leesGetal = (k, van, tot, toegestaan) => {
-        if (!k) return null;
-        if (Math.abs(stapVan(k.boven, gm) - van) > 1 || Math.abs(stapVan(k.onder, gm) - tot) > 1) return null;
+        const niets = { n: null, opties: [] };
+        if (!k) return niets;
+        if (Math.abs(stapVan(k.boven, gm) - van) > 1 || Math.abs(stapVan(k.onder, gm) - tot) > 1) return niets;
         let getal = '';
+        let zeker = true;
+        let opties = [];
         const delen = cijfersIn(k);
         for (const [plek, deel] of delen.entries()) {
           const dk = kaderIn(k.boven, k.onder, deel.links, deel.rechts);
-          if (!dk || (dk.rechts - dk.links + 1) < ia * 0.55 || (dk.onder - dk.boven + 1) < ia * 1.4) return null;
+          if (!dk || (dk.rechts - dk.links + 1) < ia * 0.55 || (dk.onder - dk.boven + 1) < ia * 1.4) return niets;
           // Eerst de cijfers die op deze plek kunnen staan (bij de noemer: 2, 4, 8 of de 1 en 6 van 16) en die bij de gaten passen
           // (als het beeld met lijnen er is), dan het best passende sjabloon.
-          let mogelijk = toegestaan
+          const opPlek = toegestaan
             ? cijfers.filter((c) => toegestaan.some((t) => String(t).length === delen.length && String(t)[plek] === String(c.n)))
             : cijfers;
+          if (delen.length === 1) {
+            opties = opPlek.map((c) => ({ n: c.n, score: vergelijkVorm(inGroep, dk, c) }))
+              .filter((o) => o.n >= 2 && o.score >= 0.7).sort((p, q) => q.score - p.score);
+          }
+          let mogelijk = opPlek;
           if (zw) {
-            const gaten = gatenIn(zw, dk, ia * ia * 0.1);
+            const gaten = gatenIn((x, y) => zw.pixels[y * zw.breedte + x] === 1, dk, ia * ia * 0.1);
             const soort = gaten.boven && gaten.onder ? 'beide' : gaten.boven ? 'boven' : gaten.onder ? 'onder' : 'geen';
             mogelijk = mogelijk.filter((c) => BIJ_GATEN[soort].includes(c.n));
           }
-          const kansen = mogelijk.map((c) => ({ n: c.n, score: vergelijkVorm(inGroep, dk, c), streng: vergelijkVorm(inGroep, dk, c, { streng: true }) })).sort((p, q) => q.score - p.score);
-          if (!kansen.length) return null;
+          const kansen = mogelijk.map((c) => ({ n: c.n, score: vergelijkVorm(inGroep, dk, c) })).sort((p, q) => q.score - p.score);
+          if (!kansen.length) { zeker = false; break; }
           // Zeker genoeg: een hoge score, of een iets lagere met een duidelijke voorsprong op het volgende cijfer (op een vage scan
           // liggen een 3 en een 9 of een 3 en een 5 dicht bij elkaar; dan liever geen maatsoort dan een verkeerde).
           const [beste, tweede] = kansen;
-          if (beste.score < 0.85 || (beste.score < 0.9 && tweede && beste.score - tweede.score < 0.05)) return null;
-          if (streng && beste.score < 0.92) return null;
-          getal += String(kansen[0].n);
+          if (beste.score < 0.85 || (beste.score < 0.9 && tweede && beste.score - tweede.score < 0.05)) zeker = false;
+          if (streng && beste.score < 0.92) zeker = false;
+          getal += String(beste.n);
         }
         const n = Number(getal);
-        if (!getal || n < 1 || n > 16 || (toegestaan && !toegestaan.includes(n))) return null;
-        return n;
+        if (!zeker || !getal || n < 1 || n > 16 || (toegestaan && !toegestaan.includes(n))) return { n: null, opties };
+        return { n, opties: [{ n, score: 1 }, ...(delen.length === 1 ? opties.filter((o) => o.n !== n) : [])] };
       };
       if (gb >= -1.2 && gb <= 1 && go >= 7 && go <= 9.2 && breed <= 4) {
         const teller = leesGetal(kaderIn(g.boven, midden - 1), 0, 4, null);
         const noemer = leesGetal(kaderIn(midden + 1, g.onder), 4, 8, NOEMERS);
+        // De combinaties die het best lijken (hooguit acht, een zekere maatsoort vooraan), om met de lengte van de maten te
+        // kiezen.
+        const combinaties = () => teller.opties.flatMap((t) => noemer.opties.map((o) => ({ teller: t.n, noemer: o.n, score: t.score + o.score })))
+          .sort((p, q) => q.score - p.score).slice(0, 8).map(({ teller: t, noemer: o }) => ({ teller: t, noemer: o }));
         // (1/1 komt niet voor; dat is een half gelezen 16.)
-        if (teller && noemer && !(teller === 1 && noemer === 1)) maatsoort = { teller, noemer };
+        if (teller.n && noemer.n && !(teller.n === 1 && noemer.n === 1)) {
+          maatsoort = { teller: teller.n, noemer: noemer.n };
+          return { maatsoort, opties: combinaties(), rechts: g.rechts };
+        }
+        // Niet zeker: alleen als boven en onder iets duidelijk op een cijfer lijkt en er geen nootkop in staat (een akkoord met een
+        // stok, of een hele noot met tremolostreepjes eronder, lijkt anders op twee cijfers boven elkaar).
+        if (!streng && teller.opties[0]?.score >= 0.8 && noemer.opties[0]?.score >= 0.8 && !kopIn(g, gb, go)) {
+          return { maatsoort: null, opties: combinaties(), rechts: g.rechts };
+        }
       } else if (groep.length <= 5 && breed >= 1.1 && breed <= 2.2 && Math.abs((gb + go) / 2 - 4) <= 0.8 && go - gb >= 3 && go - gb <= 7) {
         // Een C (vier kwart) of een C met een streep erdoor (twee halve), midden op de balk. Een rust aan het begin van de regel
         // staat op dezelfde plek; die moet minder goed passen dan de C.
         const kansen = [...SYMBOLEN, ...RUSTEN].map((naam) => ({ naam, score: vergelijkVorm(inGroep, g, sjabloon(naam, ia)) }))
           .sort((p, q) => q.score - p.score);
         const [best, tweede] = kansen;
-        if (best.score >= 0.75 && best.score - tweede.score >= 0.04) {
+        // Midden in de regel lijkt een hele noot met een boog erover (of twee boven elkaar) op een C; een C is rechts open en
+        // heeft dus geen gat, en lijkt minder op een nootkop.
+        const gat = () => { const gaten = gatenIn(inGroep, g, ia * ia * 0.1); return gaten.boven || gaten.onder; };
+        const nootLijkend = () => gat() || kopIn(g, gb, go, 0.78);
+        if (best.score >= 0.75 && best.score - tweede.score >= 0.04 && !(streng && best.naam === 'maat-c' && nootLijkend())) {
           if (best.naam === 'maat-c') maatsoort = { teller: 4, noemer: 4, symbool: 'C' };
           if (best.naam === 'maat-alla-breve') maatsoort = { teller: 2, noemer: 2, symbool: 'alla-breve' };
         }
@@ -337,6 +433,7 @@ export function leesBalkkoppen(kaal, raster, schaal, { zw = null, gevonden = nul
     const gelezen = leesMaatsoort(daarna, i, vorigeRechts);
     if (gelezen) {
       uit.maatsoort = gelezen.maatsoort;
+      if (gelezen.opties) uit.maatsoortOpties = gelezen.opties;
       uit.einde = gelezen.rechts + 1;
     }
     // Een nieuwe voortekening midden in de regel, vanaf vorm 0 in `lijst` (de vormen na de maatstreep): eerst herstellingstekens
@@ -353,7 +450,7 @@ export function leesBalkkoppen(kaal, raster, schaal, { zw = null, gevonden = nul
         gelezen.push(teken);
         herstel += 1;
         rechts = teken.kader.rechts;
-        j += teken.n;
+        j = naKruimels(lijst, j + teken.n, teken.kader);
       }
       let nieuw = null;
       let aantal = 0;
@@ -364,7 +461,7 @@ export function leesBalkkoppen(kaal, raster, schaal, { zw = null, gevonden = nul
         gelezen.push(teken);
         aantal += 1;
         rechts = teken.kader.rechts;
-        j += teken.n;
+        j = naKruimels(lijst, j + teken.n, teken.kader);
       }
       if (!gelezen.length || (!aantal && herstel < Math.abs(oud))) return null;
       const tekens = gelezen.map((teken) => ({ soort: teken.soort, stap: teken.plek, links: teken.kader.links, rechts: teken.kader.rechts }));
@@ -392,7 +489,8 @@ export function leesBalkkoppen(kaal, raster, schaal, { zw = null, gevonden = nul
         wissel.voortekening = toon.voortekening;
         geldend = toon.voortekening.aantal;
       }
-      if (maat) wissel.maatsoort = maat.maatsoort;
+      if (maat?.maatsoort) wissel.maatsoort = maat.maatsoort;
+      if (maat?.opties) wissel.maatsoortOpties = maat.opties;
       uit.wissels.push(wissel);
     }
     uit.voortekening.tekens = uit.voortekening.tekens.map(({ delen, ...teken }) => teken);

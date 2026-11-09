@@ -176,3 +176,85 @@ test('balkkop: een noemer 1 wordt niet gelezen', () => {
   assert.equal(kop.sleutel?.soort, 'G');
   assert.equal(kop.maatsoort, null);
 });
+
+// Op een vage scan: een kruimel onder de stok van een mol (een los stukje, binnen de kolommen van de mol), een mol waarvan de stok
+// grotendeels wegvalt (alleen de buik met een stukje stok), en een mol in vier stukken.
+test('balkkop: voortekening met een kruimel, een mol met een vage stok en een mol in stukken', () => {
+  const { beeld, verwacht } = maakBlad({ balken: 1, koppen: false, maatstrepen: false, lijnafstand: ia });
+  const zet = (x, y) => { beeld.pixels[Math.round(y) * beeld.breedte + Math.round(x)] = 0; };
+  const wis = (x, y) => { beeld.pixels[Math.round(y) * beeld.breedte + Math.round(x)] = 255; };
+  const y = (stap) => Math.round(verwacht.balken[0].lijnen[0].a + (stap * ia) / 2);
+  const stempel = (naam, ax, ay) => {
+    const t = sjabloon(naam, ia);
+    for (let dy = 0; dy < t.hoogte; dy += 1) for (let dx = 0; dx < t.breedte; dx += 1) if (t.pixels[dy * t.breedte + dx]) zet(ax - t.ankerX + dx, ay - t.ankerY + dy);
+    return t;
+  };
+  stempel('sleutel-g', 110, y(6));
+  // Mol op b met een kruimel van 4 bij 5 pixels vlak onder de stok.
+  const mol = stempel('mol', 175, y(4));
+  const onder = y(4) - mol.ankerY + mol.hoogte;
+  for (let dy = 2; dy < 7; dy += 1) for (let dx = 0; dx < 4; dx += 1) zet(175 - mol.ankerX + dx, onder + dy);
+  // Mol op e: de bovenste 45 procent (het grootste deel van de stok) valt weg.
+  stempel('mol', 197, y(1));
+  for (let dy = 0; dy < Math.round(mol.hoogte * 0.45); dy += 1) for (let dx = 0; dx < mol.breedte; dx += 1) wis(197 - mol.ankerX + dx, y(1) - mol.ankerY + dy);
+  // Mol op a in vier stukken: drie witte rijen door de stok en een witte kolom tussen stok en buik.
+  stempel('mol', 219, y(5));
+  const boven = y(5) - mol.ankerY;
+  for (const rij of [0.2, 0.4, 0.6]) for (let dx = 0; dx < mol.breedte; dx += 1) wis(219 - mol.ankerX + dx, boven + Math.round(mol.hoogte * rij));
+  for (let dy = 0; dy < mol.hoogte; dy += 1) wis(219 - mol.ankerX + Math.round(ia * 0.16), boven + dy);
+  const [kop] = lees(beeld);
+  assert.equal(kop.sleutel?.soort, 'G');
+  assert.equal(kop.voortekening.aantal, -3);
+  assert.deepEqual(kop.voortekening.tekens.map((t) => t.stap), [4, 1, 5]);
+});
+
+test('balkkop: bij gelezen cijfers gaan de maatsoorten die erop lijken mee, de gelezen vooraan', () => {
+  const koppen = lees(bladMetKoppen());
+  assert.deepEqual(koppen[0].maatsoortOpties[0], { teller: 3, noemer: 4 });
+  assert.ok(koppen[0].maatsoortOpties.length > 1);
+  // Bij een C geen opties.
+  assert.equal(koppen[1].maatsoortOpties, undefined);
+});
+
+// Midden in de regel lijken twee hele noten boven elkaar op een C; een C is rechts open (geen gat) en lijkt niet op nootkoppen.
+test('balkkop: twee hele noten boven elkaar na een maatstreep zijn geen C', () => {
+  const { beeld, verwacht } = maakBlad({ balken: 1, koppen: false, maatstrepen: false, lijnafstand: ia });
+  const zet = (x, y) => { beeld.pixels[Math.round(y) * beeld.breedte + Math.round(x)] = 0; };
+  const y = (stap) => Math.round(verwacht.balken[0].lijnen[0].a + (stap * ia) / 2);
+  const stempel = (naam, ax, ay) => {
+    const t = sjabloon(naam, ia);
+    for (let dy = 0; dy < t.hoogte; dy += 1) for (let dx = 0; dx < t.breedte; dx += 1) if (t.pixels[dy * t.breedte + dx]) zet(ax - t.ankerX + dx, ay - t.ankerY + dy);
+  };
+  stempel('sleutel-g', 110, y(6));
+  stempel('kop-zwart', 250, y(4));
+  for (let yy = y(0); yy <= y(8); yy += 1) { zet(500, yy); zet(501, yy); }
+  stempel('kop-heel', 540, y(3));
+  stempel('kop-heel', 540, y(5));
+  // En een echte C na een maatstreep verderop.
+  for (let yy = y(0); yy <= y(8); yy += 1) { zet(800, yy); zet(801, yy); }
+  stempel('maat-c', 840, y(4));
+  const zw = zwartWit(beeld);
+  const schaal = meetSchaal(zw);
+  const raster = vindBalken(zw, schaal);
+  const kaal = verwijderLijnen(zw, raster, schaal);
+  const strepen = [[{ links: 500, rechts: 501, soort: 'enkel' }, { links: 800, rechts: 801, soort: 'enkel' }]];
+  const [kop] = leesBalkkoppen(kaal, raster, schaal, { zw, strepen });
+  assert.deepEqual(kop.wissels.map((w) => [w.x, w.maatsoort?.symbool]), [[801, 'C']]);
+});
+
+// Een zwarte kop (iets dikker, zoals op een scan) zonder stok op de plek van de tweede mol lijkt op het onderste deel van een
+// mol, maar is gevuld: dat is de eerste noot, geen deel van de voortekening.
+test('balkkop: een zwarte kop zonder stok na een mol is geen korte mol', () => {
+  const { beeld, verwacht } = maakBlad({ balken: 1, koppen: false, maatstrepen: false, lijnafstand: ia });
+  const zet = (x, y) => { beeld.pixels[Math.round(y) * beeld.breedte + Math.round(x)] = 0; };
+  const y = (stap) => Math.round(verwacht.balken[0].lijnen[0].a + (stap * ia) / 2);
+  const stempel = (naam, ax, ay, schaal = ia) => {
+    const t = sjabloon(naam, schaal);
+    for (let dy = 0; dy < t.hoogte; dy += 1) for (let dx = 0; dx < t.breedte; dx += 1) if (t.pixels[dy * t.breedte + dx]) zet(ax - t.ankerX + dx, ay - t.ankerY + dy);
+  };
+  stempel('sleutel-g', 110, y(6));
+  stempel('mol', 175, y(4));
+  stempel('kop-zwart', 205, y(1), ia * 1.2);
+  const [kop] = lees(beeld);
+  assert.equal(kop.voortekening.aantal, -1);
+});

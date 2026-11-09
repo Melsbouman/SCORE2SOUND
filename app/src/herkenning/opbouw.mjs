@@ -3,7 +3,9 @@
 // 1. De maten komen uit maten.mjs, balk voor balk en bladzijde voor bladzijde. Elke maat krijgt zijn plek op het blad (`vak`),
 //    en de eerste maat van een balk `regelbegin`, de eerste van een bladzijde `paginabegin`.
 // 2. Sleutel, voortekening en maatsoort komen uit de balkkop (kop.mjs) en gelden tot er een andere komt. Zonder gelezen
-//    maatsoort geldt 4/4, zonder sleutel de vioolsleutel.
+//    maatsoort geldt 4/4, zonder sleutel de vioolsleutel. Waren de cijfers van een maatsoort niet zeker (kop.mjs geeft dan
+//    opties), dan kiezen we na de opbouw de optie waar de meeste maten tot de volgende maatsoort precies in passen. Een zeker
+//    gelezen maatsoort waar geen enkele maat in past, wijkt voor een optie waar de meeste maten in passen.
 // 3. Elke nootkop en rust hoort bij de maat waarin zijn midden valt. Op volgorde van links naar rechts krijgen ze hun start:
 //    de som van de duren ervoor. Koppen boven elkaar (bijna dezelfde x) zijn een akkoord en starten samen.
 // 4. De toonhoogte volgt uit de plek op de balk en de sleutel. De voortekening geeft de standaard; een voorteken bij een noot
@@ -47,6 +49,8 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
   let sleutel = { teken: 'G', lijn: 2 };
   let kwinten = 0;
   let maatsoort = { teller: 4, noemer: 4 };
+  // Waar een maatsoort begint (index in `maten`), met de opties als de cijfers niet zeker gelezen zijn.
+  const grenzen = [];
   for (const [p, pagina] of paginas.entries()) {
     const ia = pagina.schaal?.lijnafstand ?? 20;
     let eersteVanBlad = true;
@@ -58,7 +62,8 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
         maatsoort = { teller: kop.maatsoort.teller, noemer: kop.maatsoort.noemer };
         if (kop.maatsoort.symbool === 'C') maatsoort.symbool = 'common';
         if (kop.maatsoort.symbool === 'alla-breve') maatsoort.symbool = 'cut';
-      }
+        grenzen.push({ vanaf: maten.length, opties: kop.maatsoortOpties ?? null, zeker: true });
+      } else if (kop?.maatsoortOpties?.length) grenzen.push({ vanaf: maten.length, opties: kop.maatsoortOpties });
       const noten = pagina.noten?.[b] ?? [];
       const tekens = new Map((pagina.voortekens?.[b] ?? []).map((teken) => [teken.kop, teken]));
       // Per nootkop het groepje waar hij in staat (groepcijfers.mjs): { aantal, normaal, plek, lengte }.
@@ -81,7 +86,8 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
           maatsoort = { teller: wissel.maatsoort.teller, noemer: wissel.maatsoort.noemer };
           if (wissel.maatsoort.symbool === 'C') maatsoort.symbool = 'common';
           if (wissel.maatsoort.symbool === 'alla-breve') maatsoort.symbool = 'cut';
-        }
+          grenzen.push({ vanaf: maten.length, opties: wissel.maatsoortOpties ?? null, zeker: true });
+        } else if (wissel?.maatsoortOpties?.length) grenzen.push({ vanaf: maten.length, opties: wissel.maatsoortOpties });
         const lengte = (maatsoort.teller * 4 * TIKKEN_PER_KWART) / maatsoort.noemer;
         const binnen = (x) => x >= vak.links && (x < vak.rechts || (m === vakken.length - 1 && x <= vak.rechts));
         const gebeurtenissen = [];
@@ -203,6 +209,7 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
       });
     });
   }
+  kiesMaatsoorten(maten, grenzen);
   maten.forEach((maat, i) => { maat.index = i; maat.nummer = String(i + 1); });
   return {
     versie: 1, titel, componist: '', arrangeur: '',
@@ -210,6 +217,46 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
       id: 'P1', naam: '', afkorting: '', instrument: { midiProgramma: 0, transpositie: { chromatisch: 0, diatonisch: 0 } }, maten,
     }],
   };
+}
+
+// Een maatsoort waarvan de cijfers niet zeker gelezen zijn (opties uit kop.mjs, beste eerst): we nemen de optie waar de meeste
+// maten tot de volgende maatsoort precies in passen (maten met inhoud, zonder hele-maatrust), als dat er minstens één is en
+// niet minder dan bij de maatsoort die anders zou gelden; bij gelijke stand de eerste optie. Anders geldt de maatsoort van de
+// maat ervoor. Een zeker gelezen maatsoort (`zeker`) blijft, tenzij er geen enkele maat in past en in een optie minstens drie
+// en minstens twee derde van de maten (een 2 die als 9 gelezen is). Rusten die de hele maat vullen, krijgen de nieuwe lengte.
+function kiesMaatsoorten(maten, grenzen) {
+  const lengteVan = (m) => (m.teller * 4 * TIKKEN_PER_KWART) / m.noemer;
+  grenzen.forEach((grens, g) => {
+    // Begint er op dezelfde plek nog een maatsoort (een wissel direct aan het begin van de regel), dan geldt die.
+    if (!grens.opties || grenzen.slice(g + 1).some((ander) => ander.vanaf === grens.vanaf)) return;
+    const eind = grenzen.slice(g + 1).find((ander) => ander.vanaf > grens.vanaf)?.vanaf ?? maten.length;
+    const reeks = maten.slice(grens.vanaf, eind);
+    if (!reeks.length) return;
+    const lengtes = reeks.filter((m) => !m.verborgen && !m.maatrust && m.elementen.length && !m.elementen.some((e) => e.heleMaat))
+      .map((m) => m.elementen.reduce((max, e) => Math.max(max, e.start + e.duur), 0));
+    const passend = (maatsoort) => lengtes.filter((l) => l === lengteVan(maatsoort)).length;
+    let gekozen = null;
+    for (const optie of grens.opties) {
+      const aantal = passend(optie);
+      if (!gekozen || aantal > gekozen.aantal) gekozen = { optie, aantal };
+    }
+    let nieuw;
+    if (grens.zeker) {
+      if (passend(reeks[0].maatsoort) > 0 || !gekozen || gekozen.aantal < Math.max(3, (lengtes.length * 2) / 3)) return;
+      nieuw = { teller: gekozen.optie.teller, noemer: gekozen.optie.noemer };
+    } else {
+      // Begon er op dezelfde plek al een zekere maatsoort (die hier wijkt voor deze), dan geldt die als de andere.
+      const zekerErvoor = grenzen.slice(0, g).some((ander) => ander.vanaf === grens.vanaf && ander.zeker);
+      const anders = zekerErvoor ? reeks[0].maatsoort : maten[grens.vanaf - 1]?.maatsoort ?? reeks[0].maatsoort;
+      nieuw = gekozen && gekozen.aantal > 0 && gekozen.aantal >= passend(anders)
+        ? { teller: gekozen.optie.teller, noemer: gekozen.optie.noemer } : { ...anders };
+    }
+    const lengte = lengteVan(nieuw);
+    for (const maat of reeks) {
+      maat.maatsoort = { ...nieuw };
+      for (const e of maat.elementen) if (e.heleMaat) e.duur = lengte;
+    }
+  });
 }
 
 // Noten onder één waardestreep krijgen `balk`: 'begin', 'midden' of 'eind'. Twee noten na elkaar horen bij dezelfde streep als
