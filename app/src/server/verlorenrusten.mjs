@@ -88,3 +88,99 @@ export function meldVerlorenRusten(partituur, bladen, woordenPerBlad) {
   }
   return meldingen;
 }
+
+const maatLengte = (maat) => ((maat.maatsoort?.teller ?? 4) * 1920) / (maat.maatsoort?.noemer ?? 4);
+
+// Invoegen als het aantal te lezen is: vóór de samengevoegde maat komt een meermaatsrust (oranje, zekerheid 0,75) met zijn plek op
+// het blad (van het einde van de kop tot vóór de eerste noot) en N-1 verborgen maten. De rust neemt het begin van de regel over:
+// sleutel, regel- en paginabegin, tempo en de repetitieletter (een kader aan het begin van de regel staat boven de rust). Alle
+// ingevoegde maten zijn `ingevoegd` (geen eigen stapel bij Audiveris). Zonder cijfer blijft het bij een melding (meldVerlorenRusten):
+// hetzelfde teken komt ook voor als Audiveris noten miste. Draait na de letterstap en vóór herstelHerkenning. De rust krijgt
+// verlorenRust: N, zodat meldIngevoegdeRusten aan het eind (als de nummering vaststaat) de meldingen kan maken.
+export function voegVerlorenRustenIn(partituur, bladen, woordenPerBlad) {
+  const kopie = structuredClone(partituur);
+  const eerste = kopie.partijen?.[0];
+  if (!eerste) return kopie;
+  const invoegingen = [];
+  for (const blad of bladen ?? []) {
+    let plekken = [];
+    try {
+      plekken = blad.xml ? verlorenRustenVanBlad(blad.xml) : [];
+    } catch {
+      plekken = [];
+    }
+    const woorden = (woordenPerBlad ?? []).filter((item) => item?.blad === blad.nummer)
+      .flatMap((item) => (item.regels ?? []).flatMap((regel) => regel.woorden ?? []));
+    for (const plek of plekken) {
+      const index = eerste.maten.findIndex((kandidaat) => kandidaat.vak?.blad === blad.nummer && kandidaat.vak.links === plek.stackLinks
+        && kandidaat.vak.rechts === plek.stackRechts && Math.abs(kandidaat.vak.boven - plek.boven) < plek.onder - plek.boven);
+      if (index < 0) continue;
+      const ervoor = eerste.maten.slice(0, index).findLast((kandidaat) => !kandidaat.verborgen);
+      if (ervoor && !ervoor.vak && ervoor.elementen?.some((element) => element.soort === 'rust')) continue;
+      const aantal = cijferBoven(plek, woorden);
+      if (aantal) invoegingen.push({ index, aantal, plek, blad: blad.nummer });
+    }
+  }
+  for (const { index, aantal, plek, blad } of invoegingen.sort((a, b) => b.index - a.index)) {
+    for (const partij of kopie.partijen) {
+      const maat = partij.maten[index];
+      if (!maat) continue;
+      const nummer = Number(maat.nummer);
+      const rust = { soort: 'rust', start: 0, duur: maatLengte(maat), stem: 1, notenbalk: 1, heleMaat: true };
+      const letters = maat.elementen.filter((element) => element.soort === 'aanwijzing' && element.type === 'letter');
+      const rustMaat = {
+        ...structuredClone(maat),
+        ...(aantal > 1 ? { maatrust: aantal } : {}),
+        ingevoegd: true,
+        verlorenRust: aantal,
+        herhaling: { begin: false, eind: false, keer: 2 },
+        vak: { blad, links: plek.links, rechts: plek.rechts, boven: maat.vak?.boven ?? plek.boven, onder: maat.vak?.onder ?? plek.onder },
+        elementen: [{ ...rust, zekerheid: 0.75 }, ...letters],
+      };
+      for (const veld of ['volta', 'sprong', 'verborgen']) delete rustMaat[veld];
+      const verborgenMaten = Array.from({ length: aantal - 1 }, (_, plekInRust) => {
+        const verborgen = {
+          ...structuredClone(rustMaat),
+          ...(Number.isInteger(nummer) ? { nummer: String(nummer + plekInRust + 1) } : {}),
+          verborgen: true,
+          regelbegin: false,
+          paginabegin: false,
+          tempo: null,
+          sleutels: [],
+          elementen: [{ ...rust, zekerheid: 1 }],
+        };
+        for (const veld of ['maatrust', 'vak', 'verlorenRust']) delete verborgen[veld];
+        return verborgen;
+      });
+      maat.elementen = maat.elementen.filter((element) => !letters.includes(element));
+      maat.sleutels = [];
+      maat.regelbegin = false;
+      maat.paginabegin = false;
+      maat.tempo = null;
+      if (maat.vak) maat.vak = { ...maat.vak, links: plek.rechts };
+      partij.maten.splice(index, 0, rustMaat, ...verborgenMaten);
+      if (Number.isInteger(nummer)) {
+        for (const volgende of partij.maten.slice(index + aantal)) {
+          const volgendNummer = Number(volgende.nummer);
+          if (Number.isInteger(volgendNummer)) volgende.nummer = String(volgendNummer + aantal);
+        }
+      }
+      partij.maten.forEach((huidige, positie) => {
+        huidige.index = positie;
+      });
+    }
+  }
+  return kopie;
+}
+
+// Meldingen voor de ingevoegde rusten (verlorenRust), in de eerste partij, met de nummering zoals die aan het eind van de keten is.
+export function meldIngevoegdeRusten(partituur) {
+  const partij = partituur?.partijen?.[0];
+  return (partij?.maten ?? []).filter((maat) => maat.verlorenRust && !maat.verborgen).map((maat) => ({
+    soort: 'herkenning',
+    ernst: 'waarschuwing',
+    partij: partij.id,
+    maat: maat.index,
+    tekst: `Maat ${maat.nummer}: aan het begin van deze regel stond een meermaatsrust van ${maat.verlorenRust} maten die Audiveris wegliet; de app heeft hem ingevoegd (oranje). Kijk hem na.`,
+  }));
+}
