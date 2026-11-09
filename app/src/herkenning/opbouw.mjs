@@ -8,7 +8,8 @@
 //    de som van de duren ervoor. Koppen boven elkaar (bijna dezelfde x) zijn een akkoord en starten samen.
 // 4. De toonhoogte volgt uit de plek op de balk en de sleutel. De voortekening geeft de standaard; een voorteken bij een noot
 //    geldt tot het eind van de maat voor dezelfde plek.
-// 5. Een hele rust die alleen in de maat staat, vult de hele maat. Een meermaatsrust wordt zoveel maten als het getal erboven
+// 5. Herhaaltekens bij de maatstrepen (maten.mjs) worden `herhaling.begin` en `herhaling.eind` van de maten ernaast.
+// 6. Een hele rust die alleen in de maat staat, vult de hele maat. Een meermaatsrust wordt zoveel maten als het getal erboven
 //    zegt (cijfers.mjs): de eerste met `maatrust`, de andere verborgen.
 // De herstelketen (herstelHerkenning, vulRustGaten, herstelTriolen, maatduur) kan daarna op het resultaat draaien, net als na
 // Audiveris. Het veld `bron` (waar de bladzijden te vinden zijn) zet de keten in de browser zelf.
@@ -79,8 +80,13 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
         eersteVanBlad = false;
         // De maatstreep aan het eind van deze maat: dubbel of eind.
         const streep = strepen.find((s) => Math.abs((s.links + s.rechts) / 2 - vak.rechts) <= ia);
-        if (streep?.soort === 'dubbel') basis.maatstreep = 'dubbel';
-        if (streep?.soort === 'eind') basis.maatstreep = 'eind';
+        // Herhaaltekens (maten.mjs): punten rechts van de streep aan het begin van de maat, of links van de streep aan het eind.
+        // Bij een herhaling volgt de streep uit het herhaalteken (docs/model.md), dus dan geen eigen maatstreep.
+        const beginStreep = strepen.find((s) => Math.abs(s.rechts - vak.links) <= ia || Math.abs((s.links + s.rechts) / 2 - vak.links) <= ia);
+        if (beginStreep?.herhaling === 'begin' || beginStreep?.herhaling === 'beide') basis.herhaling.begin = true;
+        if (streep?.herhaling === 'eind' || streep?.herhaling === 'beide') basis.herhaling.eind = true;
+        if (streep?.soort === 'dubbel' && !basis.herhaling.eind) basis.maatstreep = 'dubbel';
+        if (streep?.soort === 'eind' && !basis.herhaling.eind) basis.maatstreep = 'eind';
         // Een meermaatsrust: zoveel maten als het getal erboven.
         const rustbalk = gebeurtenissen.find((g) => g.rust?.soort === 'meermaats');
         if (rustbalk) {
@@ -91,7 +97,9 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
             const maat = { ...structuredClone(basis), regelbegin: basis.regelbegin && i === 0, paginabegin: basis.paginabegin && i === 0 };
             // De verborgen maten hebben geen eigen plek op het blad (zoals bij meermaatsrust.mjs).
             if (i === 0) maat.maatrust = n; else { maat.verborgen = true; delete maat.vak; }
-            if (i < n - 1) delete maat.maatstreep;
+            // Een herhaling begint op de eerste maat van de rust en eindigt op de laatste, net als de maatstreep.
+            if (i > 0) maat.herhaling.begin = false;
+            if (i < n - 1) { delete maat.maatstreep; maat.herhaling.eind = false; }
             maat.elementen.push({
               soort: 'rust', start: 0, duur: lengte, stem: 1, notenbalk: 1, heleMaat: true, zekerheid: aantal ? 0.9 : 0.3,
               ...(i === 0 ? { plek: plekVan(pagina, p, rustbalk.rust, ia, balk) } : {}),
