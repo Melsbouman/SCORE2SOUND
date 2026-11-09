@@ -5,6 +5,7 @@
 //  - maatIndex en totIndex: de maat (of de reeks gekozen maten);
 //  - start: de tik in de maat (bij een aanwijzing op een noot), anders 0;
 //  - elementId: de noot ('n-<partij>-<maat>-<element>') bij een hokje voor een noot.
+//  - opNoot: true als het hokje op een noot of rust viel (slepen of een gekozen noot); een haak loopt dan tot de volgende noot.
 import { maatLengte } from './duur.mjs';
 import { leesId, voegAanwijzingToe, voegHaakToe, zetAlter, verschuifHalvetoon } from './corrigeren.mjs';
 import { verschuifOctaaf, zetArticulatie, zetFermate, zetOverbinding } from './noten-bewerken.mjs';
@@ -41,7 +42,12 @@ export function voerPaletActieUit(partituur, actie, plek) {
     case 'dynamiek': return voegAanwijzingToe(partituur, partij.id, van, start, 'dynamiek', waarde);
     case 'tekst': return voegAanwijzingToe(partituur, partij.id, van, start, 'tekst', waarde);
     case 'letter': return zetLetter(partituur, van);
-    case 'haak': return voegHaakToe(partituur, partij.id, van, start, tot, maatLengte(partij.maten[tot].maatsoort), waarde);
+    case 'haak': {
+      // Op één noot (slepen, of een gekozen noot): tot de volgende noot of rust in de maat. Op een maat of een reeks maten: tot
+      // het eind van de laatste maat.
+      const eind = van === tot && plek.opNoot ? volgendeStart(partij.maten[van], start) : maatLengte(partij.maten[tot].maatsoort);
+      return voegHaakToe(partituur, partij.id, van, start, tot, eind, waarde);
+    }
     case 'herhaling': {
       const plekMaat = waarde === 'eind' ? tot : van;
       const aan = !partij.maten[plekMaat].herhaling?.[waarde];
@@ -52,6 +58,14 @@ export function voerPaletActieUit(partituur, actie, plek) {
     case 'maatstreep': return zetMaatstreep(partituur, tot, waarde);
     default: return partituur;
   }
+}
+
+// De start van de eerste noot of rust na `start` in de maat (akkoordnoten tellen niet apart), of het eind van de maat.
+function volgendeStart(maat, start) {
+  const later = maat.elementen
+    .filter((element) => (element.soort === 'noot' || element.soort === 'rust') && !element.akkoord && element.start > start)
+    .map((element) => element.start);
+  return later.length ? Math.min(...later) : maatLengte(maat.maatsoort);
 }
 
 // De noten waarop een hokje werkt: de noot zelf, of alle noten in de gekozen maten (van één partij of van alle).
