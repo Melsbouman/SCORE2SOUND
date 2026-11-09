@@ -129,3 +129,20 @@ test('met het beeld met lijnen vinden we dezelfde koppen uit het lettertype als 
   const metLijnen = zoekMetLijnen(beeld);
   for (const balk of [0, 1]) assert.deepEqual(metLijnen[balk].map((kop) => [kop.stap, kop.soort]), koppen.filter((kop) => kop.balk === balk).map((kop) => [kop.stap, kop.soort]));
 });
+
+test('een halve kop een paar pixels onder zijn plek op de balk wordt gevonden, op de goede stap', () => {
+  const { beeld, verwacht } = bladMetKoppen([], {
+    extra: ({ beeld: blad, verwacht, lijnafstand }) => {
+      const balk = verwacht.balken[0];
+      const y = (stap) => Math.round(balk.lijnen[0].a + (stap * lijnafstand) / 2);
+      dunneOpenKop(blad, 400, y(5) + 4, lijnafstand);
+      dunneOpenKop(blad, 500, y(4) - 2, lijnafstand);
+    },
+  });
+  const gevonden = zoekMetLijnen(beeld)[0];
+  assert.deepEqual(gevonden.map((kop) => [kop.stap, kop.soort]), [[5, 'half'], [4, 'half']]);
+  // De kop staat op de hoogte waar hij echt staat (voor de stok en de punt), niet op de plek van de stap.
+  const a = verwacht.balken[0].lijnen[0].a;
+  assert.ok(Math.abs(gevonden[0].y - (Math.round(a + 50) + 4)) <= 1, `y ${gevonden[0].y}`);
+  assert.ok(Math.abs(gevonden[1].y - (Math.round(a + 40) - 2)) <= 1, `y ${gevonden[1].y}`);
+});
