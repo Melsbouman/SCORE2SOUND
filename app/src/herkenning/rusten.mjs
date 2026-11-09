@@ -125,7 +125,11 @@ export function zoekRusten(kaal, raster, schaal, { koppen = [], strepen = [], ba
         });
         const beste = sjablonen.filter((t) => t.rust || kopErnaast)
           .map((t) => ({ t, score: vergelijkVorm(isZwart, kader, t) })).sort((p, q) => q.score - p.score)[0];
-        if (beste.t.rust && beste.score >= drempel) return beste.t.soort;
+        if (!beste.t.rust || beste.score < drempel) return null;
+        // Tussen achtste, zestiende en tweeëndertigste rust zegt de hoogte meer dan de vorm (lettertypen verschillen vooral in de
+        // vorm van de haakjes): een achtste is ongeveer 1,7 lijnafstand hoog, een zestiende 2,7, een tweeëndertigste 3,7.
+        if (['8', '16', '32'].includes(beste.t.soort)) return h < 2.25 ? '8' : h < 3.2 ? '16' : '32';
+        return beste.t.soort;
       }
       return null;
     };
