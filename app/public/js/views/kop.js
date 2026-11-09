@@ -20,7 +20,7 @@ export function kopTitel(hash) {
 const VLAKKEN = {
   begin: ['nieuw', 'upload', 'voorbeeld', 'hulp'],
   'nieuwe-partij': ['nieuw-partij'],
-  editor: ['lint', 'paletten', 'zoom', 'weergave'],
+  editor: ['lint', 'paletten', 'zoom', 'weergave', 'speler'],
   bibliotheek: ['projecten'],
   inloggen: ['inloggen'],
   instellingen: ['instellingen'],
