@@ -21,7 +21,7 @@ import { markeerVerdachteNoten } from '../model/verdacht.mjs';
 // meermaatsrusten uit de cijfers boven de balk, en een ingevoegde maat haalt een latere ronde niet meer weg.
 const herstelMaatsoorten = (partituur) => herstelMaatsoortenZonderBeginrust(partituur);
 import { kinderen, leesXml, tekst } from '../musicxml/xml.mjs';
-import { controleerMaatduur } from '../controle/maatduur.mjs';
+import { controleerMaatduur, maatsoortVermoedens } from '../controle/maatduur.mjs';
 import { vulLegeMaten, markeerFouteMaten } from '../controle/nabewerken.mjs';
 import { INSTRUMENTEN, instrumentBijNaam } from '../model/instrumenten.mjs';
 import { herstelInstrumentnamen } from '../model/instrumentnamen.mjs';
@@ -399,7 +399,7 @@ export function maakHerken({ map, draaier }) {
     const triolen = herstelTriolen(uit.partituur);
     uit.partituur = triolen.partituur;
   const gevuld = vulLegeMaten(uit.partituur);
-  const maatMeldingen = controleerMaatduur(gevuld);
+  const maatMeldingen = [...controleerMaatduur(gevuld), ...maatsoortVermoedens(gevuld)];
   const nagekeken = markeerFouteMaten(gevuld, maatMeldingen);
   uit.partituur = markeerVerdachteNoten(nagekeken);
   // Digitale pdf: de nootkoppen in de pdf als tweede mening per maat.
