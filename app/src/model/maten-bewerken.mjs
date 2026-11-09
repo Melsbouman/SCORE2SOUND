@@ -81,6 +81,7 @@ export function voegMaatToe(partituur, maatIndex) {
     if ('herhaling' in nieuw) nieuw.herhaling = { begin: false, eind: false, keer: 2 };
     delete nieuw.volta;
     delete nieuw.sprong;
+    delete nieuw.maatstreep;
     delete nieuw.maatrust;
     delete nieuw.verborgen;
 
@@ -107,7 +108,7 @@ export function voegMeermaatsrustIn(partituur, partijId, maatIndex, aantal) {
     nieuw.opmaat = false;
     if ('tempo' in nieuw) nieuw.tempo = null;
     if ('herhaling' in nieuw) nieuw.herhaling = { begin: false, eind: false, keer: 2 };
-    for (const veld of ['vak', 'volta', 'sprong', 'maatrust', 'verborgen', 'verlorenRust', 'gedruktNummer']) delete nieuw[veld];
+    for (const veld of ['vak', 'volta', 'sprong', 'maatrust', 'verborgen', 'verlorenRust', 'gedruktNummer', 'maatstreep']) delete nieuw[veld];
     if ('regelbegin' in nieuw) nieuw.regelbegin = false;
     if ('paginabegin' in nieuw) nieuw.paginabegin = false;
     return nieuw;

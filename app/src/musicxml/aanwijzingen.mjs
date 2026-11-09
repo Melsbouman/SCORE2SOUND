@@ -19,7 +19,8 @@ export function leesAttributen(attributesKnoop, huidig) {
   const time = kind(attributesKnoop, 'time');
   if (time) {
     const teller = tekst(kind(time, 'beats')).split('+').reduce((som, deel) => som + Number(deel), 0);
-    stand.maatsoort = { teller, noemer: getal(kind(time, 'beat-type')) };
+    const symbool = ['common', 'cut'].includes(time.attr.symbol) ? time.attr.symbol : null;
+    stand.maatsoort = { teller, noemer: getal(kind(time, 'beat-type')), ...(symbool ? { symbool } : {}) };
   }
 
   const key = kind(attributesKnoop, 'key');
@@ -274,6 +275,9 @@ export function leesMaatstreep(barlineKnoop) {
   const sound = kind(barlineKnoop, 'sound');
   const nummers = ending?.attr.number?.split(',').map((nummer) => Number(nummer.trim()))
     .filter((nummer) => Number.isInteger(nummer) && nummer > 0) ?? [];
+  // Een dubbele maatstreep of een eindstreep (bar-style); bij een herhaling volgt de streep uit het herhaalteken.
+  const balkstijl = kind(barlineKnoop, 'bar-style') ? tekst(kind(barlineKnoop, 'bar-style')) : '';
+  const stijl = { 'light-light': 'dubbel', 'light-heavy': 'eind' }[balkstijl] ?? null;
   const sprong = {};
   if (sound) {
     if (sound.attr.segno !== undefined) sprong.segno = sound.attr.segno === 'yes' ? 'waar' : sound.attr.segno;
@@ -287,6 +291,7 @@ export function leesMaatstreep(barlineKnoop) {
     begin: repeat?.attr.direction === 'forward',
     eind: repeat?.attr.direction === 'backward',
     keer: repeat?.attr.times === undefined ? 2 : Number(repeat.attr.times),
+    ...(stijl && !repeat ? { stijl } : {}),
     ...(Object.keys(sprong).length ? { sprong } : {}),
     ...(ending ? {
       volta: {

@@ -111,5 +111,5 @@ test('leesNotaties: een kale noot heeft niets', () => {
 test('leesMaatstreep: herhaalstrepen', () => {
   assert.deepEqual(leesMaatstreep(eerste('<barline location="left"><repeat direction="forward"/></barline>')), { begin: true, eind: false, keer: 2 });
   assert.deepEqual(leesMaatstreep(eerste('<barline location="right"><repeat direction="backward" times="3"/></barline>')), { begin: false, eind: true, keer: 3 });
-  assert.deepEqual(leesMaatstreep(eerste('<barline location="right"><bar-style>light-heavy</bar-style></barline>')), { begin: false, eind: false, keer: 2 });
+  assert.deepEqual(leesMaatstreep(eerste('<barline location="right"><bar-style>light-heavy</bar-style></barline>')), { begin: false, eind: false, keer: 2, stijl: 'eind' });
 });

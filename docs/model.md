@@ -81,6 +81,8 @@ In de stand is `verborgen` `true` als de stand niet wordt getoond.
   elementen: [Element, ...],     // gesorteerd op start, dan op stem
 }
 ```
+`maatstreep: 'dubbel'` of `'eind'` staat op een maat die eindigt met een dubbele maatstreep of een eindstreep (MusicXML `bar-style` `light-light` of `light-heavy`); alleen als die er is. Bij een herhaling eind volgt de streep uit het herhaalteken.
+`maatsoort.symbool` is `'common'` (C) of `'cut'` (alla breve) als de maatsoort met dat teken is genoteerd; alleen als het er is.
 `ingevoegd: true` staat op een maat die de herkenning zelf invoegde omdat hij ontbrak (bijvoorbeeld tussen twee repetitiecijfers); zo'n maat staat niet op het blad en wordt niet aan een stapel van Audiveris gekoppeld.
 `maatrust: N` staat op de eerste maat van een meermaats-rust, en de N-1 volgende maten hebben `verborgen: true`; alleen als ze er zijn.
 Na een scan heeft een maat ook `vak: { blad, links, rechts, boven, onder }`: de plek van de maat op de bladafbeelding in pixels (links en rechts van de maat, boven en onder van de bovenste en onderste notenbalklijn). Daarmee koppelt de herkenning tekst van de tekstherkenning aan een maat, zoals het cijfer boven een meermaatsrust.

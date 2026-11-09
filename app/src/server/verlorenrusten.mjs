@@ -154,7 +154,7 @@ export function voegVerlorenRustenIn(partituur, bladen, woordenPerBlad) {
         vak: { blad, links: plek.links, rechts: plek.rechts, boven: maat.vak?.boven ?? plek.boven, onder: maat.vak?.onder ?? plek.onder },
         elementen: [{ ...rust, zekerheid: 0.75 }, ...naarRust],
       };
-      for (const veld of ['volta', 'verborgen']) delete rustMaat[veld];
+      for (const veld of ['volta', 'verborgen', 'maatstreep']) delete rustMaat[veld];
       const verborgenMaten = Array.from({ length: aantal - 1 }, (_, plekInRust) => {
         const verborgen = {
           ...structuredClone(rustMaat),

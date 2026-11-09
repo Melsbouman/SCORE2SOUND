@@ -8,8 +8,11 @@ Focus sinds 8 nov: een werkende scanner met verbeteren in de editor (`plannen/20
 - copisteria (Apache-2.0, CPU) proberen als tweede motor op dezelfde testset (download).
 - PDMX (CC BY 4.0) ophalen voor echte brass-partijen als referentie (`PDMX.csv` 225 MB, MusicXML 1,9 GB).
 - pdf.js als bibliotheek (nieuwe bibliotheek), of de eigen kleine pdf-lezer uitbreiden.
-- Origineel naast de scan: op 2 nov weggehaald voor een partituur over de volle breedte; voor het nakijken van een scan is het blad ernaast handig. Voorstel: een knop in het tabblad Weergave.
-- Knop "Invoegen" bij de melding over een weggelaten meermaatsrust zonder leesbaar cijfer (een rust van N maten vóór die maat), of alleen de melding laten.
+
+## Besloten door Mels (9 nov)
+- Origineel naast de scan: niet terug (weinig toegevoegde waarde).
+- Knop "Invoegen" bij de melding over een weggelaten meermaatsrust: gebouwd (#1819, PR #1820).
+- Paletten met tekens en slepen naar een maat of noot: gebouwd (branch `claude/palet-met-tekens`).
 
 ## Fase 1 (scanmeting)
 - Referentie van Mels: 2 pagina's African Symphony (MusicXML), daarna in `testset.json` met de paginanummers.

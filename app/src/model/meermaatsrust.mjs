@@ -80,7 +80,7 @@ export function meermaatsRustenUitCijfers(partituur, ocrPerBlad) {
           tempo: null,
           elementen: maat.elementen.filter((element) => element.soort === 'rust').map((rust) => ({ ...rust, zekerheid: 1 })),
         };
-        for (const veld of ['maatrust', 'vak', 'herhaling', 'volta', 'sprong']) delete verborgen[veld];
+        for (const veld of ['maatrust', 'vak', 'herhaling', 'volta', 'sprong', 'maatstreep']) delete verborgen[veld];
         return verborgen;
       });
       partij.maten.splice(index + 1, 0, ...verborgenMaten);
