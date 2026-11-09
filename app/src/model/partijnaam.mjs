@@ -45,7 +45,12 @@ export function splitsPartijenOpKoppen(partituur, paginaNamen) {
           volgnummer += 1;
         }
         gebruikteIds.add(id);
-        huidig = { ...partij, id, naam: paginaNaam, maten: [] };
+        // Het nieuwe deel krijgt het instrument (klank en transpositie) dat bij de naam uit de kop hoort, net als het eerste deel.
+        const instrument = instrumentBijNaam(paginaNaam);
+        huidig = {
+          ...partij, id, naam: paginaNaam, maten: [],
+          ...(instrument ? { instrument: { ...partij.instrument, midiProgramma: instrument.midiProgramma, transpositie: instrument.transpositie } } : {}),
+        };
       }
       if (paginaNaam && !naamUitKop) {
         const instrument = instrumentBijNaam(paginaNaam);
@@ -56,7 +61,9 @@ export function splitsPartijenOpKoppen(partituur, paginaNamen) {
         vorigeNaam = paginaNaam;
         naamUitKop = true;
       }
-      huidig.maten.push({ ...maat, index: huidig.maten.length, nummer: String(huidig.maten.length + 1) });
+      // Een opmaat is maat 0; dan heeft de eerste hele maat nummer 1, net als op het blad.
+      const opmaat = Boolean((huidig.maten[0] ?? maat).opmaat);
+      huidig.maten.push({ ...maat, index: huidig.maten.length, nummer: String(huidig.maten.length + (opmaat ? 0 : 1)) });
     }
     delen.push(huidig);
     return delen;
