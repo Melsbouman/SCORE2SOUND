@@ -2,8 +2,8 @@
 // noten hij vindt, voor een of meer bladzijden (PGM, gemaakt met teken.py). Om met het oog na te lopen op stukken zonder
 // referentie: node automatisering/herkenning-meting/balkkoppen.mjs <map>/galop-p1.pgm <map>/distant-p1.pgm ...
 // Uitslag op 9 nov 2026 (avond, eerste bladzijden in C:/Brassmuziek PDF): Galop, Distant Land, Renaissance en Sand and Stars
-// alle balkkoppen goed (42); Suite Gothique 9 van 11 (vage scan: een 3/2 en een 3/4 gemist of verkeerd); African Symphony:
-// het raster vindt geen balken.
+// alle balkkoppen goed (42); Suite Gothique 9 van 11 (vage scan: een 3/2 en een 3/4 gemist, niets verkeerd); African
+// Symphony (lichtgrijze lijnen, met de papierdrempel) alle 6 goed.
 import { herken } from './pijplijn.mjs';
 
 for (const pad of process.argv.slice(2)) {

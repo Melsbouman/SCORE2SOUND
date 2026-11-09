@@ -22,7 +22,8 @@ const KRUISEN = [0, 3, -1, 2, 5, 1, 4];
 // Bij een tenorsleutel beginnen de kruisen laag (anders zou de eerste boven de balk staan).
 const KRUISEN_TENOR = [6, 2, 5, 1, 4, 0, 3];
 const MOLLEN = [4, 1, 5, 2, 6, 3, 7];
-const NOEMERS = [1, 2, 4, 8, 16];
+// (Een noemer 1 komt in de praktijk niet voor; zonder 1 is een 4 met een afgeknipte punt geen 1.)
+const NOEMERS = [2, 4, 8, 16];
 const SYMBOLEN = ['maat-c', 'maat-alla-breve'];
 const RUSTEN = ['rust-kwart', 'rust-8', 'rust-16', 'rust-32'];
 // Welke cijfers passen bij de gaten die een cijfer heeft op het beeld met notenbalklijnen (de lijnen door het cijfer heen
@@ -264,20 +265,26 @@ export function leesBalkkoppen(kaal, raster, schaal, { zw = null, gevonden = nul
         if (!k) return null;
         if (Math.abs(stapVan(k.boven, gm) - van) > 1 || Math.abs(stapVan(k.onder, gm) - tot) > 1) return null;
         let getal = '';
-        for (const deel of cijfersIn(k)) {
+        const delen = cijfersIn(k);
+        for (const [plek, deel] of delen.entries()) {
           const dk = kaderIn(k.boven, k.onder, deel.links, deel.rechts);
           if (!dk || (dk.rechts - dk.links + 1) < ia * 0.55 || (dk.onder - dk.boven + 1) < ia * 1.4) return null;
-          // Eerst de cijfers die bij de gaten passen (als het beeld met lijnen er is), dan het best passende sjabloon (streng
-          // vergeleken; de gewone score moet wel hoog genoeg zijn).
-          let mogelijk = cijfers;
+          // Eerst de cijfers die op deze plek kunnen staan (bij de noemer: 2, 4, 8 of de 1 en 6 van 16) en die bij de gaten passen
+          // (als het beeld met lijnen er is), dan het best passende sjabloon.
+          let mogelijk = toegestaan
+            ? cijfers.filter((c) => toegestaan.some((t) => String(t).length === delen.length && String(t)[plek] === String(c.n)))
+            : cijfers;
           if (zw) {
             const gaten = gatenIn(zw, dk, ia * ia * 0.1);
             const soort = gaten.boven && gaten.onder ? 'beide' : gaten.boven ? 'boven' : gaten.onder ? 'onder' : 'geen';
-            mogelijk = cijfers.filter((c) => BIJ_GATEN[soort].includes(c.n));
+            mogelijk = mogelijk.filter((c) => BIJ_GATEN[soort].includes(c.n));
           }
-          const kansen = mogelijk.map((c) => ({ n: c.n, score: vergelijkVorm(inGroep, dk, c), streng: vergelijkVorm(inGroep, dk, c, { streng: true }) })).sort((p, q) => q.streng - p.streng);
+          const kansen = mogelijk.map((c) => ({ n: c.n, score: vergelijkVorm(inGroep, dk, c), streng: vergelijkVorm(inGroep, dk, c, { streng: true }) })).sort((p, q) => q.score - p.score);
           if (!kansen.length) return null;
-          if (kansen[0].score < 0.8) return null;
+          // Zeker genoeg: een hoge score, of een iets lagere met een duidelijke voorsprong op het volgende cijfer (op een vage scan
+          // liggen een 3 en een 9 of een 3 en een 5 dicht bij elkaar; dan liever geen maatsoort dan een verkeerde).
+          const [beste, tweede] = kansen;
+          if (beste.score < 0.85 || (beste.score < 0.9 && tweede && beste.score - tweede.score < 0.05)) return null;
           getal += String(kansen[0].n);
         }
         const n = Number(getal);
