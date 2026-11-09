@@ -37,4 +37,4 @@
 
 ## Mels moet nog
 - 2 pagina's referentie van African Symphony (MusicXML).
-- Besluiten uit `voorraad.md` (Wacht op een besluit van Mels): Audiveris-development, copisteria en PDMX (downloads), pdf.js, origineel naast de scan, knop Invoegen bij een weggelaten rust.
+- Besluiten uit `voorraad.md` (Wacht op een besluit van Mels): Audiveris-development, copisteria en PDMX (downloads), pdf.js. Origineel naast de scan: nee; knop Invoegen en paletten met slepen: gebouwd op 9 nov.
