@@ -3,7 +3,7 @@
 ## Eerste handelingen in elke chat
 - `bash automatisering/hartslag.sh` en `bash automatisering/review.sh`.
 - Controleer dat er hooguit één `werkpakketten.sh` draait (PowerShell: `Get-CimInstance Win32_Process -Filter "Name='bash.exe'" | ? CommandLine -match 'werkpakketten'`). Start voor een losse taak: `bash automatisering/werkpakketten.sh` (één wachtrij).
-- Richting: volle focus op een werkende scanner met verbeteren in de editor (`plannen/2026-11-08-scanner.md`). Laatste nachtrapport: `nacht/rapport-2026-11-08.md`. Wensen en open punten: `voorraad.md`.
+- Richting (sinds 9 nov): alles in de browser, zonder server: eigen herkenning naar het voorbeeld van Audiveris, inloggen met Google (`plannen/2026-11-09-browser-herkenning.md`). Audiveris blijft alleen meetlat op de pc van Mels. Daarvoor: werkende scanner met verbeteren in de editor (`plannen/2026-11-08-scanner.md`). Laatste nachtrapport: `nacht/rapport-2026-11-08.md`. Wensen en open punten: `voorraad.md`.
 
 ## Uitvoerders (9 nov)
 - Claude (`agent-claude`): Claude Code met het tweede account (Pro), inlog in `~/.claude-uitvoerder` (`automatisering/claude-inloggen.ps1`). Model `sonnet`. Deed in de nacht van 8 op 9 nov vrijwel alles; met een exacte diff in de taak duurt een taak ongeveer een minuut.
