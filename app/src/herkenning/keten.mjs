@@ -42,7 +42,7 @@ export function herkenPagina(grijs) {
   if (!schaal || !raster.balken.length) return leeg;
   const kaal = verwijderLijnen(zw, raster, schaal);
   const maten = vindMaten(zw, raster, schaal);
-  const balkkoppen = leesBalkkoppen(kaal, raster, schaal, { zw });
+  const balkkoppen = leesBalkkoppen(kaal, raster, schaal, { zw, strepen: maten.map((maat) => maat.strepen) });
   const koppen = zoekNootkoppen(kaal, raster, schaal, { balkkoppen });
   const noten = bepaalDuren(kaal, raster, schaal, koppen);
   // Voortekens op het beeld zonder hulplijnen: een kruis dat een hulplijn raakt, is dan een losse vorm.

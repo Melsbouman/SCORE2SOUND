@@ -138,3 +138,41 @@ test('keten: een lege bladzijde heeft geen notenbalken; alleen lege bladzijden g
   assert.deepEqual(partituur.bron.bladen.map((b) => b.nummer), [3]);
   assert.ok(meldingen.some((m) => m.soort === 'herkenning' && /pagina 5/.test(m.tekst)));
 });
+
+// Een maatsoortwissel midden in de regel: 4/4 met vier kwarten, een maatstreep, dan 3/4 met drie kwarten, en een hele noot met
+// tremolostreepjes eronder (die geen 2/2 is).
+function wisselBlad() {
+  const ia = 20;
+  const { beeld, verwacht } = maakBlad({ balken: 1, koppen: false, maatstrepen: false, lijnafstand: ia, rechts: 1100 });
+  const zet = (x, y) => { beeld.pixels[Math.round(y) * beeld.breedte + Math.round(x)] = 0; };
+  const y = (stap) => Math.round(verwacht.balken[0].lijnen[0].a + (stap * ia) / 2);
+  const stempel = (naam, ax, ay) => {
+    const t = sjabloon(naam, ia);
+    for (let dy = 0; dy < t.hoogte; dy += 1) for (let dx = 0; dx < t.breedte; dx += 1) if (t.pixels[dy * t.breedte + dx]) zet(ax - t.ankerX + dx, ay - t.ankerY + dy);
+    return t;
+  };
+  const streep = (x) => { for (let yy = y(0); yy <= y(8); yy += 1) { zet(x, yy); zet(x + 1, yy); } };
+  stempel('sleutel-g', 110, y(6));
+  stempel('cijfer-4', 180, y(2));
+  stempel('cijfer-4', 180, y(6));
+  [8, 7, 6, 5].forEach((stap, i) => stempel('kop-zwart', 250 + i * 55, y(stap)));
+  streep(470);
+  stempel('cijfer-3', 495, y(2));
+  stempel('cijfer-4', 495, y(6));
+  [4, 3, 2].forEach((stap, i) => stempel('kop-zwart', 560 + i * 60, y(stap)));
+  streep(760);
+  // Een maat met een hele noot (in 3/4 te lang, maar het gaat om de wissel) met tremolostreepjes eronder.
+  const heel = stempel('kop-heel', 800, y(0));
+  for (const stap of [3, 4.5, 6]) for (let d = 0; d < 16; d += 1) for (let dy = -2; dy <= 2; dy += 1) zet(800 + heel.breedte / 2 - 8 + d, y(stap) + dy - Math.round(d / 4));
+  streep(1096);
+  return beeld;
+}
+
+test('keten: een maatsoortwissel midden in de regel geldt vanaf de maat erna; een hele noot met tremolo is geen wissel', () => {
+  const { partituur } = herkenPartituur([wisselBlad()]);
+  const maten = partituur.partijen[0].maten;
+  assert.deepEqual(maten.map((m) => `${m.maatsoort.teller}/${m.maatsoort.noemer}`), ['4/4', '3/4', '3/4']);
+  const toon = (maat) => maat.elementen.filter((e) => e.soort === 'noot').map((e) => `${e.toonhoogte.stap}${e.toonhoogte.octaaf}`);
+  assert.deepEqual(toon(maten[1]), ['B4', 'C5', 'D5'], 'de cijfers 3 en 4 zijn geen noten');
+  assert.deepEqual(maten[1].elementen.filter((e) => e.soort === 'rust'), [], 'en geen rusten');
+});

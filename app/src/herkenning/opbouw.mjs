@@ -59,7 +59,6 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
         if (kop.maatsoort.symbool === 'C') maatsoort.symbool = 'common';
         if (kop.maatsoort.symbool === 'alla-breve') maatsoort.symbool = 'cut';
       }
-      const lengte = (maatsoort.teller * 4 * TIKKEN_PER_KWART) / maatsoort.noemer;
       const noten = pagina.noten?.[b] ?? [];
       const tekens = new Map((pagina.voortekens?.[b] ?? []).map((teken) => [teken.kop, teken]));
       // Per nootkop het groepje waar hij in staat (groepcijfers.mjs): { aantal, normaal, plek, lengte }.
@@ -74,6 +73,14 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
       const vakken = pagina.maten?.[b]?.maten ?? [];
       const strepen = pagina.maten?.[b]?.strepen ?? [];
       vakken.forEach((vak, m) => {
+        // Een maatsoortwissel midden in de regel (kop.mjs) aan het begin van deze maat: vanaf hier de nieuwe maatsoort.
+        const wissel = (kop?.wissels ?? []).find((w) => Math.abs(w.x - vak.links) <= ia * 1.5);
+        if (wissel) {
+          maatsoort = { teller: wissel.maatsoort.teller, noemer: wissel.maatsoort.noemer };
+          if (wissel.maatsoort.symbool === 'C') maatsoort.symbool = 'common';
+          if (wissel.maatsoort.symbool === 'alla-breve') maatsoort.symbool = 'cut';
+        }
+        const lengte = (maatsoort.teller * 4 * TIKKEN_PER_KWART) / maatsoort.noemer;
         const binnen = (x) => x >= vak.links && (x < vak.rechts || (m === vakken.length - 1 && x <= vak.rechts));
         const gebeurtenissen = [];
         noten.forEach((noot, k) => { if (binnen(noot.x)) gebeurtenissen.push({ x: noot.x, noot, k }); });

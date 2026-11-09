@@ -10,8 +10,9 @@
 //    streep) midden op de balk. De cijfers vergelijken we met de sjablonen; de noemer is 1, 2, 4, 8 of 16.
 // 5. Waar de laatste van die tekens ophoudt, begint de muziek (`einde`); daar zoeken de stappen hierna naar noten en rusten.
 // Uitkomst per balk: { sleutel: { soort: 'G' | 'F' | 'C', lijn, links, rechts } | null, voortekening: { aantal, tekens },
-// maatsoort: { teller, noemer, symbool? } | null, einde }. Aantal is positief voor kruisen en negatief voor mollen; lijn telt
-// van onder (de G-sleutel staat op lijn 2).
+// maatsoort: { teller, noemer, symbool? } | null, einde, wissels: [{ x, rechts, maatsoort }] }. Aantal is positief voor kruisen
+// en negatief voor mollen; lijn telt van onder (de G-sleutel staat op lijn 2). Een wissel is een maatsoort midden in de regel,
+// van x (de maatstreep ervoor) tot rechts.
 import { vindVormen } from './vormen.mjs';
 import { sjabloon, vergelijkVorm } from './sjablonen.mjs';
 import { maakKopScore } from './koppen.mjs';
@@ -70,7 +71,8 @@ function gatenIn(zw, k, minGrootte) {
 
 // `zw` (het zwart-witbeeld met notenbalklijnen) is niet verplicht; het helpt cijfers die op elkaar lijken uit elkaar te houden.
 // `gevonden` is de uitkomst van vindVormen op `kaal` ({ labels, vormen }), als die er al is.
-export function leesBalkkoppen(kaal, raster, schaal, { zw = null, gevonden = null } = {}) {
+// `strepen` (per balk de maatstrepen uit maten.mjs) maakt dat ook een maatsoortwissel midden in de regel gelezen wordt (`wissels`).
+export function leesBalkkoppen(kaal, raster, schaal, { zw = null, gevonden = null, strepen = null } = {}) {
   const ia = schaal.lijnafstand;
   const { breedte } = kaal;
   const { labels, vormen } = gevonden ?? vindVormen(kaal, { minPixels: Math.max(2, Math.round(ia * ia * 0.04)) });
@@ -80,7 +82,7 @@ export function leesBalkkoppen(kaal, raster, schaal, { zw = null, gevonden = nul
   const kopScore = maakKopScore(kaal, ia);
   const kopSjablonen = ['kop-zwart', 'kop-half', 'kop-heel'].map((naam) => sjabloon(naam, ia));
 
-  return raster.balken.map((balk) => {
+  return raster.balken.map((balk, b) => {
     const yOp = (stap, x) => balk.lijnen[0].a + balk.lijnen[0].b * x + (stap * ia) / 2;
     const stapVan = (y, x) => (y - yOp(0, x)) / (ia / 2);
     // Vormen bij deze balk: ze raken de balk (tot een halve lijnafstand erbuiten) en staan niet ver erboven of eronder.
@@ -209,12 +211,17 @@ export function leesBalkkoppen(kaal, raster, schaal, { zw = null, gevonden = nul
     uit.voortekening.aantal = voorteken === 'kruis' || aantalTekens === 0 ? aantalTekens : -aantalTekens;
     uit.einde = vorigeRechts + 1;
 
-    // 3. Maatsoort: de eerste vorm hierna, met de vormen die erboven of eronder staan (de cijfers delen hun kolommen) of er met
-    // een kleine opening naast staan (het tweede cijfer van 16, of een stuk van een C dat het weghalen van de lijnen losknipte).
-    const begin = daarna[i];
-    if (begin && begin.links - vorigeRechts <= ia * 2.5) {
+    // Een maatsoort vanaf vorm `start` in `lijst` (vormen van links naar rechts), binnen tweeënhalve lijnafstand na `vorige`: de
+    // eerste vorm met de vormen die erboven of eronder staan (de cijfers delen hun kolommen) of er met een kleine opening naast
+    // staan (het tweede cijfer van 16, of een stuk van een C dat het weghalen van de lijnen losknipte). Geeft { maatsoort, rechts }
+    // of null. Midden in de regel (`streng`) moet elk cijfer duidelijker lijken: een hele noot met tremolostreepjes eronder lijkt
+    // anders op twee cijfers boven elkaar, en een verkeerde wissel geldt voor alle maten erna.
+    const leesMaatsoort = (lijst, start, vorige, streng = false) => {
+    let maatsoort = null;
+    const begin = lijst[start];
+    if (begin && begin.links - vorige <= ia * 2.5) {
       const groep = [begin];
-      for (const v of daarna.slice(i + 1)) {
+      for (const v of lijst.slice(start + 1)) {
         const g = kaderVan(groep);
         if (v.links > g.rechts + ia * 0.4) break;
         // Erboven of eronder (de kolommen delen), of ernaast met een kleine opening als het stuk niet te laag en niet plat is
@@ -285,6 +292,7 @@ export function leesBalkkoppen(kaal, raster, schaal, { zw = null, gevonden = nul
           // liggen een 3 en een 9 of een 3 en een 5 dicht bij elkaar; dan liever geen maatsoort dan een verkeerde).
           const [beste, tweede] = kansen;
           if (beste.score < 0.85 || (beste.score < 0.9 && tweede && beste.score - tweede.score < 0.05)) return null;
+          if (streng && beste.score < 0.92) return null;
           getal += String(kansen[0].n);
         }
         const n = Number(getal);
@@ -295,7 +303,7 @@ export function leesBalkkoppen(kaal, raster, schaal, { zw = null, gevonden = nul
         const teller = leesGetal(kaderIn(g.boven, midden - 1), 0, 4, null);
         const noemer = leesGetal(kaderIn(midden + 1, g.onder), 4, 8, NOEMERS);
         // (1/1 komt niet voor; dat is een half gelezen 16.)
-        if (teller && noemer && !(teller === 1 && noemer === 1)) uit.maatsoort = { teller, noemer };
+        if (teller && noemer && !(teller === 1 && noemer === 1)) maatsoort = { teller, noemer };
       } else if (groep.length <= 5 && breed >= 1.1 && breed <= 2.2 && Math.abs((gb + go) / 2 - 4) <= 0.8 && go - gb >= 3 && go - gb <= 7) {
         // Een C (vier kwart) of een C met een streep erdoor (twee halve), midden op de balk. Een rust aan het begin van de regel
         // staat op dezelfde plek; die moet minder goed passen dan de C.
@@ -303,11 +311,31 @@ export function leesBalkkoppen(kaal, raster, schaal, { zw = null, gevonden = nul
           .sort((p, q) => q.score - p.score);
         const [best, tweede] = kansen;
         if (best.score >= 0.75 && best.score - tweede.score >= 0.04) {
-          if (best.naam === 'maat-c') uit.maatsoort = { teller: 4, noemer: 4, symbool: 'C' };
-          if (best.naam === 'maat-alla-breve') uit.maatsoort = { teller: 2, noemer: 2, symbool: 'alla-breve' };
+          if (best.naam === 'maat-c') maatsoort = { teller: 4, noemer: 4, symbool: 'C' };
+          if (best.naam === 'maat-alla-breve') maatsoort = { teller: 2, noemer: 2, symbool: 'alla-breve' };
         }
       }
-      if (uit.maatsoort) uit.einde = g.rechts + 1;
+      if (maatsoort) return { maatsoort, rechts: g.rechts };
+    }
+    return null;
+    };
+
+    // 3. Maatsoort aan het begin van de balk.
+    const gelezen = leesMaatsoort(daarna, i, vorigeRechts);
+    if (gelezen) {
+      uit.maatsoort = gelezen.maatsoort;
+      uit.einde = gelezen.rechts + 1;
+    }
+    // 4. Een maatsoortwissel midden in de regel: een maatsoort direct na een maatstreep (niet aan het eind van de balk).
+    uit.wissels = [];
+    for (const streep of strepen?.[b] ?? []) {
+      if (streep.rechts <= uit.einde || balk.rechts - streep.rechts < ia * 3) continue;
+      const naStreep = bijBalk.filter((v) => {
+        const x = (v.links + v.rechts) / 2;
+        return v.links > streep.rechts && v.links <= streep.rechts + ia * 6 && v.onder >= yOp(0.5, x) && v.boven <= yOp(7.5, x);
+      }).sort((p, q) => p.links - q.links);
+      const wissel = leesMaatsoort(naStreep, 0, streep.rechts, true);
+      if (wissel) uit.wissels.push({ x: streep.rechts, rechts: wissel.rechts, maatsoort: wissel.maatsoort });
     }
     uit.voortekening.tekens = uit.voortekening.tekens.map(({ delen, ...teken }) => teken);
     return uit;
