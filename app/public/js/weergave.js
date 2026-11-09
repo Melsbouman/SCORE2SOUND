@@ -3,6 +3,7 @@
 // Luistert naar 'naar-maat' ({ maat }: markeert en toont die maat) en 'speel-maat' ({ maat } of null: de maat die nu klinkt).
 import { zetTitelgegevens } from '../../src/model/titelgegevens.mjs';
 import { kiesBladindeling } from '../../src/export/bladverdeling.mjs';
+import { dichtsteBijX } from '../../src/model/paletdoel.mjs';
 
 const VASTE_PAGINABREEDTE = 2100;
 const schaalVoor = (breedte) => (breedte < 500 ? 70 : breedte <= 1200 ? 60 : 75); // op een telefoon zijn de noten anders te klein.
@@ -476,12 +477,25 @@ export function start(app) {
       return maat ? { element: maatG, plek: { partijId: null, maatIndex: maat.index, start: 0 } } : null;
     }
     const plaats = leesNootId(inBalk.element.id);
+    const notenbalk = modelElement(inBalk.element.id)?.notenbalk ?? 1;
+    if (bijNoot) {
+      // Een aanwijzing (ff, cresc., een haak) hoort bij een noot of rust: de dichtstbijzijnde op deze balk, van links naar rechts
+      // gemeten, ook als de muis er niet vlak bij is. Die noot licht op en de aanwijzing komt op zijn tel.
+      const kandidaten = delen
+        .filter((deel) => deel.balkAfstand === inBalk.balkAfstand && deel.element.matches('g.note, g.rest'))
+        .map((deel) => {
+          const kader = deel.element.getBoundingClientRect();
+          return { deel, links: kader.left, rechts: kader.right, balkAfstand: 0 };
+        });
+      const gekozen = dichtsteBijX(kandidaten, x);
+      if (gekozen) {
+        const start = modelElement(gekozen.deel.element.id)?.start ?? 0;
+        return { element: gekozen.deel.element, plek: { partijId: plaats.partijId, maatIndex: plaats.maatIndex, start, notenbalk, opNoot: true } };
+      }
+    }
     const dichtste = delen.filter((deel) => deel.dichtbij && deel.balkAfstand === inBalk.balkAfstand).sort((a, b) => a.afstand - b.afstand)[0];
     const start = dichtste ? modelElement(dichtste.element.id)?.start ?? 0 : 0;
-    const notenbalk = modelElement(inBalk.element.id)?.notenbalk ?? 1;
-    // Een aanwijzing (ff, cresc.) bij een noot: die noot licht op, en de aanwijzing komt op zijn tel.
-    const element = bijNoot && dichtste?.element.matches('g.note, g.rest') ? dichtste.element : maatG;
-    return { element, plek: { partijId: plaats.partijId, maatIndex: plaats.maatIndex, start, notenbalk } };
+    return { element: maatG, plek: { partijId: plaats.partijId, maatIndex: plaats.maatIndex, start, notenbalk } };
   }
   function leesNootId(id) {
     const delen = id.split('-');
