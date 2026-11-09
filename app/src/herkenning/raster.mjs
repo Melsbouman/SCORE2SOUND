@@ -51,31 +51,34 @@ function pieken(projectie, drempel) {
   return uit;
 }
 
-// Groepen van vijf pieken met telkens ongeveer een lijnafstand ertussen.
+// Groepen van vijf pieken met telkens ongeveer een lijnafstand ertussen. Vanaf elke piek zoeken we telkens de volgende piek
+// die het best op een lijnafstand ligt. Overlappende groepen (een hulplijn of tekstregel boven de balk geeft een groep die
+// één lijn verschoven is) beslissen we op sterkte: notenbalklijnen lopen door de hele strook, een hulplijn maar een stukje.
 function vijftallen(lijst, lijnafstand) {
-  const uit = [];
   const marge = Math.max(1.5, lijnafstand * 0.2);
-  let i = 0;
-  while (i + 4 < lijst.length) {
+  const kandidaten = [];
+  for (let i = 0; i + 4 < lijst.length; i += 1) {
     const groep = [lijst[i]];
-    let j = i + 1;
-    while (j < lijst.length && groep.length < 5) {
-      const afstand = lijst[j].y - groep.at(-1).y;
-      if (Math.abs(afstand - lijnafstand) <= marge) {
-        groep.push(lijst[j]);
-      } else if (afstand > lijnafstand + marge) {
-        break;
+    while (groep.length < 5) {
+      const vorige = groep.at(-1);
+      let beste = null;
+      for (const piek of lijst) {
+        const afwijking = Math.abs(piek.y - vorige.y - lijnafstand);
+        if (piek.y > vorige.y && afwijking <= marge && (!beste || afwijking < beste.afwijking)) beste = { piek, afwijking };
       }
-      j += 1;
+      if (!beste) break;
+      groep.push(beste.piek);
     }
-    if (groep.length === 5) {
-      uit.push(groep.map((p) => p.y));
-      i = lijst.indexOf(groep[4]) + 1;
-    } else {
-      i += 1;
-    }
+    if (groep.length === 5) kandidaten.push({ groep, sterkte: groep.reduce((som, piek) => som + piek.sterkte, 0) });
   }
-  return uit;
+  const gekozen = [];
+  for (const kandidaat of kandidaten.sort((a, b) => b.sterkte - a.sterkte)) {
+    const boven = kandidaat.groep[0].y;
+    const onder = kandidaat.groep[4].y;
+    if (gekozen.some((ander) => ander.groep[0].y <= onder + marge && boven - marge <= ander.groep[4].y)) continue;
+    gekozen.push(kandidaat);
+  }
+  return gekozen.sort((a, b) => a.groep[0].y - b.groep[0].y).map((kandidaat) => kandidaat.groep.map((piek) => piek.y));
 }
 
 // Rechte lijn door punten (x, y) met kleinste kwadraten.
@@ -102,17 +105,20 @@ function rechteLijn(punten) {
 // de balk geeft maar een paar procent treffers. Onder een kwart houdt de lijn op; het eind is de laatste plek met minstens
 // vier treffers op rij.
 function volg(dun, breedte, hoogte, lijn, x, stap, venster, ruimte) {
-  let laatste = x;
+  const raakOp = (px) => {
+    const y = Math.round(lijn.a + lijn.b * px);
+    for (let d = -ruimte; d <= ruimte; d += 1) {
+      const py = y + d;
+      if (py >= 0 && py < hoogte && dun[py * breedte + px]) return 1;
+    }
+    return 0;
+  };
+  let laatste = null;
   const recent = [];
   let raakInVenster = 0;
   let opRij = 0;
   for (let px = x; px >= 0 && px < breedte; px += stap) {
-    const y = Math.round(lijn.a + lijn.b * px);
-    let raak = 0;
-    for (let d = -ruimte; d <= ruimte && !raak; d += 1) {
-      const py = y + d;
-      if (py >= 0 && py < hoogte && dun[py * breedte + px]) raak = 1;
-    }
+    const raak = raakOp(px);
     recent.push(raak);
     raakInVenster += raak;
     if (recent.length > venster) raakInVenster -= recent.shift();
@@ -121,13 +127,24 @@ function volg(dun, breedte, hoogte, lijn, x, stap, venster, ruimte) {
     if (opRij >= 4) laatste = px;
     if (recent.length >= venster && raakInVenster < venster * 0.25) break;
   }
-  return laatste;
+  if (laatste !== null) return laatste;
+  // Het beginpunt (het midden van de eerste of laatste strook) lag al voorbij het eind van de balk: zoek terug naar binnen
+  // tot de eerste vier treffers op rij; de buitenste daarvan is het eind.
+  opRij = 0;
+  for (let px = x - stap; px >= 0 && px < breedte; px -= stap) {
+    opRij = raakOp(px) ? opRij + 1 : 0;
+    if (opRij >= 4) return px - 3 * -stap;
+  }
+  return x;
 }
 
 export function vindBalken(zw, schaal) {
   const { breedte, hoogte } = zw;
+  if (!schaal) return { helling: 0, balken: [] };
   const { lijnafstand } = schaal;
-  const dun = dunneLijnen(zw, Math.max(schaal.lijndikteMax + 1, Math.round(schaal.lijndikte * 1.8)));
+  // Dun is hoogstens zo dik als een lijn (met wat ruimte), maar nooit zo dik als een balk (een halve lijnafstand).
+  const maxDikte = Math.min(Math.max(schaal.lijndikteMax + 1, Math.round(schaal.lijndikte * 1.8)), Math.floor(lijnafstand * 0.35));
+  const dun = dunneLijnen(zw, maxDikte);
   const strookBreedte = Math.max(24, Math.round(lijnafstand * 6));
   const stroken = [];
   for (let x0 = 0; x0 < breedte; x0 += strookBreedte) {

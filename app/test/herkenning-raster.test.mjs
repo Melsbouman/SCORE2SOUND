@@ -84,3 +84,34 @@ test('raster: balken die niet over de hele breedte lopen (ingesprongen eerste ba
   const zw = zwartWit(beeld);
   controleer(vindBalken(zw, meetSchaal(zw)), verwacht);
 });
+
+test('raster: een balk die halverwege een strook ophoudt krijgt toch het goede eind (ook met dikke lijnen)', () => {
+  for (const [rechts, lijndikte] of [[1110, 2], [1120, 2], [1130, 2], [1100, 3], [1125, 4], [1090, 6]]) {
+    const { beeld, verwacht } = maakBlad({ balken: 2, rechts, lijndikte, lijnafstand: lijndikte >= 4 ? 25 : 20, koppen: false });
+    const zw = zwartWit(beeld);
+    controleer(vindBalken(zw, meetSchaal(zw)), verwacht, { marge: 2, randMarge: 4 });
+  }
+  for (const links of [70, 80, 90]) {
+    const { beeld, verwacht } = maakBlad({ balken: 2, links, koppen: false });
+    const zw = zwartWit(beeld);
+    controleer(vindBalken(zw, meetSchaal(zw)), verwacht, { marge: 2, randMarge: 4 });
+  }
+});
+
+test('raster: noten op hulplijnen boven de balk schuiven de balk niet een lijn omhoog', () => {
+  for (const hulplijnNoten of [8, 14]) {
+    const { beeld, verwacht } = maakBlad({ balken: 3, hulplijnNoten, koppen: false });
+    const zw = zwartWit(beeld);
+    controleer(vindBalken(zw, meetSchaal(zw)), verwacht, { marge: 2 });
+  }
+});
+
+test('raster: een dunne lijn vlak onder de bovenste lijn neemt de plek van een lijn niet in', () => {
+  const { beeld, verwacht } = maakBlad({ balken: 2, extraLijn: { dy: 16 }, koppen: false });
+  const zw = zwartWit(beeld);
+  controleer(vindBalken(zw, meetSchaal(zw)), verwacht, { marge: 1.5 });
+});
+
+test('raster: zonder schaal (een leeg blad) geen balken en geen fout', () => {
+  assert.deepEqual(vindBalken({ breedte: 10, hoogte: 10, pixels: new Uint8Array(100) }, null), { helling: 0, balken: [] });
+});

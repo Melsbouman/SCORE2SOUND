@@ -16,7 +16,7 @@ function willekeur(zaad) {
 export function maakBlad({
   breedte = 1200, hoogte = 1500, balken = 5, lijnafstand = 20, lijndikte = 2, helling = 0, links = 100, rechts = 1100,
   boven = 150, afstandBalken = 220, koppen = true, maatstrepen = true, ruis = 0, achtergrond = 255, inkt = 0, verloop = 0,
-  zaad = 1,
+  zaad = 1, hulplijnNoten = 0, extraLijn = null,
 } = {}) {
   const kans = willekeur(zaad);
   const inktLaag = new Uint8Array(breedte * hoogte);
@@ -40,6 +40,25 @@ export function maakBlad({
       }
     }
     verwacht.balken.push({ lijnen, links, rechts });
+    // Een dunne extra lijn (zoals een tekstregel of een stuk van een boog) op dy pixels onder de bovenste lijn.
+    if (extraLijn) {
+      for (let x = extraLijn.van ?? links; x <= (extraLijn.tot ?? rechts); x += 1) zet(x, lijnen[0].a + helling * x + extraLijn.dy);
+    }
+    // Noten op de tweede hulplijn boven de balk, met de eerste hulplijn erbij (1,6 lijnafstand breed), elke 120 pixels.
+    for (let n = 0; n < hulplijnNoten; n += 1) {
+      const x = links + 60 + n * 120;
+      if (x > rechts - 60) break;
+      for (const stap of [1, 2]) {
+        const y = lijnen[0].a + helling * x - stap * lijnafstand;
+        for (let dx = -0.8 * lijnafstand; dx <= 0.8 * lijnafstand; dx += 1) for (let d = 0; d < lijndikte; d += 1) zet(x + dx, y - (lijndikte - 1) / 2 + d);
+      }
+      const cy = lijnen[0].a + helling * x - 2 * lijnafstand;
+      for (let dy = -lijnafstand * 0.45; dy <= lijnafstand * 0.45; dy += 0.5) {
+        for (let dx = -lijnafstand * 0.65; dx <= lijnafstand * 0.65; dx += 0.5) {
+          if ((dx * dx) / (0.4225 * lijnafstand * lijnafstand) + (dy * dy) / (0.2025 * lijnafstand * lijnafstand) <= 1) zet(x + dx, cy + dy);
+        }
+      }
+    }
     const yOp = (x, stap) => lijnen[0].a + helling * x + (stap * lijnafstand) / 2;
     if (maatstrepen) {
       for (const x of [links, links + (rechts - links) / 3, links + (2 * (rechts - links)) / 3, rechts]) {
