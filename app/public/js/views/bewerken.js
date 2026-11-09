@@ -5,6 +5,7 @@ import { sorteerPartijen } from '/src/model/partituurvolgorde.mjs';
 import { transponeerPartij } from '/src/model/transponeren.mjs';
 import { hernoemPartij, partijUitnemen, voegSamen } from '/src/model/partijen.mjs';
 import { controleerMaatduur } from '/src/controle/maatduur.mjs';
+import { importeerBestand } from '/src/import/importeer.mjs';
 
 export function start(app) {
   const vlak = document.getElementById('bewerken');
@@ -163,22 +164,16 @@ export function start(app) {
       const bestand = bestandInvoer.files[0];
       if (!bestand) return;
 
-      let antwoord;
+      let resultaat;
+      let fout = null;
       try {
-        antwoord = await fetch('/api/importeer', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/vnd.recordare.musicxml+xml' },
-          body: bestand,
-        });
-      } catch {
-        toonStatus('De server is niet bereikbaar. Probeer het opnieuw.');
-        bestandInvoer.value = '';
-        return;
+        resultaat = await importeerBestand(new Uint8Array(await bestand.arrayBuffer()));
+      } catch (error) {
+        fout = error;
       }
 
-      const resultaat = await antwoord.json();
-      if (!antwoord.ok) {
-        toonStatus(`Dat lukte niet: ${resultaat.fout}`);
+      if (fout) {
+        toonStatus('Dat lukte niet: ' + fout.message);
       } else {
         const samengevoegd = voegSamen([app.stand.partituur, resultaat.partituur]);
         const aantal = resultaat.partituur.partijen.length;
