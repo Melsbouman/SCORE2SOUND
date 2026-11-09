@@ -20,6 +20,8 @@ const SOORTEN = [['zwart', 'kop-zwart'], ['half', 'kop-half'], ['heel', 'kop-hee
 // maakKopScore). Zo'n sjabloon past ook op het rondje van een mol of het vakje van een herstellingsteken; daarom moet het gewone
 // sjabloon op die plek ook redelijk passen (GEWOON_DREMPEL). Bij een hele kop gaf de buitenrand alleen te veel valse koppen.
 const GEWOON_DREMPEL = 0.7;
+// Hoe dicht een open kop bij de drempel moet komen om ook een paar pixels hoger en lager te proberen.
+const BIJNA = 0.12;
 function alleenBuitenrand(t) {
   const { breedte: w, hoogte: h } = t;
   const buiten = (x, y) => x < 0 || y < 0 || x >= w || y >= h || (!t.pixels[y * w + x] && !t.binnen[y * w + x]);
@@ -75,6 +77,7 @@ export function zoekNootkoppen(kaal, raster, schaal, { drempel = 0.78, balkkoppe
   // Een dunne open kop op een scan is soms een paar pixels breder dan het sjabloon: bij het tweede halve sjabloon zoeken we de
   // randen in de voorkeuze met wat speling.
   const speling = Math.max(1, Math.round(ia * 0.15));
+  const hoogteSpeling = Math.max(1, Math.round(ia * 0.2));
   const randZwart = (x, y, richting, ruim) => { for (let d = 0; d <= (ruim ? speling : 0); d += 1) if (zwart(x + d * richting, y)) return true; return false; };
 
   // Een kop ver buiten de balk (vanaf de tweede hulplijn) heeft hulplijnen tussen zich en de balk: dunne horizontale lijnen die
@@ -116,8 +119,25 @@ export function zoekNootkoppen(kaal, raster, schaal, { drempel = 0.78, balkkoppe
           // Snelle voorkeuze: bij een zwarte kop moet het midden zwart zijn, bij een halve of hele de linker- en rechterrand.
           const midden = x - t.ankerX + Math.round(t.breedte / 2);
           if (t.soort === 'zwart' ? !zwart(midden, y) : !(randZwart(x - t.ankerX + 1, y, -1, !!t.gewoon) && randZwart(x - t.ankerX + t.breedte - 2, y, 1, !!t.gewoon))) continue;
-          const s = score(t, x, y);
-          if (s >= drempel && (!t.gewoon || score(t.gewoon, x, y) >= GEWOON_DREMPEL) && (stap > -2 && stap < 10 || heeftHulplijnen(balk, x - t.ankerX + t.breedte / 2, stap, t.breedte))) treffers.push({ x: x - t.ankerX + t.breedte / 2, y, stap, soort: t.soort, score: s, breedte: t.breedte, hoogte: t.hoogte });
+          // Past het sjabloon op hoogte yy? (Bij het tweede halve sjabloon moet ook het gewone redelijk passen.)
+          const past = (yy) => {
+            const v = score(t, x, yy);
+            return { v, ja: v >= drempel && (!t.gewoon || score(t.gewoon, x, yy) >= GEWOON_DREMPEL) };
+          };
+          let beste = past(y);
+          let ky = y;
+          // Een open kop die net niet past, staat op een scan soms een paar pixels boven of onder zijn plek op de balk (tot
+          // ongeveer een vijfde lijnafstand). Bij zwarte koppen niet: die worden al goed gevonden, en met speling schuiven ze
+          // naar een buurplek.
+          if (!beste.ja && t.soort !== 'zwart' && beste.v >= drempel - BIJNA) {
+            for (let d = 1; d <= hoogteSpeling; d += 1) {
+              for (const dy of [-d, d]) {
+                const p = past(y + dy);
+                if (p.ja && (!beste.ja || p.v > beste.v)) { beste = p; ky = y + dy; }
+              }
+            }
+          }
+          if (beste.ja && (stap > -2 && stap < 10 || heeftHulplijnen(balk, x - t.ankerX + t.breedte / 2, stap, t.breedte))) treffers.push({ x: x - t.ankerX + t.breedte / 2, y: ky, stap, soort: t.soort, score: beste.v, breedte: t.breedte, hoogte: t.hoogte });
         }
       }
     }
