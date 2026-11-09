@@ -15,10 +15,22 @@ const maatLengte = (maat) => ((maat.maatsoort?.teller ?? 4) * 1920) / (maat.maat
 // Waar de rust hoort: de index van het element waarvóór hij komt (0 = vooraan), of null als het niet duidelijk is.
 // Een gat telt alleen tegen gaten na elementen van dezelfde duur: een kwart neemt meer ruimte dan een achtste, en een zestiende
 // naar verhouding meer dan een achtste.
-function plekVanGat(maat, delen, gewoneVoorruimte = null) {
+// Midden in een regel: de maat ervoor (de verborgen maten van een meermaatsrust overgeslagen) staat op hetzelfde blad en houdt op
+// waar deze begint. Alleen dan is de ruimte vóór het eerste element de ruimte na een maatstreep; aan het begin van een regel staat
+// daar de kop (sleutel, voortekening), ook als er een beginrust zonder plek op het blad vóór staat.
+function middenInRegel(maten, index) {
+  const maat = maten[index];
+  let vorige = index - 1;
+  while (vorige >= 0 && maten[vorige].verborgen) vorige -= 1;
+  const ervoor = maten[vorige]?.vak;
+  return Boolean(maat?.vak && ervoor && ervoor.blad === maat.vak.blad && Math.abs(ervoor.rechts - maat.vak.links) <= 5
+    && Math.abs(ervoor.boven - maat.vak.boven) < maat.vak.onder - maat.vak.boven);
+}
+
+function plekVanGat(maat, delen, gewoneVoorruimte = null, inRegel = false) {
   const balk = maat.vak ? maat.vak.onder - maat.vak.boven : null;
   const gaten = delen.slice(1).map((deel, index) => ({ na: index, duur: delen[index].duur, breedte: deel.plek.x - delen[index].plek.x }));
-  const voor = maat.vak && !maat.regelbegin ? delen[0].plek.x - maat.vak.links : null;
+  const voor = inRegel ? delen[0].plek.x - maat.vak.links : null;
   const breedste = Math.max(0, ...gaten.map((gat) => gat.breedte));
   if (voor !== null && balk && voor > 0.8 * balk && voor >= 1.6 * breedste) return 0;
   let beste = null;
@@ -44,8 +56,8 @@ function plekVanGat(maat, delen, gewoneVoorruimte = null) {
 // De gewone ruimte tussen de maatstreep en het eerste element, per blad (de mediaan, met minstens vijf maten midden in een regel).
 function gewoneVoorruimtePerBlad(partij) {
   const perBlad = new Map();
-  for (const maat of partij.maten ?? []) {
-    if (!maat.vak || maat.regelbegin || maat.verborgen) continue;
+  for (const [index, maat] of (partij.maten ?? []).entries()) {
+    if (maat.verborgen || !middenInRegel(partij.maten, index)) continue;
     const eerste = maat.elementen.filter((element) => (element.soort === 'noot' || element.soort === 'rust') && element.plek)
       .sort((a, b) => a.start - b.start)[0];
     if (!eerste) continue;
@@ -61,7 +73,7 @@ export function vulRustGaten(partituur) {
   const meldingen = [];
   for (const partij of kopie.partijen ?? []) {
     const voorruimte = gewoneVoorruimtePerBlad(partij);
-    for (const maat of partij.maten ?? []) {
+    for (const [index, maat] of (partij.maten ?? []).entries()) {
       if (maat.verborgen || maat.maatrust > 1) continue;
       const delen = maat.elementen.filter((element) => element.soort === 'noot' || element.soort === 'rust');
       if (delen.some((deel) => (deel.stem ?? 1) !== 1 || (deel.notenbalk ?? 1) !== 1 || deel.heleMaat || !deel.plek || !GEWOON.has(deel.duur))) continue;
@@ -73,10 +85,15 @@ export function vulRustGaten(partituur) {
       if (!WAARDEN.includes(tekort)) continue;
       // Aaneengesloten: elk begin is het einde van het vorige; anders is er iets anders aan de hand.
       if (opBegin[0].start !== 0 || opBegin.some((deel, index) => index > 0 && deel.start !== opBegin[index - 1].start + opBegin[index - 1].duur)) continue;
-      const voor = plekVanGat(maat, opBegin, voorruimte.get(maat.vak?.blad) ?? null);
+      const voor = plekVanGat(maat, opBegin, voorruimte.get(maat.vak?.blad) ?? null, middenInRegel(partij.maten, index));
       if (voor === null) continue;
       const start = voor === 0 ? 0 : opBegin[voor - 1].start + opBegin[voor - 1].duur;
-      for (const element of maat.elementen) if (element.start >= start) element.start += tekort;
+      // Noten en rusten vanaf de plek schuiven op. Een aanwijzing op die plek gaat mee met de noot erna, behalve op tel 1: een
+      // repetitieletter, tempo of tekst aan het begin van de maat blijft daar.
+      for (const element of maat.elementen) {
+        const deel = element.soort === 'noot' || element.soort === 'rust';
+        if (element.start > start || (element.start === start && (deel || start > 0))) element.start += tekort;
+      }
       const rust = { soort: 'rust', start, duur: tekort, stem: 1, notenbalk: 1, heleMaat: false, zekerheid: ZEKERHEID };
       const positie = maat.elementen.findIndex((element) => (element.soort === 'noot' || element.soort === 'rust') && element.start > start);
       maat.elementen.splice(positie < 0 ? maat.elementen.length : positie, 0, rust);
