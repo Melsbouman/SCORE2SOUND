@@ -254,9 +254,15 @@ function leesStijl(ctx, attr) {
   const c = { ...ctx };
   const sw = parseFloat(attr['stroke-width']);
   if (Number.isFinite(sw)) c.sw = sw;
+  // Een eigen lijndikte op het element zelf (niet geërfd): bij Verovio zijn dat de notenbalklijnen, stokken, maatstrepen en
+  // hulplijnen. Verovio geeft alle vormen in zijn CSS 'stroke: currentColor'; die CSS lezen we niet, dus een eigen
+  // stroke-width betekent hier: ook een lijn tekenen.
+  c.eigenLijn = Number.isFinite(sw) && sw > 0;
   const size = parseFloat(attr['font-size']);
   if (Number.isFinite(size)) c.size = size;
   if (attr.fill !== undefined) c.fill = attr.fill.trim();
+  // Een onzichtbaar vlak (fill-opacity 0, zoals de kaders die Verovio om sommige tekens legt) tekenen we niet.
+  if (attr['fill-opacity'] !== undefined && parseFloat(attr['fill-opacity']) === 0) c.fill = 'none';
   if (attr.stroke !== undefined) c.stroke = attr.stroke.trim();
   if (attr['text-anchor'] !== undefined) c.anchor = attr['text-anchor'].trim();
   if (attr['font-style'] !== undefined) c.italic = attr['font-style'].trim() === 'italic';
@@ -287,7 +293,7 @@ function maakOmzetter() {
 
   function verf(ctx, alleenLijn) {
     const vul = !alleenLijn && ctx.fill !== 'none';
-    const lijn = alleenLijn || (ctx.sw > 0 && ctx.stroke !== 'none' && (!vul || ctx.stroke !== undefined));
+    const lijn = alleenLijn || (ctx.sw > 0 && ctx.stroke !== 'none' && (!vul || ctx.stroke !== undefined || ctx.eigenLijn));
     return { vul, lijn };
   }
 
