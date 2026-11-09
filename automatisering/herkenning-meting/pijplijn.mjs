@@ -61,7 +61,7 @@ export function herken(pad) {
   // Voortekens op het beeld zonder hulplijnen: een kruis dat een hulplijn raakt, is dan een losse vorm.
   const zonderHulplijnen = hulplijnen ? hulplijnen.verwijderHulplijnen(kaal, raster, schaal, koppen) : kaal;
   const tekens = voortekens ? voortekens.zoekVoortekens(zonderHulplijnen, raster, schaal, { koppen: noten, balkkoppen }) : null;
-  const rusten = zoekRusten(kaal, raster, schaal, { koppen, strepen: maten.map((m) => m.strepen), balkkoppen, voortekens: tekens });
+  const rusten = zoekRusten(kaal, raster, schaal, { koppen, strepen: maten.map((m) => m.strepen), balkkoppen, voortekens: tekens, noten });
   const aantallen = cijfers ? cijfers.leesMeermaatsAantallen(kaal, raster, schaal, rusten) : null;
   const triolen = groepcijfers ? groepcijfers.leesTriolen(kaal, raster, schaal, noten) : null;
   return {
