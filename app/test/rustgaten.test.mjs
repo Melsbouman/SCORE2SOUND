@@ -2,22 +2,24 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { vulRustGaten } from '../src/model/rustgaten.mjs';
 
-// Een maat in 2/4 op een balk van 76 pixels hoog (y 556 tot 632); per element [soort, start, duur, x].
-function stuk(elementen, { links = 955, rechts = 1187, regelbegin = false, teller = 2 } = {}) {
+// Een maat in 2/4 op een balk van 76 pixels hoog (y 556 tot 632); per element [soort, start, duur, x]. Met ervoor staat er op
+// dezelfde regel een maat vóór (die ophoudt waar deze begint); aanwijzingen zijn extra elementen.
+function stuk(elementen, { links = 955, rechts = 1187, regelbegin = false, teller = 2, ervoor = false, aanwijzingen = [] } = {}) {
+  const vorige = { nummer: '48', index: 0, maatsoort: { teller, noemer: 4 }, vak: { blad: 1, links: links - 246, rechts: links, boven: 556, onder: 632 }, elementen: [] };
   return {
     partijen: [{
       id: 'P1',
-      maten: [{
+      maten: [...(ervoor ? [vorige] : []), {
         nummer: '49', index: 0, regelbegin, maatsoort: { teller, noemer: 4 }, vak: { blad: 1, links, rechts, boven: 556, onder: 632 },
         elementen: elementen.map(([soort, start, duur, x]) => ({
           soort, start, duur, stem: 1, notenbalk: 1, zekerheid: 0.9, plek: { blad: 1, x, y: 600, breedte: 22, hoogte: 20 },
           ...(soort === 'noot' ? { toonhoogte: { stap: 'G', alter: 0, octaaf: 4 } } : { heleMaat: false }),
-        })),
+        })).concat(aanwijzingen),
       }],
     }],
   };
 }
-const vorm = (uit) => uit.partituur.partijen[0].maten[0].elementen.map((e) => `${e.soort[0]}${e.start}/${e.duur}${e.zekerheid === 0.5 ? '*' : ''}`).join(' ');
+const vorm = (uit) => uit.partituur.partijen[0].maten.at(-1).elementen.filter((e) => e.soort !== 'aanwijzing').map((e) => `${e.soort[0]}${e.start}/${e.duur}${e.zekerheid === 0.5 ? '*' : ''}`).join(' ');
 
 test('achtste rust, noot, (gemiste rust), noot: de rust komt in het grote gat (Galop maat 49)', () => {
   const uit = vulRustGaten(stuk([['rust', 0, 240, 976], ['noot', 240, 240, 1024], ['noot', 480, 240, 1129]]));
@@ -28,8 +30,25 @@ test('achtste rust, noot, (gemiste rust), noot: de rust komt in het grote gat (G
 });
 
 test('een lege plek vooraan (ver na de maatstreep) krijgt de rust vooraan (Galop maat 15)', () => {
-  const uit = vulRustGaten(stuk([['rust', 0, 240, 1670], ['rust', 240, 480, 1715]], { links: 1530, rechts: 1783 }));
+  const uit = vulRustGaten(stuk([['rust', 0, 240, 1670], ['rust', 240, 480, 1715]], { links: 1530, rechts: 1783, ervoor: true }));
   assert.equal(vorm(uit), 'r0/240* r240/240 r480/480');
+});
+
+test('een letter of tempo op tel 1 blijft op tel 1 als de rust vooraan komt', () => {
+  const letter = { soort: 'aanwijzing', start: 0, type: 'letter', waarde: 'B', zekerheid: 1 };
+  const sterkte = { soort: 'aanwijzing', start: 240, type: 'dynamiek', waarde: 'f', zekerheid: 1 };
+  const uit = vulRustGaten(stuk([['rust', 0, 240, 1670], ['rust', 240, 480, 1715]], { links: 1530, rechts: 1783, ervoor: true, aanwijzingen: [letter, sterkte] }));
+  const elementen = uit.partituur.partijen[0].maten.at(-1).elementen;
+  assert.equal(elementen.find((e) => e.type === 'letter').start, 0);
+  assert.equal(elementen.find((e) => e.type === 'dynamiek').start, 480);
+});
+
+test('na een beginrust zonder plek op het blad telt de kop van de regel niet als lege plek', () => {
+  // Eerste maat van de regel (regelbegin staat uit door de beginrust ervoor): kop tot ongeveer 330, kwarten op 450, 530 en 690.
+  const stukMetBeginrust = stuk([['noot', 0, 480, 450], ['noot', 480, 480, 530], ['noot', 960, 480, 690]], { links: 150, rechts: 900, teller: 4 });
+  stukMetBeginrust.partijen[0].maten.unshift({ nummer: '1', index: 0, maatrust: 4, maatsoort: { teller: 4, noemer: 4 }, elementen: [{ soort: 'rust', start: 0, duur: 1920, heleMaat: true }] });
+  const uit = vulRustGaten(stukMetBeginrust);
+  assert.equal(vorm(uit), 'n0/480 n480/480 r960/480* n1440/480');
 });
 
 test('een volle maat, gelijke gaten of één akkoord blijven zoals ze zijn', () => {
