@@ -7,7 +7,7 @@ import { decodeerG4 } from '../src/pdf/ccitt.mjs';
 
 // Een klein zwart-witbeeld van 72 x 40 (eigen tekening: vijf lijnen, een ellips, een schuine streep, een blok), gecodeerd als
 // CCITT Group 4, met de verwachte pixels (# = zwart).
-const G4 = Buffer.from('JqB4vINj/t593kNp/2//Pu8gqPkFGN6fpt6fn3eQ2UIMPte03j7efd5Blfb/b/Pu8gSP5L9v/2//b/8R4AIAIA==', 'base64');
+const G4 = Buffer.from('yU/ty4HuSv9v+XA9yW8hDbp9Nuny4HuS4hr7Xabj25cD3Kl2/b8uB7lV+eHb/2/9v/EcAEAE', 'base64');
 const VERWACHT = [
   '........................................................................',
   '........................................................................',

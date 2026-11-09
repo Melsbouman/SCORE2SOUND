@@ -34,25 +34,45 @@ export function filtersVan(woordenboek) {
 }
 
 function zoekObjecten(bytes, tekst) {
-  const objecten = new Map();
+  const ruweObjecten = [];
   const patroon = /(\d+)\s+\d+\s+obj\b/g;
   let gevonden;
   while ((gevonden = patroon.exec(tekst))) {
     const begin = gevonden.index + gevonden[0].length;
     const eind = tekst.indexOf('endobj', begin);
     if (eind < 0) break;
-    const inhoud = tekst.slice(begin, eind);
-    const stroomBegin = inhoud.search(/stream\r?\n/);
-    if (stroomBegin < 0) {
-      objecten.set(Number(gevonden[1]), { woordenboek: inhoud, ruw: null });
-    } else {
-      const woordenboek = inhoud.slice(0, stroomBegin);
-      const dataBegin = stroomBegin + inhoud.slice(stroomBegin).match(/stream\r?\n/)[0].length;
-      const lengte = woordenboek.match(/\/Length\s+(\d+)(?!\s+\d+\s+R)/);
-      const dataEind = lengte ? dataBegin + Number(lengte[1]) : inhoud.lastIndexOf('endstream');
-      objecten.set(Number(gevonden[1]), { woordenboek, ruw: bytes.subarray(begin + dataBegin, begin + Math.max(dataBegin, dataEind)) });
-    }
+    ruweObjecten.push({ nummer: Number(gevonden[1]), begin, inhoud: tekst.slice(begin, eind) });
     patroon.lastIndex = eind;
+  }
+  // Een lengte kan in een ander object staan (/Length 10 0 R); daarom eerst alle objecten kennen.
+  const tekstVan = new Map(ruweObjecten.map((object) => [object.nummer, object.inhoud]));
+  const objecten = new Map();
+  for (const { nummer, begin, inhoud } of ruweObjecten) {
+    // Na het woordenboek komt 'stream' met CRLF of LF; sommige pdf's hebben alleen CR (Renaissance).
+    const kop = inhoud.match(/(?<=>>\s*)stream(\r\n|\n|\r)/);
+    if (!kop) {
+      objecten.set(nummer, { woordenboek: inhoud, ruw: null });
+      continue;
+    }
+    const woordenboek = inhoud.slice(0, kop.index);
+    const dataBegin = kop.index + kop[0].length;
+    let lengte = null;
+    const opgegeven = woordenboek.match(/\/Length\s+(\d+)(\s+\d+\s+R)?/);
+    if (opgegeven && !opgegeven[2]) lengte = Number(opgegeven[1]);
+    else if (opgegeven) {
+      const elders = tekstVan.get(Number(opgegeven[1]))?.trim() ?? '';
+      if (/^\d+$/.test(elders)) lengte = Number(elders);
+    }
+    // Alleen een lengte waarna 'endstream' volgt telt; anders tot 'endstream', zonder het regeleinde ervoor.
+    let dataEind;
+    if (lengte != null && inhoud.slice(dataBegin + lengte).trimStart().startsWith('endstream')) {
+      dataEind = dataBegin + lengte;
+    } else {
+      dataEind = inhoud.lastIndexOf('endstream');
+      if (inhoud[dataEind - 1] === '\n') dataEind -= 1;
+      if (inhoud[dataEind - 1] === '\r') dataEind -= 1;
+    }
+    objecten.set(nummer, { woordenboek, ruw: bytes.subarray(begin + dataBegin, begin + Math.max(dataBegin, dataEind)) });
   }
   return objecten;
 }

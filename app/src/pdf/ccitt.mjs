@@ -64,9 +64,8 @@ const MODES = new Map([
 ]);
 
 export function decodeerG4(bytes, breedte, hoogte) {
-  // De codering van de testbeelden schrijft de achtergrond als zwarte run: de uitkomst is 1 voor wit en 0 voor de zwarte runs
-  // van de codering (de inkt van de tekening staat in de witte runs).
-  const uit = new Uint8Array(breedte * hoogte).fill(1);
+  // Zoals de norm (T.6): 1 voor een pixel uit een zwarte run, 0 voor wit. Bij een gewone scan is de inkt zwart gecodeerd.
+  const uit = new Uint8Array(breedte * hoogte);
   const totaalBits = bytes.length * 8;
   let plek = 0;
   const leesCode = (tabel, maxLengte) => {
@@ -128,7 +127,7 @@ export function decodeerG4(bytes, breedte, hoogte) {
     for (let i = 0; i < wijzigingen.length; i += 2) {
       const van = wijzigingen[i];
       const tot = i + 1 < wijzigingen.length ? wijzigingen[i + 1] : breedte;
-      uit.fill(0, y * breedte + van, y * breedte + Math.max(van, tot));
+      uit.fill(1, y * breedte + van, y * breedte + Math.max(van, tot));
     }
     if (fout) break;
     referentie = [...wijzigingen, breedte, breedte, breedte, breedte];

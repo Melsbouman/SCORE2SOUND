@@ -53,3 +53,23 @@ test('een kapotte gecomprimeerde stroom geeft lege bytes, geen fout', async () =
   const pdf = await openPdf(new Uint8Array(kapot));
   assert.equal((await pdf.stroom(1)).length, 0);
 });
+
+test('een stroom met alleen CR na stream, en een lengte in een ander object (/Length 10 0 R), worden goed gelezen', async () => {
+  const CR = String.fromCharCode(13);
+  const LF = String.fromCharCode(10);
+  const inhoud = `q 1 0 0 1 0 0 cm /Im1 Do Q`;
+  const pdf = await openPdf(new Uint8Array(Buffer.from([
+    `%PDF-1.4${LF}`,
+    `1 0 obj${CR}<< /Length ${inhoud.length} ${CR}>>${CR}stream${CR}${inhoud}${CR}endstream${CR}endobj${CR}`,
+    `2 0 obj${CR}${LF}<< /Length 3 0 R >>${CR}${LF}stream${CR}${LF}${inhoud}${CR}${LF}endstream${CR}${LF}endobj${CR}${LF}`,
+    `3 0 obj${CR}${LF}${inhoud.length}${CR}${LF}endobj${CR}${LF}`,
+  ].join(''), 'latin1')));
+  assert.equal(naarTekst(await pdf.stroom(1)), inhoud);
+  assert.equal(naarTekst(await pdf.stroom(2)), inhoud);
+});
+
+test('een verkeerde /Length (te lang) valt terug op endstream', async () => {
+  const LF = String.fromCharCode(10);
+  const pdf = await openPdf(new Uint8Array(Buffer.from(`%PDF-1.4${LF}1 0 obj << /Length 999 >> stream${LF}abc${LF}endstream endobj${LF}`, 'latin1')));
+  assert.equal(naarTekst(await pdf.stroom(1)), 'abc');
+});
