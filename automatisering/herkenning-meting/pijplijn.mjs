@@ -19,6 +19,7 @@ const { zoekRusten } = await laad('rusten.mjs');
 const optioneel = async (naam) => { try { return await laad(naam); } catch (fout) { if (String(fout).includes('Cannot find')) return null; throw fout; } };
 const kop = await optioneel('kop.mjs');
 const voortekens = await optioneel('voortekens.mjs');
+const hulplijnen = await optioneel('hulplijnen.mjs');
 
 export function leesPgm(pad) {
   const buffer = readFileSync(pad);
@@ -54,7 +55,9 @@ export function herken(pad) {
   const balkkoppen = kop ? kop.leesBalkkoppen(kaal, raster, schaal, { zw }) : null;
   const koppen = zoekNootkoppen(kaal, raster, schaal, { balkkoppen });
   const noten = bepaalDuren(kaal, raster, schaal, koppen);
-  const tekens = voortekens ? voortekens.zoekVoortekens(kaal, raster, schaal, { koppen: noten, balkkoppen }) : null;
+  // Voortekens op het beeld zonder hulplijnen: een kruis dat een hulplijn raakt, is dan een losse vorm.
+  const zonderHulplijnen = hulplijnen ? hulplijnen.verwijderHulplijnen(kaal, raster, schaal, koppen) : kaal;
+  const tekens = voortekens ? voortekens.zoekVoortekens(zonderHulplijnen, raster, schaal, { koppen: noten, balkkoppen }) : null;
   const rusten = zoekRusten(kaal, raster, schaal, { koppen, strepen: maten.map((m) => m.strepen), balkkoppen, voortekens: tekens });
   return { schaal, raster, maten, balkkoppen, noten, voortekens: tekens, rusten, tijd: Date.now() - begin };
 }
