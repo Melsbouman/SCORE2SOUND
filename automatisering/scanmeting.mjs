@@ -48,8 +48,16 @@ const stappen = {
       return { partituur: null, seconden };
     }
   },
+  // Een referentie kan .musicxml zijn of gecomprimeerd .mxl (zip met META-INF/container.xml).
   async lees(referentie) {
-    return leesMusicXML(await readFile(pad(referentie), 'utf8'));
+    if (!/\.mxl$/i.test(referentie)) return leesMusicXML(await readFile(pad(referentie), 'utf8'));
+    const { leesZip } = await laad('src/server/zip.mjs');
+    const bestanden = await leesZip(await readFile(pad(referentie)));
+    const container = bestanden.get('META-INF/container.xml');
+    const binnen = (container && Buffer.from(container).toString('utf8').match(/full-path="([^"]+)"/)?.[1])
+      ?? [...bestanden.keys()].find((naam) => !naam.startsWith('META-INF/') && /\.(musicxml|xml)$/i.test(naam));
+    if (!binnen || !bestanden.has(binnen)) throw new Error(`Geen MusicXML in ${referentie}`);
+    return leesMusicXML(Buffer.from(bestanden.get(binnen)).toString('utf8'));
   },
 };
 
