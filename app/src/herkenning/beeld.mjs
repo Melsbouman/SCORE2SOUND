@@ -41,6 +41,18 @@ export function otsuDrempel(pixels) {
   return drempel;
 }
 
+// Een drempel net onder het papier, voor bladen met lichtgrijze notenbalklijnen (een digitale pdf die de lijnen grijs tekent):
+// Otsu legt de drempel dan tussen zwart en papier en de lijnen vallen weg. Het papier is de grijswaarde die boven de
+// Otsu-drempel het meest voorkomt; de drempel ligt een kwart van de afstand tot Otsu (minstens 20) onder het papier.
+export function papierDrempel(pixels) {
+  const otsu = otsuDrempel(pixels);
+  const histogram = new Uint32Array(256);
+  for (const waarde of pixels) histogram[waarde] += 1;
+  let papier = Math.min(255, otsu + 1);
+  for (let waarde = papier; waarde < 256; waarde += 1) if (histogram[waarde] > histogram[papier]) papier = waarde;
+  return Math.round(papier - Math.max(20, (papier - otsu) / 4));
+}
+
 // Sauvola: een drempel per pixel uit het gemiddelde en de spreiding in een venster eromheen, voor scans die niet overal even
 // licht zijn. Met integraalbeelden kost dat per pixel evenveel, hoe groot het venster ook is.
 function sauvola(beeld, venster, k) {
@@ -80,14 +92,15 @@ function sauvola(beeld, venster, k) {
 }
 
 // Van grijs naar zwart-wit. methode 'otsu' (standaard) of 'sauvola' (venster in pixels, standaard 1/20 van de kleinste
-// zijde, en k: hoe streng; 0,34 werkt goed voor gedrukte muziek).
-export function zwartWit(beeld, { methode = 'otsu', venster, k = 0.34 } = {}) {
+// zijde, en k: hoe streng; 0,34 werkt goed voor gedrukte muziek). Met de optie drempel gebruikt Otsu een vaste drempel in
+// plaats van de berekende (tot en met de drempel is zwart).
+export function zwartWit(beeld, { methode = 'otsu', venster, k = 0.34, drempel: gegeven } = {}) {
   const { breedte, hoogte, pixels } = beeld;
   if (methode === 'sauvola') {
     const maat = venster ?? Math.max(15, Math.round(Math.min(breedte, hoogte) / 20) | 1);
     return { breedte, hoogte, pixels: sauvola(beeld, maat, k) };
   }
-  const drempel = otsuDrempel(pixels);
+  const drempel = gegeven ?? otsuDrempel(pixels);
   const uit = new Uint8Array(breedte * hoogte);
   for (let i = 0; i < uit.length; i += 1) uit[i] = pixels[i] <= drempel ? 1 : 0;
   return { breedte, hoogte, pixels: uit };
