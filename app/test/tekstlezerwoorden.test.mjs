@@ -27,7 +27,7 @@ test('zet een bekende term bij de horizontaal dichtstbijzijnde maat eronder', ()
   assert.deepEqual(uit.partijen[0].maten[1].elementen.at(-1), {
     soort: 'aanwijzing',
     type: 'tekst',
-    tekst: '  marcato  ',
+    waarde: 'marcato',
     start: 0,
     zekerheid: 0.6,
   });

@@ -24,8 +24,8 @@ const ocrPerBlad = [{
 test('woordenNaarMaten zet een aanwijzing bij de maat onder het OCR-woord zonder duplicaat', () => {
   const eenmaal = woordenNaarMaten(partituur, ocrPerBlad);
   const tweemaal = woordenNaarMaten(eenmaal, ocrPerBlad);
-  const verwacht = { soort: 'aanwijzing', type: 'tekst', tekst: 'Marcato', start: 0, zekerheid: 0.6 };
+  const verwacht = { soort: 'aanwijzing', type: 'tekst', waarde: 'Marcato', start: 0, zekerheid: 0.6 };
 
   assert.deepEqual(eenmaal.partijen[0].maten[1].elementen.at(-1), verwacht);
-  assert.equal(tweemaal.partijen[0].maten[1].elementen.filter((element) => element.tekst === 'Marcato').length, 1);
+  assert.equal(tweemaal.partijen[0].maten[1].elementen.filter((element) => element.waarde === 'Marcato').length, 1);
 });
