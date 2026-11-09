@@ -7,7 +7,7 @@ import { pathToFileURL, fileURLToPath } from 'node:url';
 
 const HERK = process.env.HERK || fileURLToPath(new URL('../../app/src/herkenning', import.meta.url));
 const laad = (naam) => import(pathToFileURL(`${HERK}/${naam}`).href);
-const { zwartWit } = await laad('beeld.mjs');
+const { zwartWit, papierDrempel } = await laad('beeld.mjs');
 const { meetSchaal } = await laad('schaal.mjs');
 const { vindBalken } = await laad('raster.mjs');
 const { verwijderLijnen } = await laad('vormen.mjs');
@@ -39,9 +39,16 @@ export function leesPgm(pad) {
 
 export function herken(pad) {
   const begin = Date.now();
-  const zw = zwartWit(leesPgm(pad));
-  const schaal = meetSchaal(zw);
-  const raster = vindBalken(zw, schaal);
+  const grijs = leesPgm(pad);
+  let zw = zwartWit(grijs);
+  let schaal = meetSchaal(zw);
+  let raster = vindBalken(zw, schaal);
+  // Geen balken: misschien lichtgrijze notenbalklijnen; opnieuw met een drempel net onder het papier.
+  if (!raster.balken.length && papierDrempel) {
+    zw = zwartWit(grijs, { drempel: papierDrempel(grijs.pixels) });
+    schaal = meetSchaal(zw);
+    raster = vindBalken(zw, schaal);
+  }
   const kaal = verwijderLijnen(zw, raster, schaal);
   const maten = vindMaten(zw, raster, schaal);
   const balkkoppen = kop ? kop.leesBalkkoppen(kaal, raster, schaal, { zw }) : null;
