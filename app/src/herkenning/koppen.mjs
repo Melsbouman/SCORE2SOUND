@@ -14,11 +14,34 @@ import { sjabloon } from './sjablonen.mjs';
 
 const SOORTEN = [['zwart', 'kop-zwart'], ['half', 'kop-half'], ['heel', 'kop-heel']];
 
+// Een tweede kans voor een halve kop: een sjabloon waarvan alleen de buitenrand van het zwart telt. Lettertypen verschillen in
+// hoe dik de rand van een open kop is (Bravura heeft een dikke, schuine rand, veel gravures een dunne), en op een lichte scan is
+// de rand dun. De binnenrand telt dan niet mee, zwart of wit, en ook pixels op een weggehaalde notenbalklijn niet (`open`, zie
+// maakKopScore). Zo'n sjabloon past ook op het rondje van een mol of het vakje van een herstellingsteken; daarom moet het gewone
+// sjabloon op die plek ook redelijk passen (GEWOON_DREMPEL). Bij een hele kop gaf de buitenrand alleen te veel valse koppen.
+const GEWOON_DREMPEL = 0.7;
+function alleenBuitenrand(t) {
+  const { breedte: w, hoogte: h } = t;
+  const buiten = (x, y) => x < 0 || y < 0 || x >= w || y >= h || (!t.pixels[y * w + x] && !t.binnen[y * w + x]);
+  const pixels = new Uint8Array(w * h);
+  for (let y = 0; y < h; y += 1) {
+    for (let x = 0; x < w; x += 1) {
+      const i = y * w + x;
+      if (t.pixels[i] && (buiten(x - 1, y) || buiten(x + 1, y) || buiten(x, y - 1) || buiten(x, y + 1))) pixels[i] = 1;
+    }
+  }
+  return { ...t, pixels };
+}
+
 // De score van een kopsjabloon met zijn ankerpunt op (ax, ay): zwarte pixels van het teken wegen 6, het gat binnenin 4, een
 // rand wit eromheen 1. Ook gebruikt door kop.mjs (is er vlak na een voorteken een noot?).
-export function maakKopScore(kaal, lijnafstand) {
+// Met het beeld vóór het weghalen van de notenbalklijnen (zw) tellen bij een sjabloon met `t.open` pixels op een weggehaalde
+// lijn niet mee: daar weten we niet of de kop zwart was. Een open kop met een dunne rand tussen twee lijnen raakt met zijn
+// boven- en onderrand de lijnen, en die rand is met de lijn weggehaald.
+export function maakKopScore(kaal, lijnafstand, zw = null) {
   const { breedte, hoogte, pixels } = kaal;
   const zwart = (x, y) => x >= 0 && x < breedte && y >= 0 && y < hoogte && pixels[y * breedte + x] === 1;
+  const opLijn = zw ? (x, y) => x >= 0 && x < breedte && y >= 0 && y < hoogte && zw.pixels[y * breedte + x] === 1 && pixels[y * breedte + x] !== 1 : () => false;
   const rand = Math.max(1, Math.round(lijnafstand * 0.15));
   return (t, ax, ay) => {
     const x0 = ax - t.ankerX;
@@ -32,6 +55,7 @@ export function maakKopScore(kaal, lijnafstand) {
         let gewicht;
         let wilZwart;
         if (binnenSjabloon && t.pixels[i]) { gewicht = 6; wilZwart = true; } else if (binnenSjabloon && t.binnen[i]) { gewicht = 4; wilZwart = false; } else if (!binnenSjabloon) { gewicht = 1; wilZwart = false; } else continue;
+        if (t.open && opLijn(x0 + x, y0 + y)) continue;
         totaal += gewicht;
         if (zwart(x0 + x, y0 + y) === wilZwart) goed += gewicht;
       }
@@ -40,12 +64,18 @@ export function maakKopScore(kaal, lijnafstand) {
   };
 }
 
-export function zoekNootkoppen(kaal, raster, schaal, { drempel = 0.78, balkkoppen = null } = {}) {
+export function zoekNootkoppen(kaal, raster, schaal, { drempel = 0.78, balkkoppen = null, zw = null } = {}) {
   const { breedte, hoogte, pixels } = kaal;
   const ia = schaal.lijnafstand;
   const zwart = (x, y) => x >= 0 && x < breedte && y >= 0 && y < hoogte && pixels[y * breedte + x] === 1;
-  const sjablonen = SOORTEN.map(([soort, naam]) => ({ soort, ...sjabloon(naam, ia) }));
-  const score = maakKopScore(kaal, ia);
+  const sjablonen = SOORTEN.map(([soort, naam]) => ({ soort, open: soort === 'heel', ...sjabloon(naam, ia) }));
+  const halfGewoon = sjablonen.find((t) => t.soort === 'half');
+  sjablonen.push({ ...alleenBuitenrand(halfGewoon), open: true, gewoon: { ...halfGewoon, open: true } });
+  const score = maakKopScore(kaal, ia, zw);
+  // Een dunne open kop op een scan is soms een paar pixels breder dan het sjabloon: bij het tweede halve sjabloon zoeken we de
+  // randen in de voorkeuze met wat speling.
+  const speling = Math.max(1, Math.round(ia * 0.15));
+  const randZwart = (x, y, richting, ruim) => { for (let d = 0; d <= (ruim ? speling : 0); d += 1) if (zwart(x + d * richting, y)) return true; return false; };
 
   // Een kop ver buiten de balk (vanaf de tweede hulplijn) heeft hulplijnen tussen zich en de balk: dunne horizontale lijnen die
   // aan beide kanten wat buiten de kop uitsteken. Zonder die lijnen is het iets anders (een repetitiecijfer, een letter).
@@ -85,9 +115,9 @@ export function zoekNootkoppen(kaal, raster, schaal, { drempel = 0.78, balkkoppe
         for (const t of sjablonen) {
           // Snelle voorkeuze: bij een zwarte kop moet het midden zwart zijn, bij een halve of hele de linker- en rechterrand.
           const midden = x - t.ankerX + Math.round(t.breedte / 2);
-          if (t.soort === 'zwart' ? !zwart(midden, y) : !(zwart(x - t.ankerX + 1, y) && zwart(x - t.ankerX + t.breedte - 2, y))) continue;
+          if (t.soort === 'zwart' ? !zwart(midden, y) : !(randZwart(x - t.ankerX + 1, y, -1, !!t.gewoon) && randZwart(x - t.ankerX + t.breedte - 2, y, 1, !!t.gewoon))) continue;
           const s = score(t, x, y);
-          if (s >= drempel && (stap > -2 && stap < 10 || heeftHulplijnen(balk, x - t.ankerX + t.breedte / 2, stap, t.breedte))) treffers.push({ x: x - t.ankerX + t.breedte / 2, y, stap, soort: t.soort, score: s, breedte: t.breedte, hoogte: t.hoogte });
+          if (s >= drempel && (!t.gewoon || score(t.gewoon, x, y) >= GEWOON_DREMPEL) && (stap > -2 && stap < 10 || heeftHulplijnen(balk, x - t.ankerX + t.breedte / 2, stap, t.breedte))) treffers.push({ x: x - t.ankerX + t.breedte / 2, y, stap, soort: t.soort, score: s, breedte: t.breedte, hoogte: t.hoogte });
         }
       }
     }

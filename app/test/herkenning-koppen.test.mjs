@@ -77,3 +77,55 @@ test('de krul van een vioolsleutel aan het begin en een kadertje ver boven de ba
   const gevonden = zoek(beeld);
   assert.deepEqual(gevonden[0].map((kop) => [kop.stap, kop.soort]), [[4, 'zwart']]);
 });
+
+// Een open kop met een dunne rand (zoals in veel gravures en op een lichte scan), schuin, tussen twee lijnen: de boven- en
+// onderrand vallen op de lijnen en verdwijnen met het weghalen van de lijnen.
+function dunneOpenKop(beeld, cx, cy, lijnafstand, binnen = 0.75) {
+  const a = lijnafstand * 0.62;
+  const b = lijnafstand * 0.47;
+  const hoek = (-30 * Math.PI) / 180;
+  for (let y = Math.floor(cy - lijnafstand); y <= cy + lijnafstand; y += 1) {
+    for (let x = Math.floor(cx - lijnafstand); x <= cx + lijnafstand; x += 1) {
+      const dx = x - cx;
+      const dy = y - cy;
+      const u = (dx * Math.cos(hoek) + dy * Math.sin(hoek)) / a;
+      const v = (-dx * Math.sin(hoek) + dy * Math.cos(hoek)) / b;
+      const r = Math.sqrt(u * u + v * v);
+      if (r <= 1 && r >= binnen) beeld.pixels[y * beeld.breedte + x] = 0;
+    }
+  }
+}
+
+function zoekMetLijnen(beeld) {
+  const zw = zwartWit(beeld);
+  const schaal = meetSchaal(zw);
+  const raster = vindBalken(zw, schaal);
+  return zoekNootkoppen(verwijderLijnen(zw, raster, schaal), raster, schaal, { zw });
+}
+
+test('een halve kop met een dunne rand tussen twee lijnen wordt gevonden; een haardunne ring, een mol en een herstellingsteken niet', () => {
+  const { beeld } = bladMetKoppen([{ balk: 0, x: 200, stap: 4, soort: 'zwart' }], {
+    extra: ({ beeld: blad, verwacht, stempel, lijnafstand }) => {
+      const balk = verwacht.balken[0];
+      const y = (stap) => Math.round(balk.lijnen[0].a + (stap * lijnafstand) / 2);
+      dunneOpenKop(blad, 400, y(5), lijnafstand);
+      dunneOpenKop(blad, 500, y(3), lijnafstand);
+      stempel('mol', 600, y(5));
+      stempel('herstel', 700, y(3));
+      // Een haardunne ring (zoals het rondje van een mol op een scan): de buitenrand past, het gewone sjabloon niet genoeg.
+      dunneOpenKop(blad, 800, y(5), lijnafstand, 0.86);
+    },
+  });
+  const gevonden = zoekMetLijnen(beeld);
+  assert.deepEqual(gevonden[0].map((kop) => [kop.stap, kop.soort]), [[4, 'zwart'], [5, 'half'], [3, 'half']]);
+});
+
+test('met het beeld met lijnen vinden we dezelfde koppen uit het lettertype als zonder', () => {
+  const koppen = [
+    { balk: 0, x: 200, stap: 8, soort: 'zwart' }, { balk: 0, x: 300, stap: 5, soort: 'half' }, { balk: 0, x: 400, stap: 0, soort: 'half' },
+    { balk: 0, x: 500, stap: 3, soort: 'heel' }, { balk: 0, x: 600, stap: 4, soort: 'half' }, { balk: 1, x: 350, stap: 7, soort: 'heel' },
+  ];
+  const { beeld } = bladMetKoppen(koppen);
+  const metLijnen = zoekMetLijnen(beeld);
+  for (const balk of [0, 1]) assert.deepEqual(metLijnen[balk].map((kop) => [kop.stap, kop.soort]), koppen.filter((kop) => kop.balk === balk).map((kop) => [kop.stap, kop.soort]));
+});
