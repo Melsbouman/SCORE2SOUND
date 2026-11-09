@@ -62,7 +62,8 @@ export function woordenNaarMaten(partituur, ocrPerBlad) {
         }));
         if (!bestaat) {
           maten[maatIndex].elementen.push({
-            soort: 'aanwijzing', type: 'tekst', tekst: woord.tekst, start: 0, zekerheid: 0.6,
+            // waarde, zoals elke tekstaanwijzing in het model (docs/model.md); met tekst schreef de weergave 'undefined'.
+            soort: 'aanwijzing', type: 'tekst', waarde: woord.tekst.trim(), start: 0, zekerheid: 0.6,
           });
         }
       }
