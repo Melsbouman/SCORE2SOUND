@@ -30,6 +30,11 @@ Na het herkennen van de losse bladzijden bouwt `bouwUitPaginas` in `keten.mjs` d
 - **`controleerMaatduur`** en **`maatsoortVermoedens`** (`app/src/controle/maatduur.mjs`): Controleren of de som van de nootduren per maat klopt met de maatsoort.
 - **`markeerVerdachteNoten`** en **`markeerFouteMaten`** (`app/src/model/verdacht.mjs` en `app/src/controle/nabewerken.mjs`): Markeren onzekere noten en maten voor de gebruiker.
 
+### Onzekere maatsoort en oude meermaatsrusten
+- **Maatsoort met opties** (`kop.mjs`): als twee cijfers boven elkaar niet zeker te lezen zijn (op een vage scan lijkt een 2 op een 9 en een 3 op een 5), geeft de balkkop `maatsoortOpties` mee: de maatsoorten die erop lijken, de beste eerst. Bij zeker gelezen cijfers gaan de opties ook mee, met de gelezen maatsoort vooraan.
+- **`kiesMaatsoorten`** (`opbouw.mjs`): kiest na de opbouw uit de opties de maatsoort waar de meeste maten tot de volgende maatsoort precies in passen. Een zeker gelezen maatsoort wijkt alleen als er geen enkele maat in past en in een optie minstens drie en twee derde van de maten.
+- **Oude meermaatsrust** (`rusten.mjs`): een gevuld blokje van de tweede lijn tot de middelste lijn is een rust van twee maten, tot de vierde lijn een rust van vier maten. Blokjes met hele rusten ernaast in één maat zijn samen één meermaatsrust met het opgetelde aantal (`aantal`); de opbouw gebruikt dat als er geen getal boven de rust gelezen is. Zo'n blokje is geen zwarte kop (`koppen.mjs`).
+
 ## Meting
 
 De kwaliteit van de herkenning wordt gecontroleerd in `automatisering/herkenning-meting`, onder andere met `maatduur.mjs` en teststukken zoals `devils-galop.mjs`.
