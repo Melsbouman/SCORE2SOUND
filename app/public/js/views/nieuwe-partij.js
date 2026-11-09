@@ -134,7 +134,7 @@ export function start(app) {
     const instrumentFout = maakElement('p', 'begin__veldfout');
 
     // Velden Titel, Componist, Toonsoort, Maatsoort
-    const state = app.staat();
+    const state = app.stand;
     const huidigePartituur = state.partituur;
 
     const titelGroep = maakElement('label', 'begin__veld');

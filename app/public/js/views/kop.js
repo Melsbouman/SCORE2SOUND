@@ -19,6 +19,7 @@ export function kopTitel(hash) {
 // Welk scherm bij welke hash hoort, en welke vlakken van de hoofdinhoud daarbij zichtbaar zijn.
 const VLAKKEN = {
   begin: ['nieuw', 'upload', 'voorbeeld', 'hulp'],
+  'nieuwe-partij': ['nieuw-partij'],
   editor: ['lint', 'paletten', 'zoom', 'weergave'],
   bibliotheek: ['projecten'],
   inloggen: ['inloggen'],
@@ -28,7 +29,8 @@ const SCHERMEN = [
   [/^(projecten|bibliotheek)\b/, 'bibliotheek'],
   [/^inloggen\b/, 'inloggen'],
   [/^instellingen\b/, 'instellingen'],
-  [/^(|begin|nieuw|nieuw-partij|nieuw-partituur|upload|hulp|voorbeeld)$/, 'begin'],
+  [/^nieuw-partij$/, 'nieuwe-partij'],
+  [/^(|begin|nieuw|nieuw-partituur|upload|hulp|voorbeeld)$/, 'begin'],
 ];
 
 // De vlakken van de hoofdinhoud die bij een scherm zichtbaar zijn.
