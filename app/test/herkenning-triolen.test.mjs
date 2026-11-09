@@ -11,17 +11,20 @@ import { sjabloon } from '../src/herkenning/sjablonen.mjs';
 import { maakBlad } from './hulp/blad.mjs';
 
 const ia = 20;
+const klein = Math.round(ia * 0.65);
 
 // Eén balk met: drie achtsten onder één waardestreep (stokken omhoog) met een 3 boven de streep; twee achtsten zonder cijfer;
 // drie achtsten met stokken omlaag en een 3 onder de streep; en drie achtsten met een 3 ver boven de balk (een repetitiecijfer
-// hoort er niet bij als het meer dan twee lijnafstanden van de streep staat).
+// hoort er niet bij als het meer dan twee lijnafstanden van de streep staat). Een triolencijfer is klein; een groot teken boven
+// een groep (tekst) telt niet.
 function blad() {
   const { beeld, verwacht } = maakBlad({ balken: 1, koppen: false, maatstrepen: false, lijnafstand: ia });
   const y = (stap) => Math.round(verwacht.balken[0].lijnen[0].a + (stap * ia) / 2);
   const zet = (x, yy) => { beeld.pixels[Math.round(yy) * beeld.breedte + Math.round(x)] = 0; };
   const vlak = (x0, x1, y0, y1) => { for (let x = x0; x <= x1; x += 1) for (let yy = y0; yy <= y1; yy += 1) zet(x, yy); };
-  const stempel = (naam, ax, ay) => {
-    const t = sjabloon(naam, ia);
+  // Een triolencijfer is kleiner dan een cijfer van de maatsoort: we stempelen het op twee derde van de grootte.
+  const stempel = (naam, ax, ay, maat = ia) => {
+    const t = sjabloon(naam, maat);
     for (let dy = 0; dy < t.hoogte; dy += 1) for (let dx = 0; dx < t.breedte; dx += 1) if (t.pixels[dy * t.breedte + dx]) zet(ax - t.ankerX + dx, ay - t.ankerY + dy);
     return t;
   };
@@ -38,12 +41,15 @@ function blad() {
   };
   stempel('sleutel-g', 110, y(6));
   const a = groep([220, 270, 320], 7, true);
-  stempel('cijfer-3', a.midden - sjabloon('cijfer-3', ia).breedte / 2, a.eind - Math.round(ia * 1.4));
+  stempel('cijfer-3', a.midden - sjabloon('cijfer-3', klein).breedte / 2, a.eind - Math.round(ia * 1.1), klein);
   groep([420, 470], 7, true);
   const c = groep([570, 620, 670], 1, false);
-  stempel('cijfer-3', c.midden - sjabloon('cijfer-3', ia).breedte / 2, c.eind + Math.round(ia * 1.4));
+  stempel('cijfer-3', c.midden - sjabloon('cijfer-3', klein).breedte / 2, c.eind + Math.round(ia * 1.1), klein);
   const d = groep([780, 830, 880], 7, true);
-  stempel('cijfer-3', d.midden - sjabloon('cijfer-3', ia).breedte / 2, d.eind - Math.round(ia * 4));
+  stempel('cijfer-3', d.midden - sjabloon('cijfer-3', klein).breedte / 2, d.eind - Math.round(ia * 4), klein);
+  // Tekst boven een groep (een groot woord, zoals "Optional" boven Devils Galop maat 45) is geen cijfer: een grote 6.
+  const e = groep([960, 1010], 7, true);
+  stempel('cijfer-6', e.midden - sjabloon('cijfer-6', ia).breedte / 2, e.eind - Math.round(ia * 1.4));
   return beeld;
 }
 
@@ -53,7 +59,7 @@ test('triolen: een 3 bij een groep onder één waardestreep', () => {
   const raster = vindBalken(zw, schaal);
   const kaal = verwijderLijnen(zw, raster, schaal);
   const noten = bepaalDuren(kaal, raster, schaal, zoekNootkoppen(kaal, raster, schaal));
-  assert.equal(noten[0].length, 11);
+  assert.equal(noten[0].length, 13);
   const [triolen] = leesTriolen(kaal, raster, schaal, noten);
   assert.deepEqual(triolen.map((t) => [t.koppen, t.aantal]), [[[0, 1, 2], 3], [[5, 6, 7], 3]]);
 });

@@ -5,8 +5,11 @@
 //    hoort bij de groep van de vorige als de streep van de vorige tot aan zijn stok loopt en de streep van de noot vanaf de stok
 //    van de vorige (met een kleine marge).
 // 3. Per groep van minstens twee noten zoeken we de vormen tussen de eerste en de laatste stok (een halve lijnafstand ruimer),
-//    bij stokken omhoog net boven de streep, bij stokken omlaag net eronder, met een hoogte tussen 0,8 en 2,5 lijnafstand.
-// 4. Elke kandidaat vergelijken we met de sjablonen van de cijfers 2 tot en met 7; de beste telt als score minstens 0,75 is.
+//    bij stokken omhoog net boven de streep, bij stokken omlaag net eronder, met een hoogte tussen 0,8 en 1,7 lijnafstand (een
+//    triolencijfer is klein: op de bladen in de testset 1,1 tot 1,5 lijnafstand; tekst erboven is meestal groter).
+// 4. Een vorm met een even hoge buur vlak ernaast (op dezelfde regel) is een letter van een woord, zoals de tekst
+//    "Optional cut" boven Devils Galop maat 45; die slaan we over.
+// 5. Elke kandidaat vergelijken we met de sjablonen van de cijfers 2 tot en met 7; de beste telt als score minstens 0,75 is.
 //    De eerste kandidaat die telt, is het cijfer van de groep.
 // Uitkomst per balk: [{ koppen, aantal, x }] met koppen de plekken (indexen in noten[b]) van de noten in de groep, aantal het
 // cijfer en x het midden van het cijfer. Een balk zonder zulke groepen geeft een lege lijst.
@@ -44,11 +47,13 @@ export function leesTriolen(kaal, raster, schaal, noten) {
       const kandidaten = vormen.filter((v) => {
         const midden = (v.links + v.rechts) / 2;
         const hoogte = (v.onder - v.boven + 1) / ia;
-        if (midden < van || midden > tot || hoogte < 0.8 || hoogte > 2.5) return false;
+        if (midden < van || midden > tot || hoogte < 0.8 || hoogte > 1.7) return false;
         return omhoog
           ? v.onder <= eind + ia * 0.3 && v.onder >= eind - ia * 2
           : v.boven >= eind - ia * 0.3 && v.boven <= eind + ia * 2;
-      }).sort((p, q) => p.links - q.links);
+      }).filter((v) => !vormen.some((w) => w !== v && Math.abs(w.onder - v.onder) <= ia * 0.3
+        && Math.abs((w.onder - w.boven) - (v.onder - v.boven)) <= (v.onder - v.boven + 1) * 0.4
+        && Math.max(w.links - v.rechts, v.links - w.rechts) <= ia * 0.4)).sort((p, q) => p.links - q.links);
       for (const vorm of kandidaten) {
         const isZwart = (x, y) => labels[y * kaal.breedte + x] === vorm.id;
         let beste = -1;
