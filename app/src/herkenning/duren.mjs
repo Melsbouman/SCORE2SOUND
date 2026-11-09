@@ -9,7 +9,8 @@
 //    (Maestro tekent vlaggen anders dan Bravura).
 // 4. Punt: een klein, rond, los vlekje rechts van de kop, in de tussenruimte (op een lijn: de tussenruimte erboven), maakt de
 //    duur anderhalf keer zo lang.
-// Duur in tikken (480 per kwartnoot): heel 1920, half 960, zwart 480 gedeeld door 2 per waardestreep of vlag.
+// Duur in tikken (480 per kwartnoot): heel 1920, half 960, zwart 480 gedeeld door 2 per waardestreep of vlag. Bij een
+// waardestreep geeft `balk: { links, rechts }` hoe ver de buitenste streep loopt (voor het groeperen in opbouw.mjs).
 import { sjabloon } from './sjablonen.mjs';
 
 export function bepaalDuren(kaal, raster, schaal, koppenPerBalk) {
@@ -18,11 +19,16 @@ export function bepaalDuren(kaal, raster, schaal, koppenPerBalk) {
   const zwart = (x, y) => x >= 0 && x < breedte && y >= 0 && y < hoogte && pixels[y * breedte + x] === 1;
   const kop = sjabloon('kop-zwart', ia);
   // Aanzetten van vlaggen: rijen vanaf het eind van de stok waar het zwart direct rechts naast de stok doorloopt.
+  // We beginnen iets voorbij het gevonden eind van de stok: op een scan heeft de stok daar soms een gaatje, terwijl de vlag er
+  // al aan vastzit. Alleen zolang het zwart direct naast de stok vanaf het eind doorloopt (een boog vlak boven de stok zit er
+  // niet aan vast en is geen vlag).
   const telVlaggen = (stokX, eind, stap) => {
     let aantal = 0;
     let inVlag = false;
     let lengte = 0;
-    for (let n = 0; n < ia * 2.2; n += 1) {
+    let voorbij = 0;
+    while (voorbij < Math.round(ia * 0.4) && (zwart(stokX + 1, eind + stap * (voorbij + 1)) || zwart(stokX, eind + stap * (voorbij + 1)))) voorbij += 1;
+    for (let n = -voorbij; n < ia * 2.2; n += 1) {
       const y = eind - stap * n;
       const naast = zwart(stokX + 1, y) || zwart(stokX + 2, y);
       const verder = zwart(stokX + 3, y) || zwart(stokX + 4, y);
@@ -81,11 +87,12 @@ export function bepaalDuren(kaal, raster, schaal, koppenPerBalk) {
     }
     return beste;
   };
-  // Het aantal dikke horizontale stroken door de stok, in de laatste tweeënhalve lijnafstand voor het eind.
-  const telWaardestrepen = (stokX, eind, stap) => {
+  // Het aantal dikke horizontale stroken door de stok, in de laatste tweeënhalve lijnafstand voor het eind (bij een korte stok
+  // niet tot in de eigen kop: de bovenkant van de kop is ook breed).
+  const telWaardestrepen = (stokX, eind, stap, tot = ia * 2.5) => {
     let aantal = 0;
     let inStreep = false;
-    for (let n = 0; n < ia * 2.5; n += 1) {
+    for (let n = 0; n < tot; n += 1) {
       const y = eind - stap * n;
       let l = stokX;
       let r = stokX;
@@ -98,6 +105,45 @@ export function bepaalDuren(kaal, raster, schaal, koppenPerBalk) {
     return aantal;
   };
 
+  // Hoe ver de buitenste waardestreep van een stok naar links en rechts loopt (om noten onder één streep te groeperen): op de
+  // eerste rij vanaf het eind van de stok waar de strook rond de stok breder is dan een lijnafstand.
+  // Een schuine streep volgen we kolom voor kolom: steeds het zwart binnen twee pixels boven of onder de vorige hoogte.
+  const balkBereik = (stokX, eind, stap) => {
+    let y0 = null;
+    for (let n = 0; n < ia * 2.5 && y0 === null; n += 1) {
+      const y = eind - stap * n;
+      if (!zwart(stokX, y)) continue;
+      let l = stokX;
+      let r = stokX;
+      while (zwart(l - 1, y) && stokX - l <= ia) l -= 1;
+      while (zwart(r + 1, y) && r - stokX <= ia) r += 1;
+      if (r - l + 1 > ia) y0 = y;
+    }
+    if (y0 === null) return null;
+    const volg = (richting) => {
+      let y = y0;
+      let laatste = stokX;
+      let leeg = 0;
+      for (let x = stokX + richting; Math.abs(x - stokX) <= ia * 20; x += richting) {
+        let gevonden = null;
+        for (let dy = 0; dy <= 2 && gevonden === null; dy += 1) {
+          if (zwart(x, y - dy)) gevonden = y - dy;
+          else if (zwart(x, y + dy)) gevonden = y + dy;
+        }
+        if (gevonden === null) {
+          leeg += 1;
+          if (leeg > 1) break;
+          continue;
+        }
+        leeg = 0;
+        y = gevonden;
+        laatste = x;
+      }
+      return laatste;
+    };
+    return { links: volg(-1), rechts: volg(1) };
+  };
+
   return koppenPerBalk.map((koppen) => koppen.map((noot) => {
     const uit = { ...noot };
     const yKop = noot.y;
@@ -108,7 +154,9 @@ export function bepaalDuren(kaal, raster, schaal, koppenPerBalk) {
       const linksKant = Math.round(noot.x - kop.breedte / 2);
       const marge = Math.max(3, Math.round(ia * 0.3));
       // Koppen in andere lettertypen (Maestro) zijn wat smaller of breder dan in Bravura: zoek een paar kolommen naar binnen en buiten.
-      const kolommen = (rand, binnen) => Array.from({ length: marge + 3 }, (_, i) => rand + binnen * (i - 2));
+      // Eén kolom extra naar buiten staat achteraan: die telt alleen als hij echt langer is (een kop die iets te ver naar binnen
+      // geschat is), zodat de gewone kolommen bij gelijke lengte voorgaan.
+      const kolommen = (rand, binnen) => [...Array.from({ length: marge + 3 }, (_, i) => rand + binnen * (i - 2)), rand - binnen * 3];
       const op = strook(kolommen(rechtsKant, -1), Math.round(yKop - kop.hoogte * 0.25), -1);
       const neer = strook(kolommen(linksKant, 1), Math.round(yKop + kop.hoogte * 0.25), 1);
       const stok = op.lengte >= neer.lengte ? { ...op, richting: 'op', stap: -1 } : { ...neer, richting: 'neer', stap: 1 };
@@ -118,7 +166,8 @@ export function bepaalDuren(kaal, raster, schaal, koppenPerBalk) {
       } else {
         let delingen = 0;
         if (uit.stok) {
-          delingen = telWaardestrepen(stok.x, stok.eind, stok.stap);
+          delingen = telWaardestrepen(stok.x, stok.eind, stok.stap, Math.min(ia * 2.5, Math.abs(stok.eind - yKop) - ia * 0.6));
+          if (delingen > 0) uit.balk = balkBereik(stok.x, stok.eind, stok.stap);
           if (delingen === 0) delingen = telVlaggen(stok.x, stok.eind, stok.stap);
         }
         uit.duur = 480 / 2 ** delingen;

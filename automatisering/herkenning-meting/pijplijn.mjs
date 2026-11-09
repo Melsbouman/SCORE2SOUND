@@ -19,6 +19,9 @@ const { zoekRusten } = await laad('rusten.mjs');
 const optioneel = async (naam) => { try { return await laad(naam); } catch (fout) { if (String(fout).includes('Cannot find')) return null; throw fout; } };
 const kop = await optioneel('kop.mjs');
 const voortekens = await optioneel('voortekens.mjs');
+const hulplijnen = await optioneel('hulplijnen.mjs');
+const cijfers = await optioneel('cijfers.mjs');
+const opbouw = await optioneel('opbouw.mjs');
 
 export function leesPgm(pad) {
   const buffer = readFileSync(pad);
@@ -54,7 +57,25 @@ export function herken(pad) {
   const balkkoppen = kop ? kop.leesBalkkoppen(kaal, raster, schaal, { zw }) : null;
   const koppen = zoekNootkoppen(kaal, raster, schaal, { balkkoppen });
   const noten = bepaalDuren(kaal, raster, schaal, koppen);
-  const tekens = voortekens ? voortekens.zoekVoortekens(kaal, raster, schaal, { koppen: noten, balkkoppen }) : null;
+  // Voortekens op het beeld zonder hulplijnen: een kruis dat een hulplijn raakt, is dan een losse vorm.
+  const zonderHulplijnen = hulplijnen ? hulplijnen.verwijderHulplijnen(kaal, raster, schaal, koppen) : kaal;
+  const tekens = voortekens ? voortekens.zoekVoortekens(zonderHulplijnen, raster, schaal, { koppen: noten, balkkoppen }) : null;
   const rusten = zoekRusten(kaal, raster, schaal, { koppen, strepen: maten.map((m) => m.strepen), balkkoppen, voortekens: tekens });
-  return { schaal, raster, maten, balkkoppen, noten, voortekens: tekens, rusten, tijd: Date.now() - begin };
+  const aantallen = cijfers ? cijfers.leesMeermaatsAantallen(kaal, raster, schaal, rusten) : null;
+  return {
+    breedte: grijs.breedte, hoogte: grijs.hoogte, schaal, raster, maten, balkkoppen, noten, voortekens: tekens, rusten, aantallen,
+    tijd: Date.now() - begin,
+  };
+}
+
+// Het muziekmodel (opbouw.mjs) uit een of meer bladzijden (PGM-paden, in volgorde).
+export function bouwModel(paden, { titel = '' } = {}) {
+  if (!opbouw) throw new Error('opbouw.mjs ontbreekt in deze versie van de herkenning');
+  const paginas = paden.map((pad, i) => {
+    const r = herken(pad);
+    const { maten } = r;
+    return { blad: i + 1, breedte: r.breedte, hoogte: r.hoogte, raster: r.raster, schaal: r.schaal, maten, balkkoppen: r.balkkoppen,
+      noten: r.noten, voortekens: r.voortekens, rusten: r.rusten, aantallen: r.aantallen };
+  });
+  return opbouw.bouwPartituur(paginas, { titel });
 }
