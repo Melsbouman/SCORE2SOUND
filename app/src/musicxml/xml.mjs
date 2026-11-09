@@ -1,16 +1,31 @@
 // Kleine hulp om MusicXML te lezen. Bewaart de volgorde van elementen, want in een maat
-// tellen note, backup, forward en direction in volgorde. Alleen op de server (gebruikt fast-xml-parser).
-import { XMLParser, XMLValidator } from 'fast-xml-parser';
+// tellen note, backup, forward en direction in volgorde.
+// In Node leest fast-xml-parser de XML; in de browser de ingebouwde DOMParser, zodat de browser geen extra bibliotheek hoeft
+// te laden (een kale naam als 'fast-xml-parser' kan de browser niet vinden).
+const fxp = typeof DOMParser === 'undefined' ? await import('fast-xml-parser') : null;
 
 // Een knoop: { naam, attr: { ... }, kinderen: [knoop, ...], tekst: '...' }.
-const parser = new XMLParser({
+const parser = fxp ? new fxp.XMLParser({
   preserveOrder: true,
   ignoreAttributes: false,
   attributeNamePrefix: '',
   parseTagValue: false,
   parseAttributeValue: false,
   trimValues: true,
-});
+}) : null;
+
+// Een element uit de DOMParser van de browser naar dezelfde knoop als hierboven (tekst ingekort, zoals trimValues).
+function vanDom(element) {
+  const attr = {};
+  for (const attribuut of element.attributes) attr[attribuut.name] = attribuut.value;
+  const kinderen = [];
+  let tekst = '';
+  for (const kind of element.childNodes) {
+    if (kind.nodeType === 1) kinderen.push(vanDom(kind));
+    else if (kind.nodeType === 3 || kind.nodeType === 4) tekst += kind.nodeValue.trim();
+  }
+  return { naam: element.nodeName, attr, kinderen, tekst };
+}
 
 function omzetten(item) {
   const naam = Object.keys(item).find((k) => k !== ':@');
@@ -25,7 +40,13 @@ export function leesXmlBoom(tekst) {
   if (typeof tekst !== 'string' || tekst.trim() === '') throw new Error('Het bestand is leeg.');
   // Eigen entiteiten in een DOCTYPE kunnen een bestand opblazen; MusicXML heeft ze niet nodig.
   if (/<!ENTITY/i.test(tekst)) throw new Error('Dit bestand bevat XML-constructies die niet zijn toegestaan.');
-  const geldig = XMLValidator.validate(tekst);
+  if (!parser) {
+    const document = new DOMParser().parseFromString(tekst, 'application/xml');
+    const fout = document.getElementsByTagName('parsererror')[0];
+    if (fout) throw new Error(`Dit is geen geldige MusicXML: ${fout.textContent.trim().split(String.fromCharCode(10))[0]}.`);
+    return vanDom(document.documentElement);
+  }
+  const geldig = fxp.XMLValidator.validate(tekst);
   if (geldig !== true) throw new Error(`Dit is geen geldige MusicXML: ${geldig.err?.msg ?? 'onbekende fout'} (regel ${geldig.err?.line ?? '?'}).`);
   const wortel = parser.parse(tekst).map(omzetten).find((k) => !k.naam.startsWith('?') && k.naam !== '#text');
   if (!wortel) throw new Error('Dit is geen geldige MusicXML: er staat geen muziek in.');
