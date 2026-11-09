@@ -100,7 +100,7 @@ export function leesFoutmelding(log) {
     return 'De afbeelding is te klein om noten te lezen. Scan op 300 dpi en probeer het opnieuw.';
   }
   if (log.includes('No regularly spaced lines') || log.includes('No system found')) {
-    return 'Op dit blad staan geen notenbalken die de app kan lezen.';
+    return 'Op dit blad staan geen notenbalken die de app kan lezen. Staat het blad rechtop? Een liggende scan, of twee pagina\'s naast elkaar op één blad, kan de app nog niet lezen: draai het blad of knip het eerst in tweeën.';
   }
   return 'De bladmuziek is niet herkend.';
 }
