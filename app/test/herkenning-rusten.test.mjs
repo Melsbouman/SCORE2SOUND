@@ -169,3 +169,34 @@ test('rusten: een punt rechts naast een rust (in een tussenruimte) maakt hem ges
   const rusten = zoekRusten(kaal, raster, schaal, { koppen: zoekNootkoppen(kaal, raster, schaal) })[0];
   assert.deepEqual(rusten.map((r) => [r.soort, Boolean(r.punt)]), [['kwart', true], ['kwart', false], ['8', true], ['kwart', false]]);
 });
+
+// Een meermaatsrust in de oude schrijfwijze: een blokje van vier maten (tweede tot vierde lijn), een van twee maten (tweede
+// lijn tot de middelste) en een hele rust, samen zeven maten. Daarna, na een maatstreep, een losse hele rust (die blijft een
+// hele rust) en een los blokje van twee maten.
+test('rusten: blokjes van vier en twee maten met een hele rust zijn samen één meermaatsrust', () => {
+  const { beeld, verwacht } = maakBlad({ balken: 1, koppen: false, maatstrepen: false, lijnafstand: ia });
+  const lijn0 = verwacht.balken[0].lijnen[0].a;
+  const yOp = (stap) => Math.round(lijn0 + (stap * ia) / 2);
+  const zet = (x, y) => { beeld.pixels[Math.round(y) * beeld.breedte + Math.round(x)] = 0; };
+  const vlak = (x0, x1, y0, y1) => { for (let x = x0; x <= x1; x += 1) for (let y = y0; y <= y1; y += 1) zet(x, y); };
+  const stempel = (naam, ax, ay) => {
+    const t = sjabloon(naam, ia);
+    for (let y = 0; y < t.hoogte; y += 1) for (let x = 0; x < t.breedte; x += 1) if (t.pixels[y * t.breedte + x]) zet(ax - t.ankerX + x, ay - t.ankerY + y);
+  };
+  stempel('sleutel-g', 105, yOp(6));
+  vlak(300, 311, yOp(2), yOp(6)); // vier maten
+  vlak(330, 341, yOp(2), yOp(4)); // twee maten
+  vlak(360, 385, yOp(2), yOp(3) - 1); // hele rust
+  vlak(500, 502, yOp(0), yOp(8)); // maatstreep
+  vlak(560, 585, yOp(2), yOp(3) - 1); // losse hele rust
+  vlak(700, 702, yOp(0), yOp(8)); // maatstreep
+  vlak(760, 771, yOp(2), yOp(4)); // los blokje van twee maten
+  const zw = zwartWit(beeld);
+  const schaal = meetSchaal(zw);
+  const raster = vindBalken(zw, schaal);
+  const kaal = verwijderLijnen(zw, raster, schaal);
+  const strepen = [[{ links: 500, rechts: 502, soort: 'enkel' }, { links: 700, rechts: 702, soort: 'enkel' }]];
+  const [rusten] = zoekRusten(kaal, raster, schaal, { strepen });
+  assert.deepEqual(rusten.map((rust) => [rust.soort, rust.aantal ?? null]), [['meermaats', 7], ['heel', null], ['meermaats', 2]]);
+  assert.ok(Math.abs(rusten[0].links - 300) <= 2 && Math.abs(rusten[0].rechts - 385) <= 2, `van ${rusten[0].links} tot ${rusten[0].rechts}`);
+});

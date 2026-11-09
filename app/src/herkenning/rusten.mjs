@@ -16,8 +16,11 @@
 // 6. Een rust valt op een scan soms in stukken (het bolletje van een achtste rust los van de staart): stukken die elkaar
 //    (bijna) raken, vergelijken we eerst samen.
 // 7. Een los vlekje in een tussenruimte vlak rechts van een rust is een punt (`punt: true`, anderhalf keer zo lang).
-// Uitkomst per balk: [{ x, soort, links, rechts, punt? }] met soort 'meermaats', 'heel', 'half', 'kwart', '8', '16' of '32'
-// en x het midden.
+// 8. Een meermaatsrust in de oude schrijfwijze: blokjes van de tweede lijn tot de middelste (twee maten) of tot de vierde lijn
+//    (vier maten), eventueel met een hele rust erachter, naast elkaar in één maat. Samen zijn ze één meermaatsrust met het
+//    opgetelde aantal maten (`aantal`; het getal erboven leest cijfers.mjs).
+// Uitkomst per balk: [{ x, soort, links, rechts, punt?, aantal? }] met soort 'meermaats', 'heel', 'half', 'kwart', '8', '16' of
+// '32' en x het midden.
 import { vindVormen } from './vormen.mjs';
 import { sjabloon, vergelijkVorm } from './sjablonen.mjs';
 import { maakZoekPunt } from './duren.mjs';
@@ -110,6 +113,13 @@ export function zoekRusten(kaal, raster, schaal, { koppen = [], strepen = [], ba
       const h = (kader.onder - kader.boven + 1) / ia;
       const midden = ((kader.boven + kader.onder) / 2 - yOp(0, x)) / (ia / 2); // in stappen
       const vulling = pixels / ((kader.rechts - kader.links + 1) * (kader.onder - kader.boven + 1));
+      // Een blokje van een oude meermaatsrust: gevuld, smal, van de tweede lijn tot de middelste of tot de vierde lijn.
+      if (w >= 0.3 && w <= 0.9 && vulling >= 0.8) {
+        const bovenStap = (kader.boven - yOp(0, x)) / (ia / 2);
+        const onderStap = (kader.onder - yOp(0, x)) / (ia / 2);
+        if (Math.abs(bovenStap - 2) <= 0.6 && Math.abs(onderStap - 4) <= 0.6) return 'twee';
+        if (Math.abs(bovenStap - 2) <= 0.6 && Math.abs(onderStap - 6) <= 0.6) return 'vier';
+      }
       if (w >= 0.7 && w <= 1.7 && h >= 0.3 && h <= 0.75 && vulling >= 0.75) {
         // Bovenkant tegen de tweede lijn (stap 2): hele rust; onderkant op de middelste lijn (stap 4): halve rust.
         const bovenStap = (kader.boven - yOp(0, x)) / (ia / 2);
@@ -191,6 +201,26 @@ export function zoekRusten(kaal, raster, schaal, { koppen = [], strepen = [], ba
       if ((drie || vijf || op(1)) && !(drie && vijf)) rust.punt = true;
     }
     for (const bar of meermaats) uit.push({ x: Math.round((bar.links + bar.rechts) / 2), soort: 'meermaats', links: bar.links, rechts: bar.rechts });
-    return uit.sort((p, q) => p.x - q.x);
+    // Blokjes van een oude meermaatsrust met de hele rusten ernaast (tot anderhalve lijnafstand ertussen, geen maatstreep):
+    // één meermaatsrust. Een hele rust zonder blokje ernaast blijft een hele rust.
+    uit.sort((p, q) => p.x - q.x);
+    const MATEN = { twee: 2, vier: 4, heel: 1 };
+    const samen = [];
+    for (const rust of uit) {
+      const vorige = samen.at(-1);
+      const streepTussen = (links, rechts) => (strepen[b] ?? []).some((streep) => streep.links >= links && streep.rechts <= rechts);
+      if (MATEN[rust.soort] && vorige?.kerk && rust.links - vorige.rechts <= ia * 1.5 && !streepTussen(vorige.rechts, rust.links)) {
+        vorige.delen.push(rust);
+        vorige.rechts = rust.rechts;
+      } else {
+        samen.push(MATEN[rust.soort] ? { kerk: true, delen: [rust], links: rust.links, rechts: rust.rechts } : rust);
+      }
+    }
+    return samen.flatMap((ding) => {
+      if (!ding.kerk) return [ding];
+      if (!ding.delen.some((rust) => rust.soort !== 'heel')) return ding.delen;
+      const aantal = ding.delen.reduce((som, rust) => som + MATEN[rust.soort], 0);
+      return [{ x: Math.round((ding.links + ding.rechts) / 2), soort: 'meermaats', links: ding.links, rechts: ding.rechts, aantal }];
+    });
   });
 }

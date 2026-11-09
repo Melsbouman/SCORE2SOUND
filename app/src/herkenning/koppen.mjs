@@ -8,6 +8,8 @@
 // 3. Alleen plekken waar het midden van de kop zwart is (zwarte kop) of de rand van de kop zwart is (halve of hele) proberen
 //    we; dat scheelt veel rekenwerk.
 // 4. Van treffers die elkaar overlappen houden we de beste.
+// 5. Een blokje van een oude meermaatsrust (gevuld, smaller dan een kop, met rechte kanten op de tweede lijn en de middelste of
+//    vierde lijn; rusten.mjs) lijkt op een zwarte kop, maar is er geen.
 // Uitkomst per balk: [{ x, y, stap, soort, score }], met x en y het midden van de kop in pixels en stap de plek op de balk
 // (0 = bovenste lijn, 8 = onderste lijn, oneven = tussenruimte, negatief = erboven).
 import { sjabloon } from './sjablonen.mjs';
@@ -137,12 +139,14 @@ export function zoekNootkoppen(kaal, raster, schaal, { drempel = 0.78, balkkoppe
               }
             }
           }
-          if (beste.ja && (stap > -2 && stap < 10 || heeftHulplijnen(balk, x - t.ankerX + t.breedte / 2, stap, t.breedte))) treffers.push({ x: x - t.ankerX + t.breedte / 2, y: ky, stap, soort: t.soort, score: beste.v, breedte: t.breedte, hoogte: t.hoogte });
+          if (beste.ja && (stap > -2 && stap < 10 || heeftHulplijnen(balk, x - t.ankerX + t.breedte / 2, stap, t.breedte))) treffers.push({ x: x - t.ankerX + t.breedte / 2, y: ky, stap, soort: t.soort, score: beste.v, breedte: t.breedte, hoogte: t.hoogte, tweedeKans: !!t.gewoon });
         }
       }
     }
-    // De beste per plek: overlappende treffers (meer dan een derde van de kleinste) vallen weg.
-    treffers.sort((a, b) => b.score - a.score);
+    // De beste per plek: overlappende treffers (meer dan een derde van de kleinste) vallen weg. Het tweede halve sjabloon (alleen
+    // de buitenrand) is een tweede kans: het vult alleen plekken waar geen gewoon sjabloon past (de buitenrand van een hele
+    // kop past er ook op).
+    treffers.sort((a, b) => (a.tweedeKans - b.tweedeKans) || (b.score - a.score));
     const gekozen = [];
     for (const kandidaat of treffers) {
       const overlapt = gekozen.some((ander) => {
@@ -152,6 +156,25 @@ export function zoekNootkoppen(kaal, raster, schaal, { drempel = 0.78, balkkoppe
       });
       if (!overlapt) gekozen.push(kandidaat);
     }
-    return gekozen.sort((a, b) => a.x - b.x).map(({ x, y, stap, soort, score: s }) => ({ x: Math.round(x), y, stap, soort, score: Math.round(s * 1000) / 1000 }));
+    // Een blokje van een oude meermaatsrust: vanuit het midden van de kop de zwarte strook naar links, rechts, boven en onder.
+    const isBlokje = (kop) => {
+      const x = Math.round(kop.x);
+      const y = Math.round(kop.y);
+      if (!zwart(x, y)) return false;
+      let l = x; while (zwart(l - 1, y) && x - l < ia) l -= 1;
+      let r = x; while (zwart(r + 1, y) && r - x < ia) r += 1;
+      let o = y; while (zwart(x, o - 1) && y - o < ia * 2) o -= 1;
+      let n = y; while (zwart(x, n + 1) && n - y < ia * 2) n += 1;
+      // (Dezelfde breedte als een blokje in rusten.mjs.)
+      if (r - l + 1 > ia * 0.9 || r - l + 1 < ia * 0.3) return false;
+      const bovenStap = (o - yOp(0, x)) / (ia / 2);
+      const onderStap = (n - yOp(0, x)) / (ia / 2);
+      if (Math.abs(bovenStap - 2) > 0.6 || (Math.abs(onderStap - 4) > 0.6 && Math.abs(onderStap - 6) > 0.6)) return false;
+      let vol = 0;
+      for (let yy = o; yy <= n; yy += 1) for (let xx = l; xx <= r; xx += 1) if (zwart(xx, yy)) vol += 1;
+      return vol >= (r - l + 1) * (n - o + 1) * 0.88;
+    };
+    return gekozen.filter((kop) => kop.soort !== 'zwart' || !isBlokje(kop))
+      .sort((a, b) => a.x - b.x).map(({ x, y, stap, soort, score: s }) => ({ x: Math.round(x), y, stap, soort, score: Math.round(s * 1000) / 1000 }));
   });
 }

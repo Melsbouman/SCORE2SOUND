@@ -31,7 +31,8 @@ Focus sinds 8 nov: een werkende scanner met verbeteren in de editor (`plannen/20
 - Devils Galop: maat 69 tot 73 (rusten van 3 en 3 maten) leest Audiveris als één rust van 3; de nummermelding wijst erop.
 - Distant Land: 130 van de 134 maten; een maat te veel in regel 3 en 4 (Audiveris splitst een maat), de rust van 6 maten bij 98 wordt niet gelezen.
 - Meldingen met een maatnummer in de tekst ("Maat 53: ...") houden dat nummer na het invoegen van maten; de maat waar ze bij horen schuift wel mee.
-- Suite Gothique: vanaf maat 57 zijn bijna alle maten in 4/4 precies een tel te kort (het lijkt 3/4, een Menuet), en in het Choral (2/4) duren maten vier tellen: de maatsoort is verkeerd gelezen. `herstelMaatsoorten` past bewust niets aan; nu komen er tientallen losse maatduur-meldingen. Voorstel: één melding "maat 57 tot 140 duren elk 3 kwarten: staat er misschien 3/4?" als vier of meer maten op rij hetzelfde afwijken.
+- Eigen herkenning, Masque: een liggende scan van twee pagina's in een staande pagina. In de browser: als er geen notenbalken zijn, 90 of 270 graden draaien (`draai` in bladen.mjs) en een breed blad in tweeën knippen, vóór `herkenPagina`. Let op `vak.blad` en `bron.bladen` (de plek van een maat op het blad).
+- Eigen herkenning, vage scans: kwart- en achtste rusten uit elkaar houden (Gothique, Toccata), halve noten met een vage stok.
 - Tempowisselingen midden in het stuk koppelen aan maten; Galop: arrangeur, en de laatste 4 maatduur-meldingen (31, 52, 77, 97).
 
 ## Editor

@@ -368,3 +368,38 @@ test('opbouw: een zekere maatsoort waar geen maat in past, wijkt voor de optie w
   const { maten } = bouwPartituur([pagina]).partijen[0];
   assert.deepEqual(maten.map((m) => `${m.maatsoort.teller}/${m.maatsoort.noemer}`), ['2/2', '2/2', '2/2', '3/4', '3/4', '3/4', '3/4', '3/4']);
 });
+
+// Een oude meermaatsrust (rusten.mjs geeft het aantal uit de blokjes): zoveel maten, ook zonder getal erboven.
+test('opbouw: een meermaatsrust met een aantal uit de blokjes wordt zoveel maten', () => {
+  const pagina = {
+    blad: 1, schaal: { lijnafstand: ia }, raster: { balken: [balk(200)] },
+    balkkoppen: [{ sleutel: { soort: 'G', lijn: 2 }, voortekening: { aantal: 0, tekens: [] }, maatsoort: { teller: 3, noemer: 4 }, einde: 180 }],
+    maten: [{ strepen: [], maten: [vak(180, 600, 200), vak(600, 1100, 200)] }],
+    noten: [[kop(700, 200, 4), kop(800, 200, 4), kop(900, 200, 4)]],
+    voortekens: [[]],
+    rusten: [[{ x: 380, soort: 'meermaats', links: 300, rechts: 460, aantal: 7 }]],
+    aantallen: [[]],
+  };
+  const { maten } = bouwPartituur([pagina]).partijen[0];
+  assert.equal(maten.length, 8);
+  assert.equal(maten[0].maatrust, 7);
+  assert.deepEqual(maten[0].elementen.map((e) => [e.duur, e.heleMaat, e.zekerheid]), [[1440, true, 0.9]]);
+  assert.equal(maten.filter((m) => m.verborgen).length, 6);
+});
+
+// Twee meermaatsrusten in één maat (twee blokjes ver uit elkaar) mogen het getal van een latere rust niet verschuiven: zonder
+// gelezen getal bij de rust zelf telt het aantal uit de blokjes.
+test('opbouw: zonder getal bij de rust zelf telt het aantal uit de blokjes, niet het getal van een andere rust', () => {
+  const kerk = (x, aantal) => ({ x, soort: 'meermaats', links: x - 10, rechts: x + 10, aantal });
+  const pagina = {
+    blad: 1, schaal: { lijnafstand: ia }, raster: { balken: [balk(200)] },
+    balkkoppen: [{ sleutel: { soort: 'G', lijn: 2 }, voortekening: { aantal: 0, tekens: [] }, maatsoort: { teller: 4, noemer: 4 }, einde: 180 }],
+    maten: [{ strepen: [], maten: [vak(180, 500, 200), vak(500, 800, 200), vak(800, 1100, 200)] }],
+    noten: [[]],
+    voortekens: [[]],
+    rusten: [[kerk(250, 4), kerk(400, 2), { x: 650, soort: 'meermaats', links: 550, rechts: 750 }, kerk(950, 2)]],
+    aantallen: [[{ x: 250, aantal: null }, { x: 400, aantal: null }, { x: 650, aantal: 8 }, { x: 950, aantal: null }]],
+  };
+  const { maten } = bouwPartituur([pagina]).partijen[0];
+  assert.deepEqual(maten.filter((m) => m.maatrust).map((m) => m.maatrust), [4, 8, 2]);
+});

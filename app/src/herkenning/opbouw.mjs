@@ -14,7 +14,8 @@
 //    cijfer bij een groep onder één waardestreep (groepcijfers.mjs) maakt de noten een triool (of een ander groepje): de
 //    duur wordt `normaal / aantal` keer zo lang, met 3 in de tijd van 2, 2 en 4 in de tijd van 3, en 5, 6 en 7 in die van 4.
 // 6. Een hele rust die alleen in de maat staat, vult de hele maat. Een meermaatsrust wordt zoveel maten als het getal erboven
-//    zegt (cijfers.mjs): de eerste met `maatrust`, de andere verborgen.
+//    zegt (cijfers.mjs), of bij de oude schrijfwijze de blokjes samen (rusten.mjs): de eerste met `maatrust`, de andere
+//    verborgen.
 // De herstelketen (herstelHerkenning, vulRustGaten, herstelTriolen, maatduur) kan daarna op het resultaat draaien, net als na
 // Audiveris. Het veld `bron` (waar de bladzijden te vinden zijn) zet de keten in de browser zelf.
 import { TIKKEN_PER_KWART } from '../model/duur.mjs';
@@ -119,7 +120,10 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
         // Een meermaatsrust: zoveel maten als het getal erboven.
         const rustbalk = gebeurtenissen.find((g) => g.rust?.soort === 'meermaats');
         if (rustbalk) {
-          const aantal = aantallen.find((a) => Math.abs(a.x - rustbalk.rust.x) <= ia)?.aantal ?? aantallen[meermaats]?.aantal ?? null;
+          // Het getal erboven (cijfers.mjs, bij voorkeur op de plek van deze rust; alleen zonder zo'n plek op volgorde), of anders
+          // het aantal uit de blokjes van een oude meermaatsrust (rusten.mjs).
+          const bijRust = aantallen.find((a) => Math.abs(a.x - rustbalk.rust.x) <= ia);
+          const aantal = (bijRust ? bijRust.aantal : aantallen[meermaats]?.aantal) ?? rustbalk.rust.aantal ?? null;
           meermaats += 1;
           const n = aantal && aantal > 0 ? aantal : 1;
           for (let i = 0; i < n; i += 1) {
