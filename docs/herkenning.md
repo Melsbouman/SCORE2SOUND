@@ -15,7 +15,7 @@ Elke bladzijde doorloopt in `keten.mjs` een vaste volgorde van stappen:
 7. **Nootkoppen zoeken (`koppen.mjs`)**: Vindt alle nootkoppen op de balken. Levert de gevonden nootkoppen op.
 8. **Duren bepalen (`duren.mjs`)**: Bepaalt de duur van de noten aan de hand van nootkoppen, stokken en vlaggen. Levert de noten met hun duur op.
 9. **Hulplijnen verwijderen (`hulplijnen.mjs`)**: Wist de hulplijnen (kort boven/onder de balk) weg zodat voortekens die de hulplijn raken goed herkend kunnen worden. Levert een beeld zonder hulplijnen op.
-10. **Voortekens zoeken (`voortekens.mjs`)**: Zoekt mollen, kruizen en herhalingstekens bij de noten. Levert de voortekens op.
+10. **Voortekens zoeken (`voortekens.mjs`)**: Zoekt mollen, kruizen en herstellingstekens bij de noten. Levert de voortekens op.
 11. **Rusten zoeken (`rusten.mjs`)**: Vindt de rusten op de balken. Levert de rusten op.
 12. **Meermaatsaantallen lezen (`cijfers.mjs`)**: Leest de cijfers boven meermaatsrusten. Levert de aantallen op.
 13. **Triolen lezen (`groepcijfers.mjs`)**: Leest de groepcijfers (zoals triolen) boven noten. Levert de triolen op.
@@ -27,7 +27,7 @@ Na het herkennen van de losse bladzijden bouwt `bouwUitPaginas` in `keten.mjs` d
 - **`vulRustGaten`** (`app/src/model/rustgaten.mjs`): Vult ontbrekende rusten op waar de maatduur niet klopt.
 - **`herstelTriolen`** (`app/src/model/triolenherstel.mjs`): Corrigeert de duur en verdeling binnen triolen.
 - **`vulLegeMaten`** (`app/src/controle/nabewerken.mjs`): Vult lege maten op met passende rusten.
-- **`controleerMaatduur`** en **`maatsoortVermoedens`** (`app/controle/maatduur.mjs`): Controleren of de som van de nootduren per maat klopt met de maatsoort.
+- **`controleerMaatduur`** en **`maatsoortVermoedens`** (`app/src/controle/maatduur.mjs`): Controleren of de som van de nootduren per maat klopt met de maatsoort.
 - **`markeerVerdachteNoten`** en **`markeerFouteMaten`** (`app/src/model/verdacht.mjs` en `app/src/controle/nabewerken.mjs`): Markeren onzekere noten en maten voor de gebruiker.
 
 ## Meting
