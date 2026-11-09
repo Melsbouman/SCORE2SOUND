@@ -19,9 +19,9 @@ function maakPdf(mediaboxPages, mediaboxPage) {
   return Buffer.concat(delen.map((deel) => (Buffer.isBuffer(deel) ? deel : Buffer.from(deel, 'latin1'))));
 }
 
-test('de pagina geeft haar breedte en hoogte in punten (MediaBox), ook als ze die erft', () => {
-  const [eigen] = leesPdfTekens(maakPdf(null, '0 0 595.28 841.89'));
+test('de pagina geeft haar breedte en hoogte in punten (MediaBox), ook als ze die erft', async () => {
+  const [eigen] = await leesPdfTekens(maakPdf(null, '0 0 595.28 841.89'));
   assert.deepEqual([eigen.breedte, eigen.hoogte], [595.28, 841.89]);
-  const [geerfd] = leesPdfTekens(maakPdf('0 0 842 595', null));
+  const [geerfd] = await leesPdfTekens(maakPdf('0 0 842 595', null));
   assert.deepEqual([geerfd.breedte, geerfd.hoogte], [842, 595]);
 });
