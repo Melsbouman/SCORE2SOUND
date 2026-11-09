@@ -1,6 +1,6 @@
 // Meldingen na een bewerking: de controle op maatduur opnieuw, en de meldingen uit de herkenning laten staan.
 // Een herkenningsmelding bij een maat verdwijnt pas als die maat is goedgekeurd (alle noten en rusten zekerheid 1).
-import { controleerMaatduur } from './maatduur.mjs';
+import { controleerMaatduur, maatsoortVermoedens } from './maatduur.mjs';
 
 function maatGoedgekeurd(partituur, melding) {
   if (melding.partij == null || melding.maat == null) return false;
@@ -39,5 +39,5 @@ export function vernieuwMeldingen(oude, partituur, vorige = null) {
   const herkenning = (oude ?? []).filter((m) => m.soort === 'herkenning')
     .map((m) => verschuif(m, vorige, partituur))
     .filter((m) => m && !maatGoedgekeurd(partituur, m));
-  return [...herkenning, ...controleerMaatduur(partituur)];
+  return [...herkenning, ...controleerMaatduur(partituur), ...maatsoortVermoedens(partituur)];
 }
