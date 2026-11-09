@@ -16,7 +16,7 @@ function willekeur(zaad) {
 export function maakBlad({
   breedte = 1200, hoogte = 1500, balken = 5, lijnafstand = 20, lijndikte = 2, helling = 0, links = 100, rechts = 1100,
   boven = 150, afstandBalken = 220, koppen = true, maatstrepen = true, ruis = 0, achtergrond = 255, inkt = 0, verloop = 0,
-  zaad = 1, hulplijnNoten = 0, extraLijn = null,
+  zaad = 1, hulplijnNoten = 0, extraLijn = null, streepDikte = 2, strepen = null, langeStokken = 0, eindstreep = false, bogen = false,
 } = {}) {
   const kans = willekeur(zaad);
   const inktLaag = new Uint8Array(breedte * hoogte);
@@ -60,11 +60,54 @@ export function maakBlad({
       }
     }
     const yOp = (x, stap) => lijnen[0].a + helling * x + (stap * lijnafstand) / 2;
+    // Maatstrepen: standaard aan het begin, op een derde, op twee derde en aan het eind van de balk; `strepen` geeft eigen
+    // plekken (als deel van de breedte). Met eindstreep staat aan het eind een dunne en een dikke streep.
+    verwacht.balken.at(-1).strepen = [];
     if (maatstrepen) {
-      for (const x of [links, links + (rechts - links) / 3, links + (2 * (rechts - links)) / 3, rechts]) {
-        for (let y = yOp(x, 0); y <= yOp(x, 8); y += 0.5) zet(x, y);
-        zet(x + 1, yOp(x, 4));
+      const delen = strepen ?? [0, 1 / 3, 2 / 3, 1];
+      for (const deel of delen) {
+        const x0 = Math.round(links + deel * (rechts - links));
+        const laatste = deel === delen.at(-1) && eindstreep;
+        const stukken = laatste ? [[x0 - Math.round(lijnafstand * 0.9), streepDikte], [x0 - Math.round(lijnafstand * 0.5), Math.round(lijnafstand * 0.5)]] : [[x0, streepDikte]];
+        for (const [xs, w] of stukken) {
+          for (let x = xs; x < xs + w; x += 1) for (let y = yOp(x, 0) - lijndikte / 2; y <= yOp(x, 8) + lijndikte / 2; y += 0.5) zet(x, y);
+        }
+        verwacht.balken.at(-1).strepen.push({ x: laatste ? x0 - Math.round(lijnafstand * 0.5) : x0 + (streepDikte - 1) / 2, soort: laatste ? 'eind' : 'enkel' });
       }
+    }
+    // Een rij overbindingen vlak boven de balk (zoals hele noten die over de maatstreep doorklinken): bogen van 100 pixels met
+    // gaten ertussen, op ongeveer 0,7 lijnafstand boven de bovenste lijn.
+    if (bogen) {
+      for (let x0 = links + 80; x0 + 100 < rechts; x0 += 120) {
+        // Een vlakke boog (hele noten die doorklinken) op een lijnafstand boven de bovenste lijn.
+        for (let x = x0; x <= x0 + 100; x += 0.5) {
+          const t = (x - x0) / 100;
+          const y = lijnen[0].a + helling * x - lijnafstand - 4 * t * (1 - t) * 1.5;
+          for (let d = 0; d < lijndikte; d += 1) zet(x, y - (lijndikte - 1) / 2 + d);
+        }
+        // Een hele noot op de onderste lijn (die onderbreekt die lijn), onder het begin van de boog.
+        const cx = x0 - 10;
+        const cy = lijnen[4].a + helling * cx;
+        for (let dy = -lijnafstand * 0.45; dy <= lijnafstand * 0.45; dy += 0.5) {
+          for (let dx = -lijnafstand * 0.8; dx <= lijnafstand * 0.8; dx += 0.5) {
+            const r = (dx * dx) / (0.64 * lijnafstand * lijnafstand) + (dy * dy) / (0.2025 * lijnafstand * lijnafstand);
+            if (r <= 1 && r >= 0.35) zet(cx + dx, cy + dy);
+          }
+        }
+      }
+    }
+    // Lange stokken dwars door de hele balk (een nootkop ver onder de balk, de stok tot boven de balk, zoals bij een balk van
+    // achtsten): dat zijn geen maatstrepen.
+    for (let n = 0; n < langeStokken; n += 1) {
+      const x = links + 90 + n * 170;
+      if (x > rechts - 60) break;
+      const kop = yOp(x, 14);
+      for (let dy = -lijnafstand * 0.45; dy <= lijnafstand * 0.45; dy += 0.5) {
+        for (let dx = -lijnafstand * 0.65; dx <= lijnafstand * 0.65; dx += 0.5) {
+          if ((dx * dx) / (0.4225 * lijnafstand * lijnafstand) + (dy * dy) / (0.2025 * lijnafstand * lijnafstand) <= 1) zet(x + dx, kop + dy);
+        }
+      }
+      for (let y = kop; y >= yOp(x, -3); y -= 0.5) { zet(x + lijnafstand * 0.65 - 1, y); zet(x + lijnafstand * 0.65, y); }
     }
     if (koppen) {
       for (let x = links + 60; x < rechts - 40; x += 55) {
