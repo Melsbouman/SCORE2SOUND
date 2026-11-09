@@ -65,25 +65,25 @@ Wij volgen dezelfde volgorde en dezelfde ideeën. Ideeën en werkwijzen zijn vri
 ## Fasen en pakketten
 Golf 1 kan nu beginnen; de latere golven worden per golf uitgewerkt, met de uitslag van de vorige.
 
-| Nr | Titel | Bestanden | Uitvoerder | Hangt af van | Golf |
-|---|---|---|---|---|---|
-| A1 | Projecten in de browser (IndexedDB), bewaren en openen als bestand | `app/public/js/opslag.js` (nieuw), `views/projecten.js`, `views/begin.js` | Claude-uitvoerder | – | 1 |
-| A2 | MusicXML en .mxl openen in de browser | `app/src/import/importeer.mjs` (nieuw, uit `server/importeer.mjs`), `upload.js`, `views/bewerken.js`, `views/voorbeeld.js` | Claude-uitvoerder | – | 1 |
-| B1 | Pdf-lezer voor de browser: objecten, streams, pagina's, tekens, zonder `Buffer`/`zlib` | `app/src/pdf/lezer.mjs` (nieuw), `app/src/pdf/tekens.mjs` (nieuw) | Claude | – | 1 |
-| C1 | Beeld en schaal (BINARY, SCALE): grijs, zwart-wit, lijndikte en lijnafstand uit histogrammen | `app/src/herkenning/beeld.mjs`, `schaal.mjs` | Claude | – | 1 |
-| C2 | Raster (GRID, deel 1): notenbalklijnen als draden, balken van 5 lijnen, helling, links en rechts | `app/src/herkenning/raster.mjs` | Claude | C1 | 1 |
-| B2 | Paginabeelden uit een pdf: JPEG, gewone compressie, faxcodering (CCITT G4) | `app/src/pdf/beelden.mjs`, `app/src/pdf/ccitt.mjs` | Claude-uitvoerder | B1 | 2 |
-| C3 | Raster (GRID, deel 2): maatstrepen, systemen, maten met `vak`, beeld zonder lijnen | `app/src/herkenning/raster.mjs` | Claude | C2 | 2 |
-| C4 | Notenbalklijnen weghalen en losse vormen zoeken | `app/src/herkenning/vormen.mjs` | Claude-uitvoerder | C2 | 2 |
-| D1 | Digitale pdf: notenbalken uit lijnen en tekens uit het lettertype, direct naar het model | `app/src/herkenning/digitaal.mjs` | Claude | B1 | 2 |
-| A3 | Pdf-export in de browser | `views/export.js`, eigen pdf-schrijver of pdfkit in de browser | Claude-uitvoerder | – | 2 |
-| C5 | Symbolen: nootkoppen, rusten, sleutels, voortekens, cijfers van de maatsoort, punten, balken, stokken, vlaggen, H-balk | `app/src/herkenning/symbolen.mjs`, `sjablonen.mjs` | Claude | C3, C4 | 3 |
-| C6 | Muziek opbouwen voor één stem: toonhoogte, duur, maatsoort, voortekening, meermaatsrust | `app/src/herkenning/opbouw.mjs` | Claude | C5 | 3 |
-| C7 | Cijfers en letters: aantal maten boven een meermaatsrust, repetitiecijfers, maatnummers | `app/src/herkenning/cijfers.mjs` | Claude-uitvoerder | C4 | 3 |
-| C8 | Keten in de browser: Web Worker, voortgang, bestaande herstelketen, scan als concept in de editor | `app/public/js/herken-worker.js`, `upload.js`, `app/src/herkenning/keten.mjs` | Claude | C6, C7 | 4 |
-| C9 | Scanmeting met de eigen herkenning naast Audiveris | `automatisering/scanmeting.mjs`, `app/src/meting/` | Claude-uitvoerder | C6 | 4 |
-| A5 | Inloggen met Google en projecten in de Google Drive van de klant (`appDataFolder`) | `app/public/js/google.js` (nieuw), `app/public/js/opslag.js`, `views/inloggen.js`, CSP in `app/server.mjs` | Claude | A1, client-ID van Mels | 3 |
-| A4 | Server en wachtwoord-accounts weg, statische site, hosting-uitleg (domeinnaam + Cloudflare Pages of GitHub Pages) | `app/server.mjs`, `docs/online.md`, `automatisering/statisch.sh` | Claude-uitvoerder en Hermes | C8, A5 | 5 |
+| Nr | Titel | Bestanden | Uitvoerder | Hangt af van | Golf | Stand |
+|---|---|---|---|---|---|---|
+| A1 | Projecten in de browser (IndexedDB), bewaren en openen als bestand | `app/public/js/opslag.js` (nieuw), `views/projecten.js`, `views/begin.js` | Claude-uitvoerder | – | 1 | klaar (#1825) |
+| A2 | MusicXML en .mxl openen in de browser | `app/src/import/importeer.mjs` (nieuw, uit `server/importeer.mjs`), `upload.js`, `views/bewerken.js`, `views/voorbeeld.js` | Claude-uitvoerder | – | 1 | klaar (#1824, spoed #1828) |
+| B1 | Pdf-lezer voor de browser: objecten, streams, pagina's, tekens, zonder `Buffer`/`zlib` | `app/src/pdf/lezer.mjs` (nieuw), `app/src/pdf/tekens.mjs` (nieuw) | Claude | – | 1 | klaar (#1833) |
+| C1 | Beeld en schaal (BINARY, SCALE): grijs, zwart-wit, lijndikte en lijnafstand uit histogrammen | `app/src/herkenning/beeld.mjs`, `schaal.mjs` | Claude | – | 1 | klaar (#1829) |
+| C2 | Raster (GRID, deel 1): notenbalklijnen als draden, balken van 5 lijnen, helling, links en rechts | `app/src/herkenning/raster.mjs` | Claude | C1 | 1 | klaar (#1829) |
+| B2 | Paginabeelden uit een pdf: JPEG, gewone compressie, faxcodering (CCITT G4) | `app/src/pdf/beelden.mjs`, `app/src/pdf/ccitt.mjs` | Claude-uitvoerder | B1 | 2 | klaar (#1834, #1836) |
+| C3 | Raster (GRID, deel 2): maatstrepen, systemen, maten met `vak`, beeld zonder lijnen | `app/src/herkenning/raster.mjs` | Claude | C2 | 2 | klaar (#1837, in maten.mjs) |
+| C4 | Notenbalklijnen weghalen en losse vormen zoeken | `app/src/herkenning/vormen.mjs` | Claude-uitvoerder | C2 | 2 | klaar (#1830) |
+| D1 | Digitale pdf: notenbalken uit lijnen en tekens uit het lettertype, direct naar het model | `app/src/herkenning/digitaal.mjs` | Claude | B1 | 2 | open: lettertype tekenen of pdf.js |
+| A3 | Pdf-export in de browser | `views/export.js`, eigen pdf-schrijver of pdfkit in de browser | Claude-uitvoerder | – | 2 | deel 1 klaar (#1839, #1842); deel 2 bezig (#1843) |
+| C5 | Symbolen: nootkoppen, rusten, sleutels, voortekens, cijfers van de maatsoort, punten, balken, stokken, vlaggen, H-balk | `app/src/herkenning/symbolen.mjs`, `sjablonen.mjs` | Claude | C3, C4 | 3 | koppen (#1838), duur (#1841), rusten (PR #1844); sleutel/voortekens open |
+| C6 | Muziek opbouwen voor één stem: toonhoogte, duur, maatsoort, voortekening, meermaatsrust | `app/src/herkenning/opbouw.mjs` | Claude | C5 | 3 | open |
+| C7 | Cijfers en letters: aantal maten boven een meermaatsrust, repetitiecijfers, maatnummers | `app/src/herkenning/cijfers.mjs` | Claude-uitvoerder | C4 | 3 | open |
+| C8 | Keten in de browser: Web Worker, voortgang, bestaande herstelketen, scan als concept in de editor | `app/public/js/herken-worker.js`, `upload.js`, `app/src/herkenning/keten.mjs` | Claude | C6, C7 | 4 | open |
+| C9 | Scanmeting met de eigen herkenning naast Audiveris | `automatisering/scanmeting.mjs`, `app/src/meting/` | Claude-uitvoerder | C6 | 4 | open |
+| A5 | Inloggen met Google en projecten in de Google Drive van de klant (`appDataFolder`) | `app/public/js/google.js` (nieuw), `app/public/js/opslag.js`, `views/inloggen.js`, CSP in `app/server.mjs` | Claude | A1, client-ID van Mels | 3 | open (client-ID van Mels) |
+| A4 | Server en wachtwoord-accounts weg, statische site, hosting-uitleg (domeinnaam + Cloudflare Pages of GitHub Pages) | `app/server.mjs`, `docs/online.md`, `automatisering/statisch.sh` | Claude-uitvoerder en Hermes | C8, A5 | 5 | open |
 
 ## Tests
 Tests gaan voor de code, in hetzelfde pakket.
