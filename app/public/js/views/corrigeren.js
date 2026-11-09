@@ -49,7 +49,7 @@ export function start(app) {
   function pas(nieuw) {
     app.zet({
       partituur: nieuw,
-      meldingen: vernieuwMeldingen(app.stand.meldingen, nieuw),
+      meldingen: vernieuwMeldingen(app.stand.meldingen, nieuw, app.stand.partituur),
     });
     if (!zoekElement(nieuw, gekozen)) {
       gekozen = null;
