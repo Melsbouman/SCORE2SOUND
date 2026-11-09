@@ -1,1 +1,180 @@
-export const PALETTEN =[{id: 'sleutels',naam: 'Muzieksleutels',items:[{id: 'key-violin',naam: 'Vioolsleutel',tekst: '',actie:{soort: 'key',waarde:{teken: 'G',lijn: 2,notenbalk: 1,octaafVerschuiving: 0}},},{id: 'key-violin-8va-hoch',naam: 'Vioolsleutel 8va hoch',tekst: '',actie:{soort: 'key',waarde:{teken: 'G',lijn: 2,notenbalk: 1,octaafVerschuiving: 1}},},{id: 'key-violin-8va-lag',naam: 'Vioolsleutel 8va laag',tekst: '',actie:{soort: 'key',waarde:{teken: 'G',lijn: 2,notenbalk: 1,octaafVerschuiving: -1}},},{id: 'key-alto',naam: 'Altsleutel',tekst: '',actie:{soort: 'key',waarde:{teken: 'C',lijn: 3,notenbalk: 1,octaafVerschuiving: 0}},},{id: 'key-tenor',naam: 'Tenorsleutel',tekst: '',actie:{soort: 'key',waarde:{teken: 'C',lijn: 4,notenbalk: 1,octaafVerschuiving: 0}},},{id: 'key-bass',naam: 'Bassleutel',tekst: '',actie:{soort: 'key',waarde:{teken: 'F',lijn: 4,notenbalk: 1,octaafVerschuiving: 0}},},{id: 'key-bass-8va-hoch',naam: 'Bassleutel 8va hoch',tekst: '',actie:{soort: 'key',waarde:{teken: 'F',lijn: 4,notenbalk: 1,octaafVerschuiving: 1}},},{id: 'key-bass-8va-lag',naam: 'Bassleutel 8va laag',tekst: '',actie:{soort: 'key',waarde:{teken: 'F',lijn: 4,notenbalk: 1,octaafVerschuiving: -1}},},{id: 'key-percussion',naam: 'Slagwerk',tekst: '',actie:{soort: 'key',waarde:{teken: 'F',lijn: 4,notenbalk: 1,octaafVerschuiving: 0}},},],},{id: 'toonsoorten',naam: 'Toonsoorten',items:[{id: 'tonality-open',naam: 'Open/atonaal',tekst: '',actie:{soort: 'toonsoort',waarde:{kwinten: null,modus: null}},},{id: 'tonality-c-majeur-a-minor',naam: 'C majeur / A mineur',tekst: '',actie:{soort: 'toonsoort',waarde:{kwinten: 0,modus: 'majeur'}},},{id: 'tonality-g-majeur-e-minor',naam: 'G majeur / E mineur',tekst: '',actie:{soort: 'toonsoort',waarde:{kwinten: 1,modus: 'majeur'}},},{id: 'tonality-d-majeur-h-minor',naam: 'D majeur / H mineur',tekst: '',actie:{soort: 'toonsoort',waarde:{kwinten: 2,modus: 'majeur'}},},{id: 'tonality-a-majeur-f-sharp-minor',naam: 'A majeur / F♯ mineur',tekst: '',actie:{soort: 'toonsoort',waarde:{kwinten: 3,modus: 'majeur'}},},{id: 'tonality-e-majeur-c-sharp-minor',naam: 'E majeur / C♯ mineur',tekst: '',actie:{soort: 'toonsoort',waarde:{kwinten: 4,modus: 'majeur'}},},{id: 'tonality-b-majeur-g-sharp-minor',naam: 'B majeur / G♯ mineur',tekst: '',actie:{soort: 'toonsoort',waarde:{kwinten: 5,modus: 'majeur'}},},{id: 'tonality-f-sharp-majeur-d-sharp-minor',naam: 'F♯ majeur / D♯ mineur',tekst: '',actie:{soort: 'toonsoort',waarde:{kwinten: 6,modus: 'majeur'}},},{id: 'tonality-c-sharp-majeur-a-sharp-minor',naam: 'C♯ majeur / A♯ mineur',tekst: '',actie:{soort: 'toonsoort',waarde:{kwinten: 7,modus: 'majeur'}},},{id: 'tonality-c-flat-majeur-a-flat-minor',naam: 'C♭ majeur / A♭ mineur',tekst: '',actie:{soort: 'toonsoort',waarde:{kwinten: -1,modus: 'majeur'}},},{id: 'tonality-g-flat-majeur-e-flat-minor',naam: 'G♭ majeur / E♭ mineur',tekst: '',actie:{soort: 'toonsoort',waarde:{kwinten: -2,modus: 'majeur'}},},{id: 'tonality-d-flat-majeur-b-flat-minor',naam: 'D♭ majeur / B♭ mineur',tekst: '',actie:{soort: 'toonsoort',waarde:{kwinten: -3,modus: 'majeur'}},},{id: 'tonality-a-flat-majeur-f-minor',naam: 'A♭ majeur / F mineur',tekst: '',actie:{soort: 'toonsoort',waarde:{kwinten: -4,modus: 'majeur'}},},{id: 'tonality-e-flat-majeur-c-minor',naam: 'E♭ majeur / C mineur',tekst: '',actie:{soort: 'toonsoort',waarde:{kwinten: -5,modus: 'majeur'}},},{id: 'tonality-b-flat-majeur-g-minor',naam: 'B♭ majeur / G mineur',tekst: '',actie:{soort: 'toonsoort',waarde:{kwinten: -6,modus: 'majeur'}},},{id: 'tonality-f-majeur-d-minor',naam: 'F majeur / D mineur',tekst: '',actie:{soort: 'toonsoort',waarde:{kwinten: -7,modus: 'majeur'}},},],},{id: 'maatsoorten',naam: 'Maatsoorten',items:[{id: 'meter-2-4',naam: '2/4',tekst: '',actie:{soort: 'maatsoort',waarde:{teller: 2,noemer: 4}},},{id: 'meter-3-4',naam: '3/4',tekst: '',actie:{soort: 'maatsoort',waarde:{teller: 3,noemer: 4}},},{id: 'meter-4-4',naam: '4/4',tekst: '',actie:{soort: 'maatsoort',waarde:{teller: 4,noemer: 4}},},{id: 'meter-5-4',naam: '5/4',tekst: '',actie:{soort: 'maatsoort',waarde:{teller: 5,noemer: 4}},},{id: 'meter-6-4',naam: '6/4',tekst: '',actie:{soort: 'maatsoort',waarde:{teller: 6,noemer: 4}},},{id: 'meter-3-8',naam: '3/8',tekst: '',actie:{soort: 'maatsoort',waarde:{teller: 3,noemer: 8}},},{id: 'meter-4-8',naam: '4/8',tekst: '',actie:{soort: 'maatsoort',waarde:{teller: 4,noemer: 8}},},{id: 'meter-5-8',naam: '5/8',tekst: '',actie:{soort: 'maatsoort',waarde:{teller: 5,noemer: 8}},},{id: 'meter-6-8',naam: '6/8',tekst: '',actie:{soort: 'maatsoort',waarde:{teller: 6,noemer: 8}},},{id: 'meter-7-8',naam: '7/8',tekst: '',actie:{soort: 'maatsoort',waarde:{teller: 7,noemer: 8}},},{id: 'meter-9-8',naam: '9/8',tekst: '',actie:{soort: 'maatsoort',waarde:{teller: 9,noemer: 8}},},{id: 'meter-12-8',naam: '12/8',tekst: '',actie:{soort: 'maatsoort',waarde:{teller: 12,noemer: 8}},},{id: 'meter-alla-breve',naam: 'Alla breve',tekst: '',actie:{soort: 'maatsoort',waarde:{teller: 2,noemer: 2}},},{id: 'meter-c Zeichen',naam: 'C-teken',tekst: '',actie:{soort: 'maatsoort',waarde:{teller: 4,noemer: 4}},},{id: 'meter-2-2',naam: '2/2',tekst: '',actie:{soort: 'maatsoort',waarde:{teller: 2,noemer: 2}},},{id: 'meter-3-2',naam: '3/2',tekst: '',actie:{soort: 'maatsoort',waarde:{teller: 3,noemer: 2}},},],},{id: 'tempo',naam: 'Tempo',items:[{id: 'tempo-Grave',naam: 'Grave',tekst: '',actie:{soort: 'tempo',waarde: 40},},{id: 'tempo-Largo',naam: 'Largo',tekst: '',actie:{soort: 'tempo',waarde: 50},},{id: 'tempo-Lento',naam: 'Lento',tekst: '',actie:{soort: 'tempo',waarde: 56},},{id: 'tempo-Larghetto',naam: 'Larghetto',tekst: '',actie:{soort: 'tempo',waarde: 60},},{id: 'tempo-Adagio',naam: 'Adagio',tekst: '',actie:{soort: 'tempo',waarde: 66},},{id: 'tempo-Andante',naam: 'Andante',tekst: '',actie:{soort: 'tempo',waarde: 76},},{id: 'tempo-Andantino',naam: 'Andantino',tekst: '',actie:{soort: 'tempo',waarde: 84},},{id: 'tempo-Moderato',naam: 'Moderato',tekst: '',actie:{soort: 'tempo',waarde: 100},},{id: 'tempo-Allegretto',naam: 'Allegretto',tekst: '',actie:{soort: 'tempo',waarde: 108},},{id: 'tempo-Allegro',naam: 'Allegro',tekst: '',actie:{soort: 'tempo',waarde: 120},},{id: 'tempo-Vivace',naam: 'Vivace',tekst: '',actie:{soort: 'tempo',waarde: 160},},{id: 'tempo-Presto',naam: 'Presto',tekst: '',actie:{soort: 'tempo',waarde: 180},},{id: 'tempo-Prestissimo',naam: 'Prestissimo',tekst: '',actie:{soort: 'tempo',waarde: 200},},{id: 'tempo-accel',naam: 'accel.',tekst: '',actie:{soort: 'tempotekst',waarde: 'accel.'},},{id: 'tempo-allarg',naam: 'allarg.',tekst: '',actie:{soort: 'tempotekst',waarde: 'allarg.'},},{id: 'tempo-rall',naam: 'rall.',tekst: '',actie:{soort: 'tempotekst',waarde: 'rall.'},},{id: 'tempo-rit',naam: 'rit.',tekst: '',actie:{soort: 'tempotekst',waarde: 'rit.'},},{id: 'tempo-a-tempo',naam: 'a tempo',tekst: '',actie:{soort: 'tempotekst',waarde: 'a tempo'},},{id: 'tempo-tempo-primo',naam: 'tempo primo',tekst: '',actie:{soort: 'tempotekst',waarde: 'tempo primo'},},],},{id: 'toonhoogte',naam: 'Toonhoogte',items:[{id: 'pitch-8va-hoch',naam: '8va hoch',tekst: '',actie:{soort: 'toonhoogte',waarde: 1},},{id: 'pitch-8va-lag',naam: '8va laag',tekst: '',actie:{soort: 'toonhoogte',waarde: -1},},{id: 'pitch-15ma-hoch',naam: '15ma hoch',tekst: '',actie:{soort: 'toonhoogte',waarde: 2},},{id: 'pitch-15ma-lag',naam: '15ma laag',tekst: '',actie:{soort: 'toonhoogte',waarde: -2},},],},{id: 'voortekens',naam: 'Voortekens',items:[{id: 'accidental-double-sharp',naam: 'Double sharp',tekst: '',actie:{soort: 'voorteken',waarde: 'doubleSharp'},},{id: 'accidental-sharp',naam: 'Sharp',tekst: '',actie:{soort: 'voorteken',waarde: 'sharp'},},{id: 'accidental-natural',naam: 'Natural',tekst: '',actie:{soort: 'voorteken',waarde: 'natural'},},{id: 'accidental-flat',naam: 'Flat',tekst: '',actie:{soort: 'voorteken',waarde: 'flat'},},{id: 'accidental-double-flat',naam: 'Double flat',tekst: '',actie:{soort: 'voorteken',waarde: 'doubleFlat'},},],},{id: 'dynamiek',naam: 'Dynamiek',items:[{id: 'dynamics-ppp',naam: 'ppp',tekst: '',actie:{soort: 'dynamiek',waarde: 'ppp'},},{id: 'dynamics-pp',naam: 'pp',tekst: '',actie:{soort: 'dynamiek',waarde: 'pp'},},{id: 'dynamics-p',naam: 'p',tekst: '',actie:{soort: 'dynamiek',waarde: 'p'},},{id: 'dynamics-mp',naam: 'mp',tekst: '',actie:{soort: 'dynamiek',waarde: 'mp'},},{id: 'dynamics-mf',naam: 'mf',tekst: '',actie:{soort: 'dynamiek',waarde: 'mf'},},{id: 'dynamics-f',naam: 'f',tekst: '',actie:{soort: 'dynamiek',waarde: 'f'},},{id: 'dynamics-ff',naam: 'ff',tekst: '',actie:{soort: 'dynamiek',waarde: 'ff'},},{id: 'dynamics-fff',naam: 'fff',tekst: '',actie:{soort: 'dynamiek',waarde: 'fff'},},{id: 'dynamics-fp',naam: 'fp',tekst: '',actie:{soort: 'dynamiek',waarde: 'fp'},},{id: 'dynamics-sf',naam: 'sf',tekst: '',actie:{soort: 'dynamiek',waarde: 'sf'},},{id: 'dynamics-sfz',naam: 'sfz',tekst: '',actie:{soort: 'dynamiek',waarde: 'sfz'},},{id: 'dynamics-rfz',naam: 'rfz',tekst: '',actie:{soort: 'dynamiek',waarde: 'rfz'},},{id: 'dynamics-crescendo',naam: 'crescendo',tekst: '',actie:{soort: 'dynamiek',waarde: 'crescendo'},},{id: 'dynamics-diminuendo',naam: 'diminuendo',tekst: '',actie:{soort: 'dynamiek',waarde: 'diminuendo'},},],},{id: 'articulaties',naam: 'Articulaties',items:[{id: 'articulation-ligatuur',naam: 'Ligatuur',tekst: '',actie:{soort: 'articulatie',waarde: 'ligatuur'},},{id: 'articulation-accent',naam: 'Accent',tekst: '',actie:{soort: 'articulatie',waarde: 'accent'},},{id: 'articulation-staccato',naam: 'Staccato',tekst: '',actie:{soort: 'articulatie',waarde: 'staccato'},},{id: 'articulation-staccatissimo',naam: 'Staccatissimo',tekst: '',actie:{soort: 'articulatie',waarde: 'staccatissimo'},},{id: 'articulation-tenuto',naam: 'Tenuto',tekst: '',actie:{soort: 'articulatie',waarde: 'tenuto'},},{id: 'articulation-marcato',naam: 'Marcato',tekst: '',actie:{soort: 'articulatie',waarde: 'marcato'},},],},{id: 'tekst',naam: 'Tekst',items:[{id: 'text-staff',naam: 'Staltekst',tekst: '',actie:{soort: 'tekst',waarde: 'staltekst'},},{id: 'text-expression',naam: 'Uitdrukking',tekst: '',actie:{soort: 'tekst',waarde: 'uitdrukking'},},{id: 'text-repeat-sign',naam: 'Repetitieteken',tekst: '',actie:{soort: 'tekst',waarde: 'repetitieteken'},},{id: 'text-pizzicato',naam: 'Pizz.',tekst: '',actie:{soort: 'tekst',waarde: 'pizz.'},},{id: 'text-arco',naam: 'Arco',tekst: '',actie:{soort: 'tekst',waarde: 'arco'},},{id: 'text-dampen',naam: 'Dampen',tekst: '',actie:{soort: 'tekst',waarde: 'dampen'},},{id: 'text-open',naam: 'Open',tekst: '',actie:{soort: 'tekst',waarde: 'open'},},],},{id: 'herhalingen',naam: 'Herhalingen',items:[{id: 'repeat-begin',naam: 'Herhalingsteken begin',tekst: '',actie:{soort: 'herhaling',waarde:{type: 'begin'}},},{id: 'repeat-end',naam: 'Herhalingsteken eind',tekst: '',actie:{soort: 'herhaling',waarde:{type: 'eind'}},},{id: 'volta-1',naam: '1e volta',tekst: '',actie:{soort: 'volta',waarde: 1},},{id: 'volta-2',naam: '2e volta',tekst: '',actie:{soort: 'volta',waarde: 2},},{id: 'jump-segno',naam: 'Segno',tekst: '',actie:{soort: 'sprung',waarde: 'segno'},},{id: 'jump-coda',naam: 'Coda',tekst: '',actie:{soort: 'sprung',waarde: 'coda'},},{id: 'jump-fine',naam: 'Fine',tekst: '',actie:{soort: 'sprung',waarde: 'fine'},},{id: 'jump-to-coda',naam: 'To Coda',tekst: '',actie:{soort: 'sprung',waarde: 'toCoda'},},{id: 'jump-dc',naam: 'D.C.',tekst: '',actie:{soort: 'sprung',waarde: 'dc'},},{id: 'jump-dc-al-fine',naam: 'D.C. al Fine',tekst: '',actie:{soort: 'sprung',waarde: 'dc al fine'},},{id: 'jump-dc-al-coda',naam: 'D.C. al Coda',tekst: '',actie:{soort: 'sprung',waarde: 'dc al coda'},},{id: 'jump-ds',naam: 'D.S.',tekst: '',actie:{soort: 'sprung',waarde: 'ds'},},{id: 'jump-ds-al-fine',naam: 'D.S. al Fine',tekst: '',actie:{soort: 'sprung',waarde: 'ds al fine'},},{id: 'jump-ds-al-coda',naam: 'D.S. al Coda',tekst: '',actie:{soort: 'sprung',waarde: 'ds al coda'},},],},{id: 'maatstrepen',naam: 'Maatstrepen',items:[{id: 'barline-single',naam: 'Enkel',tekst: '',actie:{soort: 'maatstreep',waarde: 'single'},},{id: 'barline-double',naam: 'Dubbel',tekst: '',actie:{soort: 'maatstreep',waarde: 'double'},},{id: 'barline-dashed',naam: 'Gestreept',tekst: '',actie:{soort: 'maatstreep',waarde: 'dashed'},},{id: 'barline-final',naam: 'Eind',tekst: '',actie:{soort: 'maatstreep',waarde: 'final'},},{id: 'barline-repeat-start',naam: 'Herhaling begin',tekst: '',actie:{soort: 'maatstreep',waarde:{begin: true,eind: false}},},{id: 'barline-repeat-end',naam: 'Herhaling eind',tekst: '',actie:{soort: 'maatstreep',waarde:{begin: false,eind: true}},},{id: 'barline-dotted',naam: 'Gestippelt',tekst: '',actie:{soort: 'maatstreep',waarde: 'dotted'},},],},];
+// De paletten in de editor: hokjes die je op een maat of een noot zet (slepen of klikken).
+// Elk hokje heeft een id, een naam (ook de uitleg bij de muis), een icoon en een actie.
+// Het icoon is `teken` (tekens uit het muzieklettertype Bravura, SMuFL-codes) en/of `woord` (gewone tekst, met `stijl`).
+// Sleutels, toonsoorten en maatsoorten krijgen een kleine notenbalk; die tekent het scherm uit de actie, net als de haken,
+// de hokjes 1 en 2 en de overbinding. Wat een actie doet staat in paletactie.mjs.
+
+const G = {
+  vioolsleutel: '\uE050', vioolsleutel8vb: '\uE052', altsleutel: '\uE05C', bassleutel: '\uE062',
+  mol: '\uE260', herstel: '\uE261', kruis: '\uE262', dubbelkruis: '\uE263', dubbelmol: '\uE264',
+  p: '\uE520', m: '\uE521', f: '\uE522', r: '\uE523', s: '\uE524', z: '\uE525',
+  halve: '\uE1D3', kwart: '\uE1D5', achtste: '\uE1D7', punt: '\uE1E7',
+  accent: '\uE4A0', staccato: '\uE4A2', tenuto: '\uE4A4', staccatissimo: '\uE4A6', marcato: '\uE4AC', fermate: '\uE4C0',
+  herhalingBegin: '\uE040', herhalingEind: '\uE041', segno: '\uE047', coda: '\uE048',
+  streep: '\uE030', dubbeleStreep: '\uE031', eindstreep: '\uE032',
+  achtHoger: '\uE511', achtLager: '\uE51C',
+};
+
+// Dynamiek als losse letters uit Bravura: 'sfz' wordt s, f en z.
+const dyn = (term) => [...term].map((letter) => G[letter]).join('');
+
+const sleutel = (id, naam, teken, lijn, octaafVerschuiving, icoon) => ({
+  id, naam, teken: icoon, actie: { soort: 'sleutel', waarde: { teken, lijn, octaafVerschuiving } },
+});
+
+const TOONSOORT_NAMEN = {
+  0: 'C majeur / A mineur', 1: 'G majeur / E mineur', 2: 'D majeur / B mineur', 3: 'A majeur / F♯ mineur',
+  4: 'E majeur / C♯ mineur', 5: 'B majeur / G♯ mineur', 6: 'F♯ majeur / D♯ mineur', 7: 'C♯ majeur / A♯ mineur',
+  '-1': 'F majeur / D mineur', '-2': 'B♭ majeur / G mineur', '-3': 'E♭ majeur / C mineur', '-4': 'A♭ majeur / F mineur',
+  '-5': 'D♭ majeur / B♭ mineur', '-6': 'G♭ majeur / E♭ mineur', '-7': 'C♭ majeur / A♭ mineur',
+};
+const toonsoort = (kwinten) => ({
+  id: `toonsoort-${kwinten < 0 ? `${-kwinten}-mollen` : `${kwinten}-kruisen`}`,
+  naam: TOONSOORT_NAMEN[kwinten],
+  actie: { soort: 'toonsoort', waarde: { kwinten, modus: 'majeur' } },
+});
+
+const maatsoort = (teller, noemer, symbool) => ({
+  id: `maatsoort-${symbool ?? `${teller}-${noemer}`}`,
+  naam: symbool === 'common' ? 'C (vierkwartsmaat)' : symbool === 'cut' ? 'Alla breve' : `${teller}/${noemer}`,
+  actie: { soort: 'maatsoort', waarde: { teller, noemer, ...(symbool ? { symbool } : {}) } },
+});
+
+const metronoom = (noot, naam, getal, kwartPerMinuut) => ({
+  id: `tempo-${naam.replace(/\./g, 'punt')}-${getal}`, naam: `${naam} = ${getal}`, teken: noot, woord: ` = ${getal}`, stijl: 'vet',
+  actie: { soort: 'tempo', waarde: kwartPerMinuut },
+});
+const tempoterm = (naam, bpm) => ({
+  id: `tempo-${naam.toLowerCase()}`, naam, woord: naam, stijl: 'vet',
+  actie: { soort: 'tempo', waarde: bpm, tekst: naam },
+});
+const tempotekst = (tekst) => ({
+  id: `tempotekst-${tekst.replace(/[^a-z]/gi, '')}`, naam: tekst, woord: tekst, stijl: 'cursief',
+  actie: { soort: 'tempotekst', waarde: tekst },
+});
+const dynamiek = (term) => ({ id: `dynamiek-${term}`, naam: term, teken: dyn(term), actie: { soort: 'dynamiek', waarde: term } });
+const tekst = (waarde) => ({
+  id: `tekst-${waarde.replace(/[^a-z]/gi, '')}`, naam: waarde, woord: waarde, stijl: 'cursief', actie: { soort: 'tekst', waarde },
+});
+const sprong = (id, naam, veld, waarde, icoon) => ({ id, naam, ...icoon, actie: { soort: 'sprong', waarde: { veld, waarde } } });
+
+export const PALETTEN = [
+  {
+    id: 'sleutels',
+    naam: 'Muzieksleutels',
+    items: [
+      sleutel('sleutel-viool', 'Vioolsleutel', 'G', 2, 0, G.vioolsleutel),
+      sleutel('sleutel-viool-8vb', 'Vioolsleutel, een octaaf lager', 'G', 2, -1, G.vioolsleutel8vb),
+      sleutel('sleutel-bas', 'Bassleutel', 'F', 4, 0, G.bassleutel),
+      sleutel('sleutel-alt', 'Altsleutel', 'C', 3, 0, G.altsleutel),
+      sleutel('sleutel-tenor', 'Tenorsleutel', 'C', 4, 0, G.altsleutel),
+    ],
+  },
+  {
+    id: 'toonsoorten',
+    naam: 'Toonsoorten',
+    items: [0, 1, 2, 3, 4, 5, 6, 7, -1, -2, -3, -4, -5, -6, -7].map(toonsoort),
+  },
+  {
+    id: 'maatsoorten',
+    naam: 'Maatsoorten',
+    items: [
+      maatsoort(2, 4), maatsoort(3, 4), maatsoort(4, 4), maatsoort(5, 4), maatsoort(6, 4),
+      maatsoort(3, 8), maatsoort(6, 8), maatsoort(9, 8), maatsoort(12, 8),
+      maatsoort(2, 2), maatsoort(3, 2), maatsoort(4, 4, 'common'), maatsoort(2, 2, 'cut'),
+    ],
+  },
+  {
+    id: 'tempo',
+    naam: 'Tempo',
+    items: [
+      metronoom(G.kwart, '♩', 60, 60), metronoom(G.kwart, '♩', 80, 80), metronoom(G.kwart, '♩', 100, 100),
+      metronoom(G.kwart, '♩', 120, 120), metronoom(G.kwart, '♩', 144, 144), metronoom(G.halve, 'halve noot', 80, 160),
+      metronoom(`${G.kwart}${G.punt}`, '♩.', 60, 90), metronoom(G.achtste, '♪', 120, 60),
+      tempoterm('Grave', 40), tempoterm('Largo', 50), tempoterm('Adagio', 66), tempoterm('Andante', 76),
+      tempoterm('Moderato', 100), tempoterm('Allegretto', 108), tempoterm('Allegro', 120), tempoterm('Vivace', 160),
+      tempoterm('Presto', 180),
+      tempotekst('accel.'), tempotekst('rall.'), tempotekst('rit.'), tempotekst('allarg.'),
+      tempotekst('a tempo'), tempotekst('tempo primo'),
+    ],
+  },
+  {
+    id: 'toonhoogte',
+    naam: 'Toonhoogte',
+    items: [
+      { id: 'toonhoogte-octaaf-hoger', naam: 'Noot een octaaf hoger', teken: G.achtHoger, actie: { soort: 'octaaf', waarde: 1 } },
+      { id: 'toonhoogte-octaaf-lager', naam: 'Noot een octaaf lager', teken: G.achtLager, actie: { soort: 'octaaf', waarde: -1 } },
+      { id: 'toonhoogte-halve-toon-hoger', naam: 'Noot een halve toon hoger', woord: '+½', stijl: 'vet', actie: { soort: 'halvetoon', waarde: 1 } },
+      { id: 'toonhoogte-halve-toon-lager', naam: 'Noot een halve toon lager', woord: '−½', stijl: 'vet', actie: { soort: 'halvetoon', waarde: -1 } },
+    ],
+  },
+  {
+    id: 'voortekens',
+    naam: 'Voortekens',
+    items: [
+      { id: 'voorteken-dubbelmol', naam: 'Dubbelmol', teken: G.dubbelmol, actie: { soort: 'voorteken', waarde: -2 } },
+      { id: 'voorteken-mol', naam: 'Mol', teken: G.mol, actie: { soort: 'voorteken', waarde: -1 } },
+      { id: 'voorteken-herstel', naam: 'Herstellingsteken', teken: G.herstel, actie: { soort: 'voorteken', waarde: 0 } },
+      { id: 'voorteken-kruis', naam: 'Kruis', teken: G.kruis, actie: { soort: 'voorteken', waarde: 1 } },
+      { id: 'voorteken-dubbelkruis', naam: 'Dubbelkruis', teken: G.dubbelkruis, actie: { soort: 'voorteken', waarde: 2 } },
+    ],
+  },
+  {
+    id: 'dynamiek',
+    naam: 'Dynamiek',
+    items: [
+      ...['ppp', 'pp', 'p', 'mp', 'mf', 'f', 'ff', 'fff', 'fp', 'sf', 'sfz', 'sffz', 'fz', 'rfz'].map(dynamiek),
+      { id: 'dynamiek-crescendo', naam: 'Crescendo (haak)', actie: { soort: 'haak', waarde: 'crescendo' } },
+      { id: 'dynamiek-decrescendo', naam: 'Decrescendo (haak)', actie: { soort: 'haak', waarde: 'decrescendo' } },
+      { id: 'dynamiek-cresc', naam: 'cresc.', woord: 'cresc.', stijl: 'cursief', actie: { soort: 'tekst', waarde: 'cresc.' } },
+      { id: 'dynamiek-dim', naam: 'dim.', woord: 'dim.', stijl: 'cursief', actie: { soort: 'tekst', waarde: 'dim.' } },
+    ],
+  },
+  {
+    id: 'articulaties',
+    naam: 'Articulaties',
+    items: [
+      { id: 'articulatie-accent', naam: 'Accent', teken: G.accent, actie: { soort: 'articulatie', waarde: 'accent' } },
+      { id: 'articulatie-staccato', naam: 'Staccato', teken: G.staccato, actie: { soort: 'articulatie', waarde: 'staccato' } },
+      { id: 'articulatie-tenuto', naam: 'Tenuto', teken: G.tenuto, actie: { soort: 'articulatie', waarde: 'tenuto' } },
+      { id: 'articulatie-staccatissimo', naam: 'Staccatissimo', teken: G.staccatissimo, actie: { soort: 'articulatie', waarde: 'staccatissimo' } },
+      { id: 'articulatie-marcato', naam: 'Marcato', teken: G.marcato, actie: { soort: 'articulatie', waarde: 'marcato' } },
+      { id: 'articulatie-fermate', naam: 'Fermate', teken: G.fermate, actie: { soort: 'fermate', waarde: true } },
+      { id: 'articulatie-overbinding', naam: 'Overbinding naar de volgende noot', actie: { soort: 'overbinding', waarde: true } },
+    ],
+  },
+  {
+    id: 'tekst',
+    naam: 'Tekst',
+    items: [
+      { id: 'tekst-letter', naam: 'Repetitieletter (de volgende letter)', woord: 'A', stijl: 'kader', actie: { soort: 'letter', waarde: null } },
+      tekst('solo'), tekst('tutti'), tekst('con sord.'), tekst('senza sord.'), tekst('open'),
+      tekst('dolce'), tekst('espress.'), tekst('cantabile'), tekst('legato'), tekst('sim.'),
+    ],
+  },
+  {
+    id: 'herhalingen',
+    naam: 'Herhalingen en sprongen',
+    items: [
+      { id: 'herhaling-begin', naam: 'Herhaling begin', teken: G.herhalingBegin, actie: { soort: 'herhaling', waarde: 'begin' } },
+      { id: 'herhaling-eind', naam: 'Herhaling eind', teken: G.herhalingEind, actie: { soort: 'herhaling', waarde: 'eind' } },
+      { id: 'volta-1', naam: 'Eerste einde (hokje 1)', actie: { soort: 'volta', waarde: 1 } },
+      { id: 'volta-2', naam: 'Tweede einde (hokje 2)', actie: { soort: 'volta', waarde: 2 } },
+      sprong('sprong-segno', 'Segno', 'segno', 'segno', { teken: G.segno }),
+      sprong('sprong-coda', 'Coda', 'coda', 'coda', { teken: G.coda }),
+      sprong('sprong-naar-coda', 'To Coda', 'naarCoda', 'coda', { woord: 'To Coda', stijl: 'gewoon' }),
+      sprong('sprong-fine', 'Fine', 'fine', true, { woord: 'Fine', stijl: 'gewoon' }),
+      sprong('sprong-dc', 'D.C. al Fine', 'daCapo', true, { woord: 'D.C.', stijl: 'gewoon' }),
+      sprong('sprong-ds', 'D.S. al Fine', 'dalSegno', 'segno', { woord: 'D.S.', stijl: 'gewoon' }),
+    ],
+  },
+  {
+    id: 'maatstrepen',
+    naam: 'Maatstrepen',
+    items: [
+      { id: 'maatstreep-enkel', naam: 'Gewone maatstreep', teken: G.streep, actie: { soort: 'maatstreep', waarde: 'enkel' } },
+      { id: 'maatstreep-dubbel', naam: 'Dubbele maatstreep', teken: G.dubbeleStreep, actie: { soort: 'maatstreep', waarde: 'dubbel' } },
+      { id: 'maatstreep-eind', naam: 'Eindstreep', teken: G.eindstreep, actie: { soort: 'maatstreep', waarde: 'eind' } },
+    ],
+  },
+];

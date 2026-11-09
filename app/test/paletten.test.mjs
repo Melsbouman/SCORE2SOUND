@@ -25,9 +25,10 @@ PALETTEN.forEach(section => {
   });
 });
 
-test('toonsoorten has 16 items', () => {
+test('toonsoorten has 15 items (C plus 1 to 7 sharps and 1 to 7 flats)', () => {
   const tonalitySection = PALETTEN.find(s => s.id === 'toonsoorten');
-  assert.strictEqual(tonalitySection.items.length, 16, 'expected 16 tonalities');
+  assert.strictEqual(tonalitySection.items.length, 15, 'expected 15 tonalities');
+  assert.deepStrictEqual(tonalitySection.items.map(i => i.actie.waarde.kwinten), [0, 1, 2, 3, 4, 5, 6, 7, -1, -2, -3, -4, -5, -6, -7]);
 });
 
 test('maatsoorten contains 4/4 item with correct action', () => {

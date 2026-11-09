@@ -438,65 +438,88 @@ export function start(app) {
     app.meld('kies-maat', { maat: maat?.index ?? null });
   });
 
-  vlak.addEventListener('dragover', (gebeurtenis) => {
-    if (!gebeurtenis.dataTransfer.types.includes('application/x-palet')) return;
-    gebeurtenis.preventDefault();
-    gebeurtenis.dataTransfer.dropEffect = 'copy';
-
+  // Slepen vanuit het palet. Het doel is de maat onder de muis, in de partij van de notenbalk onder de muis; bij een hokje
+  // voor een noot (articulatie, voorteken) de noot onder de muis. De partij en de maat komen uit de id's van de noten en
+  // rusten ('n-<partij>-<maat>-<element>'), zodat het ook klopt na een meermaatsrust (verborgen maten worden niet getekend).
+  const PALET = 'application/x-palet';
+  function paletDoel(gebeurtenis, opNoot) {
     const x = gebeurtenis.clientX;
     const y = gebeurtenis.clientY;
-    maten().forEach((g, index) => {
-      const kader = g.getBoundingClientRect();
-      const binnen = x >= kader.left && x <= kader.right && y >= kader.top && y <= kader.bottom;
-      if (binnen) {
-        g.classList.add('sleep-doel');
-      } else {
-        g.classList.remove('sleep-doel');
-      }
-    });
+    const maatG = maten()
+      .map((g) => ({ g, kader: g.getBoundingClientRect() }))
+      .filter(({ kader }) => x >= kader.left && x <= kader.right && y >= kader.top && y <= kader.bottom)
+      .sort((a, b) => a.kader.width * a.kader.height - b.kader.width * b.kader.height)[0]?.g;
+    if (!maatG) return null;
+    const delen = [...maatG.querySelectorAll('g.note[id^="n-"], g.rest[id^="n-"], g.mRest[id^="n-"], g.multiRest[id^="n-"]')]
+      .map((element) => {
+        const kader = element.getBoundingClientRect();
+        const balk = (element.closest('g.staff') ?? element).getBoundingClientRect();
+        const dx = x - (kader.left + kader.right) / 2;
+        const dy = y - (kader.top + kader.bottom) / 2;
+        return {
+          element,
+          dichtbij: x >= kader.left - 14 && x <= kader.right + 14 && y >= kader.top - 14 && y <= kader.bottom + 14,
+          afstand: dx * dx + dy * dy,
+          balkAfstand: y < balk.top ? balk.top - y : y > balk.bottom ? y - balk.bottom : 0,
+        };
+      });
+    if (opNoot) {
+      const noot = delen.filter((deel) => deel.dichtbij && deel.element.matches('g.note')).sort((a, b) => a.afstand - b.afstand)[0];
+      return noot ? { element: noot.element, plek: { ...leesNootId(noot.element.id), elementId: noot.element.id } } : null;
+    }
+    const inBalk = [...delen].sort((a, b) => a.balkAfstand - b.balkAfstand || a.afstand - b.afstand)[0];
+    if (!inBalk) {
+      const index = maten().indexOf(maatG);
+      return { element: maatG, plek: { partijId: null, maatIndex: index, start: 0 } };
+    }
+    const plaats = leesNootId(inBalk.element.id);
+    const dichtste = delen.filter((deel) => deel.dichtbij && deel.balkAfstand === inBalk.balkAfstand).sort((a, b) => a.afstand - b.afstand)[0];
+    const start = dichtste ? zoekStart(dichtste.element.id) : 0;
+    return { element: maatG, plek: { partijId: plaats.partijId, maatIndex: plaats.maatIndex, start } };
+  }
+  function leesNootId(id) {
+    const delen = id.split('-');
+    const elementIndex = Number(delen.pop());
+    const maatIndex = Number(delen.pop());
+    return { partijId: delen.slice(1).join('-'), maatIndex, elementIndex };
+  }
+  function zoekStart(id) {
+    const { partijId, maatIndex, elementIndex } = leesNootId(id);
+    const partij = app.stand.partituur?.partijen.find((kandidaat) => kandidaat.id === partijId);
+    return partij?.maten[maatIndex]?.elementen[elementIndex]?.start ?? 0;
+  }
+  function wisSleepDoel() {
+    for (const element of vlak.querySelectorAll('.sleep-doel')) element.classList.remove('sleep-doel');
+  }
+
+  vlak.addEventListener('dragover', (gebeurtenis) => {
+    const soorten = [...gebeurtenis.dataTransfer.types];
+    if (!soorten.includes(PALET)) return;
+    const doel = paletDoel(gebeurtenis, soorten.includes(`${PALET}-noot`));
+    wisSleepDoel();
+    if (!doel) return;
+    gebeurtenis.preventDefault();
+    gebeurtenis.dataTransfer.dropEffect = 'copy';
+    doel.element.classList.add('sleep-doel');
   });
 
-  vlak.addEventListener('dragleave', () => {
-    maten().forEach((g) => g.classList.remove('sleep-doel'));
+  vlak.addEventListener('dragleave', (gebeurtenis) => {
+    if (!vlak.contains(gebeurtenis.relatedTarget)) wisSleepDoel();
   });
 
   vlak.addEventListener('drop', async (gebeurtenis) => {
+    const id = gebeurtenis.dataTransfer.getData(PALET);
+    wisSleepDoel();
+    if (!id) return;
     gebeurtenis.preventDefault();
-    maten().forEach((g) => g.classList.remove('sleep-doel'));
-    const data = gebeurtenis.dataTransfer.getData('application/x-palet');
-    if (!data) return;
-    let payload;
-    try {
-      payload = JSON.parse(data);
-    } catch {
-      return;
-    }
-
-    const x = gebeurtenis.clientX;
-    const y = gebeurtenis.clientY;
-    const maat = maten()
-      .map((element, index) => {
-        const kader = element.getBoundingClientRect();
-        return {
-          index,
-          binnen: x >= kader.left && x <= kader.right && y >= kader.top && y <= kader.bottom,
-          oppervlakte: kader.width * kader.height,
-        };
-      })
-      .filter((kandidaat) => kandidaat.binnen)
-      .sort((a, b) => a.oppervlakte - b.oppervlakte)[0];
-
-    if (!maat || maat.index === undefined) return;
-
-    const { PALETTEN } = await import('/src/model/paletten.mjs');
-    const onderdeel = PALETTEN.find((o) => o.id === payload.onderdeelId);
-    const item = onderdeel?.items.find((i) => i.id === payload.itemId);
-    if (!item || !item.actie) return;
-
-    const { voerPaletActieUit } = await import('./views/paletten.js');
-    if (typeof voerPaletActieUit === 'function') {
-      voerPaletActieUit(app, item.actie, maat.index, null);
-    }
+    const doel = paletDoel(gebeurtenis, [...gebeurtenis.dataTransfer.types].includes(`${PALET}-noot`));
+    if (!doel) return;
+    // Pas hier laden: paletten.js gebruikt paden voor de browser, en deze module wordt ook in Node getest.
+    const { pasPaletToe, zoekItem } = await import('./views/paletten.js');
+    const item = zoekItem(id);
+    if (!item) return;
+    const gelukt = pasPaletToe(app, item, doel.plek);
+    app.meld('palet-gezet', { naam: item.naam, gelukt });
   });
 
   // De maten in volgorde; Verovio tekent elke maat als <g class="measure">, over alle partijen heen.

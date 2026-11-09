@@ -136,3 +136,5 @@ Als die herkenning onzeker is, wordt de aanduiding rood weergegeven.
 Een sterkte zoals `f` of `mf` en een speelwijze zoals Marcato staan los van elkaar.
 Woorden die niet duidelijk op een aanduiding uit de lijst lijken, blijven staan.
 
+## Paletten
+Links van de partituur staan de paletten: hokjes met een teken (sleutels, toonsoorten, maatsoorten, tempo, toonhoogte, voortekens, dynamiek, articulaties, tekst, herhalingen en sprongen, maatstrepen). Sleep een hokje naar een maat, of kies eerst een maat (of noot) en klik op het hokje. Articulaties, voortekens, fermate, overbinding en toonhoogte horen op een noot: sleep ze naar de noot, of zet ze met een gekozen maat op alle noten van die maat. Een sleutel, toonsoort of maatsoort geldt tot de volgende wissel; de noten blijven staan, en de maatduurcontrole meldt maten die niet meer passen. Een toonsoort op een transponerend instrument geeft de andere partijen dezelfde klinkende toonsoort. Een hokje dat er al staat (zoals een staccato of een repetitieletter) haalt het bij nog een keer weer weg. De gegevens staan in `src/model/paletten.mjs`, wat een hokje doet in `src/model/paletactie.mjs`.

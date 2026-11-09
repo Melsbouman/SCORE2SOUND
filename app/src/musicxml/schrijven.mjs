@@ -49,7 +49,9 @@ function schrijfAttributes(maat, vorige, instrument) {
   let inhoud = eerste ? tag('divisions', 480) : '';
   if (eerste && balken > 1) inhoud += tag('staves', balken);
   if (keyVeranderd) inhoud += tag('key', tag('fifths', toonsoort.kwinten) + tag('mode', modus(toonsoort.modus)));
-  if (timeVeranderd) inhoud += tag('time', tag('beats', maatsoort.teller) + tag('beat-type', maatsoort.noemer));
+  if (timeVeranderd) {
+    inhoud += tag('time', tag('beats', maatsoort.teller) + tag('beat-type', maatsoort.noemer), maatsoort.symbool ? { symbol: maatsoort.symbool } : {});
+  }
   if (clefVeranderd) inhoud += sleutels.map((sleutel) => schrijfSleutel(sleutel, balken > 1)).join('');
   const transpositie = instrument?.transpositie;
   if (eerste && transpositie && (transpositie.diatonisch || transpositie.chromatisch)) {
@@ -346,7 +348,11 @@ function schrijfMaat(maat, vorige, instrument, partij, weergave, openBogen) {
     let streep = leeg('ending', { number: nummer, type: 'stop' });
     if (maat.herhaling?.eind) streep += leeg('repeat', { direction: 'backward', times: maat.herhaling.keer });
     inhoud += tag('barline', streep, { location: 'right' });
-  } else if (maat.herhaling?.eind) inhoud += tag('barline', leeg('repeat', { direction: 'backward', times: maat.herhaling.keer }), { location: 'right' });
+  } else if (maat.herhaling?.eind) {
+    inhoud += tag('barline', leeg('repeat', { direction: 'backward', times: maat.herhaling.keer }), { location: 'right' });
+  } else if (maat.maatstreep === 'dubbel' || maat.maatstreep === 'eind') {
+    inhoud += tag('barline', tag('bar-style', maat.maatstreep === 'dubbel' ? 'light-light' : 'light-heavy'), { location: 'right' });
+  }
   return tag('measure', inhoud, { number: maat.nummer, ...(maat.opmaat ? { implicit: 'yes' } : {}) });
 }
 

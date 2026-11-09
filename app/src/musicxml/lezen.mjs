@@ -95,6 +95,7 @@ function leesMaat(maat, index, voortgang) {
   let volta = null;
   let tempo = null;
   let maatrust = null;
+  let maatstreep = null;
   let regelbegin = false;
   let paginabegin = false;
   const sprong = {};
@@ -120,6 +121,7 @@ function leesMaat(maat, index, voortgang) {
       const streep = leesMaatstreep(knoop);
       if (streep.begin) herhaling.begin = true;
       if (streep.eind) Object.assign(herhaling, { eind: true, keer: streep.keer });
+      if (streep.stijl && knoop.attr.location !== 'left' && knoop.attr.location !== 'middle') maatstreep = streep.stijl;
       if (streep.sprong) Object.assign(sprong, streep.sprong);
       if (streep.volta) {
         volta = {
@@ -172,6 +174,7 @@ function leesMaat(maat, index, voortgang) {
     herhaling,
     ...(Object.keys(sprong).length ? { sprong } : {}),
     ...(volta ? { volta } : {}),
+    ...(maatstreep ? { maatstreep } : {}),
     elementen,
     ...(maatrust !== null ? { maatrust } : {}),
   };
