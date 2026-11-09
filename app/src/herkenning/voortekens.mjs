@@ -114,12 +114,17 @@ export function zoekVoortekens(kaal, raster, schaal, { koppen = [], rusten = [],
     for (const kandidaat of kandidaten) if (!gekozen.some((ander) => ander.kop === kandidaat.kop)) gekozen.push(kandidaat);
     return gekozen.map(({ kop, soort, links, rechts, boven, onder }) => {
       const midden = (boven + onder) / 2;
-      // Haakjes: een smalle boog vlak links en een vlak rechts van het teken, op dezelfde hoogte.
-      const naast = (kant) => haakjes.some((h) => {
+      // Haakjes: een smalle boog vlak links en een vlak rechts van het teken, op dezelfde hoogte. Het kader van het teken
+      // neemt de haakjes dan mee (zodat rusten.mjs een haakje niet als rust ziet).
+      const naast = (kant) => haakjes.find((h) => {
         const gat = kant < 0 ? links - h.rechts : h.links - rechts;
         return gat >= -1 && gat <= ia * 0.5 && Math.abs((h.boven + h.onder) / 2 - midden) <= ia * 0.8;
       });
-      return { kop, soort, haakjes: naast(-1) && naast(1), links, rechts, boven, onder };
+      const [voor, na] = [naast(-1), naast(1)];
+      if (voor && na) {
+        return { kop, soort, haakjes: true, links: voor.links, rechts: na.rechts, boven: Math.min(boven, voor.boven, na.boven), onder: Math.max(onder, voor.onder, na.onder) };
+      }
+      return { kop, soort, haakjes: false, links, rechts, boven, onder };
     }).sort((p, q) => p.links - q.links);
   });
 }

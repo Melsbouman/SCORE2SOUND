@@ -11,7 +11,7 @@
 // 5. Een hele rust die alleen in de maat staat, vult de hele maat. Een meermaatsrust wordt zoveel maten als het getal erboven
 //    zegt (cijfers.mjs): de eerste met `maatrust`, de andere verborgen.
 // De herstelketen (herstelHerkenning, vulRustGaten, herstelTriolen, maatduur) kan daarna op het resultaat draaien, net als na
-// Audiveris.
+// Audiveris. Het veld `bron` (waar de bladzijden te vinden zijn) zet de keten in de browser zelf.
 import { TIKKEN_PER_KWART } from '../model/duur.mjs';
 
 const STAMMEN = 'CDEFGAB';
@@ -44,10 +44,11 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
   let maatsoort = { teller: 4, noemer: 4 };
   for (const [p, pagina] of paginas.entries()) {
     const ia = pagina.schaal?.lijnafstand ?? 20;
-    pagina.raster.balken.forEach((balk, b) => {
+    let eersteVanBlad = true;
+    (pagina.raster?.balken ?? []).forEach((balk, b) => {
       const kop = pagina.balkkoppen?.[b];
       if (kop?.sleutel) sleutel = { teken: kop.sleutel.soort, lijn: kop.sleutel.lijn };
-      if (kop?.sleutel) kwinten = kop.voortekening.aantal;
+      if (kop?.sleutel) kwinten = kop.voortekening?.aantal ?? 0;
       if (kop?.maatsoort) {
         maatsoort = { teller: kop.maatsoort.teller, noemer: kop.maatsoort.noemer };
         if (kop.maatsoort.symbool === 'C') maatsoort.symbool = 'common';
@@ -68,13 +69,14 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
         for (const rust of rusten) if (binnen(rust.x)) gebeurtenissen.push({ x: rust.x, rust });
         gebeurtenissen.sort((p1, p2) => p1.x - p2.x || (p1.noot && p2.noot ? p1.noot.stap - p2.noot.stap : 0));
         const basis = {
-          nummer: '', index: 0, opmaat: false, regelbegin: m === 0, paginabegin: m === 0 && b === 0,
+          nummer: '', index: 0, opmaat: false, regelbegin: m === 0, paginabegin: eersteVanBlad,
           maatsoort: { ...maatsoort }, toonsoort: { kwinten, modus: 'majeur' },
           sleutels: [{ teken: sleutel.teken, lijn: sleutel.lijn, notenbalk: 1, octaafVerschuiving: 0 }],
           tempo: null, herhaling: { begin: false, eind: false, keer: 2 },
           vak: { blad: pagina.blad ?? p + 1, links: vak.links, rechts: vak.rechts, boven: vak.boven, onder: vak.onder },
           elementen: [],
         };
+        eersteVanBlad = false;
         // De maatstreep aan het eind van deze maat: dubbel of eind.
         const streep = strepen.find((s) => Math.abs((s.links + s.rechts) / 2 - vak.rechts) <= ia);
         if (streep?.soort === 'dubbel') basis.maatstreep = 'dubbel';
@@ -87,11 +89,12 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
           const n = aantal && aantal > 0 ? aantal : 1;
           for (let i = 0; i < n; i += 1) {
             const maat = { ...structuredClone(basis), regelbegin: basis.regelbegin && i === 0, paginabegin: basis.paginabegin && i === 0 };
-            if (i === 0) maat.maatrust = n; else maat.verborgen = true;
+            // De verborgen maten hebben geen eigen plek op het blad (zoals bij meermaatsrust.mjs).
+            if (i === 0) maat.maatrust = n; else { maat.verborgen = true; delete maat.vak; }
             if (i < n - 1) delete maat.maatstreep;
             maat.elementen.push({
               soort: 'rust', start: 0, duur: lengte, stem: 1, notenbalk: 1, heleMaat: true, zekerheid: aantal ? 0.9 : 0.3,
-              ...(i === 0 ? { plek: plekVan(pagina, p, rustbalk.rust, ia) } : {}),
+              ...(i === 0 ? { plek: plekVan(pagina, p, rustbalk.rust, ia, balk) } : {}),
             });
             maten.push(maat);
           }
@@ -100,6 +103,7 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
         const maat = structuredClone(basis);
         // Voortekens gelden tot het eind van de maat op dezelfde plek (dezelfde stam en hetzelfde octaaf).
         const geldend = new Map();
+        const bijElement = new Map();
         let start = 0;
         let vorigeNoot = null;
         const alleenHeleRust = gebeurtenissen.length === 1 && gebeurtenissen[0].rust?.soort === 'heel';
@@ -109,7 +113,7 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
             const duur = heel ? (alleenHeleRust ? lengte : 1920) : RUSTDUUR[g.rust.soort] ?? 480;
             maat.elementen.push({
               soort: 'rust', start, duur, stem: 1, notenbalk: 1, ...(heel && alleenHeleRust ? { heleMaat: true } : {}),
-              zekerheid: 0.9, plek: plekVan(pagina, p, g.rust, ia),
+              zekerheid: 0.9, plek: plekVan(pagina, p, g.rust, ia, balk),
             });
             start += duur;
             vorigeNoot = null;
@@ -121,8 +125,10 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
           const teken = tekens.get(g.k);
           if (teken) geldend.set(sleutelNaam, ALTER[teken.soort]);
           const alter = geldend.has(sleutelNaam) ? geldend.get(sleutelNaam) : alterUitVoortekening(plaats.stap, kwinten);
-          // In een akkoord (bijna dezelfde x als de vorige kop) start de noot met de vorige mee.
-          const akkoord = Boolean(vorigeNoot && Math.abs(noot.x - vorigeNoot.noot.x) < ia * 0.6);
+          // In een akkoord (bijna dezelfde x als de vorige kop, of dezelfde stok: bij een secunde staat een kop ernaast) start
+          // de noot met de vorige mee.
+          const zelfdeStok = noot.stok && vorigeNoot?.noot.stok && Math.abs(noot.stok.x - vorigeNoot.noot.stok.x) <= Math.max(2, ia * 0.2);
+          const akkoord = Boolean(vorigeNoot && (Math.abs(noot.x - vorigeNoot.noot.x) < ia * 0.6 || zelfdeStok));
           const duur = noot.duur ?? 480;
           const element = {
             soort: 'noot', start: akkoord ? vorigeNoot.start : start, duur: akkoord ? vorigeNoot.duur : duur, stem: 1, notenbalk: 1,
@@ -131,11 +137,13 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
             zekerheid: 0.9, plek: plekVan(pagina, p, noot, ia),
           };
           maat.elementen.push(element);
+          bijElement.set(element, noot);
           if (!akkoord) {
             vorigeNoot = { noot, start, duur };
             start += duur;
           }
         }
+        zetBalken(maat.elementen.filter((e) => e.soort === 'noot' && !e.akkoord), bijElement, ia);
         maten.push(maat);
       });
     });
@@ -146,15 +154,34 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
     partijen: [{
       id: 'P1', naam: '', afkorting: '', instrument: { midiProgramma: 0, transpositie: { chromatisch: 0, diatonisch: 0 } }, maten,
     }],
-    bron: { herkenning: 'browser', bladen: paginas.map((pagina, p) => ({ nummer: pagina.blad ?? p + 1, breedte: pagina.breedte ?? 0, hoogte: pagina.hoogte ?? 0 })) },
   };
 }
 
-// De plek van een kop of rust op het blad: linksboven, breedte en hoogte (zoals bij Audiveris).
-function plekVan(pagina, p, ding, ia) {
+// Noten onder één waardestreep krijgen `balk`: 'begin', 'midden' of 'eind'. Twee noten na elkaar horen bij dezelfde streep als
+// de streep van de ene tot de stok van de andere loopt (duren.mjs geeft per noot hoe ver zijn streep loopt).
+function zetBalken(elementen, bijElement, ia) {
+  let groep = [];
+  const sluit = () => {
+    if (groep.length >= 2) groep.forEach((e, i) => { e.balk = i === 0 ? 'begin' : i === groep.length - 1 ? 'eind' : 'midden'; });
+    groep = [];
+  };
+  for (const element of elementen) {
+    const noot = bijElement.get(element);
+    const vorige = groep.length ? bijElement.get(groep.at(-1)) : null;
+    const verbonden = noot?.balk && noot.stok && vorige?.balk && vorige.stok
+      && vorige.balk.rechts >= noot.stok.x - Math.max(2, ia * 0.2) && noot.balk.links <= vorige.stok.x + Math.max(2, ia * 0.2);
+    if (!verbonden) sluit();
+    if (noot?.balk && noot.stok) groep.push(element);
+  }
+  sluit();
+}
+
+// De plek van een kop of rust op het blad: linksboven, breedte en hoogte (zoals bij Audiveris). Een rust heeft geen eigen
+// hoogte uit rusten.mjs; die krijgt het midden van de balk.
+function plekVan(pagina, p, ding, ia, balk) {
   const breedte = ding.links !== undefined ? ding.rechts - ding.links + 1 : Math.round(ia * 1.2);
   const hoogte = Math.round(ia);
   const x = ding.links !== undefined ? ding.links : Math.round(ding.x - breedte / 2);
-  const y = ding.y !== undefined ? Math.round(ding.y - hoogte / 2) : 0;
-  return { blad: pagina.blad ?? p + 1, x, y, breedte, hoogte };
+  const midden = ding.y ?? (balk ? balk.lijnen[0].a + balk.lijnen[0].b * ding.x + 2 * ia : hoogte / 2);
+  return { blad: pagina.blad ?? p + 1, x, y: Math.round(midden - hoogte / 2), breedte, hoogte };
 }

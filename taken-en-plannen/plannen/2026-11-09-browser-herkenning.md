@@ -78,7 +78,7 @@ Golf 1 kan nu beginnen; de latere golven worden per golf uitgewerkt, met de uits
 | D1 | Digitale pdf: notenbalken uit lijnen en tekens uit het lettertype, direct naar het model | `app/src/herkenning/digitaal.mjs` | Claude | B1 | 2 | open: lettertype tekenen of pdf.js |
 | A3 | Pdf-export in de browser | `views/export.js`, eigen pdf-schrijver of pdfkit in de browser | Claude-uitvoerder | – | 2 | deel 1 klaar (#1839, #1842); deel 2 bezig (#1843) |
 | C5 | Symbolen: nootkoppen, rusten, sleutels, voortekens, cijfers van de maatsoort, punten, balken, stokken, vlaggen, H-balk | `app/src/herkenning/symbolen.mjs`, `sjablonen.mjs` | Claude | C3, C4 | 3 | koppen (#1838), duur (#1841), rusten (#1844), balkkop en voortekens (`kop.mjs`, `voortekens.mjs`, 9 nov avond); cijfers boven meermaatsrusten open |
-| C6 | Muziek opbouwen voor één stem: toonhoogte, duur, maatsoort, voortekening, meermaatsrust | `app/src/herkenning/opbouw.mjs` | Claude | C5 | 3 | open |
+| C6 | Muziek opbouwen voor één stem: toonhoogte, duur, maatsoort, voortekening, meermaatsrust | `app/src/herkenning/opbouw.mjs` | Claude | C5 | 3 | klaar (9 nov avond; Devils Galop na herstelketen 102/102 maten goed) |
 | C7 | Cijfers en letters: aantal maten boven een meermaatsrust, repetitiecijfers, maatnummers | `app/src/herkenning/cijfers.mjs` | Claude-uitvoerder | C4 | 3 | open |
 | C8 | Keten in de browser: Web Worker, voortgang, bestaande herstelketen, scan als concept in de editor | `app/public/js/herken-worker.js`, `upload.js`, `app/src/herkenning/keten.mjs` | Claude | C6, C7 | 4 | open |
 | C9 | Scanmeting met de eigen herkenning naast Audiveris | `automatisering/scanmeting.mjs`, `app/src/meting/` | Claude-uitvoerder | C6 | 4 | open |

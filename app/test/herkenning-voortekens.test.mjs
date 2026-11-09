@@ -76,6 +76,9 @@ test('voortekens: kruis, mol en herstel horen bij de kop rechts ervan, ook in st
   assert.deepEqual(perKop.map((kop) => kop.stap), [5, 3, 6, 4, 7, 5, 5, 7]);
   assert.deepEqual(perKop.map((kop) => kop.teken), ['kruis', 'mol', 'herstel', '-', 'mol', 'herstel ()', 'mol', 'mol']);
   assert.deepEqual(rusten[0].map((rust) => rust.soort), ['kwart']);
+  // Bij een voorteken tussen haakjes neemt het kader de haakjes mee (zodat een haakje geen rust wordt).
+  const metHaakjes = voortekens.find((teken) => teken.haakjes);
+  assert.ok(metHaakjes.rechts - metHaakjes.links + 1 >= sjabloon('herstel', ia).breedte + 8, `kader ${metHaakjes.links}..${metHaakjes.rechts}`);
 });
 
 test('voortekens: zonder koppen geen voortekens', () => {
