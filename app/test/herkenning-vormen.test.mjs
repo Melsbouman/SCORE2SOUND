@@ -75,3 +75,12 @@ test('vormen: een groot beeld met veel vormen gaat snel en zonder stack overflow
   assert.equal(vormen.length, 750 * 350 + 1);
   assert.ok(Date.now() - begin < 5000, `${Date.now() - begin} ms`);
 });
+
+test('lijnen weghalen: een lijn waarvan het begin te laat gevolgd is, verdwijnt toch tot het begin van de balk', () => {
+  const beeld = maakBeeld();
+  // Het begin van de bovenste lijn is verkeerd gevolgd (een sleutel kruist hem): links op 120 in plaats van 10.
+  const scheef = { ...raster, balken: [{ ...raster.balken[0], lijnen: raster.balken[0].lijnen.map((lijn, i) => (i === 0 ? { ...lijn, links: 120 } : lijn)) }] };
+  const schoon = verwijderLijnen(beeld, scheef, schaal);
+  assert.equal(op(schoon, 30, 30), 0, 'het begin van de bovenste lijn is ook weg');
+  assert.equal(op(schoon, 12, 31), 0);
+});

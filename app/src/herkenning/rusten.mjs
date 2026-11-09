@@ -7,53 +7,24 @@
 // 3. Een hele rust hangt als gevuld blokje onder de tweede lijn; een halve rust staat op de middelste lijn.
 // 4. Kwart-, achtste-, zestiende- en tweeëndertigste rusten vergelijken we met de sjablonen uit Bravura, op dezelfde maat
 //    geschaald als de vorm (lettertypen verschillen in de details, niet in de grote lijn). Voortekens vergelijken we mee als er
-//    vlak rechts een nootkop staat: lijkt de vorm dan meer op een kruis dan op een rust, dan is het een voorteken.
+//    vlak rechts een nootkop staat: lijkt de vorm dan meer op een kruis dan op een rust, dan is het een voorteken. Zijn de
+//    voortekens al gezocht (voortekens.mjs, optie `voortekens`), dan slaan we die vormen over; ook de balkkop (kop.mjs, optie
+//    `balkkoppen`) bevat geen rusten.
 // Uitkomst per balk: [{ x, soort, links, rechts }] met soort 'meermaats', 'heel', 'half', 'kwart', '8', '16' of '32' en
 // x het midden.
 import { vindVormen } from './vormen.mjs';
-import { sjabloon } from './sjablonen.mjs';
+import { sjabloon, vergelijkVorm } from './sjablonen.mjs';
 
 const RUSTEN = [['kwart', 'rust-kwart'], ['8', 'rust-8'], ['16', 'rust-16'], ['32', 'rust-32']];
 // Cijfers staan niet midden in een maat op de balk (een 7 lijkt op een achtste rust); voortekens wel, vlak voor een kop.
 const ANDERE = ['kruis', 'mol', 'herstel'];
 
-// Hoe goed past een vorm (uitsnede uit labels) op een sjabloon, beide op hetzelfde kader geschaald. Dunne lijnen (een achtste
-// rust) vallen na het schalen net naast elkaar; daarom telt een pixel als raak als de ander binnen één pixel ligt. De score is
-// het gemiddelde van beide kanten: hoeveel van de vorm bij het sjabloon past, en hoeveel van het sjabloon bij de vorm.
+// Hoe goed past een losse vorm (uitsnede uit labels) op een sjabloon.
 function overlap(labels, breedte, vorm, t) {
-  const w = vorm.rechts - vorm.links + 1;
-  const h = vorm.onder - vorm.boven + 1;
-  const v = new Uint8Array(w * h);
-  const s = new Uint8Array(w * h);
-  for (let y = 0; y < h; y += 1) {
-    const ty = Math.min(t.hoogte - 1, Math.floor(((y + 0.5) * t.hoogte) / h));
-    for (let x = 0; x < w; x += 1) {
-      const tx = Math.min(t.breedte - 1, Math.floor(((x + 0.5) * t.breedte) / w));
-      v[y * w + x] = labels[(vorm.boven + y) * breedte + vorm.links + x] === vorm.id ? 1 : 0;
-      s[y * w + x] = t.pixels[ty * t.breedte + tx];
-    }
-  }
-  const dichtbij = (masker, x, y) => {
-    for (let dy = -1; dy <= 1; dy += 1) {
-      for (let dx = -1; dx <= 1; dx += 1) {
-        const px = x + dx;
-        const py = y + dy;
-        if (px >= 0 && px < w && py >= 0 && py < h && masker[py * w + px]) return true;
-      }
-    }
-    return false;
-  };
-  let vormRaak = 0; let vormAlle = 0; let sjabloonRaak = 0; let sjabloonAlle = 0;
-  for (let y = 0; y < h; y += 1) {
-    for (let x = 0; x < w; x += 1) {
-      if (v[y * w + x]) { vormAlle += 1; if (dichtbij(s, x, y)) vormRaak += 1; }
-      if (s[y * w + x]) { sjabloonAlle += 1; if (dichtbij(v, x, y)) sjabloonRaak += 1; }
-    }
-  }
-  return vormAlle && sjabloonAlle ? (vormRaak / vormAlle + sjabloonRaak / sjabloonAlle) / 2 : 0;
+  return vergelijkVorm((x, y) => labels[y * breedte + x] === vorm.id, vorm, t);
 }
 
-export function zoekRusten(kaal, raster, schaal, { koppen = [], strepen = [] } = {}) {
+export function zoekRusten(kaal, raster, schaal, { koppen = [], strepen = [], balkkoppen = null, voortekens = null } = {}) {
   const ia = schaal.lijnafstand;
   const { breedte } = kaal;
   const { labels, vormen } = vindVormen(kaal, { minPixels: Math.round(ia * ia * 0.08) });
@@ -85,23 +56,40 @@ export function zoekRusten(kaal, raster, schaal, { koppen = [], strepen = [] } =
       }
     }
     // Stokken onderweg: kolommen binnen de balk (niet aan de uiteinden) waar een dunne strook boven of onder de balk ver doorloopt.
+    const strookVan = (x) => {
+      const y = Math.round(yOp(4, x));
+      let o = y; while (zwart(x, o - 1) && y - o < ia * 5) o -= 1;
+      let n = y; while (zwart(x, n + 1) && n - y < ia * 5) n += 1;
+      return { o, n };
+    };
+    const strook = (x) => { const { o, n } = strookVan(x); return n - o; };
+    // Een maatstreep loopt precies van de bovenste tot de onderste lijn (een stok naar een kop houdt ergens anders op).
+    const maatstreep = (x) => {
+      const { o, n } = strookVan(x);
+      return Math.abs(o - yOp(0, x)) <= Math.max(2, ia * 0.25) && Math.abs(n - yOp(8, x)) <= Math.max(2, ia * 0.25);
+    };
+    // Aan de uiteinden heeft een meermaatsrust een streepje van een lijnafstand naar boven en naar beneden (samen twee
+    // lijnafstanden). Een stok aan het eind van een waardestreep loopt veel verder door, naar zijn nootkop: dan zijn het
+    // waardestrepen tussen twee stokken (een voorteken in een groep zestienden maakt dat stuk soms lang genoeg).
     const heeftStokken = (bar) => {
-      for (let x = bar.links + Math.round(ia * 0.6); x <= bar.rechts - Math.round(ia * 0.6); x += 1) {
-        const y = Math.round(yOp(4, x));
-        let o = y; while (zwart(x, o - 1) && y - o < ia * 4) o -= 1;
-        let n = y; while (zwart(x, n + 1) && n - y < ia * 4) n += 1;
-        if (n - o >= ia * 2) return true;
+      for (let x = bar.links + Math.round(ia * 0.6); x <= bar.rechts - Math.round(ia * 0.6); x += 1) if (strook(x) >= ia * 2) return true;
+      for (const kant of [bar.links, bar.rechts]) {
+        for (let dx = -2; dx <= 2; dx += 1) if (strook(kant + dx) >= ia * 2.8 && !maatstreep(kant + dx)) return true;
       }
       return false;
     };
     const meermaats = balkenOpMidden.filter((bar) => !heeftStokken(bar));
     const bezet = (vorm) => (koppen[b] ?? []).some((kop) => kop.x >= vorm.links - ia * 0.3 && kop.x <= vorm.rechts + ia * 0.3
       && kop.y >= vorm.boven - ia * 0.3 && kop.y <= vorm.onder + ia * 0.3)
-      || (strepen[b] ?? []).some((streep) => streep.links <= vorm.rechts && streep.rechts >= vorm.links);
+      || (strepen[b] ?? []).some((streep) => streep.links <= vorm.rechts && streep.rechts >= vorm.links)
+      // Een vorm die (een stuk van) een voorteken is (voortekens.mjs), is geen rust.
+      || (voortekens?.[b] ?? []).some((v) => v.links <= vorm.rechts && v.rechts >= vorm.links && v.boven <= vorm.onder && v.onder >= vorm.boven);
     const uit = [];
+    // Sleutel, voortekening en maatsoort (kop.mjs) zijn geen rusten; zonder gelezen balkkop de eerste drie lijnafstanden.
+    const kopEinde = balkkoppen?.[b]?.einde ?? balk.links + ia * 3;
     for (const vorm of vormen) {
       const x = (vorm.links + vorm.rechts) / 2;
-      if (x < balk.links + ia * 3 || x > balk.rechts) continue;
+      if (x < kopEinde || x > balk.rechts) continue;
       const boven = yOp(-1, x);
       const onder = yOp(9, x);
       if (vorm.onder < boven || vorm.boven > onder || bezet(vorm)) continue;

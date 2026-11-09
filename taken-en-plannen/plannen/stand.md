@@ -1,16 +1,18 @@
-# Stand (bijgewerkt 9 nov 2026, middag)
+# Stand (bijgewerkt 9 nov 2026, avond)
 
 ## Eerste handelingen in elke chat
 - `bash automatisering/hartslag.sh` en `bash automatisering/review.sh`.
 - Controleer dat er hooguit één `werkpakketten.sh` draait (PowerShell: `Get-CimInstance Win32_Process -Filter "Name='bash.exe'" | ? CommandLine -match 'werkpakketten'`). Start voor een losse taak: `bash automatisering/werkpakketten.sh` (één wachtrij).
 - Richting (sinds 9 nov): alles in de browser, zonder server: eigen herkenning naar het voorbeeld van Audiveris, inloggen met Google (`plannen/2026-11-09-browser-herkenning.md`). Audiveris blijft alleen meetlat op de pc van Mels. Daarvoor: werkende scanner met verbeteren in de editor (`plannen/2026-11-08-scanner.md`). Laatste nachtrapport: `nacht/rapport-2026-11-08.md`. Wensen en open punten: `voorraad.md`.
 
-## Stand van het plan "alles in de browser" (9 nov, middag)
+## Stand van het plan "alles in de browser" (9 nov, avond)
 Zie `plannen/2026-11-09-browser-herkenning.md` (kolom Stand). Kort:
-- Klaar en gemerged: MusicXML openen en projecten bewaren in de browser (A1, A2); pdf-lezer en beelden uit gescande pdf's met eigen CCITT-decoder (B1, B2); herkenning: zwart-wit, schaal, notenbalken, maatstrepen en maten, lijnen weghalen en vormen (C1-C4), nootkoppen met sjablonen uit Bravura en de duur van noten (C5 deel 1-2); svg-naar-pdf-omzetter (A3 deel 1).
-- Open PR: rusten (C5 deel 3, #1844). Uitvoerder bezig: pdf-export in de browser aansluiten (A3 deel 2, #1843).
-- Meting Devils Galop (pagina's uit de pdf getekend met PyMuPDF, 200 dpi; scripts in de scratchpad, niet in het repo): alle 250 koppen goed (soort en toonhoogte), duur 224 van 226 (zonder de 24 triolen), rusten bijna allemaal goed, maatvakken per regel gelijk aan het blad.
-- Volgende stappen: sleutel, voortekening en maatsoort aan het begin van de balk (HEADERS); voortekens bij noten; cijfers (meermaatsrust, repetitiecijfers); dan opbouw tot het model (C6) en de keten in de browser (C8). Inloggen met Google (A5) vraagt een OAuth-client-ID van Mels.
+- Klaar en gemerged: MusicXML openen en projecten bewaren in de browser (A1, A2); pdf-lezer en beelden uit gescande pdf's met eigen CCITT-decoder (B1, B2); herkenning: zwart-wit, schaal, notenbalken, maatstrepen en maten, lijnen weghalen en vormen (C1-C4), nootkoppen met sjablonen uit Bravura, de duur van noten en rusten (C5 deel 1-3); svg-naar-pdf-omzetter en pdf-export in de browser (A3).
+- 9 nov avond: balkkop (HEADERS: sleutel, voortekening, maatsoort; `app/src/herkenning/kop.mjs`) en voortekens bij noten (`voortekens.mjs`), plus drie reparaties: lijnen weghalen tot het begin van de balk (een te laat gevolgde lijn maakte de sleutel vast aan de noten), geen meermaatsrust meer op waardestrepen tussen ver uit elkaar staande stokken, en de stap rusten slaat balkkop en voortekens over. Volgorde in de keten: balkkop, koppen, duren, voortekens, rusten.
+- Meetscripts staan nu in het repo: `automatisering/herkenning-meting/` (pagina's tekenen met PyMuPDF, referentie uit de MXL, meting Devils Galop, balkkoppen per stuk). Uitleg bovenaan elk script.
+- Meting Devils Galop (200 dpi, `automatisering/herkenning-meting/devils-galop.mjs`): balkkoppen 17/17, koppen 250/250, voortekens 64/64 (ook de 3 tussen haakjes en de mollen in akkoorden), niets te veel; duur 224 van 226 (zonder de 24 triolen); rusten zonder de twee valse van eerst. De referentie-MXL heeft vóór maat 41 twee mollen voortekening die niet op het blad staan; het script corrigeert dat.
+- Balkkoppen op de eerste bladzijde van de andere stukken: Galop, Distant Land, Renaissance en Sand and Stars alle 42 goed (ook 2/4, 9/8, 6/8, 3/4, 1 tot 3 mollen, 1 tot 2 kruisen); Suite Gothique (vage scan) 9 van 11. Op African Symphony vindt het raster geen balken: de notenbalklijnen zijn daar lichtgrijs (170) en Otsu legt de drempel op 151, dus de lijnen vallen weg (oplossing: als er geen balken zijn, opnieuw met een drempel halverwege Otsu en papier). Voortekens op de Galop-scan: alles wat gevonden is klopt; gemist worden kruizen die een hulplijn of boog raken (komt met hulplijnen weghalen, LEDGERS).
+- Volgende stappen: opbouw tot het model (C6: toonhoogte uit stap, sleutel, voortekening en voortekens; maten en maatsoort); cijfers boven meermaatsrusten en repetitiecijfers (C7); hulplijnen weghalen (LEDGERS); dan de keten in de browser (C8). Inloggen met Google (A5) vraagt een OAuth-client-ID van Mels.
 - Digitale pdf's direct lezen (D1) is lastiger dan gedacht: Finale bedt het lettertype Maestro in met een eigen codering per pdf. Opties: eigen lettertype-tekenaar (CFF/TrueType) of pdf.js (nieuwe bibliotheek, akkoord van Mels nodig). Nog niet besloten.
 
 ## Uitvoerders (9 nov)
