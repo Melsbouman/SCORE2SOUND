@@ -141,7 +141,9 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
         for (const g of gebeurtenissen) {
           if (g.rust) {
             const heel = g.rust.soort === 'heel';
-            const duur = heel ? (alleenHeleRust ? lengte : 1920) : RUSTDUUR[g.rust.soort] ?? 480;
+            const zonderPunt = heel ? (alleenHeleRust ? lengte : 1920) : RUSTDUUR[g.rust.soort] ?? 480;
+            // Een punt achter de rust (rusten.mjs): anderhalf keer zo lang (niet bij een hele rust die de maat vult).
+            const duur = g.rust.punt && !(heel && alleenHeleRust) ? Math.round(zonderPunt * 1.5) : zonderPunt;
             maat.elementen.push({
               soort: 'rust', start, duur, stem: 1, notenbalk: 1, ...(heel && alleenHeleRust ? { heleMaat: true } : {}),
               zekerheid: 0.9, plek: plekVan(pagina, p, g.rust, ia, balk),

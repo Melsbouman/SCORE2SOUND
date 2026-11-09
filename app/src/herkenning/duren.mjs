@@ -13,6 +13,39 @@
 // waardestreep geeft `balk: { links, rechts }` hoe ver de buitenste streep loopt (voor het groeperen in opbouw.mjs).
 import { sjabloon } from './sjablonen.mjs';
 
+// Een los, rond vlekje (een punt) met zijn midden in het vak (x0..x1, y-r..y+r) op het beeld zonder notenbalklijnen? Ook
+// gebruikt door rusten.mjs (een punt achter een rust).
+export function maakZoekPunt(kaal, ia) {
+  const { breedte, hoogte, pixels } = kaal;
+  const zwart = (x, y) => x >= 0 && x < breedte && y >= 0 && y < hoogte && pixels[y * breedte + x] === 1;
+  return (x0, x1, y) => {
+    const r = Math.round(ia * 0.3);
+    for (let x = x0; x <= x1; x += 1) {
+      for (let dy = -r; dy <= r; dy += 1) {
+        if (!zwart(x, y + dy)) continue;
+        // De vlek rond dit punt (klein houden: groter dan een punt is het iets anders).
+        const gezien = new Set();
+        const stapel = [[x, y + dy]];
+        let l = x; let rr = x; let b = y + dy; let o = y + dy;
+        while (stapel.length && gezien.size <= ia * ia) {
+          const [px, py] = stapel.pop();
+          const sleutel = py * breedte + px;
+          if (gezien.has(sleutel) || !zwart(px, py)) continue;
+          gezien.add(sleutel);
+          l = Math.min(l, px); rr = Math.max(rr, px); b = Math.min(b, py); o = Math.max(o, py);
+          stapel.push([px + 1, py], [px - 1, py], [px, py + 1], [px, py - 1]);
+        }
+        const w = rr - l + 1;
+        const h = o - b + 1;
+        const vulling = gezien.size / (w * h);
+        if (w >= ia * 0.2 && w <= ia * 0.7 && h >= ia * 0.2 && h <= ia * 0.7 && vulling >= 0.5 && Math.abs((b + o) / 2 - y) <= ia * 0.3) return true;
+        return false;
+      }
+    }
+    return false;
+  };
+}
+
 export function bepaalDuren(kaal, raster, schaal, koppenPerBalk) {
   const { breedte, hoogte, pixels } = kaal;
   const ia = schaal.lijnafstand;
@@ -44,33 +77,7 @@ export function bepaalDuren(kaal, raster, schaal, koppenPerBalk) {
     if (inVlag && lengte >= ia * 0.2) aantal += 1;
     return Math.min(aantal, 3);
   };
-  // Een los, rond vlekje (een punt) met zijn midden in het vak (x0..x1, y-r..y+r)?
-  const zoekPunt = (x0, x1, y) => {
-    const r = Math.round(ia * 0.3);
-    for (let x = x0; x <= x1; x += 1) {
-      for (let dy = -r; dy <= r; dy += 1) {
-        if (!zwart(x, y + dy)) continue;
-        // De vlek rond dit punt (klein houden: groter dan een punt is het iets anders).
-        const gezien = new Set();
-        const stapel = [[x, y + dy]];
-        let l = x; let rr = x; let b = y + dy; let o = y + dy;
-        while (stapel.length && gezien.size <= ia * ia) {
-          const [px, py] = stapel.pop();
-          const sleutel = py * breedte + px;
-          if (gezien.has(sleutel) || !zwart(px, py)) continue;
-          gezien.add(sleutel);
-          l = Math.min(l, px); rr = Math.max(rr, px); b = Math.min(b, py); o = Math.max(o, py);
-          stapel.push([px + 1, py], [px - 1, py], [px, py + 1], [px, py - 1]);
-        }
-        const w = rr - l + 1;
-        const h = o - b + 1;
-        const vulling = gezien.size / (w * h);
-        if (w >= ia * 0.2 && w <= ia * 0.7 && h >= ia * 0.2 && h <= ia * 0.7 && vulling >= 0.5 && Math.abs((b + o) / 2 - y) <= ia * 0.3) return true;
-        return false;
-      }
-    }
-    return false;
-  };
+  const zoekPunt = maakZoekPunt(kaal, ia);
   // De langste verticale strook in een paar kolommen, vanaf rij y in richting stap (-1 omhoog, 1 omlaag). Een stok van één
   // pixel breed wiebelt op een scan tussen twee kolommen: we volgen daarom een band van twee kolommen (x en x + 1).
   const strook = (kolommen, y, stap) => {
