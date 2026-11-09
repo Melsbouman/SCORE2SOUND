@@ -76,8 +76,11 @@ export function zoekNootkoppen(kaal, raster, schaal, { drempel = 0.78, balkkoppe
     const kopEinde = balkkoppen?.[b]?.einde ?? balk.links + Math.round(ia * 3);
     const van = Math.max(0, Math.round(kopEinde));
     const tot = Math.min(breedte - 1, balk.rechts);
+    // De cijfers van een maatsoortwissel midden in de regel (kop.mjs) zijn geen koppen.
+    const wissels = balkkoppen?.[b]?.wissels ?? [];
     for (let stap = -8; stap <= 16; stap += 1) {
       for (let x = van; x <= tot; x += 1) {
+        if (wissels.length && wissels.some((w) => x >= w.x && x <= w.rechts)) continue;
         const y = Math.round(yOp(stap, x));
         for (const t of sjablonen) {
           // Snelle voorkeuze: bij een zwarte kop moet het midden zwart zijn, bij een halve of hele de linker- en rechterrand.

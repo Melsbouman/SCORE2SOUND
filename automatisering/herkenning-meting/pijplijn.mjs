@@ -55,7 +55,7 @@ export function herken(pad) {
   }
   const kaal = verwijderLijnen(zw, raster, schaal);
   const maten = vindMaten(zw, raster, schaal);
-  const balkkoppen = kop ? kop.leesBalkkoppen(kaal, raster, schaal, { zw }) : null;
+  const balkkoppen = kop ? kop.leesBalkkoppen(kaal, raster, schaal, { zw, strepen: maten.map((m) => m.strepen) }) : null;
   const koppen = zoekNootkoppen(kaal, raster, schaal, { balkkoppen });
   const noten = bepaalDuren(kaal, raster, schaal, koppen);
   // Voortekens op het beeld zonder hulplijnen: een kruis dat een hulplijn raakt, is dan een losse vorm.

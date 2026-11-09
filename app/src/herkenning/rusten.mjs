@@ -137,6 +137,8 @@ export function zoekRusten(kaal, raster, schaal, { koppen = [], strepen = [], ba
       const x = (vorm.links + vorm.rechts) / 2;
       if (x < kopEinde || x > balk.rechts) return false;
       if (vorm.onder < yOp(-1, x) || vorm.boven > yOp(9, x) || bezet(vorm)) return false;
+      // De cijfers van een maatsoortwissel midden in de regel (kop.mjs) zijn geen rust.
+      if ((balkkoppen?.[b]?.wissels ?? []).some((w) => x >= w.x && x <= w.rechts)) return false;
       // Recht boven of onder een nootkop staat in één stem geen rust (wel een tremolo of een accent).
       if ((koppen[b] ?? []).some((kop) => Math.abs(x - kop.x) <= ia * 0.6)) return false;
       return !meermaats.some((bar) => bar.links <= vorm.rechts && bar.rechts >= vorm.links);
