@@ -171,6 +171,7 @@ export function start(app) {
         maatIndex: plaats.maatIndex,
         start: element?.start ?? 0,
         notenbalk: element?.notenbalk ?? 1,
+        opNoot: true,
         elementIds: doelVan(item.actie) === 'noot' ? (gekozenIds.length ? gekozenIds : [gekozenNoot]) : null,
       };
     }
