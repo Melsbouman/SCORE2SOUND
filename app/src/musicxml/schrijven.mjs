@@ -43,7 +43,8 @@ function schrijfAttributes(maat, vorige, instrument) {
   const keyVeranderd = eerste || !gelijk(toonsoort, vorige.toonsoort);
   const timeVeranderd = eerste || !gelijk(maatsoort, vorige.maatsoort);
   const clefVeranderd = eerste || !gelijk(sleutels, vorige.sleutels);
-  if (!eerste && !keyVeranderd && !timeVeranderd && !clefVeranderd && !maat.maatrust) return '';
+  // maatrust: true is één maat rust (geen meermaatsrust); alleen een getal vanaf 2 geeft een measure-style.
+  if (!eerste && !keyVeranderd && !timeVeranderd && !clefVeranderd && !(maat.maatrust > 1)) return '';
   const balken = Math.max(1, ...sleutels.map((sleutel) => sleutel.notenbalk || 1));
   let inhoud = eerste ? tag('divisions', 480) : '';
   if (eerste && balken > 1) inhoud += tag('staves', balken);
@@ -54,7 +55,7 @@ function schrijfAttributes(maat, vorige, instrument) {
   if (eerste && transpositie && (transpositie.diatonisch || transpositie.chromatisch)) {
     inhoud += tag('transpose', tag('diatonic', transpositie.diatonisch) + tag('chromatic', transpositie.chromatisch));
   }
-  if (maat.maatrust) inhoud += tag('measure-style', tag('multiple-rest', maat.maatrust));
+  if (maat.maatrust > 1) inhoud += tag('measure-style', tag('multiple-rest', maat.maatrust));
   return tag('attributes', inhoud);
 }
 
