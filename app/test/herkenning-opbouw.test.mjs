@@ -168,3 +168,39 @@ test('opbouw: paginabegin op de eerste maat van een blad, ook als de eerste balk
   const { maten } = bouwPartituur([pagina]).partijen[0];
   assert.deepEqual(maten.map((m) => [m.paginabegin, m.regelbegin]), [[true, true], [false, false]]);
 });
+
+test('opbouw: herhaaltekens bij de maatstrepen worden herhaling.begin en herhaling.eind', () => {
+  const pagina = {
+    blad: 1, schaal: { lijnafstand: ia }, raster: { balken: [balk(200)] }, balkkoppen: [null],
+    maten: [{
+      strepen: [
+        { links: 300, rechts: 318, soort: 'begin', herhaling: 'begin' },
+        { links: 599, rechts: 601, soort: 'enkel' },
+        { links: 890, rechts: 908, soort: 'eind', herhaling: 'eind' },
+        { links: 1090, rechts: 1100, soort: 'eind' },
+      ],
+      maten: [vak(100, 309, 200), vak(318, 600, 200), vak(600, 899, 200), vak(899, 1100, 200)],
+    }],
+    noten: [[]], voortekens: [[]], rusten: [[]],
+  };
+  const { maten } = bouwPartituur([pagina]).partijen[0];
+  assert.deepEqual(maten.map((m) => [m.herhaling.begin, m.herhaling.eind]), [[false, false], [true, false], [false, true], [false, false]]);
+  // Bij een herhaling eind volgt de streep uit het herhaalteken; de eindstreep aan het eind blijft.
+  assert.deepEqual(maten.map((m) => m.maatstreep ?? null), [null, null, null, 'eind']);
+});
+
+test('opbouw: een herhaling rond een meermaatsrust staat alleen op de eerste en de laatste maat', () => {
+  const pagina = {
+    blad: 1, schaal: { lijnafstand: ia }, raster: { balken: [balk(200)] }, balkkoppen: [null],
+    maten: [{
+      strepen: [{ links: 300, rechts: 318, soort: 'begin', herhaling: 'begin' }, { links: 890, rechts: 908, soort: 'eind', herhaling: 'eind' }],
+      maten: [vak(100, 309, 200), vak(318, 899, 200), vak(899, 1100, 200)],
+    }],
+    noten: [[]], voortekens: [[]], rusten: [[{ x: 600, soort: 'meermaats', links: 400, rechts: 800 }]],
+    aantallen: [[{ x: 600, aantal: 3 }]],
+  };
+  const { maten } = bouwPartituur([pagina]).partijen[0];
+  assert.deepEqual(maten.map((m) => [m.herhaling.begin, m.herhaling.eind, m.verborgen ?? false]), [
+    [false, false, false], [true, false, false], [false, false, true], [false, true, true], [false, false, false],
+  ]);
+});
