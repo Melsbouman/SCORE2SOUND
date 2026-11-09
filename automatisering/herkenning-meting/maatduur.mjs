@@ -21,5 +21,6 @@ for (const stuk of process.argv.slice(2).filter((arg) => arg !== '--toon')) {
   for (const melding of meldingen) {
     const maat = maten[melding.maat];
     console.log(`  maat ${melding.maat + 1} (${maat.maatsoort.teller}/${maat.maatsoort.noemer}): ${maat.elementen.map(kort).filter(Boolean).join(' ')}`);
+    if (maat.vak) console.log(`    blad ${maat.vak.blad}, x ${maat.vak.links} tot ${maat.vak.rechts}, y ${maat.vak.boven} tot ${maat.vak.onder}`);
   }
 }
