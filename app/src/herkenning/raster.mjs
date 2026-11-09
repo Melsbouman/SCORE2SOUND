@@ -216,15 +216,43 @@ export function vindBalken(zw, schaal) {
   for (const keten of samengevoegd) {
     // Een notenbalk loopt over een flink stuk van het blad; losse treffers (tekst, een balk van achtsten) tellen niet.
     if (keten.length < 3 && keten.length * strookBreedte < breedte * 0.2) continue;
-    const lijnen = [];
-    for (let l = 0; l < 5; l += 1) {
-      const lijn = rechteLijn(keten.map((stukje) => [stukje.x, stukje.ys[l]]));
-      const ruimte = Math.max(1, Math.ceil(schaal.lijndikte));
-      const gat = Math.round(lijnafstand * 3);
-      const links = volg(dun, breedte, hoogte, lijn, Math.round(keten[0].x), -1, gat, ruimte);
-      const rechts = volg(dun, breedte, hoogte, lijn, Math.round(keten.at(-1).x), 1, gat, ruimte);
-      lijnen.push({ ...lijn, links, rechts });
+    const ruimte = Math.max(1, Math.ceil(schaal.lijndikte));
+    const gat = Math.round(lijnafstand * 3);
+    let rechten = [0, 1, 2, 3, 4].map((l) => rechteLijn(keten.map((stukje) => [stukje.x, stukje.ys[l]])));
+    // Controle: een notenbalklijn loopt (op nootkoppen na) door; een rij overbindingen of hulplijnen vlak boven of onder de
+    // balk heeft gaten. Loopt de lijn een lijnafstand onder de balk beter door dan de bovenste, dan is de balk een lijn te hoog
+    // gevonden (en andersom). De nieuwe lijn zoeken we tot twee pixels om de verwachte plek.
+    const x0 = Math.round(keten[0].x);
+    const x1 = Math.round(keten.at(-1).x);
+    const dekking = (lijn) => {
+      let raak = 0;
+      let aantal = 0;
+      for (let x = x0; x <= x1; x += 2) {
+        aantal += 1;
+        const y = Math.round(lijn.a + lijn.b * x);
+        for (let d = -ruimte; d <= ruimte; d += 1) {
+          if (y + d >= 0 && y + d < hoogte && dun[(y + d) * breedte + x]) { raak += 1; break; }
+        }
+      }
+      return aantal ? raak / aantal : 0;
+    };
+    const besteBij = (a, b) => [-2, -1, 0, 1, 2].map((d) => ({ a: a + d, b })).sort((p, q) => dekking(q) - dekking(p))[0];
+    for (let poging = 0; poging < 2; poging += 1) {
+      const afstand = (rechten[4].a - rechten[0].a) / 4;
+      const onder = besteBij(rechten[4].a + afstand, rechten[4].b);
+      const boven = besteBij(rechten[0].a - afstand, rechten[0].b);
+      // Alleen schuiven als de lijn die eraf gaat zelf duidelijk slecht doorloopt (onder 75%), de nieuwe lijn goed (vanaf 80%)
+      // en het verschil groot is. Een echte lijn met veel noten erop zakt zelden onder 75%.
+      const schuif = (nieuwe, oude) => dekking(oude) < 0.75 && dekking(nieuwe) >= 0.8 && dekking(nieuwe) - dekking(oude) >= 0.15;
+      if (schuif(onder, rechten[0])) rechten = [...rechten.slice(1), onder];
+      else if (schuif(boven, rechten[4])) rechten = [boven, ...rechten.slice(0, 4)];
+      else break;
     }
+    const lijnen = rechten.map((lijn) => ({
+      ...lijn,
+      links: volg(dun, breedte, hoogte, lijn, x0, -1, gat, ruimte),
+      rechts: volg(dun, breedte, hoogte, lijn, x1, 1, gat, ruimte),
+    }));
     const midden = (breedte - 1) / 2;
     const yMidden = (lijn) => lijn.a + lijn.b * midden;
     const afstanden = [1, 2, 3, 4].map((l) => yMidden(lijnen[l]) - yMidden(lijnen[l - 1]));
