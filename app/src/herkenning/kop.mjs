@@ -9,10 +9,12 @@
 // 4. De maatsoort: twee cijfers boven elkaar (de teller boven de middelste lijn, de noemer eronder), of een C (met of zonder
 //    streep) midden op de balk. De cijfers vergelijken we met de sjablonen; de noemer is 1, 2, 4, 8 of 16.
 // 5. Waar de laatste van die tekens ophoudt, begint de muziek (`einde`); daar zoeken de stappen hierna naar noten en rusten.
+// 6. Midden in de regel, direct na een maatstreep: een nieuwe maatsoort, en na een dubbele streep (of eind- of herhaalstreep)
+//    ook een nieuwe voortekening (herstellingstekens op de plekken van de oude tekens, dan eventueel nieuwe kruisen of mollen).
 // Uitkomst per balk: { sleutel: { soort: 'G' | 'F' | 'C', lijn, links, rechts } | null, voortekening: { aantal, tekens },
-// maatsoort: { teller, noemer, symbool? } | null, einde, wissels: [{ x, rechts, maatsoort }] }. Aantal is positief voor kruisen
-// en negatief voor mollen; lijn telt van onder (de G-sleutel staat op lijn 2). Een wissel is een maatsoort midden in de regel,
-// van x (de maatstreep ervoor) tot rechts.
+// maatsoort: { teller, noemer, symbool? } | null, einde, wissels: [{ x, rechts, maatsoort?, voortekening? }] }. Aantal is
+// positief voor kruisen en negatief voor mollen; lijn telt van onder (de G-sleutel staat op lijn 2). Een wissel is een nieuwe
+// maatsoort en/of voortekening midden in de regel, van x (de maatstreep ervoor) tot rechts.
 import { vindVormen } from './vormen.mjs';
 import { sjabloon, vergelijkVorm } from './sjablonen.mjs';
 import { maakKopScore } from './koppen.mjs';
@@ -159,15 +161,16 @@ export function leesBalkkoppen(kaal, raster, schaal, { zw = null, gevonden = nul
       const ids = new Set(deel.map((v) => v.id));
       return (x, y) => ids.has(labels[y * breedte + x]);
     };
-    let voorteken = null;
-    while (i < daarna.length && uit.voortekening.tekens.length < 7) {
-      if (daarna[i].links - vorigeRechts > ia * 2) break;
-      // Op een scan valt een voorteken soms in stukken (de buik van een mol los van de stok, waar de notenbalklijn hem raakte).
-      // Daarom proberen we ook twee of drie vormen naast elkaar samen, zolang ze samen zo smal zijn als één voorteken.
-      const k = uit.voortekening.tekens.length;
+    // De vaste plek van het k-de kruis of de k-de mol van een voortekening bij deze sleutel.
+    const plekVan = (naam, k) => (naam === 'mol' ? MOLLEN[k] + schuif : soort === 'C' && lijn === 4 ? KRUISEN_TENOR[k] : KRUISEN[k] + schuif);
+    // Eén teken vanaf vorm j in `lijst`: het best passende sjabloon moet een van `namen` zijn en op `plek(naam)` staan. Op een
+    // scan valt een voorteken soms in stukken (de buik van een mol los van de stok, waar de notenbalklijn hem raakte); daarom
+    // proberen we ook twee of drie vormen naast elkaar samen, zolang ze samen zo smal zijn als één voorteken.
+    // Geeft { n (aantal vormen), kader, soort, plek, score } of null.
+    const leesTeken = (lijst, j, namen, plek) => {
       let beste = null;
-      for (let n = 1; n <= 3 && i + n <= daarna.length; n += 1) {
-        const deel = daarna.slice(i, i + n);
+      for (let n = 1; n <= 3 && j + n <= lijst.length; n += 1) {
+        const deel = lijst.slice(j, j + n);
         const kader = kaderVan(deel);
         const w = (kader.rechts - kader.links + 1) / ia;
         const h = (kader.onder - kader.boven + 1) / ia;
@@ -175,32 +178,42 @@ export function leesBalkkoppen(kaal, raster, schaal, { zw = null, gevonden = nul
         if (w < 0.4 || h < 1.7 || h > 3.4) continue;
         const isZwart = bijVormen(deel);
         const best = tekens.map((t) => ({ t, score: vergelijkVorm(isZwart, kader, t) })).sort((p, q) => q.score - p.score)[0];
-        if (best.t.naam === 'herstel' || best.score < 0.6 || (voorteken && best.t.naam !== voorteken)) continue;
-        // De plek van het teken: bij een kruis het midden, bij een mol de buik (het anker van het sjabloon, naar verhouding).
+        if (!namen.includes(best.t.naam) || best.score < 0.6) continue;
+        // De plek van het teken: bij een kruis en een herstellingsteken het midden, bij een mol de buik (het anker van het
+        // sjabloon, naar verhouding).
         const t = best.t;
         const ankerY = kader.boven + (t.ankerY / t.hoogte) * (kader.onder - kader.boven + 1);
         const stap = stapVan(ankerY, (kader.links + kader.rechts) / 2);
-        const plek = t.naam === 'mol' ? MOLLEN[k] + schuif : soort === 'C' && lijn === 4 ? KRUISEN_TENOR[k] : KRUISEN[k] + schuif;
-        if (Math.abs(stap - plek) > 0.8) continue;
-        if (!beste || best.score > beste.score) beste = { n, kader, soort: t.naam, plek, score: best.score };
+        const juist = plek(t.naam);
+        if (Math.abs(stap - juist) > 0.8) continue;
+        if (!beste || best.score > beste.score) beste = { n, kader, soort: t.naam, plek: juist, score: best.score };
       }
+      return beste;
+    };
+    // Staat er vlak na een teken (tot ongeveer 0,3 lijnafstand) een nootkop op dezelfde plek, dan is het een voorteken van die
+    // noot, geen deel van een voortekening. Na een voortekening staat de eerste noot verder weg.
+    const nootErna = (teken) => {
+      const y = Math.round(yOp(teken.stap, teken.rechts));
+      for (let x = teken.rechts + 1; x <= teken.rechts + Math.round(ia * 0.3); x += 1) {
+        if (kopSjablonen.some((t) => kopScore(t, x, y) >= 0.78)) return true;
+      }
+      return false;
+    };
+    let voorteken = null;
+    while (i < daarna.length && uit.voortekening.tekens.length < 7) {
+      if (daarna[i].links - vorigeRechts > ia * 2) break;
+      const k = uit.voortekening.tekens.length;
+      const beste = leesTeken(daarna, i, voorteken ? [voorteken] : ['kruis', 'mol'], (naam) => plekVan(naam, k));
       if (!beste) break;
       voorteken = beste.soort;
       uit.voortekening.tekens.push({ soort: beste.soort, stap: beste.plek, links: beste.kader.links, rechts: beste.kader.rechts, delen: beste.n });
       vorigeRechts = beste.kader.rechts;
       i += beste.n;
     }
-    // Staat er vlak na het laatste teken (tot ongeveer 0,3 lijnafstand) een nootkop op dezelfde plek, dan is het een voorteken
-    // van die noot (een mol voor de eerste noot van de regel), geen deel van de voortekening. Na een voortekening staat de
-    // eerste noot verder weg.
+    // Een mol vlak voor de eerste noot van de regel is een voorteken van die noot, geen voortekening.
     const laatste = uit.voortekening.tekens.at(-1);
     if (laatste) {
-      const y = Math.round(yOp(laatste.stap, laatste.rechts));
-      let noot = false;
-      for (let x = laatste.rechts + 1; x <= laatste.rechts + Math.round(ia * 0.3) && !noot; x += 1) {
-        noot = kopSjablonen.some((t) => kopScore(t, x, y) >= 0.78);
-      }
-      if (noot) {
+      if (nootErna(laatste)) {
         uit.voortekening.tekens.pop();
         i -= laatste.delen;
         vorigeRechts = uit.voortekening.tekens.at(-1)?.rechts ?? rechts;
@@ -326,16 +339,61 @@ export function leesBalkkoppen(kaal, raster, schaal, { zw = null, gevonden = nul
       uit.maatsoort = gelezen.maatsoort;
       uit.einde = gelezen.rechts + 1;
     }
-    // 4. Een maatsoortwissel midden in de regel: een maatsoort direct na een maatstreep (niet aan het eind van de balk).
+    // Een nieuwe voortekening midden in de regel, vanaf vorm 0 in `lijst` (de vormen na de maatstreep): eerst herstellingstekens
+    // op de plekken van de oude tekens (`oud`, zoals aantal), dan eventueel nieuwe kruisen of mollen. Alleen herstellingstekens
+    // tellen als ze alle oude tekens opheffen. Geeft { voortekening, rechts, volgende (de eerste vorm erna) } of null.
+    const leesNieuweVoortekening = (lijst, oud, vorige) => {
+      const gelezen = [];
+      let j = 0;
+      let rechts = vorige;
+      let herstel = 0;
+      while (j < lijst.length && herstel < Math.abs(oud) && lijst[j].links - rechts <= ia * 2) {
+        const teken = leesTeken(lijst, j, ['herstel'], () => plekVan(oud < 0 ? 'mol' : 'kruis', herstel));
+        if (!teken) break;
+        gelezen.push(teken);
+        herstel += 1;
+        rechts = teken.kader.rechts;
+        j += teken.n;
+      }
+      let nieuw = null;
+      let aantal = 0;
+      while (j < lijst.length && aantal < 7 && lijst[j].links - rechts <= ia * 2) {
+        const teken = leesTeken(lijst, j, nieuw ? [nieuw] : ['kruis', 'mol'], (naam) => plekVan(naam, aantal));
+        if (!teken) break;
+        nieuw = teken.soort;
+        gelezen.push(teken);
+        aantal += 1;
+        rechts = teken.kader.rechts;
+        j += teken.n;
+      }
+      if (!gelezen.length || (!aantal && herstel < Math.abs(oud))) return null;
+      const tekens = gelezen.map((teken) => ({ soort: teken.soort, stap: teken.plek, links: teken.kader.links, rechts: teken.kader.rechts }));
+      if (nootErna(tekens.at(-1))) return null;
+      return { voortekening: { aantal: nieuw === 'mol' ? -aantal : aantal, tekens }, rechts, volgende: j };
+    };
+
+    // 4. Midden in de regel, direct na een maatstreep (niet aan het eind van de balk): een nieuwe voortekening (alleen na een
+    // dubbele streep, eind- of herhaalstreep: zo staat een toonsoortwissel gedrukt, en een voorteken bij de eerste noot van een
+    // maat lijkt er anders op) en een nieuwe maatsoort.
     uit.wissels = [];
+    let geldend = uit.voortekening.aantal;
     for (const streep of strepen?.[b] ?? []) {
       if (streep.rechts <= uit.einde || balk.rechts - streep.rechts < ia * 3) continue;
       const naStreep = bijBalk.filter((v) => {
         const x = (v.links + v.rechts) / 2;
-        return v.links > streep.rechts && v.links <= streep.rechts + ia * 6 && v.onder >= yOp(0.5, x) && v.boven <= yOp(7.5, x);
+        return v.links > streep.rechts && v.links <= streep.rechts + ia * 14 && v.onder >= yOp(0.5, x) && v.boven <= yOp(7.5, x);
       }).sort((p, q) => p.links - q.links);
-      const wissel = leesMaatsoort(naStreep, 0, streep.rechts, true);
-      if (wissel) uit.wissels.push({ x: streep.rechts, rechts: wissel.rechts, maatsoort: wissel.maatsoort });
+      const toon = streep.soort && streep.soort !== 'enkel' ? leesNieuweVoortekening(naStreep, geldend, streep.rechts) : null;
+      // Direct na een nieuwe voortekening is een maatsoort heel gewoon; daar gelden de gewone drempels voor de cijfers.
+      const maat = leesMaatsoort(naStreep, toon?.volgende ?? 0, toon?.rechts ?? streep.rechts, !toon);
+      if (!toon && !maat) continue;
+      const wissel = { x: streep.rechts, rechts: maat?.rechts ?? toon.rechts };
+      if (toon) {
+        wissel.voortekening = toon.voortekening;
+        geldend = toon.voortekening.aantal;
+      }
+      if (maat) wissel.maatsoort = maat.maatsoort;
+      uit.wissels.push(wissel);
     }
     uit.voortekening.tekens = uit.voortekening.tekens.map(({ delen, ...teken }) => teken);
     return uit;

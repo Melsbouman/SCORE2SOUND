@@ -74,9 +74,10 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
       const strepen = pagina.maten?.[b]?.strepen ?? [];
       let eersteVanBalk = true;
       vakken.forEach((vak, m) => {
-        // Een maatsoortwissel midden in de regel (kop.mjs) aan het begin van deze maat: vanaf hier de nieuwe maatsoort.
+        // Een wissel midden in de regel (kop.mjs) aan het begin van deze maat: vanaf hier de nieuwe voortekening en/of maatsoort.
         const wissel = (kop?.wissels ?? []).find((w) => Math.abs(w.x - vak.links) <= ia * 1.5);
-        if (wissel) {
+        if (wissel?.voortekening) kwinten = wissel.voortekening.aantal;
+        if (wissel?.maatsoort) {
           maatsoort = { teller: wissel.maatsoort.teller, noemer: wissel.maatsoort.noemer };
           if (wissel.maatsoort.symbool === 'C') maatsoort.symbool = 'common';
           if (wissel.maatsoort.symbool === 'alla-breve') maatsoort.symbool = 'cut';
