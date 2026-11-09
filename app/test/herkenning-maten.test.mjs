@@ -74,3 +74,33 @@ test('een rij overbindingen vlak boven de balk schuift de balk niet een lijn omh
   });
   for (const balk of maten) assert.equal(balk.maten.length, 3);
 });
+
+test('een herhaalteken na sleutel en voortekening maakt geen nepmaat aan het begin', () => {
+  const { verwacht, maten } = herken({ balken: 2, beginHerhaling: true, strepen: [1 / 3, 2 / 3, 1], koppen: false });
+  maten.forEach((balk, s) => {
+    assert.equal(balk.maten.length, 3, balk.maten.map((maat) => `${maat.links}-${maat.rechts}`).join(' '));
+    assert.ok(balk.maten[0].links > verwacht.balken[s].herhaling, 'de eerste maat begint na het herhaalteken');
+  });
+});
+
+test('een C-sleutel midden in de balk is geen maatstreep', () => {
+  const { maten } = herken({ balken: 2, cSleutel: 0.5, koppen: false });
+  for (const balk of maten) {
+    assert.equal(balk.strepen.length, 4, balk.strepen.map((streep) => `${streep.links}:${streep.soort}`).join(' '));
+    assert.equal(balk.maten.length, 3);
+  }
+});
+
+test('een stok van de onderste lijn naar een waardestreep op de bovenste lijn is geen maatstreep', () => {
+  const { maten } = herken({ balken: 2, stokOverBalk: 5, koppen: false });
+  for (const balk of maten) assert.equal(balk.strepen.length, 4, balk.strepen.map((streep) => streep.links).join(','));
+});
+
+test('een dunne lijn boven de balk en noten op de onderste lijn schuiven een goede balk niet', () => {
+  const { verwacht, raster, maten } = herken({ balken: 2, dunneLijnBoven: true, notenOpOnderlijn: true, koppen: false });
+  raster.balken.forEach((balk, s) => {
+    const y = (lijn) => lijn.a + lijn.b * 600;
+    assert.ok(Math.abs(y(balk.lijnen[0]) - y(verwacht.balken[s].lijnen[0])) <= 1.5, `balk ${s}`);
+  });
+  for (const balk of maten) assert.equal(balk.maten.length, 3);
+});

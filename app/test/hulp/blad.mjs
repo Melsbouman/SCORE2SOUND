@@ -17,6 +17,7 @@ export function maakBlad({
   breedte = 1200, hoogte = 1500, balken = 5, lijnafstand = 20, lijndikte = 2, helling = 0, links = 100, rechts = 1100,
   boven = 150, afstandBalken = 220, koppen = true, maatstrepen = true, ruis = 0, achtergrond = 255, inkt = 0, verloop = 0,
   zaad = 1, hulplijnNoten = 0, extraLijn = null, streepDikte = 2, strepen = null, langeStokken = 0, eindstreep = false, bogen = false,
+  beginHerhaling = false, cSleutel = null, stokOverBalk = 0, dunneLijnBoven = false, notenOpOnderlijn = false,
 } = {}) {
   const kans = willekeur(zaad);
   const inktLaag = new Uint8Array(breedte * hoogte);
@@ -96,6 +97,48 @@ export function maakBlad({
         }
       }
     }
+    const vlak = (x0, x1, y0, y1) => { for (let x = x0; x <= x1; x += 0.5) for (let y = y0; y <= y1; y += 0.5) zet(x, y); };
+    const kop = (cx, cy) => {
+      for (let dy = -lijnafstand * 0.45; dy <= lijnafstand * 0.45; dy += 0.5) {
+        for (let dx = -lijnafstand * 0.65; dx <= lijnafstand * 0.65; dx += 0.5) {
+          if ((dx * dx) / (0.4225 * lijnafstand * lijnafstand) + (dy * dy) / (0.2025 * lijnafstand * lijnafstand) <= 1) zet(cx + dx, cy + dy);
+        }
+      }
+    };
+    // Een herhaalteken aan het begin van de regel, na sleutel en voortekening (5 lijnafstanden na het begin): dik, dun, punten.
+    if (beginHerhaling) {
+      const x = links + 5 * lijnafstand;
+      vlak(x, x + lijnafstand * 0.5, yOp(x, 0) - lijndikte / 2, yOp(x, 8) + lijndikte / 2);
+      vlak(x + lijnafstand * 0.8, x + lijnafstand * 0.8 + 1, yOp(x, 0) - lijndikte / 2, yOp(x, 8) + lijndikte / 2);
+      for (const stap of [3, 5]) vlak(x + lijnafstand * 1.3, x + lijnafstand * 1.55, yOp(x, stap) - 2, yOp(x, stap) + 2);
+      verwacht.balken.at(-1).herhaling = x;
+    }
+    // Een C-sleutel (alt): een dikke en een dunne balk over de hele hoogte, met krullen aan de dunne balk.
+    if (cSleutel !== null) {
+      const x = Math.round(links + cSleutel * (rechts - links));
+      vlak(x, x + lijnafstand * 0.4, yOp(x, 0) - lijndikte / 2, yOp(x, 8) + lijndikte / 2);
+      vlak(x + lijnafstand * 0.6, x + lijnafstand * 0.6 + 1, yOp(x, 0) - lijndikte / 2, yOp(x, 8) + lijndikte / 2);
+      for (const [van, tot] of [[0, 3.6], [4.4, 8]]) {
+        for (let y = yOp(x, van); y <= yOp(x, tot); y += 0.5) {
+          const t = (y - yOp(x, van)) / (yOp(x, tot) - yOp(x, van));
+          vlak(x + lijnafstand * 0.6, x + lijnafstand * (0.7 + 0.7 * Math.sin(Math.PI * t)), y, y);
+        }
+      }
+    }
+    // Een paar achtsten: de tweede noot op de onderste lijn, de stok omhoog tot een waardestreep op de bovenste lijn.
+    for (let n = 0; n < stokOverBalk; n += 1) {
+      const x = links + 140 + n * 170;
+      if (x > rechts - 60) break;
+      const stok = x + lijnafstand * 0.65;
+      kop(x, yOp(x, 8));
+      kop(x - lijnafstand * 2, yOp(x, 3));
+      vlak(stok - 1, stok, yOp(x, 0) - lijnafstand * 0.25, yOp(x, 8));
+      vlak(stok - lijnafstand * 2 - 1, stok - lijnafstand * 2, yOp(x, 0) - lijnafstand * 0.25, yOp(x, 3));
+      vlak(stok - lijnafstand * 2, stok, yOp(x, 0) - lijnafstand * 0.25, yOp(x, 0) + lijnafstand * 0.25);
+    }
+    // Een dunne lijn (1 pixel) over de hele breedte, een lijnafstand boven de balk, en noten op de onderste lijn.
+    if (dunneLijnBoven) for (let x = links; x <= rechts; x += 1) zet(x, lijnen[0].a + helling * x - lijnafstand);
+    if (notenOpOnderlijn) for (let x = links + 50; x < rechts - 30; x += 100) kop(x, yOp(x, 8));
     // Lange stokken dwars door de hele balk (een nootkop ver onder de balk, de stok tot boven de balk, zoals bij een balk van
     // achtsten): dat zijn geen maatstrepen.
     for (let n = 0; n < langeStokken; n += 1) {

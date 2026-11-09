@@ -241,8 +241,11 @@ export function vindBalken(zw, schaal) {
       const afstand = (rechten[4].a - rechten[0].a) / 4;
       const onder = besteBij(rechten[4].a + afstand, rechten[4].b);
       const boven = besteBij(rechten[0].a - afstand, rechten[0].b);
-      if (dekking(onder) > Math.max(0.5, dekking(rechten[0]) + 0.1)) rechten = [...rechten.slice(1), onder];
-      else if (dekking(boven) > Math.max(0.5, dekking(rechten[4]) + 0.1)) rechten = [boven, ...rechten.slice(0, 4)];
+      // Alleen schuiven als de lijn die eraf gaat zelf duidelijk slecht doorloopt (onder 75%), de nieuwe lijn goed (vanaf 80%)
+      // en het verschil groot is. Een echte lijn met veel noten erop zakt zelden onder 75%.
+      const schuif = (nieuwe, oude) => dekking(oude) < 0.75 && dekking(nieuwe) >= 0.8 && dekking(nieuwe) - dekking(oude) >= 0.15;
+      if (schuif(onder, rechten[0])) rechten = [...rechten.slice(1), onder];
+      else if (schuif(boven, rechten[4])) rechten = [boven, ...rechten.slice(0, 4)];
       else break;
     }
     const lijnen = rechten.map((lijn) => ({
