@@ -159,20 +159,40 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
           // In een akkoord (bijna dezelfde x als de vorige kop, of dezelfde stok: bij een secunde staat een kop ernaast) start
           // de noot met de vorige mee.
           const zelfdeStok = noot.stok && vorigeNoot?.noot.stok && Math.abs(noot.stok.x - vorigeNoot.noot.stok.x) <= Math.max(2, ia * 0.2);
-          const akkoord = Boolean(vorigeNoot && (Math.abs(noot.x - vorigeNoot.noot.x) < ia * 0.6 || zelfdeStok));
+          // Een secunde in een akkoord: twee koppen een stap uit elkaar staan naast elkaar. Twee hele noten (zonder stok), of een kop
+          // zonder stok die tegen de stok van een andere kop van het akkoord aan staat (duren.mjs zoekt de stok aan de eigen kant
+          // van de kop). We vergelijken met elke kop die al in het akkoord staat.
+          const tegenStok = (zonder, met) => !zonder.stok && met.stok && Math.abs(zonder.x - met.stok.x) <= ia * 0.9;
+          const secunde = (vorigeNoot?.koppen ?? []).some((ander) => Math.abs(noot.stap - ander.stap) === 1 && Math.abs(noot.x - ander.x) <= ia * 1.9
+            && ((noot.soort === 'heel' && ander.soort === 'heel') || tegenStok(noot, ander) || tegenStok(ander, noot)));
+          const akkoord = Boolean(vorigeNoot && (Math.abs(noot.x - vorigeNoot.noot.x) < ia * 0.6 || zelfdeStok || secunde));
           const groepje = groepjes.get(g.k);
           const duur = groepje ? Math.round(((noot.duur ?? 480) * groepje.normaal) / groepje.aantal) : noot.duur ?? 480;
+          const tuplet = groepje ? { aantal: groepje.aantal, normaal: groepje.normaal, begin: groepje.plek === 0, eind: groepje.plek === groepje.lengte - 1 } : null;
+          // Had het akkoord tot nu toe geen stok en deze kop wel, dan bepaalt deze kop het akkoord: de duur (van alle koppen), de
+          // waardestreep (zetBalken kijkt naar de kop van het eerste element) en het groepje.
+          if (secunde && !vorigeNoot.noot.stok && noot.stok) {
+            for (const ander of vorigeNoot.elementen) ander.duur = duur;
+            start = vorigeNoot.start + duur;
+            vorigeNoot.duur = duur;
+            vorigeNoot.noot = noot;
+            bijElement.set(vorigeNoot.element, noot);
+            if (tuplet) vorigeNoot.element.tuplet = { ...tuplet };
+          }
           const element = {
             soort: 'noot', start: akkoord ? vorigeNoot.start : start, duur: akkoord ? vorigeNoot.duur : duur, stem: 1, notenbalk: 1,
             toonhoogte: { stap: plaats.stap, alter, octaaf: plaats.octaaf }, akkoord,
             overbinding: { begin: false, eind: false }, articulaties: [], legato: { begin: false, eind: false }, versiering: null,
             zekerheid: 0.9, plek: plekVan(pagina, p, noot, ia),
-            ...(groepje ? { tuplet: { aantal: groepje.aantal, normaal: groepje.normaal, begin: groepje.plek === 0, eind: groepje.plek === groepje.lengte - 1 } } : {}),
+            ...(tuplet ? { tuplet } : {}),
           };
           maat.elementen.push(element);
           bijElement.set(element, noot);
-          if (!akkoord) {
-            vorigeNoot = { noot, start, duur };
+          if (akkoord) {
+            vorigeNoot.koppen.push(noot);
+            vorigeNoot.elementen.push(element);
+          } else {
+            vorigeNoot = { noot, start, duur, element, koppen: [noot], elementen: [element] };
             start += duur;
           }
         }
