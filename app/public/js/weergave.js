@@ -442,14 +442,21 @@ export function start(app) {
   // Slepen vanuit het palet. Het doel is de maat onder de muis, in de partij van de notenbalk onder de muis; bij een hokje
   // voor een noot (articulatie, voorteken) de noot onder de muis. De partij en de maat komen uit de id's van de noten en
   // rusten ('n-<partij>-<maat>-<element>'), zodat het ook klopt na een meermaatsrust (verborgen maten worden niet getekend).
-  const PALET = 'application/x-palet';
   function paletDoel(gebeurtenis, opNoot, ookRust = false, bijNoot = false) {
     const x = gebeurtenis.clientX;
     const y = gebeurtenis.clientY;
+    // De maat onder de muis, ook als je er net boven of onder loslaat (een dynamiek laat je onder de balk los): tot anderhalve
+    // balkhoogte (minstens 40 pixels) boven of onder de dichtstbijzijnde notenbalk in de maat (een maat is in Verovio het hele
+    // systeem, over alle partijen); bij meer keuze de dichtstbijzijnde, dan de kleinste.
+    const buiten = (kader) => (y < kader.top ? kader.top - y : y > kader.bottom ? y - kader.bottom : 0);
     const maatG = maten()
-      .map((g) => ({ g, kader: g.getBoundingClientRect() }))
-      .filter(({ kader }) => x >= kader.left && x <= kader.right && y >= kader.top && y <= kader.bottom)
-      .sort((a, b) => a.kader.width * a.kader.height - b.kader.width * b.kader.height)[0]?.g;
+      .map((g) => {
+        const kader = g.getBoundingClientRect();
+        const balk = dichtsteBalk(g, y) ?? kader;
+        return { g, kader, afstand: buiten(balk), bereik: Math.max(40, balk.height * 1.5) };
+      })
+      .filter(({ kader, afstand, bereik }) => x >= kader.left && x <= kader.right && afstand <= bereik)
+      .sort((a, b) => a.afstand - b.afstand || a.kader.width * a.kader.height - b.kader.width * b.kader.height)[0]?.g;
     if (!maatG) return null;
     const delen = [...maatG.querySelectorAll('g.note[id^="n-"], g.rest[id^="n-"], g.mRest[id^="n-"], g.multiRest[id^="n-"]')]
       .map((element) => {
@@ -497,6 +504,12 @@ export function start(app) {
     const start = dichtste ? modelElement(dichtste.element.id)?.start ?? 0 : 0;
     return { element: maatG, plek: { partijId: plaats.partijId, maatIndex: plaats.maatIndex, start, notenbalk } };
   }
+  // Het kader van de notenbalk in een maat die verticaal het dichtst bij y ligt (of null als er geen is).
+  function dichtsteBalk(maatG, y) {
+    const afstand = (kader) => (y < kader.top ? kader.top - y : y > kader.bottom ? y - kader.bottom : 0);
+    return [...maatG.querySelectorAll('g.staff')].map((balk) => balk.getBoundingClientRect())
+      .reduce((beste, kader) => (!beste || afstand(kader) < afstand(beste) ? kader : beste), null);
+  }
   function leesNootId(id) {
     const delen = id.split('-');
     const elementIndex = Number(delen.pop());
@@ -512,35 +525,27 @@ export function start(app) {
     for (const element of vlak.querySelectorAll('.sleep-doel')) element.classList.remove('sleep-doel');
   }
 
-  vlak.addEventListener('dragover', (gebeurtenis) => {
-    const soorten = [...gebeurtenis.dataTransfer.types];
-    if (!soorten.includes(PALET)) return;
-    const doel = paletDoel(gebeurtenis, soorten.includes(`${PALET}-noot`), soorten.includes(`${PALET}-rust`), soorten.includes(`${PALET}-aanwijzing`));
-    wisSleepDoel();
+  // Het palet sleept met pointer events (views/paletsleep.js) en meldt 'palet-sleep' bij elke beweging ('beweeg'), bij loslaten
+  // ('los') en bij afbreken ('stop'). Hier licht het doel op, en het bericht krijgt het doel terug: de plek in het model (voor
+  // pasPaletToe) en het kader op het scherm (voor de animatie van het kaartje). Alleen boven de partituur zelf is er een doel
+  // (niet boven het palet, de lint of de speler die over de partituur liggen; het kaartje laat de muis door).
+  let sleepDoel = null;
+  app.op('palet-sleep', (bericht) => {
+    const beweegt = bericht?.fase === 'beweeg';
+    const { opNoot = false, ookRust = false, bijNoot = false } = bericht?.vlaggen ?? {};
+    const onder = bericht && bericht.fase !== 'stop' ? document.elementFromPoint(bericht.x, bericht.y) : null;
+    const doel = onder && vlak.contains(onder) ? paletDoel({ clientX: bericht.x, clientY: bericht.y }, opNoot, ookRust, bijNoot) : null;
+    // Het oplichten alleen wisselen als het doel verandert, zodat het pulseren doorloopt.
+    const element = beweegt ? doel?.element ?? null : null;
+    if (element !== sleepDoel) {
+      wisSleepDoel();
+      element?.classList.add('sleep-doel');
+      sleepDoel = element;
+    }
     if (!doel) return;
-    gebeurtenis.preventDefault();
-    gebeurtenis.dataTransfer.dropEffect = 'copy';
-    doel.element.classList.add('sleep-doel');
-  });
-
-  vlak.addEventListener('dragleave', (gebeurtenis) => {
-    if (!vlak.contains(gebeurtenis.relatedTarget)) wisSleepDoel();
-  });
-
-  vlak.addEventListener('drop', async (gebeurtenis) => {
-    const id = gebeurtenis.dataTransfer.getData(PALET);
-    wisSleepDoel();
-    if (!id) return;
-    gebeurtenis.preventDefault();
-    const typen = [...gebeurtenis.dataTransfer.types];
-    const doel = paletDoel(gebeurtenis, typen.includes(`${PALET}-noot`), typen.includes(`${PALET}-rust`), typen.includes(`${PALET}-aanwijzing`));
-    if (!doel) return;
-    // Pas hier laden: paletten.js gebruikt paden voor de browser, en deze module wordt ook in Node getest.
-    const { pasPaletToe, zoekItem } = await import('./views/paletten.js');
-    const item = zoekItem(id);
-    if (!item) return;
-    const gelukt = pasPaletToe(app, item, doel.plek);
-    app.meld('palet-gezet', { naam: item.naam, gelukt });
+    // Bij een maat het kader van de notenbalk die het dichtst bij de muis is, niet het hele systeem.
+    const kader = (doel.element.matches('g.measure') ? dichtsteBalk(doel.element, bericht.y) : null) ?? doel.element.getBoundingClientRect();
+    bericht.doel = { plek: doel.plek, kader: { left: kader.left, top: kader.top, width: kader.width, height: kader.height } };
   });
 
   // De maten in volgorde; Verovio tekent elke maat als <g class="measure">, over alle partijen heen.

@@ -115,9 +115,47 @@ main:has(#weergave g.measure) #tempo > p { display: none; }
 #paletten .paletten__balk text { font-family: "Bravura", serif; font-size: 20px; fill: currentColor; }
 #paletten .paletten__lijn { width: 36px; height: 20px; fill: currentColor; }
 #paletten .paletten__voltacijfer { font: 700 11px Georgia, serif; fill: currentColor; }
-/* Het doel tijdens het slepen: de maat of de noot onder de muis. */
+/* Het doel tijdens het slepen: de maat of de noot onder de muis; het licht zacht pulserend op. */
 #weergave g.sleep-doel, #weergave g.sleep-doel * { fill: var(--kleur-accent); stroke-opacity: 1; }
 #weergave g.measure.sleep-doel { color: var(--kleur-accent); }
+#weergave g.sleep-doel { animation: sleep-doel 900ms ease-in-out infinite; }
+@keyframes sleep-doel { 50% { opacity: 0.55; } }
+/* Slepen uit het palet (paletsleep.js): een zwevend kaartje met het icoon dat met de muis of vinger meegaat. Opgetild is het
+   iets groter en schuin, boven een doel krijgt het een zachte rand, en bij loslaten vliegt het naar het doel of terug. */
+#paletten .paletten__cel { touch-action: pan-y pinch-zoom; user-select: none; -webkit-user-select: none; }
+#paletten .paletten__cel--sleept { opacity: 0.35; outline: 2px dashed var(--kleur-accent); outline-offset: -5px; }
+.palet-spook {
+  position: fixed; left: 0; top: 0; z-index: 1000; pointer-events: none; box-sizing: border-box;
+  display: flex; align-items: center; justify-content: center; gap: 1px; min-width: 46px; min-height: 46px; padding: 4px 6px;
+  color: var(--kleur-tekst); background: var(--kleur-vlak); border: 1.5px solid var(--kleur-accent); border-radius: 12px;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.12); opacity: 0.97; transform-origin: center;
+  transition: transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 160ms ease, opacity 160ms ease; will-change: transform;
+}
+.palet-spook--op { transition: transform 70ms linear, box-shadow 160ms ease, opacity 160ms ease; box-shadow: 0 12px 28px rgb(0 0 0 / 0.24), 0 3px 8px rgb(0 0 0 / 0.14); }
+.palet-spook--raak { box-shadow: 0 0 0 5px var(--kleur-accent-zacht), 0 14px 30px rgb(0 0 0 / 0.26); }
+.palet-spook--weg { transition: transform 220ms cubic-bezier(0.3, 0.7, 0.2, 1), opacity 220ms ease; opacity: 0; }
+.palet-spook .paletten__teken { font-family: "Bravura", serif; font-size: 28px; line-height: 1; }
+.palet-spook .paletten__teken--dynamiek { font-size: 26px; }
+.palet-spook .paletten__woord { font-family: "Bodoni Moda", Georgia, serif; font-size: 0.82rem; white-space: nowrap; }
+.palet-spook .paletten__woord--vet { font-weight: 700; }
+.palet-spook .paletten__woord--cursief { font-style: italic; }
+.palet-spook .paletten__woord--kader { font-weight: 700; font-size: 1rem; padding: 1px 5px; border: 1.5px solid currentColor; }
+.palet-spook .paletten__balk { width: auto; height: 46px; overflow: visible; }
+.palet-spook .paletten__balk line { stroke: currentColor; stroke-width: 0.8; }
+.palet-spook .paletten__balk text { font-family: "Bravura", serif; font-size: 20px; fill: currentColor; }
+.palet-spook .paletten__lijn { width: 36px; height: 20px; fill: currentColor; }
+.palet-spook .paletten__voltacijfer { font: 700 11px Georgia, serif; fill: currentColor; }
+body.palet-sleept, body.palet-sleept * { cursor: grabbing !important; user-select: none; -webkit-user-select: none; }
+/* Een kring die even opbloeit waar het hokje landde. */
+.palet-plof {
+  position: fixed; z-index: 999; width: 44px; height: 44px; margin: -22px 0 0 -22px; pointer-events: none;
+  border: 3px solid var(--kleur-accent); border-radius: 50%; animation: palet-plof 450ms ease-out forwards;
+}
+@keyframes palet-plof { from { transform: scale(0.3); opacity: 0.9; } to { transform: scale(1.6); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  #weergave g.sleep-doel { animation: none; }
+  .palet-spook, .palet-spook--op, .palet-spook--weg { transition: none; }
+}
 .werkvlak { grid-template-areas: "lint" "paletten" "weergave" "inloggen" "upload" "voorbeeld" "hulp"; }
 @media (min-width: 900px) {
   body[data-scherm='editor'] .werkvlak { grid-template-columns: 260px minmax(0, 1fr); grid-template-areas: "lint lint" "paletten weergave" "inloggen inloggen" "upload upload" "voorbeeld voorbeeld" "hulp hulp"; column-gap: var(--ruimte-3); }
