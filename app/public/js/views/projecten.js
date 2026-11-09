@@ -1,4 +1,5 @@
 import { controleerMaatduur } from '/src/controle/maatduur.mjs';
+import { opslag } from '../projectopslag.js';
 
 const nietBereikbaar = 'De server is niet bereikbaar. Probeer het opnieuw.';
 const sorteringSleutel = 'score2sound-projecten-sortering';
@@ -10,28 +11,6 @@ function leesSortering() {
   } catch {
     return 'nieuwste';
   }
-}
-
-async function vraag(url, opties) {
-  let antwoord;
-  try {
-    antwoord = await fetch(url, opties);
-  } catch {
-    throw new Error(nietBereikbaar);
-  }
-
-  let gegevens;
-  try {
-    gegevens = await antwoord.json();
-  } catch {
-    throw new Error(nietBereikbaar);
-  }
-
-  if (!antwoord.ok) {
-    throw new Error(gegevens.fout || nietBereikbaar);
-  }
-
-  return gegevens;
 }
 
 export function start(app) {
@@ -110,7 +89,7 @@ export function start(app) {
       link.addEventListener('click', async (gebeurtenis) => {
         gebeurtenis.preventDefault();
         try {
-          const geopend = await vraag(`/api/projecten/${encodeURIComponent(project.id)}`);
+          const geopend = await opslag.open(project.id);
           laatstBewaardePartituur = JSON.stringify(geopend.partituur);
           app.zet({
             partituur: geopend.partituur,
@@ -131,15 +110,11 @@ export function start(app) {
   async function bewaar(naam) {
     const partituur = app.stand.partituur;
     const partituurJson = JSON.stringify(partituur);
-    const project = await vraag('/api/projecten', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id: app.stand.project?.id,
-        naam,
-        partituur,
-        versies: app.stand.versies
-      })
+    const project = await opslag.bewaar({
+      id: app.stand.project?.id,
+      naam,
+      partituur,
+      versies: app.stand.versies
     });
     laatstBewaardePartituur = partituurJson;
     app.zet({ project: { id: project.id, naam: project.naam } });
@@ -154,14 +129,10 @@ export function start(app) {
   }
 
   async function bewaarMeta(project, wijzigingen) {
-    const bijgewerkt = await vraag(`/api/projecten/${encodeURIComponent(project.id)}/meta`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        map: project.map ?? null,
-        labels: Array.isArray(project.labels) ? project.labels : [],
-        ...wijzigingen
-      })
+    const bijgewerkt = await opslag.zetMeta(project.id, {
+      map: project.map ?? null,
+      labels: Array.isArray(project.labels) ? project.labels : [],
+      ...wijzigingen
     });
     Object.assign(project, bijgewerkt, wijzigingen);
     if (project.map) legeMappen.delete(project.map);
@@ -310,7 +281,7 @@ export function start(app) {
       verwijderTimers.delete(project.id);
       verwijderBevestigingen.delete(project.id);
       try {
-        await vraag(`/api/projecten/${encodeURIComponent(project.id)}`, { method: 'DELETE' });
+        await opslag.verwijder(project.id);
         projecten = projecten.filter(item => item.id !== project.id);
         status = `Verwijderd: ${project.naam}`;
         if (app.stand.project?.id === project.id) app.zet({ project: null });
@@ -591,7 +562,7 @@ export function start(app) {
           knop.append(bijgewerkt);
           knop.addEventListener('click', async () => {
             try {
-              const geopend = await vraag(`/api/projecten/${encodeURIComponent(project.id)}`);
+              const geopend = await opslag.open(project.id);
               laatstBewaardePartituur = JSON.stringify(geopend.partituur);
               app.zet({
                 partituur: geopend.partituur,
@@ -614,7 +585,7 @@ export function start(app) {
 
   async function laadProjecten() {
     try {
-      projecten = await vraag('/api/projecten');
+      projecten = await opslag.lijst();
       teken();
     } catch (fout) {
       status = fout.message || nietBereikbaar;
