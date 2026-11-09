@@ -2,10 +2,9 @@
 // Werkt in de browser en in Node (geen node:-modules, geen Buffer, geen DOMParser).
 //
 // Ondersteund deel van SVG (wat Verovio maakt):
-//  - elementen g, svg (ook genest, met x, y, width, height, viewBox), use (naar g of
-//    symbol in defs, met x, y, width, height en transform), path, polygon, polyline,
-//    line, rect, text en tspan;
-//  - transform: translate, scale, rotate en matrix;
+//  - elementen g, svg (ook genest, met x, y, width, height, viewBox), use (naar een
+//    element met id, met x, y en transform), path, polygon, polyline, rect, text, tspan;
+//  - transform: translate, scale en matrix;
 //  - pad-opdrachten M m L l H h V v C c S s Q q T t Z z (A wordt een rechte lijn
 //    en gemeld als 'path-boog');
 //  - stijl via attributen (geërfd): fill, stroke, stroke-width, font-size,
@@ -41,14 +40,7 @@ function leesXml(s) {
     } else if (s.startsWith('<!--', i)) {
       const e = s.indexOf('-->', i + 4);
       i = e < 0 ? s.length : e + 3;
-    } else if (s.startsWith('<![CDATA[', i)) {
-      const e = s.indexOf(']]>', i + 9);
-      huidig.kinderen.push({ tekst: s.slice(i + 9, e < 0 ? s.length : e) });
-      i = e < 0 ? s.length : e + 3;
-    } else if (s.startsWith('<?', i)) {
-      const e = s.indexOf('?>', i + 2);
-      i = e < 0 ? s.length : e + 2;
-    } else if (s.startsWith('<!', i)) {
+    } else if (s.startsWith('<?', i) || s.startsWith('<!', i)) {
       const e = s.indexOf('>', i + 2);
       i = e < 0 ? s.length : e + 1;
     } else if (s.startsWith('</', i)) {
@@ -117,13 +109,6 @@ function leesTransform(tekst) {
     if (t[1] === 'translate') n = [1, 0, 0, 1, a[0] ?? 0, a[1] ?? 0];
     else if (t[1] === 'scale') n = [a[0] ?? 1, 0, 0, a[1] ?? a[0] ?? 1, 0, 0];
     else if (t[1] === 'matrix' && a.length >= 6) n = a.slice(0, 6);
-    else if (t[1] === 'rotate') {
-      const h = ((a[0] ?? 0) * Math.PI) / 180;
-      const c = Math.cos(h);
-      const s = Math.sin(h);
-      n = [c, s, -s, c, 0, 0];
-      if (a.length >= 3) n = maal(maal([1, 0, 0, 1, a[1], a[2]], n), [1, 0, 0, 1, -a[1], -a[2]]);
-    }
     if (n) m = maal(m, n);
   }
   return m;
@@ -235,41 +220,24 @@ function padOpdrachten(d, uit, onbekend) {
     } else if (soort === 'L') {
       x = a[0] + ox; y = a[1] + oy;
       uit.push(`${pt(x, y)} l`);
-    } else if (soort === 'H') {
-      x = a[0] + ox;
+    } else if (soort === 'H' || soort === 'V') {
+      if (soort === 'H') x = a[0] + ox; else y = a[0] + oy;
       uit.push(`${pt(x, y)} l`);
-    } else if (soort === 'V') {
-      y = a[0] + oy;
-      uit.push(`${pt(x, y)} l`);
-    } else if (soort === 'C') {
-      const [x1, y1, x2, y2, ex, ey] = [a[0] + ox, a[1] + oy, a[2] + ox, a[3] + oy, a[4] + ox, a[5] + oy];
-      uit.push(`${pt(x1, y1)} ${pt(x2, y2)} ${pt(ex, ey)} c`);
-      nvc = [x2, y2];
-      x = ex; y = ey;
-    } else if (soort === 'S') {
-      const x1 = vc ? 2 * x - vc[0] : x;
-      const y1 = vc ? 2 * y - vc[1] : y;
-      const [x2, y2, ex, ey] = [a[0] + ox, a[1] + oy, a[2] + ox, a[3] + oy];
+    } else if (soort === 'C' || soort === 'S') {
+      const s = soort === 'S';
+      const [x1, y1] = s ? [vc ? 2 * x - vc[0] : x, vc ? 2 * y - vc[1] : y] : [a[0] + ox, a[1] + oy];
+      const b = s ? 0 : 2;
+      const [x2, y2, ex, ey] = [a[b] + ox, a[b + 1] + oy, a[b + 2] + ox, a[b + 3] + oy];
       uit.push(`${pt(x1, y1)} ${pt(x2, y2)} ${pt(ex, ey)} c`);
       nvc = [x2, y2];
       x = ex; y = ey;
     } else if (soort === 'Q' || soort === 'T') {
-      let qx;
-      let qy;
-      let ex;
-      let ey;
-      if (soort === 'Q') {
-        [qx, qy, ex, ey] = [a[0] + ox, a[1] + oy, a[2] + ox, a[3] + oy];
-      } else {
-        qx = vq ? 2 * x - vq[0] : x;
-        qy = vq ? 2 * y - vq[1] : y;
-        [ex, ey] = [a[0] + ox, a[1] + oy];
-      }
-      const c1x = x + (2 / 3) * (qx - x);
-      const c1y = y + (2 / 3) * (qy - y);
-      const c2x = ex + (2 / 3) * (qx - ex);
-      const c2y = ey + (2 / 3) * (qy - ey);
-      uit.push(`${pt(c1x, c1y)} ${pt(c2x, c2y)} ${pt(ex, ey)} c`);
+      const t = soort === 'T';
+      const [qx, qy] = t ? [vq ? 2 * x - vq[0] : x, vq ? 2 * y - vq[1] : y] : [a[0] + ox, a[1] + oy];
+      const ex = a[t ? 0 : 2] + ox;
+      const ey = a[t ? 1 : 3] + oy;
+      const f = 2 / 3;
+      uit.push(`${pt(x + f * (qx - x), y + f * (qy - y))} ${pt(ex + f * (qx - ex), ey + f * (qy - ey))} ${pt(ex, ey)} c`);
       nvq = [qx, qy];
       x = ex; y = ey;
     } else if (soort === 'A') {
@@ -284,16 +252,12 @@ function padOpdrachten(d, uit, onbekend) {
 
 function leesStijl(ctx, attr) {
   const c = { ...ctx };
-  if (attr['stroke-width'] !== undefined) {
-    const v = parseFloat(attr['stroke-width']);
-    if (Number.isFinite(v)) c.sw = v;
-  }
+  const sw = parseFloat(attr['stroke-width']);
+  if (Number.isFinite(sw)) c.sw = sw;
+  const size = parseFloat(attr['font-size']);
+  if (Number.isFinite(size)) c.size = size;
   if (attr.fill !== undefined) c.fill = attr.fill.trim();
   if (attr.stroke !== undefined) c.stroke = attr.stroke.trim();
-  if (attr['font-size'] !== undefined) {
-    const v = parseFloat(attr['font-size']);
-    if (Number.isFinite(v)) c.size = v;
-  }
   if (attr['text-anchor'] !== undefined) c.anchor = attr['text-anchor'].trim();
   if (attr['font-style'] !== undefined) c.italic = attr['font-style'].trim() === 'italic';
   if (attr['font-weight'] !== undefined) {
@@ -323,23 +287,17 @@ function maakOmzetter() {
 
   function verf(ctx, alleenLijn) {
     const vul = !alleenLijn && ctx.fill !== 'none';
-    const lijn = alleenLijn
-      ? true
-      : ctx.sw > 0 && ctx.stroke !== 'none' && (!vul || ctx.stroke !== undefined);
+    const lijn = alleenLijn || (ctx.sw > 0 && ctx.stroke !== 'none' && (!vul || ctx.stroke !== undefined));
     return { vul, lijn };
   }
 
   function sluit(ctx, alleenLijn) {
     const { vul, lijn } = verf(ctx, alleenLijn);
     uit.push(vul && lijn ? 'B' : vul ? 'f' : lijn ? 'S' : 'n');
-    return lijn;
   }
 
   function lijnDikte(ctx, alleenLijn) {
-    const { lijn } = verf(ctx, alleenLijn);
-    if (!lijn) return;
-    const w = ctx.sw > 0 ? ctx.sw : 1;
-    uit.push(`${fmt(w)} w`);
+    if (verf(ctx, alleenLijn).lijn) uit.push(`${fmt(ctx.sw > 0 ? ctx.sw : 1)} w`);
   }
 
   function kinderen(el, ctx, diepte) {
@@ -358,13 +316,12 @@ function maakOmzetter() {
           if (t !== '') huidig.runs.push({ tekst: t, size: c.size, italic: c.italic, bold: c.bold });
         } else if (k.naam === 'tspan') {
           const c2 = leesStijl(c, k.attr);
-          const nx = k.attr.x !== undefined ? parseFloat(k.attr.x) : undefined;
-          const ny = k.attr.y !== undefined ? parseFloat(k.attr.y) : undefined;
-          if (Number.isFinite(nx) || Number.isFinite(ny)) {
-            const x = Number.isFinite(nx) ? nx : huidig.x;
-            const y = Number.isFinite(ny) ? ny : huidig.y;
-            if (huidig.runs.length) nieuw(x, y);
-            else { huidig.x = x; huidig.y = y; }
+          const x = parseFloat(k.attr.x);
+          const y = parseFloat(k.attr.y);
+          if (Number.isFinite(x) || Number.isFinite(y)) {
+            if (huidig.runs.length) nieuw(huidig.x, huidig.y);
+            if (Number.isFinite(x)) huidig.x = x;
+            if (Number.isFinite(y)) huidig.y = y;
           }
           loop(k, c2);
         } else if (k.naam) {
@@ -415,18 +372,7 @@ function maakOmzetter() {
         if (!doel || diepte > 20) break;
         const x = parseFloat(a.x) || 0;
         const y = parseFloat(a.y) || 0;
-        let m = [1, 0, 0, 1, x, y];
-        let c = ctx;
-        if (doel.naam === 'symbol') {
-          const b = lengte(a.width, ctx.vw);
-          const h = lengte(a.height, ctx.vh);
-          const vp = viewportMatrix(0, 0, b, h, doel.attr.viewBox);
-          m = maal(m, vp.m);
-          c = { ...ctx, vw: vp.vw, vh: vp.vh };
-          omhul(m, () => kinderen(doel, leesStijl(c, doel.attr), diepte + 1));
-        } else {
-          omhul(m, () => verwerk(doel, c, diepte + 1));
-        }
+        omhul([1, 0, 0, 1, x, y], () => verwerk(doel, ctx, diepte + 1));
         break;
       }
       case 'path': {
@@ -445,13 +391,6 @@ function maakOmzetter() {
         for (let i = 2; i + 1 < n.length; i += 2) uit.push(`${pt(n[i], n[i + 1])} l`);
         if (!alleenLijn) uit.push('h');
         sluit(ctx, alleenLijn);
-        break;
-      }
-      case 'line': {
-        lijnDikte(ctx, true);
-        uit.push(`${pt(parseFloat(a.x1) || 0, parseFloat(a.y1) || 0)} m`);
-        uit.push(`${pt(parseFloat(a.x2) || 0, parseFloat(a.y2) || 0)} l`);
-        sluit(ctx, true);
         break;
       }
       case 'rect': {
@@ -477,7 +416,7 @@ function maakOmzetter() {
     omhul(m, () => getekend(el, c, diepte));
   }
 
-  return { uit, onbekend, ids, verzamel, verwerk };
+  return { uit, onbekend, omhul, verzamel, verwerk };
 }
 
 export function svgNaarPdf(svgTekst, { breedte, hoogte }) {
@@ -497,19 +436,11 @@ export function svgNaarPdf(svgTekst, { breedte, hoogte }) {
   const vp = viewportMatrix(0, 0, w, h, wortel.attr.viewBox);
   const ctx = { vw: vp.vw, vh: vp.vh, fill: undefined, stroke: undefined, sw: undefined, size: 16, anchor: 'start', italic: false, bold: false };
   const c = leesStijl(ctx, wortel.attr);
-  omhulBinnen(o, vp.m, () => {
+  o.omhul(vp.m, () => {
     for (const k of wortel.kinderen) if (k.naam) o.verwerk(k, c);
   });
   o.uit.push('Q');
   return { opdrachten: o.uit.join('\n') + '\n', onbekend: [...o.onbekend].sort() };
-}
-
-function omhulBinnen(o, m, f) {
-  if (isId(m)) { f(); return; }
-  o.uit.push('q');
-  o.uit.push(`${m.map((v) => fmt(v, 6)).join(' ')} cm`);
-  f();
-  o.uit.push('Q');
 }
 
 // ---- pdf-bestand ----
@@ -563,18 +494,9 @@ export async function maakPdfBestand(paginas, { breedte, hoogte }) {
       6 + 2 * i,
       `<< /Type /Page /Parent 2 0 R /MediaBox ${mediaBox} /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents ${7 + 2 * i} 0 R >>`,
     );
-    let inhoud = naarBytes(paginas[i]);
-    let kop = '';
-    if (typeof CompressionStream !== 'undefined') {
-      try {
-        inhoud = await deflate(inhoud);
-        kop = '/Filter /FlateDecode';
-      } catch {
-        inhoud = naarBytes(paginas[i]);
-        kop = '';
-      }
-    }
-    object(7 + 2 * i, kop, inhoud);
+    const kaal = naarBytes(paginas[i]);
+    const gepakt = typeof CompressionStream === 'undefined' ? null : await deflate(kaal).catch(() => null);
+    object(7 + 2 * i, gepakt ? '/Filter /FlateDecode' : '', gepakt ?? kaal);
   }
 
   const totaal = 6 + 2 * n;
