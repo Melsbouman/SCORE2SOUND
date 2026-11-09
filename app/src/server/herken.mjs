@@ -37,6 +37,7 @@ import { tweedeMening, woordenUitPdf } from '../model/digitaal.mjs';
 import { vergelijkGedrukteMaatnummers } from '../model/gedruktenummers.mjs';
 import { meldVerlorenRusten } from './verlorenrusten.mjs';
 import { vulRustGaten } from '../model/rustgaten.mjs';
+import { herstelTriolen } from '../model/triolenherstel.mjs';
 import { leesPdfTekens } from './pdftekens.mjs';
 import { maakLimiet } from './limiet.mjs';
 import { leesBlad } from './tekstlezer.mjs';
@@ -390,6 +391,9 @@ export function maakHerken({ map, draaier }) {
     // Een rust die Audiveris miste (de maat is een notenwaarde te kort en op het blad zit daar een gat).
     const rustGaten = vulRustGaten(uit.partituur);
     uit.partituur = rustGaten.partituur;
+    // Een triool die Audiveris niet goed las (de maat is te lang en drie noten passen als triool-achtsten precies).
+    const triolen = herstelTriolen(uit.partituur);
+    uit.partituur = triolen.partituur;
   const gevuld = vulLegeMaten(uit.partituur);
   const maatMeldingen = controleerMaatduur(gevuld);
   const nagekeken = markeerFouteMaten(gevuld, maatMeldingen);
@@ -419,6 +423,7 @@ export function maakHerken({ map, draaier }) {
     ...nummers.meldingen,
     ...verloren,
     ...rustGaten.meldingen,
+    ...triolen.meldingen,
     ...maatMeldingen,
     ];
   await writeFile(join(taak.uitmap, 'resultaat.json'), JSON.stringify({
