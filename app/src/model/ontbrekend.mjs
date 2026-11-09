@@ -99,7 +99,7 @@ export function vulOntbrekendeMaten(partituur) {
           tempo: null,
           elementen: maat.elementen.filter((element) => element.soort === 'rust').map((rust) => ({ ...structuredClone(rust), zekerheid: 1 })),
         };
-        for (const veld of ['maatrust', 'vak', 'herhaling', 'volta', 'sprong']) delete verborgen[veld];
+        for (const veld of ['maatrust', 'vak', 'herhaling', 'volta', 'sprong', 'maatstreep']) delete verborgen[veld];
         return verborgen;
       });
       partij.maten.splice(index + 1, 0, ...verborgenMaten);
@@ -263,7 +263,7 @@ function vouwRustenUit(partij) {
         elementen: maat.elementen.filter((element) => element.soort === 'rust').map((rust) => ({ ...structuredClone(rust), zekerheid: 1 })),
       };
       verborgen.herhaling = { begin: false, eind: false, keer: 2 };
-      for (const veld of ['maatrust', 'vak', 'volta', 'sprong', 'ingevoegd']) delete verborgen[veld];
+      for (const veld of ['maatrust', 'vak', 'volta', 'sprong', 'ingevoegd', 'maatstreep']) delete verborgen[veld];
       uit.push(verborgen);
     }
   });

@@ -442,7 +442,7 @@ export function start(app) {
   // voor een noot (articulatie, voorteken) de noot onder de muis. De partij en de maat komen uit de id's van de noten en
   // rusten ('n-<partij>-<maat>-<element>'), zodat het ook klopt na een meermaatsrust (verborgen maten worden niet getekend).
   const PALET = 'application/x-palet';
-  function paletDoel(gebeurtenis, opNoot) {
+  function paletDoel(gebeurtenis, opNoot, ookRust = false, bijNoot = false) {
     const x = gebeurtenis.clientX;
     const y = gebeurtenis.clientY;
     const maatG = maten()
@@ -464,18 +464,24 @@ export function start(app) {
         };
       });
     if (opNoot) {
-      const noot = delen.filter((deel) => deel.dichtbij && deel.element.matches('g.note')).sort((a, b) => a.afstand - b.afstand)[0];
+      const soorten = ookRust ? 'g.note, g.rest, g.mRest' : 'g.note';
+      const noot = delen.filter((deel) => deel.dichtbij && deel.element.matches(soorten)).sort((a, b) => a.afstand - b.afstand)[0];
       return noot ? { element: noot.element, plek: { ...leesNootId(noot.element.id), elementId: noot.element.id } } : null;
     }
     const inBalk = [...delen].sort((a, b) => a.balkAfstand - b.balkAfstand || a.afstand - b.afstand)[0];
     if (!inBalk) {
-      const index = maten().indexOf(maatG);
-      return { element: maatG, plek: { partijId: null, maatIndex: index, start: 0 } };
+      // Geen noot of rust met een id in deze maat: de getekende maten zijn de maten zonder de verborgen maten van een meermaatsrust.
+      const zichtbaar = (app.stand.partituur?.partijen[0]?.maten ?? []).filter((maat) => !maat.verborgen);
+      const maat = zichtbaar[maten().indexOf(maatG)];
+      return maat ? { element: maatG, plek: { partijId: null, maatIndex: maat.index, start: 0 } } : null;
     }
     const plaats = leesNootId(inBalk.element.id);
     const dichtste = delen.filter((deel) => deel.dichtbij && deel.balkAfstand === inBalk.balkAfstand).sort((a, b) => a.afstand - b.afstand)[0];
-    const start = dichtste ? zoekStart(dichtste.element.id) : 0;
-    return { element: maatG, plek: { partijId: plaats.partijId, maatIndex: plaats.maatIndex, start } };
+    const start = dichtste ? modelElement(dichtste.element.id)?.start ?? 0 : 0;
+    const notenbalk = modelElement(inBalk.element.id)?.notenbalk ?? 1;
+    // Een aanwijzing (ff, cresc.) bij een noot: die noot licht op, en de aanwijzing komt op zijn tel.
+    const element = bijNoot && dichtste?.element.matches('g.note, g.rest') ? dichtste.element : maatG;
+    return { element, plek: { partijId: plaats.partijId, maatIndex: plaats.maatIndex, start, notenbalk } };
   }
   function leesNootId(id) {
     const delen = id.split('-');
@@ -483,10 +489,10 @@ export function start(app) {
     const maatIndex = Number(delen.pop());
     return { partijId: delen.slice(1).join('-'), maatIndex, elementIndex };
   }
-  function zoekStart(id) {
+  function modelElement(id) {
     const { partijId, maatIndex, elementIndex } = leesNootId(id);
     const partij = app.stand.partituur?.partijen.find((kandidaat) => kandidaat.id === partijId);
-    return partij?.maten[maatIndex]?.elementen[elementIndex]?.start ?? 0;
+    return partij?.maten[maatIndex]?.elementen[elementIndex] ?? null;
   }
   function wisSleepDoel() {
     for (const element of vlak.querySelectorAll('.sleep-doel')) element.classList.remove('sleep-doel');
@@ -495,7 +501,7 @@ export function start(app) {
   vlak.addEventListener('dragover', (gebeurtenis) => {
     const soorten = [...gebeurtenis.dataTransfer.types];
     if (!soorten.includes(PALET)) return;
-    const doel = paletDoel(gebeurtenis, soorten.includes(`${PALET}-noot`));
+    const doel = paletDoel(gebeurtenis, soorten.includes(`${PALET}-noot`), soorten.includes(`${PALET}-rust`), soorten.includes(`${PALET}-aanwijzing`));
     wisSleepDoel();
     if (!doel) return;
     gebeurtenis.preventDefault();
@@ -512,7 +518,8 @@ export function start(app) {
     wisSleepDoel();
     if (!id) return;
     gebeurtenis.preventDefault();
-    const doel = paletDoel(gebeurtenis, [...gebeurtenis.dataTransfer.types].includes(`${PALET}-noot`));
+    const typen = [...gebeurtenis.dataTransfer.types];
+    const doel = paletDoel(gebeurtenis, typen.includes(`${PALET}-noot`), typen.includes(`${PALET}-rust`), typen.includes(`${PALET}-aanwijzing`));
     if (!doel) return;
     // Pas hier laden: paletten.js gebruikt paden voor de browser, en deze module wordt ook in Node getest.
     const { pasPaletToe, zoekItem } = await import('./views/paletten.js');

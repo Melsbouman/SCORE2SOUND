@@ -16,14 +16,38 @@ export function zoekItem(id) {
   return null;
 }
 
+// De gekozen noten (bijgehouden door start); na een hokje wijzen ze weer naar dezelfde noten.
+let gekozenIds = [];
+
 // Zet een hokje op een plek (zie paletactie.mjs) en werkt de partituur en de meldingen bij. Geeft true als er iets veranderde.
+// Een aanwijzing of letter schuift de nummers van de noten in de maat op: dan worden dezelfde noten opnieuw gekozen.
 export function pasPaletToe(app, item, plek) {
   const vorige = app.stand.partituur;
   if (!vorige || !item) return false;
   const nieuw = voerPaletActieUit(vorige, item.actie, plek);
   if (nieuw === vorige || JSON.stringify(nieuw) === JSON.stringify(vorige)) return false;
+  const nieuweIds = gekozenIds.map((id) => zelfdeElement(vorige, nieuw, id));
+  const verschoven = nieuweIds.some((id, plekInLijst) => id !== gekozenIds[plekInLijst]);
+  if (verschoven) app.meld('kies-noot', { id: null });
   app.zet({ partituur: nieuw, meldingen: vernieuwMeldingen(app.stand.meldingen, nieuw, vorige) });
+  if (verschoven) app.meld('kies-noot', { id: nieuweIds.at(-1), ids: nieuweIds });
   return true;
+}
+
+// Het id van hetzelfde element na een wijziging in de maat (een ingevoegde aanwijzing schuift de nummers op).
+function zelfdeElement(vorige, nieuw, id) {
+  const plaats = leesId(id);
+  const oud = zoekElement(vorige, id);
+  const maat = nieuw.partijen.find((partij) => partij.id === plaats?.partijId)?.maten[plaats.maatIndex];
+  if (!oud || !maat) return id;
+  const gezocht = JSON.stringify(oud);
+  const kandidaten = maat.elementen.map((element, index) => ({ element, index }))
+    .filter(({ element }) => element.soort === oud.soort && element.start === oud.start && (element.stem ?? 1) === (oud.stem ?? 1));
+  // Eerst een gelijk element (het dichtst bij de oude plek); is het element zelf veranderd (een articulatie erbij), dan zijn de
+  // nummers niet verschoven en blijft het id gelijk.
+  const gelijk = kandidaten.filter(({ element }) => JSON.stringify(element) === gezocht)
+    .sort((a, b) => Math.abs(a.index - plaats.elementIndex) - Math.abs(b.index - plaats.elementIndex))[0];
+  return gelijk ? `n-${plaats.partijId}-${plaats.maatIndex}-${gelijk.index}` : id;
 }
 
 // Kleine notenbalk (5 lijnen, 5 eenheden uit elkaar) met tekens uit Bravura. Plek k: 1 is de onderste lijn, 5 de bovenste,
@@ -123,25 +147,31 @@ export function start(app) {
   const container = document.createElement('div');
   container.className = 'paletten-container';
 
+  // Het maatnummer zoals op het blad (na een meermaatsrust is dat niet de plek + 1).
+  const nummerVan = (index) => app.stand.partituur?.partijen[0]?.maten.find((maat) => maat.index === index)?.nummer ?? String(index + 1);
+
   function uitleg() {
+    if (gekozenIds.length > 1) return `Gekozen: ${gekozenIds.length} noten. Klik op een hokje, of sleep een hokje naar een noot of maat.`;
     if (gekozenNoot != null) return 'Gekozen: een noot. Klik op een hokje, of sleep een hokje naar een noot of maat.';
     if (gekozenMaat != null) {
-      const tot = gekozenTot != null && gekozenTot !== gekozenMaat ? ` tot en met ${gekozenTot + 1}` : '';
-      return `Gekozen: maat ${gekozenMaat + 1}${tot}. Klik op een hokje, of sleep er een naar een maat.`;
+      const tot = gekozenTot != null && gekozenTot !== gekozenMaat ? ` tot en met ${nummerVan(gekozenTot)}` : '';
+      return `Gekozen: maat ${nummerVan(gekozenMaat)}${tot}. Klik op een hokje, of sleep er een naar een maat.`;
     }
     return 'Sleep een hokje naar een maat of een noot, of kies eerst een maat en klik op een hokje.';
   }
 
-  // De plek voor een klik: de gekozen noot, anders de gekozen maat (of reeks maten).
+  // De plek voor een klik: de gekozen noot (of noten), anders de gekozen maat (of reeks maten).
   function gekozenPlek(item) {
     if (gekozenNoot != null) {
       const plaats = leesId(gekozenNoot);
       if (!plaats) return null;
+      const element = zoekElement(app.stand.partituur, gekozenNoot);
       return {
         partijId: plaats.partijId,
         maatIndex: plaats.maatIndex,
-        start: zoekElement(app.stand.partituur, gekozenNoot)?.start ?? 0,
-        elementId: doelVan(item.actie) === 'noot' ? gekozenNoot : null,
+        start: element?.start ?? 0,
+        notenbalk: element?.notenbalk ?? 1,
+        elementIds: doelVan(item.actie) === 'noot' ? (gekozenIds.length ? gekozenIds : [gekozenNoot]) : null,
       };
     }
     if (gekozenMaat != null) return { partijId: null, maatIndex: gekozenMaat, totIndex: gekozenTot ?? gekozenMaat };
@@ -188,6 +218,12 @@ export function start(app) {
         gebeurtenis.dataTransfer.effectAllowed = 'copy';
         gebeurtenis.dataTransfer.setData(SLEEP_SOORT, item.id);
         gebeurtenis.dataTransfer.setData(`${SLEEP_SOORT}-${doel}`, item.id);
+        // Een fermate mag ook op een rust.
+        if (item.actie.soort === 'fermate') gebeurtenis.dataTransfer.setData(`${SLEEP_SOORT}-rust`, item.id);
+        // Dynamiek en tekst komen bij de noot waar je ze op loslaat (of aan het begin van de maat).
+        if (['dynamiek', 'tekst', 'tempotekst', 'haak'].includes(item.actie.soort)) {
+          gebeurtenis.dataTransfer.setData(`${SLEEP_SOORT}-aanwijzing`, item.id);
+        }
       });
       knop.addEventListener('click', () => {
         const plek = gekozenPlek(item);
@@ -221,8 +257,15 @@ export function start(app) {
   status.textContent = uitleg();
   vlak.replaceChildren(zoek, status, container);
 
-  app.op('kies-noot', ({ id }) => {
-    gekozenNoot = id ?? null;
+  // Dezelfde keuze als de editor: shift voegt een noot toe of haalt hem weg, anders vervangt de keuze de vorige.
+  app.op('kies-noot', ({ id, ids, shiftKey }) => {
+    if (shiftKey && id) {
+      gekozenIds = gekozenIds.includes(id) ? gekozenIds.filter((ander) => ander !== id) : [...gekozenIds, id];
+      gekozenNoot = gekozenIds.at(-1) ?? null;
+    } else {
+      gekozenNoot = id ?? null;
+      gekozenIds = Array.isArray(ids) ? ids : id ? [id] : [];
+    }
     status.textContent = uitleg();
   });
   app.op('kies-maat', ({ maat, tot }) => {

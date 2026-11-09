@@ -30,11 +30,11 @@ export function voerPaletActieUit(partituur, actie, plek) {
   const waarde = actie.waarde;
 
   switch (actie.soort) {
-    case 'sleutel': return zetSleutelVanaf(partituur, partij.id, van, waarde);
+    case 'sleutel': return zetSleutelVanaf(partituur, partij.id, van, waarde, plek.notenbalk ?? 1);
     case 'toonsoort': return zetToonsoortVanaf(partituur, partij.id, van, waarde.kwinten);
     case 'maatsoort': return zetMaatsoortVanaf(partituur, van, waarde);
     case 'tempo': {
-      const nieuw = zetTempo(partituur, van, waarde);
+      const nieuw = zetGetoond(zetTempo(partituur, van, waarde), van, actie.getoond ?? null);
       return actie.tekst ? inAllePartijen(nieuw, van, 0, 'tekst', actie.tekst) : nieuw;
     }
     case 'tempotekst': return inAllePartijen(partituur, van, start, 'tekst', waarde);
@@ -57,7 +57,10 @@ export function voerPaletActieUit(partituur, actie, plek) {
 // De noten waarop een hokje werkt: de noot zelf, of alle noten in de gekozen maten (van één partij of van alle).
 function notenVoor(partituur, actie, plek) {
   const soorten = actie.soort === 'fermate' ? ['noot', 'rust'] : ['noot'];
-  if (plek.elementId) return leesId(plek.elementId) ? [plek.elementId] : [];
+  const gekozen = plek.elementIds?.length ? plek.elementIds : plek.elementId ? [plek.elementId] : [];
+  if (gekozen.length) {
+    return gekozen.filter((id) => leesId(id) && soorten.includes(elementBij(partituur, id)?.soort));
+  }
   const ids = [];
   for (const partij of partituur.partijen) {
     if (plek.partijId && partij.id !== plek.partijId) continue;
@@ -119,13 +122,35 @@ function totDeVolgendeWissel(maten, van, veld) {
   return tot;
 }
 
-function zetSleutelVanaf(partituur, partijId, van, { teken, lijn, octaafVerschuiving = 0 }) {
+// De sleutel op één notenbalk van de partij, tot de volgende sleutelwissel op die balk. Een maat zonder sleutels (zoals de
+// verborgen maten achter een ingevoegde meermaatsrust) onderbreekt de reeks niet en blijft zonder sleutels.
+function zetSleutelVanaf(partituur, partijId, van, { teken, lijn, octaafVerschuiving = 0 }, notenbalk) {
   const kopie = structuredClone(partituur);
   const maten = kopie.partijen.find((partij) => partij.id === partijId).maten;
-  const tot = totDeVolgendeWissel(maten, van, 'sleutels');
-  for (let positie = van; positie <= tot; positie += 1) {
-    maten[positie].sleutels ??= [];
-    maten[positie].sleutels[0] = { teken, lijn, notenbalk: 1, octaafVerschuiving };
+  const opBalk = (maat) => (maat.sleutels ?? []).findIndex((sleutel) => (sleutel.notenbalk ?? 1) === notenbalk);
+  const oud = JSON.stringify(maten[van].sleutels?.[opBalk(maten[van])] ?? null);
+  const nieuw = { teken, lijn, notenbalk, octaafVerschuiving };
+  for (let positie = van; positie < maten.length; positie += 1) {
+    const maat = maten[positie];
+    const plek = opBalk(maat);
+    if (positie > van && plek !== -1 && JSON.stringify(maat.sleutels[plek]) !== oud) break;
+    if (plek !== -1) maat.sleutels[plek] = { ...nieuw };
+    else if (positie === van || maat.sleutels?.length) {
+      maat.sleutels = [...(maat.sleutels ?? []), { ...nieuw }].sort((a, b) => (a.notenbalk ?? 1) - (b.notenbalk ?? 1));
+    }
+  }
+  return kopie;
+}
+
+// De getoonde metronoomaanduiding (zoals halve noot = 80) op de tempo-aanwijzing aan het begin van de maat; zonder getoond
+// laat de partituur het tempo in kwartnoten zien.
+function zetGetoond(partituur, positie, getoond) {
+  const kopie = structuredClone(partituur);
+  for (const partij of kopie.partijen) {
+    const aanwijzing = partij.maten[positie]?.elementen.find((element) => element.soort === 'aanwijzing' && element.type === 'tempo' && element.start === 0);
+    if (!aanwijzing) continue;
+    if (getoond) aanwijzing.getoond = { ...getoond };
+    else delete aanwijzing.getoond;
   }
   return kopie;
 }
@@ -203,17 +228,37 @@ function zetLetter(partituur, positie) {
   return kopie;
 }
 
-// Hokje 1 of 2 over de gekozen maten (begin op de eerste, eind op de laatste). Staat het er al precies zo, dan gaat het weg.
+// De posities van de hokjes (voltahaken) die de maten van..tot raken: van het begin van elk hokje tot zijn eind.
+function voltaHaken(maten, van, tot) {
+  const posities = new Set();
+  for (let positie = van; positie <= tot; positie += 1) {
+    if (!maten[positie]?.volta || posities.has(positie)) continue;
+    let begin = positie;
+    while (begin > 0 && !maten[begin].volta.begin && maten[begin - 1]?.volta) begin -= 1;
+    let eind = positie;
+    while (eind + 1 < maten.length && !maten[eind].volta.eind && maten[eind + 1]?.volta && !maten[eind + 1].volta.begin) eind += 1;
+    for (let plek = begin; plek <= eind; plek += 1) posities.add(plek);
+  }
+  return posities;
+}
+
+// Hokje 1 of 2 over de gekozen maten (begin op de eerste, eind op de laatste). Hokjes die deze maten raken gaan eerst weg,
+// zodat er nooit een half hokje overblijft. Stond er al precies dit hokje, dan blijft het weg.
 function zetVolta(partituur, van, tot, nummer) {
   const kopie = structuredClone(partituur);
   for (const partij of kopie.partijen) {
-    const maten = partij.maten.slice(van, tot + 1);
-    if (maten.length === 0) continue;
-    const alGezet = maten.every((maat) => maat.volta?.nummers?.length === 1 && maat.volta.nummers[0] === nummer);
-    maten.forEach((maat, plek) => {
-      if (alGezet) delete maat.volta;
-      else maat.volta = { nummers: [nummer], begin: plek === 0, eind: plek === maten.length - 1 };
-    });
+    const maten = partij.maten;
+    if (!maten[van]) continue;
+    const laatste = Math.min(tot, maten.length - 1);
+    const geraakt = voltaHaken(maten, van, laatste);
+    const precies = geraakt.size === laatste - van + 1 && [...geraakt].every((plek) => plek >= van && plek <= laatste)
+      && maten[van].volta?.begin && maten[laatste].volta?.eind
+      && maten.slice(van, laatste + 1).every((maat) => maat.volta?.nummers?.length === 1 && maat.volta.nummers[0] === nummer);
+    for (const plek of geraakt) delete maten[plek].volta;
+    if (precies) continue;
+    for (let plek = van; plek <= laatste; plek += 1) {
+      maten[plek].volta = { nummers: [nummer], begin: plek === van, eind: plek === laatste };
+    }
   }
   return kopie;
 }

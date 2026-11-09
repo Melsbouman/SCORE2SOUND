@@ -51,6 +51,9 @@ export function vulBeginRust(partituur) {
     ingevoegd.forEach((maat, positie) => {
       delete maat.vak;
       delete maat.verlorenRust;
+      delete maat.maatstreep;
+      delete maat.volta;
+      delete maat.sprong;
       if (positie > 0 || aantal < 2) delete maat.maatrust;
     });
     // De meermaatsrust staat nu vooraan: de oorspronkelijke eerste maat begint geen regel of pagina meer.

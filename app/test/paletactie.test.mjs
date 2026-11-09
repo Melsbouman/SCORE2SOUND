@@ -152,3 +152,53 @@ test('een hokje op een onbekende maat verandert niets', () => {
   const origineel = stuk();
   assert.equal(voerPaletActieUit(origineel, actie('dynamiek-p'), { partijId: 'P1', maatIndex: 9 }), origineel);
 });
+
+test('een hokje half over een bestaand hokje haalt het oude hokje helemaal weg (geen open hokje)', () => {
+  const met = voerPaletActieUit(stuk(), actie('volta-1'), { partijId: null, maatIndex: 1, totIndex: 2 });
+  const nieuw = voerPaletActieUit(met, actie('volta-1'), { partijId: null, maatIndex: 2, totIndex: 2 });
+  assert.equal(nieuw.partijen[0].maten[1].volta, undefined);
+  assert.deepEqual(nieuw.partijen[0].maten[2].volta, { nummers: [1], begin: true, eind: true });
+  const anderNummer = voerPaletActieUit(met, actie('volta-2'), { partijId: null, maatIndex: 2, totIndex: 2 });
+  assert.equal(anderNummer.partijen[0].maten[1].volta, undefined);
+  assert.deepEqual(anderNummer.partijen[0].maten[2].volta, { nummers: [2], begin: true, eind: true });
+});
+
+test('een hokje naast een ander hokje laat dat andere staan', () => {
+  const een = voerPaletActieUit(stuk(), actie('volta-1'), { partijId: null, maatIndex: 1, totIndex: 2 });
+  const twee = voerPaletActieUit(een, actie('volta-2'), { partijId: null, maatIndex: 3, totIndex: 3 });
+  assert.deepEqual(twee.partijen[0].maten.map((m) => m.volta?.nummers?.[0] ?? '-').join(''), '-112');
+});
+
+test('een articulatie op meerdere gekozen noten komt op al die noten', () => {
+  const nieuw = voerPaletActieUit(stuk(), actie('articulatie-tenuto'), { partijId: 'P1', maatIndex: 0, elementIds: ['n-P1-0-0', 'n-P1-0-2'] });
+  assert.deepEqual(nieuw.partijen[0].maten[0].elementen.map((element) => element.articulaties.length), [1, 0, 1, 0]);
+});
+
+test('metronoomhokjes tonen de juiste noot; een kwartnoothokje haalt een oude getoonde noot weg', () => {
+  const halve = voerPaletActieUit(stuk(), actie('tempo-halve noot-80'), { partijId: 'P1', maatIndex: 0 });
+  const tempo = halve.partijen[0].maten[0].elementen.find((element) => element.type === 'tempo');
+  assert.equal(tempo.waarde, 160);
+  assert.deepEqual(tempo.getoond, { eenheid: 'half', punt: false, getal: 80 });
+  const kwart = voerPaletActieUit(halve, actie('tempo-♩-80'), { partijId: 'P1', maatIndex: 0 });
+  const nieuw = kwart.partijen[0].maten[0].elementen.find((element) => element.type === 'tempo');
+  assert.equal(nieuw.waarde, 80);
+  assert.equal('getoond' in nieuw, false);
+  const gepunt = voerPaletActieUit(stuk(), actie('tempo-♩punt-60'), { partijId: 'P1', maatIndex: 0 });
+  assert.deepEqual(gepunt.partijen[0].maten[0].elementen.find((element) => element.type === 'tempo').getoond, { eenheid: 'quarter', punt: true, getal: 60 });
+});
+
+test('een sleutel loopt door maten zonder sleutels heen (verborgen maten) en geldt voor de notenbalk waarop hij viel', () => {
+  const origineel = stuk();
+  origineel.partijen[1].maten[2].sleutels = [];
+  const nieuw = voerPaletActieUit(origineel, actie('sleutel-bas'), { partijId: 'P2', maatIndex: 0 });
+  assert.deepEqual(nieuw.partijen[1].maten.map((m) => m.sleutels[0]?.teken ?? '-').join(''), 'FF-F');
+  const tweeBalken = stuk();
+  tweeBalken.partijen[0].maten.forEach((m) => { m.sleutels = [m.sleutels[0], { teken: 'G', lijn: 2, notenbalk: 2, octaafVerschuiving: 0 }]; });
+  const balk2 = voerPaletActieUit(tweeBalken, actie('sleutel-bas'), { partijId: 'P1', maatIndex: 0, notenbalk: 2 });
+  assert.deepEqual(balk2.partijen[0].maten[0].sleutels.map((sleutel) => `${sleutel.notenbalk}${sleutel.teken}`), ['1G', '2F']);
+});
+
+test('een fermate mag op een rust', () => {
+  const nieuw = voerPaletActieUit(stuk(), actie('articulatie-fermate'), { partijId: 'P1', maatIndex: 2, elementId: 'n-P1-2-0' });
+  assert.equal(nieuw.partijen[0].maten[2].elementen[0].fermate, true);
+});

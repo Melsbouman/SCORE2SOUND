@@ -40,9 +40,10 @@ const maatsoort = (teller, noemer, symbool) => ({
   actie: { soort: 'maatsoort', waarde: { teller, noemer, ...(symbool ? { symbool } : {}) } },
 });
 
-const metronoom = (noot, naam, getal, kwartPerMinuut) => ({
+// Een metronoomhokje: het tempo in kwartnoten per minuut, en de noot zoals hij getoond wordt (eenheid, punt, getal).
+const metronoom = (noot, naam, getal, kwartPerMinuut, eenheid = 'quarter', punt = false) => ({
   id: `tempo-${naam.replace(/\./g, 'punt')}-${getal}`, naam: `${naam} = ${getal}`, teken: noot, woord: ` = ${getal}`, stijl: 'vet',
-  actie: { soort: 'tempo', waarde: kwartPerMinuut },
+  actie: { soort: 'tempo', waarde: kwartPerMinuut, ...(eenheid === 'quarter' && !punt ? {} : { getoond: { eenheid, punt, getal } }) },
 });
 const tempoterm = (naam, bpm) => ({
   id: `tempo-${naam.toLowerCase()}`, naam, woord: naam, stijl: 'vet',
@@ -89,8 +90,8 @@ export const PALETTEN = [
     naam: 'Tempo',
     items: [
       metronoom(G.kwart, '♩', 60, 60), metronoom(G.kwart, '♩', 80, 80), metronoom(G.kwart, '♩', 100, 100),
-      metronoom(G.kwart, '♩', 120, 120), metronoom(G.kwart, '♩', 144, 144), metronoom(G.halve, 'halve noot', 80, 160),
-      metronoom(`${G.kwart}${G.punt}`, '♩.', 60, 90), metronoom(G.achtste, '♪', 120, 60),
+      metronoom(G.kwart, '♩', 120, 120), metronoom(G.kwart, '♩', 144, 144), metronoom(G.halve, 'halve noot', 80, 160, 'half'),
+      metronoom(`${G.kwart}${G.punt}`, '♩.', 60, 90, 'quarter', true), metronoom(G.achtste, '♪', 120, 60, 'eighth'),
       tempoterm('Grave', 40), tempoterm('Largo', 50), tempoterm('Adagio', 66), tempoterm('Andante', 76),
       tempoterm('Moderato', 100), tempoterm('Allegretto', 108), tempoterm('Allegro', 120), tempoterm('Vivace', 160),
       tempoterm('Presto', 180),

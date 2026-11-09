@@ -137,7 +137,8 @@ export function start(app) {
       maakKnop('Volgende onzekere', () => kiesOnzeker(1)),
     ]));
 
-    if (!element) {
+    // Alleen een noot of rust is te corrigeren (een gekozen id kan na een wijziging naar een aanwijzing wijzen).
+    if (!element || (element.soort !== 'noot' && element.soort !== 'rust')) {
       voegSneltoetsenToe();
       return;
     }

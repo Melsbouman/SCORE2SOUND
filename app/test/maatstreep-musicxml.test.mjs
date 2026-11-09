@@ -39,3 +39,22 @@ test('een herhaling eind blijft een herhaalteken, ook met een maatstreep erbij',
   assert.match(xml, /<repeat direction="backward"/);
   assert.equal((xml.match(/light-light/g) ?? []).length, 0);
 });
+
+test('een eindstreep met het eind van een hokje blijft allebei bewaard', () => {
+  const partituur = stuk();
+  partituur.partijen[0].maten[2].volta = { nummers: [1], begin: true, eind: true };
+  const xml = naarMusicXML(partituur);
+  assert.match(xml, /<barline location="right"><bar-style>light-heavy<\/bar-style><ending number="1" type="stop"\/><\/barline>/);
+  const terug = leesMusicXML(xml).partijen[0].maten[2];
+  assert.equal(terug.maatstreep, 'eind');
+  assert.equal(terug.volta.eind, true);
+});
+
+test('een maat invoegen na de laatste maat neemt de eindstreep niet mee', async () => {
+  const { voegMaatToe } = await import('../src/model/maten-bewerken.mjs');
+  const ingelezen = leesMusicXML(naarMusicXML(stuk()));
+  const nieuw = voegMaatToe(ingelezen, 2);
+  assert.deepEqual(nieuw.partijen[0].maten.map((m) => m.maatstreep ?? '-'), ['-', 'dubbel', 'eind', '-']);
+  const metNieuwe = voegMaatToe(ingelezen, 1);
+  assert.deepEqual(metNieuwe.partijen[0].maten.map((m) => m.maatstreep ?? '-'), ['-', 'dubbel', '-', 'eind']);
+});
