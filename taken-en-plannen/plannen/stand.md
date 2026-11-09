@@ -1,41 +1,40 @@
-# Stand (bijgewerkt 8 nov 2026)
+# Stand (bijgewerkt 9 nov 2026, ochtend)
 
 ## Eerste handelingen in elke chat
 - `bash automatisering/hartslag.sh` en `bash automatisering/review.sh`.
-- Controleer dat precies een `werkpakketten.sh` draait (PowerShell: `Get-CimInstance Win32_Process -Filter "Name='bash.exe'" | ? CommandLine -match 'werkpakketten'`). Start: `AIFLOW_UITVOERDER=hermes bash automatisering/werkpakketten.sh --alle`.
-- Richting: `plannen/2026-11-07-richting.md`. Laatste nachtrapport: `nacht/rapport-2026-11-07.md`. Wensen: `voorraad.md`.
+- Controleer dat er hooguit één `werkpakketten.sh` draait (PowerShell: `Get-CimInstance Win32_Process -Filter "Name='bash.exe'" | ? CommandLine -match 'werkpakketten'`). Start voor een losse taak: `bash automatisering/werkpakketten.sh` (één wachtrij).
+- Richting: volle focus op een werkende scanner met verbeteren in de editor (`plannen/2026-11-08-scanner.md`). Laatste nachtrapport: `nacht/rapport-2026-11-08.md`. Wensen en open punten: `voorraad.md`.
 
-## Uitvoerders (getest 8 nov, 20:45)
-- Claude (`agent-claude`): Claude Code met een tweede account, inlog in `~/.claude-uitvoerder` (`automatisering/claude-inloggen.ps1`). Model `sonnet`, alleen Read/Edit/Write/Glob/Grep. Eerste reserve voor Codex, Copilot en Gemini. Het Max-account is voor de chat, het Pro-account hoort bij de uitvoerder. De eerste inlog pakte per ongeluk het Max-account; opnieuw inloggen met `claude-inloggen.ps1 -Account <adres van het Pro-account>` na uitloggen op claude.ai.
-- Hermes: gratis model `cohere/north-mini-code:free`, werkt weer (pad was fout na het hernoemen), ~50 s per aanroep.
-- Gemini: `gemini-flash-lite-latest` (API-sleutel in GEMINI_API_KEY), werkt.
-- Codex: op tot 10 nov 15:48 (getest).
-- Copilot: maandquotum op (getest), tot de nieuwe maand.
+## Uitvoerders (9 nov)
+- Claude (`agent-claude`): Claude Code met het tweede account (Pro), inlog in `~/.claude-uitvoerder` (`automatisering/claude-inloggen.ps1`). Model `sonnet`. Deed in de nacht van 8 op 9 nov vrijwel alles; met een exacte diff in de taak duurt een taak ongeveer een minuut.
+- Codex: gebruikslimiet tot dinsdag 10 nov 15:48 (getest); de reserve (Claude) neemt Codex-taken over.
+- Gemini (`gemini-flash-lite-latest`, API-sleutel in GEMINI_API_KEY) en Hermes (gratis model, alleen kleine taken met `--verwacht`) werken.
+- Copilot: maandquotum op tot de nieuwe maand.
 
-## Open
-- 11 editor-taken (1660, 1662, 1665-1668, 1670, 1672-1675) staan in de wachtrij van Hermes en Gemini.
-- Volgende stap: fase 1 (testset en meetscript), taken nog te maken.
+## Werkwijze die werkt (nacht 8 op 9 nov)
+- Claude schrijft de code en de tests in een eigen werkkopie (`git worktree add`), meet op de echte stukken (`automatisering/echte-controle.sh` met `VERGELIJK_UIT`), en zet de taak klaar met de exacte diff en de test (`maak-taak.sh --voor claude`, `--test-aanpassen` als een bestaande test mee moet). Het script controleert en merget.
+- Na een interfacegolf de app in de browser openen (zie het nachtrapport: vier interfacefouten die de tests niet zagen). `app/test/app-api.test.mjs` bewaakt nu dat elke `app.x` in de browsercode bestaat.
+- Een onafhankelijke review (subagent) na een reeks wijzigingen vond acht echte fouten; doen na elke grote wijziging.
+
+## Scanner: stand van de meting (9 nov, 02:40)
+| Stuk | Maten (blad) | Opmerking |
+|---|---|---|
+| Galop | 104 (105) | 4 maatduur-meldingen (was 19); hokje 1 samengevoegd |
+| Devils Galop | 102 (102) | alle 15 repetitiecijfers op hun maat; maatduur 1 |
+| Distant Land | 130 (134) | was 928 bij het begin van de nacht |
+| Renaissance | 255 | 13 maten ontbreken vóór regel 106 (melding) |
+| Sand and Stars | 479 | één partij (was vier) |
+| Suite Gothique | 279 | één partij (was twee) |
+| African Symphony | 60 | referentie van Mels nodig |
+| Masque | - | liggende scan van twee pagina's; duidelijke melding |
 
 ## Valkuilen
+- De hartslag (Windows-taak, elk uur om :36) start zelf wachtrijen. Pas `automatisering/*.sh` nooit aan terwijl er een `werkpakket.sh` draait.
 - Taakcontrole faalt op verwijdertaken en nieuwe mappen (zet een `.gitkeep`).
 - Gebruik nooit `agent-terug` om een nieuwe taak voor te trekken.
 - Een bestand `nul` in een agent-kloon breekt de schoonmaak (verwijderen met `[System.IO.File]::Delete('\?\...\nul')`).
-- Mels moet nog: 2 pagina's referentie, AGPL-besluit.
+- Code via een Python-heredoc in de Bash-tool: `\b` wordt een backspace; gebruik raw strings of de Edit-tool. Controleer of een "nieuwe" bestandsnaam vrij is (`app/src/model/triolen.mjs` bestond al).
 
-## 8 nov, middag
-- Mappen hernoemd: hermes -> automatisering, werkpakketten -> taken-en-plannen, scripts -> beheer (scripts `werkpakket.sh` e.d. houden hun naam). Hartslag-taak wijst naar het nieuwe pad.
-- 1672 (nieuwe partituur) is `agent-vast`: Gemini maakte een PR van 649 regels (max 600); splits de taak in kleinere. Hermes kan lange taken niet aan ("Argument list too long"): geef Hermes alleen korte taken.
-- 1662, 1660, 1667 zijn gemerged.
-
-## 8 nov, avond (Mels heeft nu Claude Max)
-- Claude Code als vijfde uitvoerder `agent-claude` (sonnet, tweede account). Eerste taak #1670 in 3 min gemerged. Claude is de eerste reserve voor Codex, Copilot en Gemini.
-- Hermes-pad hersteld: na het hernoemen wees `werkpakket.sh` naar `AppData\Local\automatisering\...`, waardoor elke Hermes-reserve faalde en 1665, 1666, 1668, 1674 en 1670 vastliepen (niet door de taak zelf).
-- Runner bewaart nu de reden van `vast` in `geschiedenis.jsonl`; het Agents-paneel is opnieuw ingedeeld (Actie nodig met reden, compacte taken, rij per uitvoerder).
-- Open: 1665, 1666, 1668, 1674 opnieuw starten (liefst bij `agent-claude`, na het accountbesluit van Mels); 1672 splitsen.
-
-## Richting (Mels, 8 nov avond)
-- Volle focus op een werkende scanner, met de uitkomst als concept in de editor om te verbeteren. Geen nieuwe functies zoals meespeelmodus of speelbaarheidscontrole. De lopende editor-taken mogen af; nieuwe taken gaan over scannen.
-- AGPL: besloten (Mels liet het aan Claude). Scanmotoren onder AGPL accepteren als losse programma's; eigen code alle rechten voorbehouden (`LICENSE.md`). Regels en gevolgen in `docs/licenties.md`. Later: pagina Licenties en broncode in de app.
-
-## Valkuil (8 nov)
-- De hartslag (Windows-taak, elk uur om :36) start zelf wachtrijen. Pas `automatisering/*.sh` dus nooit aan zonder eerst te kijken of er een `werkpakket.sh` draait: een aanpassing tijdens een run brak #1675 af.
+## Mels moet nog
+- 2 pagina's referentie van African Symphony (MusicXML).
+- Besluiten uit `voorraad.md` (Wacht op een besluit van Mels): Audiveris-development, copisteria en PDMX (downloads), pdf.js, origineel naast de scan, knop Invoegen bij een weggelaten rust.
