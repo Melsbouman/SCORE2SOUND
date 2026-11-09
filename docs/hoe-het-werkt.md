@@ -25,7 +25,7 @@
 ## Van pdf tot geluid
 1. De server verwerkt de aangeleverde pdf met Audiveris via `app/src/server/audiveris.mjs`.
 2. De herkende MusicXML wordt gelezen door `app/src/musicxml/lezen.mjs`.
-3. De herstelketen verbetert de herkenning in `app/src/model/herstel.mjs`.
+3. De scanketen en de herstelketen verbeteren de herkenning (zie hieronder).
 4. Je bewerkt noten in `app/public/js/views/editor.js`.
 5. De browser speelt de muziek af met `app/src/midi/hoorbaar.mjs`.
 6. Je exporteert de partituur via `app/public/js/views/export.js`.
@@ -50,17 +50,34 @@ Alles in de editor kan met het toetsenbord: tabbladen met Alt en een cijfer van 
 ## Voortekens en samengestelde rusten
 Een mol, kruis of herstellingsteken wordt getekend als de toonhoogte afwijkt van de toonsoort of van een eerdere noot in dezelfde maat, op dezelfde plek op de balk. Een samengestelde rust (een blok met een cijfer erboven) telt als meerdere maten rust; de herkenning leest dat cijfer niet altijd en kan het aantal afleiden uit de repetitiecijfers.
 
+## De scanketen op de server
+Wat er gebeurt tussen het uploaden van een pdf of foto en de partituur in de editor (`app/src/server/herken.mjs`):
+1. Audiveris (los programma, `app/src/server/audiveris.mjs`) herkent de bladen in drie rondes en levert MusicXML en de bladen met hun maten (stapels) en plekken.
+2. De MusicXML wordt gelezen (`app/src/musicxml/lezen.mjs`), de pagina's worden samengevoegd en elke maat en noot krijgt haar plek op het blad (`koppelOmr` in `app/src/server/omr.mjs`). Een maat die Audiveris in de MusicXML wegliet, wordt een gat in plaats van dat alles erna opschuift.
+3. Titel, componist en arrangeur komen uit de kop; een rust vooraan die alleen in de kop staat (zoals 12 maten bij Sand and Stars) komt als beginrust in de partij.
+4. De tekstherkenning (Windows op een pc, Tesseract op de server) leest elk blad. Partijen worden gesplitst als de paginakop een andere partijnaam noemt (ruis als Bl» voor B♭ telt niet). Tekst komt bij de maten.
+5. Het cijfer boven een rustmaat wordt het aantal maten van een meermaatsrust (uit de tekstherkenning, en bij een digitale pdf uit de tekst in de pdf zelf).
+6. De repetitiecijfers en -letters van het blad komen met hun plek bij de maten, vóór het herstel: Audiveris hangt een kader vaak aan de maat ervoor. Een meermaatsrust aan het begin van een regel die Audiveris wegliet (hij voegt de lege plek samen met de maat erna) wordt ingevoegd als het cijfer erboven te lezen is (`app/src/server/verlorenrusten.mjs`); anders komt er een melding.
+7. De herstelketen (`app/src/model/herstel.mjs`, zie hieronder) vult onder meer ontbrekende maten aan tussen de repetitiecijfers, of tussen de gedrukte maatnummers aan het begin van de regels als de partij geen genummerde repetitiecijfers heeft.
+8. Een gemiste rust (de maat is een notenwaarde te kort en op het blad zit een gat, `app/src/model/rustgaten.mjs`) en een verkeerd gelezen triool (`app/src/model/triolenherstel.mjs`) worden hersteld, rood of oranje, met een melding.
+9. Lege maten krijgen een rust, de maatduur wordt gecontroleerd en verdachte noten worden rood.
+10. Meldingen om na te kijken: de nootkoppen in een digitale pdf als tweede mening per maat, het gedrukte maatnummer aan het begin van een regel naast de nummering (`app/src/model/gedruktenummers.mjs`), en een meermaatsrust of noten aan het begin van een regel die Audiveris wegliet (`app/src/server/verlorenrusten.mjs`).
+
+De scan opent in de editor als concept, met een balk "Nog nakijken" (onzekere noten en meldingen) en de knop "Klaar met nakijken". Meldingen uit de herkenning blijven na een bewerking staan en schuiven mee als je een maat invoegt of weghaalt; een melding bij een maat verdwijnt als je die maat goedkeurt.
+
 ## De herstelketen
 1. Herstel de titel door samengevoegde hoofdletterafkortingen na een woord weer aan dat woord te koppelen.
 2. Haal een herhaald colofon uit de noten en bewaar bruikbare colofontekst eenmaal bij de partituur.
-3. Verwijder zangtekst uit noten in een partij als minder dan 40% van de niet-overgebonden noten tekst heeft.
-4. Haal tempo uit tekstuele tempo-aanduidingen en zet die om in tempo-aanwijzingen als de waarde tussen 20 en 300 ligt.
-5. Pas een maatsoort aan wanneer de inhoudsduur van een maat groter is dan de opgegeven maatlengte en precies overeenkomt met een bekende maatsoort.
-6. Voeg aan alle partijen beginmaten met rusten toe als een genummerde aanwijzing in de eerste acht maten van de eerste partij op ontbrekende beginmaten wijst.
-7. Vul ontbrekende maten op basis van sprongen tussen genummerde aanwijzingen door lege maten als samengestelde rust te markeren of ontbrekende maten met een rust in te voegen.
-8. Vul ontbrekende letters in een letterreeks aan.
-9. Zet eerste- en tweede-eindehokjes bij een herhalingseind met één maat ervoor een letter.
+3. Maak van een sterkte of speelwijze die Audiveris als zangtekst las (ff, marc., cresc.) weer een aanduiding.
+4. Verwijder zangtekst uit noten in een partij als minder dan 40% van de niet-overgebonden noten tekst heeft.
+5. Haal tempo uit tekstuele tempo-aanduidingen (tussen 20 en 300). De maatsoort blijft zoals Audiveris hem las: een maat die langer of korter is, krijgt een melding (de herkenning verzint geen wisseling van maatsoort).
+6. Voeg aan alle partijen beginmaten met rust toe als een genummerde aanwijzing in de eerste acht maten van de eerste partij op ontbrekende beginmaten wijst.
+7. Haal een herhaalde sleutel na een samengestelde rust weg.
+8. Vul ontbrekende maten aan tussen genummerde aanwijzingen. Repetitiecijfers die maatnummers zijn (oplopend, en een boven de 40) en cijfers in een kader worden nooit het aantal maten van een rust; een cijfer op een meermaatsrust gaat naar de maat erna als het aantal maten alleen zo klopt. Zonder genummerde repetitiecijfers tellen de gedrukte maatnummers aan het begin van een regel, als ze oplopen en het volgende nummer het gat bevestigt. Het tekort komt op een lege maat (leeg in alle partijen), anders op de enige rustmaat in het gat, en anders als rode maten rust vóór het volgende cijfer. Een meermaatsrust krijgt altijd zijn verborgen maten, zodat hij te zien en te horen is.
+9. Vul ontbrekende letters in een letterreeks aan.
 10. Markeer noten die sterk afwijken van hun buren als verdacht en verlaag hun zekerheid tot maximaal 0,5.
+
+Eerste- en tweede-eindehokjes invullen staat uit: de heuristiek gaf bij Galop hokjes op de verkeerde plek.
 
 ## Rood betekent: kijk even na
 Een rode noot of maat is iets waar de herkenning of de herstelketen niet zeker van is: een noot die ver van haar buren ligt, of een maat die is ingevuld omdat het repetitiecijfer niet klopte met het aantal maten. Controleer ze en keur ze goed met Enter of met Maat klopt.
