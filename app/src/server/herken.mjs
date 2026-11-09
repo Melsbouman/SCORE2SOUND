@@ -35,6 +35,7 @@ import { woordenNaarMaten } from '../model/tekstlezerwoorden.mjs';
 import { meermaatsRustenUitCijfers } from '../model/meermaatsrust.mjs';
 import { tweedeMening, woordenUitPdf } from '../model/digitaal.mjs';
 import { vergelijkGedrukteMaatnummers } from '../model/gedruktenummers.mjs';
+import { meldVerlorenRusten } from './verlorenrusten.mjs';
 import { leesPdfTekens } from './pdftekens.mjs';
 import { maakLimiet } from './limiet.mjs';
 import { leesBlad } from './tekstlezer.mjs';
@@ -393,7 +394,10 @@ export function maakHerken({ map, draaier }) {
   const digitaal = pdfTekens ? tweedeMening(uit.partituur, pdfTekens) : [];
   // Het gedrukte maatnummer aan het begin van elke regel naast de nummering van de herkenning (tekstherkenning en, bij een
   // digitale pdf, de tekst uit de pdf).
-  const nummers = vergelijkGedrukteMaatnummers(uit.partituur, [...ocrPerBlad, ...(pdfTekens ? woordenUitPdf(pdfTekens, bladenGoed) : [])]);
+  const woordenPerBlad = [...ocrPerBlad, ...(pdfTekens ? woordenUitPdf(pdfTekens, bladenGoed) : [])];
+  const nummers = vergelijkGedrukteMaatnummers(uit.partituur, woordenPerBlad);
+  // Een meermaatsrust (of noten) aan het begin van een regel die Audiveris wegliet, met het aantal als het cijfer te lezen is.
+  const verloren = meldVerlorenRusten(uit.partituur, bladenGoed, woordenPerBlad);
   const koppelRedenen = [
     [uit.redenen.geenKopInMaat, 'geen kop in de maat'],
     [uit.redenen.andereToonhoogte, 'andere toonhoogte'],
@@ -409,6 +413,7 @@ export function maakHerken({ map, draaier }) {
       ...(uit.nietGekoppeld > 0 ? [herkenMelding(`${uit.nietGekoppeld} noten konden niet aan het origineel worden gekoppeld${koppelRedenenTekst}.`)] : []),
     ...digitaal,
     ...nummers.meldingen,
+    ...verloren,
     ...maatMeldingen,
     ];
   await writeFile(join(taak.uitmap, 'resultaat.json'), JSON.stringify({
