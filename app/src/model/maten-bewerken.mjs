@@ -90,6 +90,59 @@ export function voegMaatToe(partituur, maatIndex) {
   return kopie;
 }
 
+// Voegt een meermaatsrust van `aantal` maten in vóór de maat met maatIndex (alleen in die partij).
+export function voegMeermaatsrustIn(partituur, partijId, maatIndex, aantal) {
+  const kopie = structuredClone(partituur);
+  const partij = kopie.partijen.find((item) => item.id === partijId);
+  const positie = partij ? partij.maten.findIndex((maat) => maat.index === maatIndex) : -1;
+  if (!partij || positie === -1 || typeof aantal !== 'number' || !Number.isInteger(aantal) || aantal < 1 || aantal > 999) {
+    throw new Error('Ongeldige meermaatsrust.');
+  }
+  const maat = partij.maten[positie];
+  const nummer = maatnummer(maat);
+  const nieuweMaten = Array.from({ length: aantal }, () => {
+    const nieuw = structuredClone(maat);
+    nieuw.elementen = [{ soort: 'rust', start: 0, duur: maatLengte(maat.maatsoort), stem: 1, notenbalk: 1, heleMaat: true, zekerheid: 1 }];
+    nieuw.ingevoegd = true;
+    nieuw.opmaat = false;
+    if ('tempo' in nieuw) nieuw.tempo = null;
+    if ('herhaling' in nieuw) nieuw.herhaling = { begin: false, eind: false, keer: 2 };
+    for (const veld of ['vak', 'volta', 'sprong', 'maatrust', 'verborgen', 'verlorenRust', 'gedruktNummer']) delete nieuw[veld];
+    if ('regelbegin' in nieuw) nieuw.regelbegin = false;
+    if ('paginabegin' in nieuw) nieuw.paginabegin = false;
+    return nieuw;
+  });
+  const [eerste, ...rest] = nieuweMaten;
+  if (aantal >= 2) eerste.maatrust = aantal;
+  if ('regelbegin' in maat) {
+    eerste.regelbegin = maat.regelbegin;
+    maat.regelbegin = false;
+  }
+  if ('paginabegin' in maat) {
+    eerste.paginabegin = maat.paginabegin;
+    maat.paginabegin = false;
+  }
+  rest.forEach((verborgen) => {
+    verborgen.verborgen = true;
+  });
+  if (nummer !== null) {
+    nieuweMaten.forEach((nieuw, plek) => {
+      nieuw.nummer = String(nummer + plek);
+    });
+    for (const volgende of partij.maten.slice(positie)) {
+      const volgendNummer = maatnummer(volgende);
+      if (volgendNummer !== null) volgende.nummer = String(volgendNummer + aantal);
+    }
+  } else {
+    nieuweMaten.forEach((nieuw, plek) => {
+      nieuw.nummer = String(positie + plek + 1);
+    });
+  }
+  partij.maten.splice(positie, 0, ...nieuweMaten);
+  herindexeer(partij.maten);
+  return kopie;
+}
+
 export function verwijderMaat(partituur, maatIndex) {
   const kopie = structuredClone(partituur);
   if (!Number.isInteger(maatIndex) || maatIndex < 0) return kopie;

@@ -1,3 +1,6 @@
+import { voegMeermaatsrustIn } from '/src/model/maten-bewerken.mjs';
+import { vernieuwMeldingen } from '/src/controle/meldingen.mjs';
+
 // Meldingen tonen: welke maat, wat er mis is, en naar die maat springen.
 export function start(app) {
   const vlak = document.getElementById('meldingen');
@@ -90,6 +93,41 @@ export function start(app) {
           }
         });
         item.append(knop);
+
+        if (melding.invoegen && melding.partij && melding.maat !== null && melding.maat !== undefined) {
+          const formulier = document.createElement('form');
+          formulier.className = 'melding__invoegen';
+          const label = document.createElement('label');
+          const veld = document.createElement('input');
+          veld.type = 'number';
+          veld.min = '1';
+          veld.max = '999';
+          veld.step = '1';
+          veld.required = true;
+          veld.value = Number.isFinite(melding.invoegen.aantal) ? String(melding.invoegen.aantal) : '';
+          label.append(document.createTextNode('Meermaatsrust van '), veld, document.createTextNode(' maten'));
+          const invoegKnop = document.createElement('button');
+          invoegKnop.type = 'submit';
+          invoegKnop.className = 'knop';
+          invoegKnop.textContent = 'Invoegen';
+          formulier.append(label, invoegKnop);
+          formulier.addEventListener('submit', (gebeurtenis) => {
+            gebeurtenis.preventDefault();
+            const aantal = Number(veld.value);
+            if (veld.value.trim() === '' || !Number.isInteger(aantal) || aantal < 1 || aantal > 999) {
+              veld.reportValidity();
+              return;
+            }
+            const vorige = app.stand.partituur;
+            const nieuw = voegMeermaatsrustIn(vorige, melding.partij, melding.maat, aantal);
+            app.zet({
+              partituur: nieuw,
+              meldingen: vernieuwMeldingen(app.stand.meldingen.filter((andere) => andere !== melding), nieuw, vorige),
+            });
+            app.meld('naar-maat', { partij: melding.partij, maat: melding.maat });
+          });
+          item.append(formulier);
+        }
         soortLijst.append(item);
       }
       details.append(soortLijst);

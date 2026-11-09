@@ -83,6 +83,7 @@ export function meldVerlorenRusten(partituur, bladen, woordenPerBlad) {
         tekst: aantal
           ? `Maat ${maat.nummer}: aan het begin van deze regel staat waarschijnlijk een meermaatsrust van ${aantal} maten die niet is herkend. Voeg hem vóór deze maat in en kijk de maatnummers na.`
           : `Maat ${maat.nummer}: aan het begin van deze regel heeft de herkenning iets gemist (een rust of noten). Kijk deze regel op het blad na.`,
+        invoegen: { aantal: aantal || null },
       });
     }
   }
