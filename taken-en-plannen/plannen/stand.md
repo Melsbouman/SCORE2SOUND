@@ -18,6 +18,9 @@ Zie `plannen/2026-11-09-browser-herkenning.md` (kolom Stand). Kort:
 - Volgende stappen: de keten in de browser (C8: Web Worker, pdf-beelden, herkenning, opbouw, herstelketen, concept in de editor); triolen uit #1863 in de opbouw; repetitiecijfers en maatnummers (C7 deel 2); hokjes (1. en 2.).
 - Digitale pdf's direct lezen (D1) is lastiger dan gedacht: Finale bedt het lettertype Maestro in met een eigen codering per pdf. Opties: eigen lettertype-tekenaar (CFF/TrueType) of pdf.js (nieuwe bibliotheek, akkoord van Mels nodig). Nog niet besloten.
 
+## Editor: slepen uit het palet (9 nov avond, wens van Mels)
+Plan: `plannen/2026-11-09-palet-slepen.md`. Dynamiek, cresc. en dim. komen bij slepen altijd bij de dichtstbijzijnde noot (#1859), een haak op een noot loopt tot de volgende noot (#1858), en slepen uit het palet gaat met een zwevend kaartje (pointer events, ook met een vinger; `app/public/js/views/paletsleep.js`). Let op bij nakijken in de browser: zonder inloggen verbergt de lokale server de partituur (`.inloggen-niet-ingelogd`), en in een verborgen browservenster lopen animaties en requestAnimationFrame niet.
+
 ## Uitvoerders (9 nov)
 - Claude (`agent-claude`): Claude Code met het tweede account (Pro), inlog in `~/.claude-uitvoerder` (`automatisering/claude-inloggen.ps1`). Model `sonnet`. Deed in de nacht van 8 op 9 nov vrijwel alles; met een exacte diff in de taak duurt een taak ongeveer een minuut.
 - Codex: gebruikslimiet tot dinsdag 10 nov 15:48 (getest); de reserve (Claude) neemt Codex-taken over.

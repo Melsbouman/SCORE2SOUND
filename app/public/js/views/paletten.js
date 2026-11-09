@@ -1,11 +1,12 @@
 // Het palettenpaneel: hokjes met een icoon die je naar een maat of een noot sleept, of aanklikt voor de gekozen maat of noot.
-// Het neerzetten in de partituur zelf staat in weergave.js (dragover en drop); die roept pasPaletToe aan.
+// Het slepen zelf (met muis, pen of vinger, en een zwevend kaartje) staat in paletsleep.js; weergave.js zoekt het doel onder de
+// muis en laat het oplichten. Bij loslaten op een doel roept het slepen pasPaletToe aan.
 import { PALETTEN } from '/src/model/paletten.mjs';
 import { doelVan, voerPaletActieUit } from '/src/model/paletactie.mjs';
 import { leesId, zoekElement } from '/src/model/corrigeren.mjs';
 import { vernieuwMeldingen } from '/src/controle/meldingen.mjs';
+import { maakSleepbaar } from './paletsleep.js';
 
-export const SLEEP_SOORT = 'application/x-palet';
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
 export function zoekItem(id) {
@@ -208,23 +209,24 @@ export function start(app) {
       const knop = document.createElement('button');
       knop.type = 'button';
       knop.className = 'paletten__cel';
-      knop.draggable = true;
       knop.dataset.item = item.id;
       knop.dataset.doel = doel;
       knop.title = doel === 'noot' ? `${item.naam} (op een noot)` : item.naam;
       knop.setAttribute('aria-label', `${sectie.naam}: ${item.naam}`);
       knop.append(...maakIcoon(item));
 
-      knop.addEventListener('dragstart', (gebeurtenis) => {
-        gebeurtenis.dataTransfer.effectAllowed = 'copy';
-        gebeurtenis.dataTransfer.setData(SLEEP_SOORT, item.id);
-        gebeurtenis.dataTransfer.setData(`${SLEEP_SOORT}-${doel}`, item.id);
-        // Een fermate mag ook op een rust.
-        if (item.actie.soort === 'fermate') gebeurtenis.dataTransfer.setData(`${SLEEP_SOORT}-rust`, item.id);
-        // Dynamiek en tekst komen bij de noot waar je ze op loslaat (of aan het begin van de maat).
-        if (['dynamiek', 'tekst', 'tempotekst', 'haak'].includes(item.actie.soort)) {
-          gebeurtenis.dataTransfer.setData(`${SLEEP_SOORT}-aanwijzing`, item.id);
-        }
+      // Slepen: op een noot (articulatie, voorteken), een fermate ook op een rust, en dynamiek en tekst bij de noot waar je ze
+      // loslaat.
+      maakSleepbaar(knop, {
+        app,
+        item,
+        vlaggen: {
+          opNoot: doel === 'noot',
+          ookRust: item.actie.soort === 'fermate',
+          bijNoot: ['dynamiek', 'tekst', 'tempotekst', 'haak'].includes(item.actie.soort),
+        },
+        zet: (plek) => pasPaletToe(app, item, plek),
+        klaar: (gelukt) => { status.textContent = gelukt ? `${item.naam} gezet.` : `${item.naam} past daar niet.`; },
       });
       knop.addEventListener('click', () => {
         const plek = gekozenPlek(item);
@@ -273,8 +275,5 @@ export function start(app) {
     gekozenMaat = maat ?? null;
     gekozenTot = tot ?? null;
     status.textContent = uitleg();
-  });
-  app.op('palet-gezet', ({ naam, gelukt }) => {
-    status.textContent = gelukt ? `${naam} gezet.` : `${naam} past daar niet.`;
   });
 }
