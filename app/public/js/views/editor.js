@@ -1022,7 +1022,7 @@ export function start(app) {
   function pas(nieuwePartituur) {
     app.zet({
       partituur: nieuwePartituur,
-      meldingen: vernieuwMeldingen(app.stand.meldingen, nieuwePartituur),
+      meldingen: vernieuwMeldingen(app.stand.meldingen, nieuwePartituur, app.stand.partituur),
     });
     app.meld('kies-noot', { id: gekozen, ids: gekozenIds });
   }
@@ -1033,7 +1033,7 @@ export function start(app) {
     const vorige = ongedaan.pop();
     opnieuw.push(huidige);
     bezigMetGeschiedenis = true;
-    app.zet({ partituur: vorige, meldingen: vernieuwMeldingen(app.stand.meldingen, vorige) });
+    app.zet({ partituur: vorige, meldingen: vernieuwMeldingen(app.stand.meldingen, vorige, huidige) });
     bezigMetGeschiedenis = false;
     app.meld('kies-noot', { id: gekozen, ids: gekozenIds });
     teken();
@@ -1045,7 +1045,7 @@ export function start(app) {
     const volgende = opnieuw.pop();
     ongedaan.push(huidige);
     bezigMetGeschiedenis = true;
-    app.zet({ partituur: volgende, meldingen: vernieuwMeldingen(app.stand.meldingen, volgende) });
+    app.zet({ partituur: volgende, meldingen: vernieuwMeldingen(app.stand.meldingen, volgende, huidige) });
     bezigMetGeschiedenis = false;
     app.meld('kies-noot', { id: gekozen, ids: gekozenIds });
     teken();
