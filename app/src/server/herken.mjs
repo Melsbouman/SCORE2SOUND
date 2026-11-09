@@ -377,7 +377,7 @@ export function maakHerken({ map, draaier }) {
     let pdfTekens = null;
     if (/\.pdf$/i.test(taak.invoer)) {
       try {
-        pdfTekens = leesPdfTekens(await readFile(taak.invoer));
+        pdfTekens = await leesPdfTekens(await readFile(taak.invoer));
       } catch {
         pdfTekens = null;
       }
