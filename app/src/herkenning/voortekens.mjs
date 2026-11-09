@@ -28,11 +28,13 @@ export function zoekVoortekens(kaal, raster, schaal, { koppen = [], rusten = [],
   return raster.balken.map((balk, b) => {
     const yOp = (stap, x) => balk.lijnen[0].a + balk.lijnen[0].b * x + (stap * ia) / 2;
     const kopEinde = balkkoppen?.[b]?.einde ?? balk.links + ia * 3;
+    // De tekens van een wissel midden in de regel (een nieuwe voortekening, kop.mjs) horen niet bij een noot.
+    const wissels = balkkoppen?.[b]?.wissels ?? [];
     const noten = koppen[b] ?? [];
     const rustenHier = rusten[b] ?? [];
     const bijBalk = vormen.filter((v) => {
       const x = (v.links + v.rechts) / 2;
-      return x > kopEinde && x <= balk.rechts && v.onder >= yOp(-6, x) && v.boven <= yOp(14, x);
+      return x > kopEinde && x <= balk.rechts && v.onder >= yOp(-6, x) && v.boven <= yOp(14, x) && !wissels.some((w) => x >= w.x && x <= w.rechts);
     });
     // Smalle, hoge vormen: haakjes rond een voorteken.
     const haakjes = bijBalk.filter((v) => {

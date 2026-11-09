@@ -204,3 +204,59 @@ test('keten: een eerste maat met alleen de balkkop telt niet; de maat erna begin
   assert.equal(maten[0].toonsoort.kwinten, -3);
   assert.equal(maten[0].elementen.filter((e) => e.soort === 'noot').length, 4);
 });
+
+// Een toonsoortwissel midden in de regel: twee mollen en 4/4 met vier kwarten (b en e), een dubbele maatstreep, twee
+// herstellingstekens en 2/4 met twee kwarten (b en e, nu zonder mol); dan weer een dubbele streep met een kruis vlak voor een
+// noot (een voorteken van die noot, geen nieuwe voortekening), een dubbele streep met één kruis en een noot verderop, en tot
+// slot een dubbele streep met alleen een herstellingsteken op de plek van dat kruis (terug naar geen voortekens).
+function toonsoortBlad() {
+  const ia = 20;
+  const { beeld, verwacht } = maakBlad({ balken: 1, koppen: false, maatstrepen: false, lijnafstand: ia, breedte: 1600, rechts: 1500 });
+  const zet = (x, y) => { beeld.pixels[Math.round(y) * beeld.breedte + Math.round(x)] = 0; };
+  const y = (stap) => Math.round(verwacht.balken[0].lijnen[0].a + (stap * ia) / 2);
+  const stempel = (naam, ax, ay) => {
+    const t = sjabloon(naam, ia);
+    for (let dy = 0; dy < t.hoogte; dy += 1) for (let dx = 0; dx < t.breedte; dx += 1) if (t.pixels[dy * t.breedte + dx]) zet(ax - t.ankerX + dx, ay - t.ankerY + dy);
+    return t;
+  };
+  const streep = (x) => { for (let yy = y(0); yy <= y(8); yy += 1) { zet(x, yy); zet(x + 1, yy); } };
+  const dubbel = (x) => { streep(x); streep(x + 7); };
+  stempel('sleutel-g', 110, y(6));
+  stempel('mol', 175, y(4));
+  stempel('mol', 195, y(1));
+  stempel('cijfer-4', 240, y(2));
+  stempel('cijfer-4', 240, y(6));
+  [4, 1, 4, 1].forEach((stap, i) => stempel('kop-zwart', 300 + i * 50, y(stap)));
+  dubbel(500);
+  stempel('herstel', 525, y(4));
+  stempel('herstel', 545, y(1));
+  stempel('cijfer-2', 575, y(2));
+  stempel('cijfer-4', 575, y(6));
+  [4, 1].forEach((stap, i) => stempel('kop-zwart', 640 + i * 60, y(stap)));
+  dubbel(800);
+  stempel('kruis', 825, y(0));
+  stempel('kop-zwart', 849, y(0));
+  stempel('kop-zwart', 920, y(4));
+  dubbel(1000);
+  stempel('kruis', 1025, y(0));
+  [0, 4].forEach((stap, i) => stempel('kop-zwart', 1100 + i * 60, y(stap)));
+  dubbel(1250);
+  stempel('herstel', 1275, y(0));
+  [0, 4].forEach((stap, i) => stempel('kop-zwart', 1350 + i * 60, y(stap)));
+  streep(1496);
+  return beeld;
+}
+
+test('keten: een toonsoortwissel midden in de regel geldt vanaf de maat erna; een kruis vlak voor een noot is geen wissel', () => {
+  const { partituur } = herkenPartituur([toonsoortBlad()]);
+  const maten = partituur.partijen[0].maten;
+  assert.deepEqual(maten.map((m) => m.toonsoort.kwinten), [-2, 0, 0, 1, 0]);
+  assert.deepEqual(maten.map((m) => `${m.maatsoort.teller}/${m.maatsoort.noemer}`), ['4/4', '2/4', '2/4', '2/4', '2/4']);
+  const toon = (maat) => maat.elementen.filter((e) => e.soort === 'noot').map((e) => `${e.toonhoogte.stap}${e.toonhoogte.alter || ''}`);
+  assert.deepEqual(toon(maten[0]), ['B-1', 'E-1', 'B-1', 'E-1']);
+  assert.deepEqual(toon(maten[1]), ['B', 'E'], 'de herstellingstekens en de 2/4 zijn geen noten');
+  assert.deepEqual(toon(maten[2]), ['F1', 'B']);
+  assert.deepEqual(toon(maten[3]), ['F1', 'B']);
+  assert.deepEqual(toon(maten[4]), ['F', 'B']);
+  assert.deepEqual(maten.flatMap((m) => m.elementen).filter((e) => e.soort === 'rust'), [], 'en geen rusten');
+});
