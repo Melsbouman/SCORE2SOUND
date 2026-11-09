@@ -28,9 +28,10 @@ export function onzekereElementen(partituur) {
   for (let maatIndex = 0; maatIndex < aantalMaten; maatIndex += 1) {
     for (const partij of partituur.partijen) {
       const maat = partij.maten[maatIndex];
-      if (!maat) continue;
+      // Een verborgen maat (achter een meermaatsrust) staat niet in de weergave; de eerste maat van de rust draagt de twijfel.
+      if (!maat || maat.verborgen) continue;
       maat.elementen.forEach((element, elementIndex) => {
-        if ((element.soort === 'noot' || element.soort === 'rust') && element.zekerheid < 0.8) {
+        if ((element.soort === 'noot'|| element.soort === 'rust') && element.zekerheid < 0.8) {
           ids.push(`n-${partij.id}-${maatIndex}-${elementIndex}`);
         }
       });
