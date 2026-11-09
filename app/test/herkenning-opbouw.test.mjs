@@ -296,3 +296,75 @@ test('opbouw: een rust met een punt duurt anderhalf keer zo lang', () => {
   const maat = bouwPartituur([pagina]).partijen[0].maten[0];
   assert.deepEqual(maat.elementen.map((e) => `${e.soort}${e.start}:${e.duur}`), ['noot0:720', 'rust720:720', 'rust1440:360', 'rust1800:240']);
 });
+
+// Een maatsoort waarvan de cijfers niet zeker gelezen zijn (kop.mjs geeft opties): de optie waar de meeste maten in passen.
+test('opbouw: een onzekere maatsoort wordt de optie waar de maten in passen, ook op de balken erna', () => {
+  const kwarten = (x0, n, y0) => Array.from({ length: n }, (_, i) => kop(x0 + i * 60, y0, 4));
+  const pagina = {
+    blad: 1, schaal: { lijnafstand: ia }, raster: { balken: [balk(200), balk(450)] },
+    balkkoppen: [
+      // 5/4 lijkt het meest (een vage 3 lijkt op een 5), maar de maten duren drie kwart.
+      { sleutel: { soort: 'G', lijn: 2 }, voortekening: { aantal: 0, tekens: [] }, maatsoort: null, maatsoortOpties: [{ teller: 5, noemer: 4 }, { teller: 3, noemer: 4 }], einde: 180 },
+      { sleutel: { soort: 'G', lijn: 2 }, voortekening: { aantal: 0, tekens: [] }, maatsoort: null, einde: 180 },
+    ],
+    maten: [
+      { strepen: [], maten: [vak(180, 500, 200), vak(500, 800, 200), vak(800, 1100, 200)] },
+      { strepen: [], maten: [vak(180, 600, 450), vak(600, 1100, 450)] },
+    ],
+    noten: [[...kwarten(220, 3, 200), ...kwarten(520, 3, 200), ...kwarten(820, 2, 200)], kwarten(220, 3, 450)],
+    voortekens: [[], []],
+    // De laatste maat heeft alleen een hele rust: die vult de maat, met de lengte van de gekozen maatsoort.
+    rusten: [[], [rust(850, 'heel')]],
+  };
+  const { maten } = bouwPartituur([pagina]).partijen[0];
+  assert.deepEqual(maten.map((m) => `${m.maatsoort.teller}/${m.maatsoort.noemer}`), ['3/4', '3/4', '3/4', '3/4', '3/4']);
+  assert.deepEqual(maten[4].elementen.map((e) => [e.duur, e.heleMaat]), [[1440, true]]);
+});
+
+test('opbouw: past geen optie, dan blijft de maatsoort die al gold', () => {
+  const kwarten = (x0, n, y0) => Array.from({ length: n }, (_, i) => kop(x0 + i * 60, y0, 4));
+  const kopMet = (maatsoort, opties) => ({ sleutel: { soort: 'G', lijn: 2 }, voortekening: { aantal: 0, tekens: [] }, maatsoort, ...(opties ? { maatsoortOpties: opties } : {}), einde: 180 });
+  const pagina = {
+    blad: 1, schaal: { lijnafstand: ia }, raster: { balken: [balk(200), balk(450)] },
+    balkkoppen: [kopMet({ teller: 2, noemer: 4 }), kopMet(null, [{ teller: 5, noemer: 4 }, { teller: 6, noemer: 4 }])],
+    maten: [{ strepen: [], maten: [vak(180, 1100, 200)] }, { strepen: [], maten: [vak(180, 600, 450), vak(600, 1100, 450)] }],
+    noten: [kwarten(220, 2, 200), [...kwarten(220, 2, 450), ...kwarten(620, 2, 450)]],
+    voortekens: [[], []],
+    rusten: [[], []],
+  };
+  const { maten } = bouwPartituur([pagina]).partijen[0];
+  assert.deepEqual(maten.map((m) => `${m.maatsoort.teller}/${m.maatsoort.noemer}`), ['2/4', '2/4', '2/4']);
+});
+
+// Een zeker gelezen maatsoort blijft, tenzij er geen enkele maat in past en in een optie minstens drie en twee derde van de
+// maten (een 2 die als 9 gelezen is).
+test('opbouw: een zekere maatsoort waar geen maat in past, wijkt voor de optie waar de meeste maten in passen', () => {
+  const halven = (x0, n, y0) => Array.from({ length: n }, (_, i) => kop(x0 + i * 100, y0, 4, 960, 'half'));
+  const kwarten = (x0, n, y0) => Array.from({ length: n }, (_, i) => kop(x0 + i * 60, y0, 4));
+  const kopMet = (teller, noemer, opties) => ({ sleutel: { soort: 'G', lijn: 2 }, voortekening: { aantal: 0, tekens: [] }, maatsoort: { teller, noemer }, maatsoortOpties: opties, einde: 180 });
+  const pagina = {
+    blad: 1, schaal: { lijnafstand: ia }, raster: { balken: [balk(200), balk(450), balk(700)] },
+    balkkoppen: [
+      // 9/2 gelezen, de drie maten duren twee halve: 2/2.
+      kopMet(9, 2, [{ teller: 9, noemer: 2 }, { teller: 2, noemer: 2 }, { teller: 6, noemer: 2 }]),
+      // 3/4 gelezen en de maten passen erin: dat blijft.
+      kopMet(3, 4, [{ teller: 3, noemer: 4 }, { teller: 5, noemer: 4 }]),
+      // 3/4 gelezen, geen maat past, maar maar twee van de drie maten passen in 5/4: dat is te weinig, dus 3/4 blijft.
+      kopMet(3, 4, [{ teller: 3, noemer: 4 }, { teller: 5, noemer: 4 }]),
+    ],
+    maten: [
+      { strepen: [], maten: [vak(180, 480, 200), vak(480, 780, 200), vak(780, 1100, 200)] },
+      { strepen: [], maten: [vak(180, 600, 450), vak(600, 1100, 450)] },
+      { strepen: [], maten: [vak(180, 500, 700), vak(500, 800, 700), vak(800, 1100, 700)] },
+    ],
+    noten: [
+      [...halven(200, 2, 200), ...halven(500, 2, 200), ...halven(800, 2, 200)],
+      [...kwarten(220, 3, 450), ...kwarten(620, 3, 450)],
+      [...kwarten(200, 5, 700), ...kwarten(520, 5, 700), ...kwarten(820, 2, 700)],
+    ],
+    voortekens: [[], [], []],
+    rusten: [[], [], []],
+  };
+  const { maten } = bouwPartituur([pagina]).partijen[0];
+  assert.deepEqual(maten.map((m) => `${m.maatsoort.teller}/${m.maatsoort.noemer}`), ['2/2', '2/2', '2/2', '3/4', '3/4', '3/4', '3/4', '3/4']);
+});
