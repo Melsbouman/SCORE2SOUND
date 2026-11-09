@@ -78,3 +78,14 @@ test('een echte partituur van Verovio wordt helemaal omgezet (niets onbekend) to
   const inhoud = naarTekst(await pdf.inhoud(pdf.paginas[0]));
   assert.ok((inhoud.match(/\bc\b/g) ?? []).length > 50, 'veel krommen (de muziektekens)');
 });
+
+test('een pad met een eigen lijndikte (notenbalklijn, stok, maatstreep bij Verovio) wordt ook als lijn getekend', () => {
+  const { opdrachten } = svgNaarPdf('<svg width="100px" height="100px"><g class="staff"><path d="M10 20 L90 20" stroke-width="13"/></g></svg>', A4);
+  assert.match(opdrachten, /13 w/);
+  assert.match(opdrachten, /10 20 m\s+90 20 l\s+B/);
+});
+
+test('een onzichtbaar vlak (fill-opacity 0) wordt niet gevuld', () => {
+  const { opdrachten } = svgNaarPdf('<svg width="100px" height="100px"><rect x="1" y="2" width="30" height="40" fill-opacity="0"/></svg>', A4);
+  assert.equal(/\bf\b|\bB\b/.test(opdrachten), false);
+});
