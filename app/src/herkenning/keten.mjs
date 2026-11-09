@@ -48,7 +48,7 @@ export function herkenPagina(grijs) {
   // Voortekens op het beeld zonder hulplijnen: een kruis dat een hulplijn raakt, is dan een losse vorm.
   const zonderHulplijnen = verwijderHulplijnen(kaal, raster, schaal, koppen);
   const voortekens = zoekVoortekens(zonderHulplijnen, raster, schaal, { koppen: noten, balkkoppen });
-  const rusten = zoekRusten(kaal, raster, schaal, { koppen, strepen: maten.map((maat) => maat.strepen), balkkoppen, voortekens });
+  const rusten = zoekRusten(kaal, raster, schaal, { koppen, strepen: maten.map((maat) => maat.strepen), balkkoppen, voortekens, noten });
   const aantallen = leesMeermaatsAantallen(kaal, raster, schaal, rusten);
   const triolen = leesTriolen(kaal, raster, schaal, noten);
   return { breedte: grijs.breedte, hoogte: grijs.hoogte, schaal, raster, maten, balkkoppen, noten, voortekens, rusten, aantallen, triolen };
