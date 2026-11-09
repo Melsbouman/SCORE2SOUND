@@ -1,3 +1,5 @@
+import { importeerBestand } from '/src/import/importeer.mjs';
+
 export function start(app) {
   const vlak = document.getElementById('voorbeeld');
   const knop = document.createElement('button');
@@ -25,16 +27,7 @@ export function start(app) {
         throw new Error('Het voorbeeld kon niet worden opgehaald.');
       }
 
-      const antwoord = await fetch('/api/importeer?naam=Vader%20Jacob.musicxml', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/vnd.recordare.musicxml+xml' },
-        body: await voorbeeld.text(),
-      });
-      const resultaat = await antwoord.json();
-
-      if (!antwoord.ok) {
-        throw new Error(resultaat.fout ?? 'Het voorbeeld kon niet worden geopend.');
-      }
+      const resultaat = await importeerBestand(new Uint8Array(await voorbeeld.arrayBuffer()));
 
       app.zet({
         partituur: resultaat.partituur,

@@ -1,5 +1,6 @@
 // Een muziekbestand kiezen of slepen, naar de API sturen en het resultaat in app zetten.
 import { voegSamen } from '/src/model/partijen.mjs';
+import { importeerBestand } from '/src/import/importeer.mjs';
 
 export function start(app) {
   const vlak = document.getElementById('upload');
@@ -77,28 +78,11 @@ export function start(app) {
 
     toonStatus(`Bezig met lezen van ${bestand.name}…`);
 
-    let antwoord;
-    try {
-      antwoord = await fetch('/api/importeer', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/vnd.recordare.musicxml+xml' },
-        body: bestand,
-      });
-    } catch {
-      toonStatus('De server is niet bereikbaar. Probeer het opnieuw.');
-      return null;
-    }
-
     let resultaat;
     try {
-      resultaat = await antwoord.json();
+      resultaat = await importeerBestand(new Uint8Array(await bestand.arrayBuffer()));
     } catch (fout) {
       toonStatus(`Het bestand kon niet worden geopend: ${fout.message}`);
-      return null;
-    }
-
-    if (!antwoord.ok) {
-      toonStatus(`Het bestand kon niet worden geopend: ${resultaat.fout ?? 'onbekende fout'}`);
       return null;
     }
 

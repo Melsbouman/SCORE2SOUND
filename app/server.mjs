@@ -41,6 +41,8 @@ const MAPPEN = [
   ['/src/controle/', join(HIER, 'src', 'controle')],
   ['/src/midi/', join(HIER, 'src', 'midi')],
   ['/src/export/', join(HIER, 'src', 'export')],
+  ['/src/import/', join(HIER, 'src', 'import')],
+  ['/src/project/', join(HIER, 'src', 'project')],
   ['/vendor/verovio/', join(HIER, 'node_modules', 'verovio', 'dist')],
   ['/vendor/spessasynth/', join(HIER, 'node_modules', 'spessasynth_lib', 'dist')],
   ['/vendor/spessasynth-core/', join(HIER, 'node_modules', 'spessasynth_core', 'dist')],
