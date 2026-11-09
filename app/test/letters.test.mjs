@@ -100,7 +100,7 @@ test('de letters komen als aanwijzing aan het begin van de maat, in elke partij'
   const { partituur: uit, meldingen } = voegLettersToe(partituur, [{ nummer: 2, xml: blad(), png }]);
   for (const partij of uit.partijen) {
     assert.equal(partij.maten[0].elementen.length, 1);
-    assert.deepEqual(partij.maten[1].elementen[0], { soort: 'aanwijzing', start: 0, type: 'letter', waarde: 'A', zekerheid: 0.5 });
+    assert.deepEqual(partij.maten[1].elementen[0], { soort: 'aanwijzing', start: 0, type: 'letter', waarde: 'A', zekerheid: 0.5, kader: true });
     assert.equal(partij.maten[2].elementen[0].waarde, 'B');
     assert.equal(partij.maten[1].elementen[1].soort, 'noot');
   }

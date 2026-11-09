@@ -37,7 +37,9 @@ test('op het echte stuk krijgen alleen de lege maten een maatrust, en er komen n
   const p = leesMusicXML(await readFile(new URL('./fixtures/sand-and-stars-begin.xml', import.meta.url), 'utf8'));
   const klaar = vulOntbrekendeMaten(vulBeginRust(herstelMaatsoorten(p)));
   const maten = klaar.partijen[0].maten;
-  assert.ok(maten.length <= 62, `${maten.length} maten`);
+  // Een meermaatsrust telt voor zijn volle aantal (met of zonder verborgen maten erachter).
+  const opHetBlad = maten.reduce((som, maat, index) => som + (!maat.verborgen && maat.maatrust > 1 && !maten[index + 1]?.verborgen ? maat.maatrust : 1), 0);
+  assert.ok(opHetBlad <= 64, `${opHetBlad} maten op het blad`);
   const metRust = maten.filter((m) => m.maatrust >= 2);
   assert.ok(metRust.length <= 4, `${metRust.length} maten met maatrust`);
   assert.equal(maten[0].maatrust, 12);

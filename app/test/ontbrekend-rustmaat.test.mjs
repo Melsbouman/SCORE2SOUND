@@ -19,11 +19,12 @@ test('zonder lege maat maar met één rustmaat in het gat krijgt die rustmaat he
   maten[3].elementen = [rust, { soort: 'aanwijzing', start: 0, type: 'tekst', waarde: 'open', zekerheid: 1 }];
   maten[7].elementen = [letter('10'), noot];
   const nieuw = vulOntbrekendeMaten(stuk(maten)).partijen[0].maten;
-  assert.equal(nieuw.length, 10);
+  assert.equal(nieuw.length, 12);
   assert.equal(nieuw[3].maatrust, 3);
+  assert.deepEqual(nieuw.slice(4, 6).map((maat) => maat.verborgen), [true, true]);
   assert.deepEqual(nieuw[3].elementen.map((element) => element.soort), ['rust', 'aanwijzing']);
   assert.equal(nieuw.some((huidige) => huidige.ingevoegd), false);
-  assert.equal(nieuw[7].nummer, '10');
+  assert.equal(nieuw[9].nummer, '10');
 });
 
 test('twee rustmaten in het gat: niet duidelijk welke, dan komen er maten bij zoals eerst', () => {
