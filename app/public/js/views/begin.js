@@ -3,6 +3,7 @@ import { maakLeegStuk, maakVoorbeeldStuk } from '/src/model/nieuw.mjs';
 import { sorteerPartituur } from '/src/model/instrumentkiezer.mjs';
 import { controleerMaatduur } from '/src/controle/maatduur.mjs';
 import { maakKiezer } from './nieuwe-partituur.js';
+import { opslag } from '../projectopslag.js';
 
 const TOONSOORTEN = [
   [-7, 'Ces majeur'],
@@ -131,9 +132,7 @@ export function start(app) {
   async function toonRecenteProjecten() {
     let projecten;
     try {
-      const antwoord = await fetch('/api/projecten');
-      if (!antwoord.ok) return;
-      projecten = await antwoord.json();
+      projecten = await opslag.lijst();
     } catch {
       return;
     }
@@ -158,9 +157,7 @@ export function start(app) {
       knop.append(titel, datum);
       knop.addEventListener('click', async () => {
         try {
-          const antwoord = await fetch(`/api/projecten/${encodeURIComponent(project.id)}`);
-          if (!antwoord.ok) return;
-          const geopend = await antwoord.json();
+          const geopend = await opslag.open(project.id);
                     app.zet({
                       partituur: geopend.partituur,
                       meldingen: controleerMaatduur(geopend.partituur),
