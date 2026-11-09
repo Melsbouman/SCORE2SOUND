@@ -5,7 +5,7 @@ import { kopTitel, schermVoor } from '../public/js/views/kop.js';
 test('schermVoor kiest het scherm bij de hash', () => {
   assert.equal(schermVoor(''), 'begin');
   assert.equal(schermVoor('#begin'), 'begin');
-  assert.equal(schermVoor('#nieuw-partij'), 'begin');
+  assert.equal(schermVoor('#nieuw-partij'), 'nieuwe-partij');
   assert.equal(schermVoor('#projecten'), 'bibliotheek');
   assert.equal(schermVoor('#bibliotheek/Mijn map'), 'bibliotheek');
   assert.equal(schermVoor('#inloggen'), 'inloggen');
