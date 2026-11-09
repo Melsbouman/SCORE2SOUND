@@ -10,13 +10,15 @@
 //    één maatstreep met een soort: 'enkel', 'dubbel' (twee dunne), 'eind' (dun en dik), 'begin' (dik en dun) of 'beide'
 //    (dun, dik, dun). Een losse dikke streep midden in de balk is geen maatstreep (de dikke balk van een C-sleutel); alleen aan
 //    het eind van de balk telt hij als eindstreep.
+//    Daarna kijken we bij elke streep links en rechts naar herhaalpunten: een klein, rond, los vlekje op de hoogte van stap 3
+//    én van stap 5, binnen 1,2 lijnafstand van de streep. Punten links: herhaling 'eind'; rechts: 'begin'; beide: 'beide'.
 // 4. Tussen de strepen liggen de maten. De eerste maat begint waar de balk begint (met sleutel en voortekening erin, zoals de
 //    eerste maat bij Audiveris). Een streep vlak na het begin (alleen sleutel en voortekening ervoor, zoals een herhaalteken
 //    aan het begin van een regel) is geen maatgrens; een smal stuk na de laatste streep (een waarschuwingsvoortekening of
 //    -sleutel aan het eind van de regel) is geen maat.
 import { verwijderLijnen } from './vormen.mjs';
 
-// Uitkomst per balk: { strepen: [{ links, rechts, soort }], maten: [{ links, rechts, boven, onder }] }, met boven en onder de
+// Uitkomst per balk: { strepen: [{ links, rechts, soort, herhaling? }], maten: [{ links, rechts, boven, onder }] }, met boven en onder de
 // hoogte van de bovenste en onderste lijn midden in de maat (zoals `vak` in het model).
 
 export function vindMaten(zw, raster, schaal) {
@@ -122,6 +124,54 @@ export function vindMaten(zw, raster, schaal) {
       else if (dik[0] && !dik.at(-1)) soort = 'begin';
       else soort = 'dubbel';
       strepen.push({ links: groep.links, rechts: groep.rechts, soort });
+    }
+    // Herhaalpunten: naast de streep, op de hoogte van stap 3 en stap 5, een klein rond los vlekje.
+    const stapHoogte = (stap, x) => balk.lijnen[0].a + balk.lijnen[0].b * x + (stap * ia) / 2;
+    const isPunt = (x0, x1, stap) => {
+      const marge = ia * 0.35;
+      for (let x = x0; x <= x1; x += 1) {
+        const yMidden = stapHoogte(stap, x);
+        for (let y = Math.ceil(yMidden - marge); y <= Math.floor(yMidden + marge); y += 1) {
+          if (!zwartKaal(x, y)) continue;
+          const gezien = new Set([y * breedte + x]);
+          const rij = [[x, y]];
+          let minX = x;
+          let maxX = x;
+          let minY = y;
+          let maxY = y;
+          let te = false;
+          for (let k = 0; k < rij.length; k += 1) {
+            const [px, py] = rij[k];
+            for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+              const nx = px + dx;
+              const ny = py + dy;
+              if (!zwartKaal(nx, ny) || gezien.has(ny * breedte + nx)) continue;
+              gezien.add(ny * breedte + nx);
+              rij.push([nx, ny]);
+              minX = Math.min(minX, nx);
+              maxX = Math.max(maxX, nx);
+              minY = Math.min(minY, ny);
+              maxY = Math.max(maxY, ny);
+            }
+            if (rij.length > ia * ia) { te = true; break; }
+          }
+          if (te) return false;
+          const b = maxX - minX + 1;
+          const h = maxY - minY + 1;
+          const cy = (minY + maxY) / 2;
+          return b >= ia * 0.2 && b <= ia * 0.75 && h >= ia * 0.2 && h <= ia * 0.75 && Math.abs(cy - stapHoogte(stap, (minX + maxX) / 2)) <= marge;
+        }
+      }
+      return false;
+    };
+    const reikwijdte = Math.round(ia * 1.2);
+    const puntenKant = (x0, x1) => isPunt(x0, x1, 3) && isPunt(x0, x1, 5);
+    for (const streep of strepen) {
+      const links = puntenKant(streep.links - reikwijdte, streep.links - 1);
+      const rechts = puntenKant(streep.rechts + 1, streep.rechts + reikwijdte);
+      if (links && rechts) streep.herhaling = 'beide';
+      else if (links) streep.herhaling = 'eind';
+      else if (rechts) streep.herhaling = 'begin';
     }
     // Maten tussen de strepen. Een streep vlak na het begin van de balk (alleen sleutel, voortekening en maatsoort ervoor)
     // is geen maatgrens: binnen anderhalve lijnafstand altijd, en een herhaalteken of dubbele streep tot negen lijnafstanden.
