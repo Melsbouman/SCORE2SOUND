@@ -1,0 +1,53 @@
+// De eigen herkenning (app/src/herkenning) op één bladzijde, voor de metingen in deze map. Leest een PGM-bestand (grijs,
+// zoals teken.py het maakt) en geeft per balk de balkkop, nootkoppen met duur, voortekens, maten en rusten.
+// Met de omgevingsvariabele HERK kan een andere map met herkenningsmodules gemeten worden (bijvoorbeeld main naast een
+// werkkopie): HERK=C:/andere/app/src/herkenning node ...
+import { readFileSync } from 'node:fs';
+import { pathToFileURL, fileURLToPath } from 'node:url';
+
+const HERK = process.env.HERK || fileURLToPath(new URL('../../app/src/herkenning', import.meta.url));
+const laad = (naam) => import(pathToFileURL(`${HERK}/${naam}`).href);
+const { zwartWit } = await laad('beeld.mjs');
+const { meetSchaal } = await laad('schaal.mjs');
+const { vindBalken } = await laad('raster.mjs');
+const { verwijderLijnen } = await laad('vormen.mjs');
+const { zoekNootkoppen } = await laad('koppen.mjs');
+const { bepaalDuren } = await laad('duren.mjs');
+const { vindMaten } = await laad('maten.mjs');
+const { zoekRusten } = await laad('rusten.mjs');
+// Oudere versies hebben nog geen balkkop of voortekens.
+const optioneel = async (naam) => { try { return await laad(naam); } catch (fout) { if (String(fout).includes('Cannot find')) return null; throw fout; } };
+const kop = await optioneel('kop.mjs');
+const voortekens = await optioneel('voortekens.mjs');
+
+export function leesPgm(pad) {
+  const buffer = readFileSync(pad);
+  let plek = 0;
+  const velden = [];
+  const wit = (c) => c === 9 || c === 10 || c === 13 || c === 32;
+  while (velden.length < 4) {
+    while (wit(buffer[plek])) plek += 1;
+    if (buffer[plek] === 35) { while (buffer[plek] !== 10) plek += 1; continue; }
+    let veld = '';
+    while (!wit(buffer[plek])) veld += String.fromCharCode(buffer[plek++]);
+    velden.push(veld);
+  }
+  plek += 1;
+  const [, breedte, hoogte] = velden.map(Number);
+  return { breedte, hoogte, pixels: new Uint8Array(buffer.subarray(plek, plek + breedte * hoogte)) };
+}
+
+export function herken(pad) {
+  const begin = Date.now();
+  const zw = zwartWit(leesPgm(pad));
+  const schaal = meetSchaal(zw);
+  const raster = vindBalken(zw, schaal);
+  const kaal = verwijderLijnen(zw, raster, schaal);
+  const maten = vindMaten(zw, raster, schaal);
+  const balkkoppen = kop ? kop.leesBalkkoppen(kaal, raster, schaal, { zw }) : null;
+  const koppen = zoekNootkoppen(kaal, raster, schaal, { balkkoppen });
+  const noten = bepaalDuren(kaal, raster, schaal, koppen);
+  const tekens = voortekens ? voortekens.zoekVoortekens(kaal, raster, schaal, { koppen: noten, balkkoppen }) : null;
+  const rusten = zoekRusten(kaal, raster, schaal, { koppen, strepen: maten.map((m) => m.strepen), balkkoppen, voortekens: tekens });
+  return { schaal, raster, maten, balkkoppen, noten, voortekens: tekens, rusten, tijd: Date.now() - begin };
+}

@@ -15,8 +15,10 @@ export function verwijderLijnen(zw, raster, schaal) {
   const ruimte = Math.max(1, Math.ceil(schaal.lijndikte));
   for (const balk of raster.balken) {
     for (const lijn of balk.lijnen) {
-      const van = Math.max(0, lijn.links - 2);
-      const tot = Math.min(breedte - 1, lijn.rechts + 2);
+      // Een lijn waarvan het begin of eind verkeerd gevolgd is (een sleutel of tekst kruist hem), loopt toch tot het begin en
+      // eind van de balk: anders blijft er een stuk lijn staan dat de sleutel aan de noten vastmaakt.
+      const van = Math.max(0, Math.min(lijn.links, balk.links ?? lijn.links) - 2);
+      const tot = Math.min(breedte - 1, Math.max(lijn.rechts, balk.rechts ?? lijn.rechts) + 2);
       for (let x = van; x <= tot; x += 1) {
         const yc = Math.round(lijn.a + lijn.b * x);
         const y0 = Math.max(0, yc - ruimte);

@@ -55,3 +55,49 @@ export function sjabloon(naam, lijnafstand) {
 }
 
 export const SJABLOONNAMEN = Object.keys(gegevens.sjablonen);
+
+// Hoe goed past een vorm op een sjabloon, beide op hetzelfde kader geschaald (lettertypen verschillen in de details, niet in de
+// grote lijn). `isZwart(x, y)` zegt of een pixel van het blad bij de vorm hoort; `kader` is { links, rechts, boven, onder }.
+// Dunne lijnen (een achtste rust) vallen na het schalen net naast elkaar; daarom telt een pixel als raak als de ander binnen
+// één pixel ligt. De score is het gemiddelde van beide kanten: hoeveel van de vorm bij het sjabloon past, en hoeveel van het
+// sjabloon bij de vorm.
+export function vergelijkVorm(isZwart, kader, t, { streng = false } = {}) {
+  const w = kader.rechts - kader.links + 1;
+  const h = kader.onder - kader.boven + 1;
+  if (w <= 0 || h <= 0) return 0;
+  const v = new Uint8Array(w * h);
+  const s = new Uint8Array(w * h);
+  for (let y = 0; y < h; y += 1) {
+    const ty = Math.min(t.hoogte - 1, Math.floor(((y + 0.5) * t.hoogte) / h));
+    for (let x = 0; x < w; x += 1) {
+      const tx = Math.min(t.breedte - 1, Math.floor(((x + 0.5) * t.breedte) / w));
+      v[y * w + x] = isZwart(kader.links + x, kader.boven + y) ? 1 : 0;
+      s[y * w + x] = t.pixels[ty * t.breedte + tx];
+    }
+  }
+  // Streng: het deel van alle zwarte pixels (van vorm en sjabloon samen) dat in beide zwart is, zonder speling. Zo zijn
+  // tekens die veel op elkaar lijken (een 3 en een 9) beter uit elkaar te houden.
+  if (streng) {
+    let beide = 0; let een = 0;
+    for (let i = 0; i < w * h; i += 1) { if (v[i] && s[i]) beide += 1; if (v[i] || s[i]) een += 1; }
+    return een ? beide / een : 0;
+  }
+  const dichtbij = (masker, x, y) => {
+    for (let dy = -1; dy <= 1; dy += 1) {
+      for (let dx = -1; dx <= 1; dx += 1) {
+        const px = x + dx;
+        const py = y + dy;
+        if (px >= 0 && px < w && py >= 0 && py < h && masker[py * w + px]) return true;
+      }
+    }
+    return false;
+  };
+  let vormRaak = 0; let vormAlle = 0; let sjabloonRaak = 0; let sjabloonAlle = 0;
+  for (let y = 0; y < h; y += 1) {
+    for (let x = 0; x < w; x += 1) {
+      if (v[y * w + x]) { vormAlle += 1; if (dichtbij(s, x, y)) vormRaak += 1; }
+      if (s[y * w + x]) { sjabloonAlle += 1; if (dichtbij(v, x, y)) sjabloonRaak += 1; }
+    }
+  }
+  return vormAlle && sjabloonAlle ? (vormRaak / vormAlle + sjabloonRaak / sjabloonAlle) / 2 : 0;
+}

@@ -14,15 +14,13 @@ import { sjabloon } from './sjablonen.mjs';
 
 const SOORTEN = [['zwart', 'kop-zwart'], ['half', 'kop-half'], ['heel', 'kop-heel']];
 
-export function zoekNootkoppen(kaal, raster, schaal, { drempel = 0.78 } = {}) {
+// De score van een kopsjabloon met zijn ankerpunt op (ax, ay): zwarte pixels van het teken wegen 6, het gat binnenin 4, een
+// rand wit eromheen 1. Ook gebruikt door kop.mjs (is er vlak na een voorteken een noot?).
+export function maakKopScore(kaal, lijnafstand) {
   const { breedte, hoogte, pixels } = kaal;
-  const ia = schaal.lijnafstand;
   const zwart = (x, y) => x >= 0 && x < breedte && y >= 0 && y < hoogte && pixels[y * breedte + x] === 1;
-  const rand = Math.max(1, Math.round(ia * 0.15));
-  const sjablonen = SOORTEN.map(([soort, naam]) => ({ soort, ...sjabloon(naam, ia) }));
-
-  // Score van een sjabloon met zijn ankerpunt op (ax, ay).
-  const score = (t, ax, ay) => {
+  const rand = Math.max(1, Math.round(lijnafstand * 0.15));
+  return (t, ax, ay) => {
     const x0 = ax - t.ankerX;
     const y0 = ay - t.ankerY;
     let goed = 0;
@@ -40,6 +38,14 @@ export function zoekNootkoppen(kaal, raster, schaal, { drempel = 0.78 } = {}) {
     }
     return goed / totaal;
   };
+}
+
+export function zoekNootkoppen(kaal, raster, schaal, { drempel = 0.78, balkkoppen = null } = {}) {
+  const { breedte, hoogte, pixels } = kaal;
+  const ia = schaal.lijnafstand;
+  const zwart = (x, y) => x >= 0 && x < breedte && y >= 0 && y < hoogte && pixels[y * breedte + x] === 1;
+  const sjablonen = SOORTEN.map(([soort, naam]) => ({ soort, ...sjabloon(naam, ia) }));
+  const score = maakKopScore(kaal, ia);
 
   // Een kop ver buiten de balk (vanaf de tweede hulplijn) heeft hulplijnen tussen zich en de balk: dunne horizontale lijnen die
   // aan beide kanten wat buiten de kop uitsteken. Zonder die lijnen is het iets anders (een repetitiecijfer, een letter).
@@ -62,12 +68,13 @@ export function zoekNootkoppen(kaal, raster, schaal, { drempel = 0.78 } = {}) {
     return true;
   };
 
-  return raster.balken.map((balk) => {
+  return raster.balken.map((balk, b) => {
     const treffers = [];
     const yOp = (stap, x) => balk.lijnen[0].a + balk.lijnen[0].b * x + (stap * ia) / 2;
-    // De sleutel staat in de eerste drie lijnafstanden van de balk; daar staan geen noten (de onderste krul van een
-    // vioolsleutel lijkt op een zwarte kop).
-    const van = Math.max(0, balk.links + Math.round(ia * 3));
+    // Sleutel, voortekening en maatsoort staan aan het begin van de balk; daar staan geen noten (de onderste krul van een
+    // vioolsleutel lijkt op een zwarte kop). Zonder gelezen balkkop (kop.mjs) slaan we de eerste drie lijnafstanden over.
+    const kopEinde = balkkoppen?.[b]?.einde ?? balk.links + Math.round(ia * 3);
+    const van = Math.max(0, Math.round(kopEinde));
     const tot = Math.min(breedte - 1, balk.rechts);
     for (let stap = -8; stap <= 16; stap += 1) {
       for (let x = van; x <= tot; x += 1) {
