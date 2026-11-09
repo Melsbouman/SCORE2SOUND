@@ -1,9 +1,17 @@
-# Stand (bijgewerkt 9 nov 2026, ochtend)
+# Stand (bijgewerkt 9 nov 2026, middag)
 
 ## Eerste handelingen in elke chat
 - `bash automatisering/hartslag.sh` en `bash automatisering/review.sh`.
 - Controleer dat er hooguit één `werkpakketten.sh` draait (PowerShell: `Get-CimInstance Win32_Process -Filter "Name='bash.exe'" | ? CommandLine -match 'werkpakketten'`). Start voor een losse taak: `bash automatisering/werkpakketten.sh` (één wachtrij).
 - Richting (sinds 9 nov): alles in de browser, zonder server: eigen herkenning naar het voorbeeld van Audiveris, inloggen met Google (`plannen/2026-11-09-browser-herkenning.md`). Audiveris blijft alleen meetlat op de pc van Mels. Daarvoor: werkende scanner met verbeteren in de editor (`plannen/2026-11-08-scanner.md`). Laatste nachtrapport: `nacht/rapport-2026-11-08.md`. Wensen en open punten: `voorraad.md`.
+
+## Stand van het plan "alles in de browser" (9 nov, middag)
+Zie `plannen/2026-11-09-browser-herkenning.md` (kolom Stand). Kort:
+- Klaar en gemerged: MusicXML openen en projecten bewaren in de browser (A1, A2); pdf-lezer en beelden uit gescande pdf's met eigen CCITT-decoder (B1, B2); herkenning: zwart-wit, schaal, notenbalken, maatstrepen en maten, lijnen weghalen en vormen (C1-C4), nootkoppen met sjablonen uit Bravura en de duur van noten (C5 deel 1-2); svg-naar-pdf-omzetter (A3 deel 1).
+- Open PR: rusten (C5 deel 3, #1844). Uitvoerder bezig: pdf-export in de browser aansluiten (A3 deel 2, #1843).
+- Meting Devils Galop (pagina's uit de pdf getekend met PyMuPDF, 200 dpi; scripts in de scratchpad, niet in het repo): alle 250 koppen goed (soort en toonhoogte), duur 224 van 226 (zonder de 24 triolen), rusten bijna allemaal goed, maatvakken per regel gelijk aan het blad.
+- Volgende stappen: sleutel, voortekening en maatsoort aan het begin van de balk (HEADERS); voortekens bij noten; cijfers (meermaatsrust, repetitiecijfers); dan opbouw tot het model (C6) en de keten in de browser (C8). Inloggen met Google (A5) vraagt een OAuth-client-ID van Mels.
+- Digitale pdf's direct lezen (D1) is lastiger dan gedacht: Finale bedt het lettertype Maestro in met een eigen codering per pdf. Opties: eigen lettertype-tekenaar (CFF/TrueType) of pdf.js (nieuwe bibliotheek, akkoord van Mels nodig). Nog niet besloten.
 
 ## Uitvoerders (9 nov)
 - Claude (`agent-claude`): Claude Code met het tweede account (Pro), inlog in `~/.claude-uitvoerder` (`automatisering/claude-inloggen.ps1`). Model `sonnet`. Deed in de nacht van 8 op 9 nov vrijwel alles; met een exacte diff in de taak duurt een taak ongeveer een minuut.
