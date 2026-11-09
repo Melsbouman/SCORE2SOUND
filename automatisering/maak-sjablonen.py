@@ -24,7 +24,7 @@ TEKENS = {
     'rust-heel': 0xE4E3, 'rust-half': 0xE4E4, 'rust-kwart': 0xE4E5, 'rust-8': 0xE4E6, 'rust-16': 0xE4E7, 'rust-32': 0xE4E8,
     'mol': 0xE260, 'herstel': 0xE261, 'kruis': 0xE262,
     'sleutel-g': 0xE050, 'sleutel-f': 0xE062, 'sleutel-c': 0xE05C,
-    'punt': 0xE1E7, 'vlag-8-op': 0xE240, 'vlag-8-neer': 0xE241,
+    'punt': 0xE1E7, 'vlag-8-op': 0xE240, 'vlag-8-neer': 0xE241, 'vlag-16-op': 0xE242, 'vlag-16-neer': 0xE243,
     'maat-c': 0xE08A, 'maat-alla-breve': 0xE08B,
     **{f'cijfer-{n}': 0xE080 + n for n in range(10)},
 }
