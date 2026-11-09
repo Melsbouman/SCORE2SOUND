@@ -14,8 +14,19 @@ export function vulBeginRust(partituur) {
   const aantal = nummer - (gevonden.k + 1);
   if (nummer > 200 || aantal < 1 || aantal > 200) return nieuw;
 
+  // Een scan die niet bij blad 1 begint (alleen latere pagina's gekozen): de eerste maat is niet maat 1 van het stuk. Dan geen
+  // beginrust, maar de nummering laten beginnen zoals het repetitiecijfer zegt.
+  if ((partituur?.bron?.bladen?.[0]?.nummer ?? 1) > 1) {
+    for (const huidigePartij of nieuw.partijen) {
+      for (const maat of huidigePartij.maten) {
+        if (/^-?\d+$/.test(String(maat.nummer))) maat.nummer = String(Number(maat.nummer) + aantal);
+      }
+    }
+    return nieuw;
+  }
+
   for (const huidigePartij of nieuw.partijen) {
-    const eersteMaat = huidigePartij.maten[0];
+    const eersteMaat =huidigePartij.maten[0];
     const teller = eersteMaat.maatsoort.teller;
     const noemer = eersteMaat.maatsoort.noemer;
     const ingevoegd = Array.from({ length: aantal }, (_, index) => ({
