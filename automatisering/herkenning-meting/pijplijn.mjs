@@ -22,6 +22,7 @@ const voortekens = await optioneel('voortekens.mjs');
 const hulplijnen = await optioneel('hulplijnen.mjs');
 const cijfers = await optioneel('cijfers.mjs');
 const opbouw = await optioneel('opbouw.mjs');
+const groepcijfers = await optioneel('groepcijfers.mjs');
 
 export function leesPgm(pad) {
   const buffer = readFileSync(pad);
@@ -62,8 +63,9 @@ export function herken(pad) {
   const tekens = voortekens ? voortekens.zoekVoortekens(zonderHulplijnen, raster, schaal, { koppen: noten, balkkoppen }) : null;
   const rusten = zoekRusten(kaal, raster, schaal, { koppen, strepen: maten.map((m) => m.strepen), balkkoppen, voortekens: tekens });
   const aantallen = cijfers ? cijfers.leesMeermaatsAantallen(kaal, raster, schaal, rusten) : null;
+  const triolen = groepcijfers ? groepcijfers.leesTriolen(kaal, raster, schaal, noten) : null;
   return {
-    breedte: grijs.breedte, hoogte: grijs.hoogte, schaal, raster, maten, balkkoppen, noten, voortekens: tekens, rusten, aantallen,
+    breedte: grijs.breedte, hoogte: grijs.hoogte, schaal, raster, maten, balkkoppen, noten, voortekens: tekens, rusten, aantallen, triolen,
     tijd: Date.now() - begin,
   };
 }
@@ -75,7 +77,7 @@ export function bouwModel(paden, { titel = '' } = {}) {
     const r = herken(pad);
     const { maten } = r;
     return { blad: i + 1, breedte: r.breedte, hoogte: r.hoogte, raster: r.raster, schaal: r.schaal, maten, balkkoppen: r.balkkoppen,
-      noten: r.noten, voortekens: r.voortekens, rusten: r.rusten, aantallen: r.aantallen };
+      noten: r.noten, voortekens: r.voortekens, rusten: r.rusten, aantallen: r.aantallen, triolen: r.triolen };
   });
   return opbouw.bouwPartituur(paginas, { titel });
 }

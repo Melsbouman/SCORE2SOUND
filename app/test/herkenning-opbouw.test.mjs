@@ -204,3 +204,22 @@ test('opbouw: een herhaling rond een meermaatsrust staat alleen op de eerste en 
     [false, false, false], [true, false, false], [false, false, true], [false, true, true], [false, false, false],
   ]);
 });
+
+test('opbouw: een groepje met een cijfer wordt een triool (3 in de tijd van 2)', () => {
+  const noot = (x, stap) => ({ x, y: y(200, stap), stap, soort: 'zwart', duur: 240 });
+  const pagina = {
+    blad: 1, schaal: { lijnafstand: ia }, raster: { balken: [balk(200)] },
+    balkkoppen: [{ sleutel: { soort: 'G', lijn: 2 }, voortekening: { aantal: 0, tekens: [] }, maatsoort: { teller: 2, noemer: 4 }, einde: 180 }],
+    maten: [{ strepen: [], maten: [vak(100, 1100, 200)] }],
+    noten: [[noot(200, 4), noot(260, 5), noot(320, 6), noot(400, 4), noot(460, 4), { x: 600, y: y(200, 4), stap: 4, soort: 'zwart', duur: 480 }]],
+    voortekens: [[]], rusten: [[]],
+    triolen: [[{ koppen: [0, 1, 2], aantal: 3, x: 260 }, { koppen: [3, 4], aantal: 9, x: 430 }]],
+  };
+  const [maat] = bouwPartituur([pagina]).partijen[0].maten;
+  assert.deepEqual(maat.elementen.map((e) => [e.start, e.duur]), [[0, 160], [160, 160], [320, 160], [480, 240], [720, 240], [960, 480]]);
+  assert.deepEqual(maat.elementen.slice(0, 3).map((e) => e.tuplet), [
+    { aantal: 3, normaal: 2, begin: true, eind: false }, { aantal: 3, normaal: 2, begin: false, eind: false }, { aantal: 3, normaal: 2, begin: false, eind: true },
+  ]);
+  // Een onbekend cijfer (9) verandert niets.
+  assert.equal(maat.elementen[3].tuplet, undefined);
+});

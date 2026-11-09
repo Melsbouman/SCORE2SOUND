@@ -8,7 +8,9 @@
 //    de som van de duren ervoor. Koppen boven elkaar (bijna dezelfde x) zijn een akkoord en starten samen.
 // 4. De toonhoogte volgt uit de plek op de balk en de sleutel. De voortekening geeft de standaard; een voorteken bij een noot
 //    geldt tot het eind van de maat voor dezelfde plek.
-// 5. Herhaaltekens bij de maatstrepen (maten.mjs) worden `herhaling.begin` en `herhaling.eind` van de maten ernaast.
+// 5. Herhaaltekens bij de maatstrepen (maten.mjs) worden `herhaling.begin` en `herhaling.eind` van de maten ernaast. Een
+//    cijfer bij een groep onder één waardestreep (groepcijfers.mjs) maakt de noten een triool (of een ander groepje): de
+//    duur wordt `normaal / aantal` keer zo lang, met 3 in de tijd van 2, 2 en 4 in de tijd van 3, en 5, 6 en 7 in die van 4.
 // 6. Een hele rust die alleen in de maat staat, vult de hele maat. Een meermaatsrust wordt zoveel maten als het getal erboven
 //    zegt (cijfers.mjs): de eerste met `maatrust`, de andere verborgen.
 // De herstelketen (herstelHerkenning, vulRustGaten, herstelTriolen, maatduur) kan daarna op het resultaat draaien, net als na
@@ -20,6 +22,8 @@ const KRUISEN = 'FCGDAEB';
 const MOLLEN = 'BEADGCF';
 const RUSTDUUR = { kwart: 480, 8: 240, 16: 120, 32: 60, half: 960 };
 const ALTER = { kruis: 1, mol: -1, herstel: 0 };
+// In de tijd van hoeveel noten een groepje met dit cijfer klinkt.
+const NORMAAL = { 2: 3, 3: 2, 4: 3, 5: 4, 6: 4, 7: 4 };
 
 // De noot op stap `stap` bij een sleutel: { stap: 'C'..'B', octaaf }. De G-sleutel zet g4 op zijn lijn, de F-sleutel f3, de
 // C-sleutel c4 (lijn telt van onder, stap 0 is de bovenste lijn).
@@ -36,8 +40,8 @@ export function alterUitVoortekening(stam, kwinten) {
   return 0;
 }
 
-// paginas: [{ blad, raster, schaal, maten, balkkoppen, noten, voortekens, rusten, aantallen }] zoals de herkenningsstappen ze
-// geven (aantallen uit cijfers.mjs mag ontbreken). Geeft een Partituur.
+// paginas: [{ blad, raster, schaal, maten, balkkoppen, noten, voortekens, rusten, aantallen, triolen }] zoals de
+// herkenningsstappen ze geven (aantallen uit cijfers.mjs en triolen uit groepcijfers.mjs mogen ontbreken). Geeft een Partituur.
 export function bouwPartituur(paginas, { titel = '' } = {}) {
   const maten = [];
   let sleutel = { teken: 'G', lijn: 2 };
@@ -58,6 +62,12 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
       const lengte = (maatsoort.teller * 4 * TIKKEN_PER_KWART) / maatsoort.noemer;
       const noten = pagina.noten?.[b] ?? [];
       const tekens = new Map((pagina.voortekens?.[b] ?? []).map((teken) => [teken.kop, teken]));
+      // Per nootkop het groepje waar hij in staat (groepcijfers.mjs): { aantal, normaal, plek, lengte }.
+      const groepjes = new Map();
+      for (const groep of pagina.triolen?.[b] ?? []) {
+        if (!NORMAAL[groep.aantal]) continue;
+        groep.koppen.forEach((k, plek) => groepjes.set(k, { aantal: groep.aantal, normaal: NORMAAL[groep.aantal], plek, lengte: groep.koppen.length }));
+      }
       const rusten = pagina.rusten?.[b] ?? [];
       const aantallen = pagina.aantallen?.[b] ?? [];
       let meermaats = 0;
@@ -137,12 +147,14 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
           // de noot met de vorige mee.
           const zelfdeStok = noot.stok && vorigeNoot?.noot.stok && Math.abs(noot.stok.x - vorigeNoot.noot.stok.x) <= Math.max(2, ia * 0.2);
           const akkoord = Boolean(vorigeNoot && (Math.abs(noot.x - vorigeNoot.noot.x) < ia * 0.6 || zelfdeStok));
-          const duur = noot.duur ?? 480;
+          const groepje = groepjes.get(g.k);
+          const duur = groepje ? Math.round(((noot.duur ?? 480) * groepje.normaal) / groepje.aantal) : noot.duur ?? 480;
           const element = {
             soort: 'noot', start: akkoord ? vorigeNoot.start : start, duur: akkoord ? vorigeNoot.duur : duur, stem: 1, notenbalk: 1,
             toonhoogte: { stap: plaats.stap, alter, octaaf: plaats.octaaf }, akkoord,
             overbinding: { begin: false, eind: false }, articulaties: [], legato: { begin: false, eind: false }, versiering: null,
             zekerheid: 0.9, plek: plekVan(pagina, p, noot, ia),
+            ...(groepje ? { tuplet: { aantal: groepje.aantal, normaal: groepje.normaal, begin: groepje.plek === 0, eind: groepje.plek === groepje.lengte - 1 } } : {}),
           };
           maat.elementen.push(element);
           bijElement.set(element, noot);
