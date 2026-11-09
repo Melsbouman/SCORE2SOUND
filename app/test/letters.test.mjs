@@ -55,7 +55,7 @@ test('systemen geven de bovenste notenlijn en de maten', () => {
 test('een letter in het kader wordt gelezen en de volgende letter volgt het alfabet', () => {
   const woord = '<word value="[B]"><bounds x="505" y="240" w="40" h="30"/></word>';
   const letters = lettersVoorBlad({ xml: blad(woord), png }, { volgende: 'B' });
-  assert.deepEqual(letters, [
+  assert.deepEqual(letters.map(({ x, ...letter }) => letter), [
     { systeem: 0, stack: 1, waarde: 'B', zekerheid: 0.9 },
     { systeem: 0, stack: 2, waarde: 'C', zekerheid: 0.5 },
   ]);
@@ -74,7 +74,7 @@ test('een breed kader accepteert alleen een getal van één tot vier cijfers', (
   });
   const woorden = '<word value="104"><bounds x="505" y="240" w="55" h="30"/></word>'
     + '<word value="AB"><bounds x="780" y="240" w="55" h="30"/></word>';
-  assert.deepEqual(lettersVoorBlad({ xml: blad(woorden), png: breedPng }), [
+  assert.deepEqual(lettersVoorBlad({ xml: blad(woorden), png: breedPng }).map(({ x, ...letter }) => letter), [
     { systeem: 0, stack: 1, waarde: '104', zekerheid: 0.9 },
   ]);
 });
@@ -100,7 +100,10 @@ test('de letters komen als aanwijzing aan het begin van de maat, in elke partij'
   const { partituur: uit, meldingen } = voegLettersToe(partituur, [{ nummer: 2, xml: blad(), png }]);
   for (const partij of uit.partijen) {
     assert.equal(partij.maten[0].elementen.length, 1);
-    assert.deepEqual(partij.maten[1].elementen[0], { soort: 'aanwijzing', start: 0, type: 'letter', waarde: 'A', zekerheid: 0.5, kader: true });
+    const { plek, ...letter } = partij.maten[1].elementen[0];
+    assert.deepEqual(letter, { soort: 'aanwijzing', start: 0, type: 'letter', waarde: 'A', zekerheid: 0.5, kader: true });
+    assert.equal(plek.blad, 2);
+    assert.ok(Number.isFinite(plek.x));
     assert.equal(partij.maten[2].elementen[0].waarde, 'B');
     assert.equal(partij.maten[1].elementen[1].soort, 'noot');
   }

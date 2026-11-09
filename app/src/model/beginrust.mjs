@@ -47,7 +47,12 @@ export function vulBeginRust(partituur) {
         // Alleen de eerste ingevoegde maat begint de regel en de pagina; de rest is verborgen.
         ...(index > 0 ? { regelbegin: false, paginabegin: false } : {}),
       }));
-    for (const maat of ingevoegd) delete maat.vak;
+    // De kopieën van de eerste maat nemen geen plek op het blad en geen meermaatsrust van die maat mee (zoals een ingevoegde rust).
+    ingevoegd.forEach((maat, positie) => {
+      delete maat.vak;
+      delete maat.verlorenRust;
+      if (positie > 0 || aantal < 2) delete maat.maatrust;
+    });
     // De meermaatsrust staat nu vooraan: de oorspronkelijke eerste maat begint geen regel of pagina meer.
     if (eersteMaat.regelbegin) eersteMaat.regelbegin = false;
     if (eersteMaat.paginabegin) eersteMaat.paginabegin = false;

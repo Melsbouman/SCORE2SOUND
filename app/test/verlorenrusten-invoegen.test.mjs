@@ -20,7 +20,7 @@ const maat = (index, vak, extra = {}) => ({
 const partij = (id) => ({ id, maten: [
   maat(0, { blad: 1, links: 150, rechts: 976, boven: 500, onder: 576 }, {
     regelbegin: true, sleutels: [{ teken: 'G', lijn: 2, notenbalk: 1 }],
-    elementen: [{ soort: 'aanwijzing', start: 0, type: 'letter', waarde: '53', zekerheid: 0.9, kader: true }, noot],
+    elementen: [{ soort: 'aanwijzing', start: 0, type: 'letter', waarde: '53', zekerheid: 0.9, kader: true, plek: { blad: 1, x: 183 } }, noot],
   }),
   maat(1, { blad: 1, links: 976, rechts: 1455, boven: 500, onder: 576 }),
 ] });
