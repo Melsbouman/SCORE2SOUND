@@ -15,10 +15,12 @@
 //    een stok over als hij op een vlag lijkt.
 // 6. Een rust valt op een scan soms in stukken (het bolletje van een achtste rust los van de staart): stukken die elkaar
 //    (bijna) raken, vergelijken we eerst samen.
-// Uitkomst per balk: [{ x, soort, links, rechts }] met soort 'meermaats', 'heel', 'half', 'kwart', '8', '16' of '32' en
-// x het midden.
+// 7. Een los vlekje in een tussenruimte vlak rechts van een rust is een punt (`punt: true`, anderhalf keer zo lang).
+// Uitkomst per balk: [{ x, soort, links, rechts, punt? }] met soort 'meermaats', 'heel', 'half', 'kwart', '8', '16' of '32'
+// en x het midden.
 import { vindVormen } from './vormen.mjs';
 import { sjabloon, vergelijkVorm } from './sjablonen.mjs';
+import { maakZoekPunt } from './duren.mjs';
 
 const RUSTEN = [['kwart', 'rust-kwart'], ['8', 'rust-8'], ['16', 'rust-16'], ['32', 'rust-32']];
 // Cijfers staan niet midden in een maat op de balk (een 7 lijkt op een achtste rust); voortekens wel, vlak voor een kop.
@@ -36,6 +38,7 @@ export function zoekRusten(kaal, raster, schaal, { koppen = [], strepen = [], ba
   ];
   const vlaggen = VLAGGEN.map((naam) => sjabloon(naam, ia));
   const zwart = (x, y) => x >= 0 && x < breedte && y >= 0 && y < kaal.hoogte && kaal.pixels[y * breedte + x] === 1;
+  const zoekPunt = maakZoekPunt(kaal, ia);
   return raster.balken.map((balk, b) => {
     const yOp = (stap, x) => balk.lijnen[0].a + balk.lijnen[0].b * x + (stap * ia) / 2;
     // Meermaatsrusten: per kolom de dikte van de zwarte strook door de middelste lijn.
@@ -174,6 +177,18 @@ export function zoekRusten(kaal, raster, schaal, { koppen = [], strepen = [], ba
         const soort = soortVan(vorm, (x, y) => labels[y * breedte + x] === vorm.id, vorm.pixels);
         if (soort) uit.push({ x: Math.round((vorm.links + vorm.rechts) / 2), soort, links: vorm.links, rechts: vorm.rechts });
       }
+    }
+    // Een punt achter een rust (een los vlekje in een tussenruimte vlak rechts ervan) maakt hem anderhalf keer zo lang. Twee
+    // vlekjes boven elkaar op stap 3 en 5 zijn de punten van een herhaalteken, geen punt; ook niet vlak voor een maatstreep
+    // met herhaalpunten links ervan (maten.mjs).
+    const herhaalStrepen = (strepen[b] ?? []).filter((streep) => streep.herhaling === 'eind' || streep.herhaling === 'beide');
+    for (const rust of uit) {
+      if (herhaalStrepen.some((streep) => streep.links > rust.rechts && streep.links - rust.rechts <= ia * 2)) continue;
+      const x0 = Math.round(rust.rechts + Math.max(2, ia * 0.15));
+      const op = (stap) => zoekPunt(x0, x0 + Math.round(ia * 0.9), Math.round(yOp(stap, x0)));
+      const drie = op(3);
+      const vijf = op(5);
+      if ((drie || vijf || op(1)) && !(drie && vijf)) rust.punt = true;
     }
     for (const bar of meermaats) uit.push({ x: Math.round((bar.links + bar.rechts) / 2), soort: 'meermaats', links: bar.links, rechts: bar.rechts });
     return uit.sort((p, q) => p.x - q.x);

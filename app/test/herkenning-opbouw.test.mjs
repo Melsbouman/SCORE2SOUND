@@ -281,3 +281,18 @@ test('opbouw: een secunde in een akkoord van drie, tegen een andere kop dan de e
   assert.deepEqual(kort(maten[1]), ['A0:480', 'E0:480+', 'F0:480+']);
   assert.deepEqual(kort(maten[2]), ['B0:240/begin', 'G240:240/midden', 'A240:240+', 'B480:240/midden', 'C720:240/eind']);
 });
+
+test('opbouw: een rust met een punt duurt anderhalf keer zo lang', () => {
+  const y0 = 200;
+  const pagina = {
+    blad: 1, breedte: 1200, hoogte: 600, schaal: { lijnafstand: ia },
+    raster: { balken: [balk(y0)] },
+    balkkoppen: [{ sleutel: { soort: 'G', lijn: 2 }, voortekening: { aantal: 0, tekens: [] }, maatsoort: { teller: 9, noemer: 8 }, einde: 150 }],
+    maten: [{ strepen: [], maten: [vak(150, 1100, y0)] }],
+    noten: [[kop(200, y0, 4, 720)]],
+    voortekens: [[]],
+    rusten: [[{ ...rust(400, 'kwart'), punt: true }, { ...rust(600, '8'), punt: true }, rust(800, '8')]],
+  };
+  const maat = bouwPartituur([pagina]).partijen[0].maten[0];
+  assert.deepEqual(maat.elementen.map((e) => `${e.soort}${e.start}:${e.duur}`), ['noot0:720', 'rust720:720', 'rust1440:360', 'rust1800:240']);
+});

@@ -139,3 +139,33 @@ test('rusten: een losse vlag en tremolostreepjes zijn geen rust; een gebroken ac
   assert.deepEqual(rusten.map((r) => r.soort), ['8']);
   assert.ok(Math.abs(rusten[0].x - (450 + rust.breedte / 2)) <= 4, `rust op ${rusten[0].x}`);
 });
+
+test('rusten: een punt rechts naast een rust (in een tussenruimte) maakt hem gestippeld; zonder punt of voor een herhaalteken niet', () => {
+  const { beeld, verwacht } = maakBlad({ balken: 1, koppen: false, maatstrepen: false, lijnafstand: ia });
+  const lijn0 = verwacht.balken[0].lijnen[0].a;
+  const yOp = (stap) => Math.round(lijn0 + (stap * ia) / 2);
+  const zet = (x, y) => { beeld.pixels[Math.round(y) * beeld.breedte + Math.round(x)] = 0; };
+  const stempel = (naam, ax, ay) => {
+    const t = sjabloon(naam, ia);
+    for (let y = 0; y < t.hoogte; y += 1) for (let x = 0; x < t.breedte; x += 1) if (t.pixels[y * t.breedte + x]) zet(ax - t.ankerX + x, ay - t.ankerY + y);
+    return t;
+  };
+  const punt = (cx, cy) => { for (let dy = -3; dy <= 3; dy += 1) for (let dx = -3; dx <= 3; dx += 1) if (dx * dx + dy * dy <= 10) zet(cx + dx, cy + dy); };
+  stempel('sleutel-g', 105, yOp(6));
+  const kwart = stempel('rust-kwart', 300, yOp(4));
+  punt(300 + kwart.breedte + 8, yOp(3));
+  stempel('rust-kwart', 450, yOp(4));
+  const achtste = stempel('rust-8', 600, yOp(4));
+  punt(600 + achtste.breedte + 8, yOp(3));
+  // Een kwartrust vlak voor een herhaalteken: twee punten boven elkaar (stap 3 en 5) en een streep.
+  const voorHerhaling = stempel('rust-kwart', 750, yOp(4));
+  punt(750 + voorHerhaling.breedte + 8, yOp(3));
+  punt(750 + voorHerhaling.breedte + 8, yOp(5));
+  for (let y = yOp(0); y <= yOp(8); y += 1) { zet(750 + voorHerhaling.breedte + 16, y); zet(750 + voorHerhaling.breedte + 17, y); }
+  const zw = zwartWit(beeld);
+  const schaal = meetSchaal(zw);
+  const raster = vindBalken(zw, schaal);
+  const kaal = verwijderLijnen(zw, raster, schaal);
+  const rusten = zoekRusten(kaal, raster, schaal, { koppen: zoekNootkoppen(kaal, raster, schaal) })[0];
+  assert.deepEqual(rusten.map((r) => [r.soort, Boolean(r.punt)]), [['kwart', true], ['kwart', false], ['8', true], ['kwart', false]]);
+});
