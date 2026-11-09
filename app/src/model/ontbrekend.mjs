@@ -135,7 +135,12 @@ export function vulOntbrekendeMaten(partituur) {
       const rustmaten = [];
       for (let maatIndex = vorige.index; maatIndex < huidige.index; maatIndex += 1) {
         const maat = eerstePartij.maten[maatIndex];
-        if (maat && !maat.verborgen && !maat.elementen.some((element) => ['noot', 'rust'].includes(element.soort))) {
+        // Leeg in alle partijen: anders zou de rust de noten van een andere partij wissen.
+        const leegInAlle = kopie.partijen.every((partij) => {
+          const kandidaat = partij.maten[maatIndex];
+          return Boolean(kandidaat) && !kandidaat.elementen.some((element) => ['noot', 'rust'].includes(element.soort));
+        });
+        if (maat && !maat.verborgen && leegInAlle) {
           leeg.push(maatIndex);
         } else if (kopie.partijen.every((partij) => alleenEenRust(partij.maten, maatIndex))) {
           rustmaten.push(maatIndex);
@@ -219,7 +224,37 @@ export function vulOntbrekendeMaten(partituur) {
       }
     });
   }
+  kopie.partijen.forEach(vouwRustenUit);
   return kopie;
+}
+
+// Een meermaatsrust zonder verborgen maten erachter (de vorm die het aanvullen hierboven maakt) krijgt ze alsnog: de weergave en het
+// afspelen rekenen op maatrust N met N-1 verborgen maten (docs/model.md). De nummers van de maten erna tellen de rust al mee.
+function vouwRustenUit(partij) {
+  const uit = [];
+  partij.maten.forEach((maat, index) => {
+    uit.push(maat);
+    if (!(maat.maatrust > 1) || maat.verborgen || partij.maten[index + 1]?.verborgen) return;
+    const nummer = Number(maat.nummer);
+    for (let plek = 1; plek < maat.maatrust; plek += 1) {
+      const verborgen = {
+        ...structuredClone(maat),
+        ...(Number.isInteger(nummer) ? { nummer: String(nummer + plek) } : {}),
+        verborgen: true,
+        regelbegin: false,
+        paginabegin: false,
+        tempo: null,
+        elementen: maat.elementen.filter((element) => element.soort === 'rust').map((rust) => structuredClone(rust)),
+      };
+      verborgen.herhaling = { begin: false, eind: false, keer: 2 };
+      for (const veld of ['maatrust', 'vak', 'volta', 'sprong', 'ingevoegd']) delete verborgen[veld];
+      uit.push(verborgen);
+    }
+  });
+  partij.maten = uit;
+  partij.maten.forEach((maat, index) => {
+    maat.index = index;
+  });
 }
 
 function extraVoorIndex(gaten, index, invoegingOpIndexTeltMee = false) {

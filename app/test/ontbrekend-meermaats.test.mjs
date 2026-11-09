@@ -28,7 +28,9 @@ test('een meermaatsrust telt als meerdere maten', () => {
 
   const resultaat = vulOntbrekendeMaten(invoer);
 
-  assert.equal(resultaat.partijen[0].maten.length, 3);
+  // Geen extra maten tussen de cijfers; de rust krijgt wel zijn 2 verborgen maten (maatrust N met N-1 verborgen maten).
+  assert.equal(resultaat.partijen[0].maten.length, 5);
+  assert.deepEqual(resultaat.partijen[0].maten.slice(2, 4).map((maat) => maat.verborgen), [true, true]);
   assert.equal(resultaat.partijen[0].maten[1].maatrust, 3);
   assert.deepEqual(resultaat.partijen[0].maten[1].elementen, [
     { type: 'rust', heleMaat: true },

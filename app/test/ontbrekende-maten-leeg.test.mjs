@@ -24,12 +24,14 @@ test('een lege maat in het gat wordt een samengestelde rust met het ontbrekende 
   maten[5].elementen = [];
   maten[7].elementen.unshift(letter('10'));
   const nieuw = vulOntbrekendeMaten(stuk(maten)).partijen[0].maten;
-  assert.equal(nieuw.length, 10);
+  // De rust van 3 maten krijgt zijn 2 verborgen maten (maatrust N met N-1 verborgen maten, docs/model.md).
+  assert.equal(nieuw.length, 12);
   assert.equal(nieuw[5].maatrust, 3);
   assert.deepEqual(nieuw[5].elementen, [rustMaat]);
-  assert.equal(nieuw[6].nummer, '9');
-  assert.equal(nieuw[7].nummer, '10');
-  assert.equal(nieuw[9].nummer, '12');
+  assert.deepEqual(nieuw.slice(6, 8).map((maat) => [maat.verborgen, maat.nummer]), [[true, '7'], [true, '8']]);
+  assert.equal(nieuw[8].nummer, '9');
+  assert.equal(nieuw[9].nummer, '10');
+  assert.equal(nieuw[11].nummer, '12');
 });
 
 test('twee lege maten delen het ontbrekende aantal, de eerste krijgt de rest', () => {
@@ -39,10 +41,10 @@ test('twee lege maten delen het ontbrekende aantal, de eerste krijgt de rest', (
   maten[6].elementen = [];
   maten[7].elementen.unshift(letter('11'));
   const nieuw = vulOntbrekendeMaten(stuk(maten)).partijen[0].maten;
-  assert.equal(nieuw.length, 10);
+  assert.equal(nieuw.length, 13);
   assert.equal(nieuw[5].maatrust, 3);
-  assert.equal(nieuw[6].maatrust, 2);
-  assert.equal(nieuw[7].nummer, '11');
+  assert.equal(nieuw[8].maatrust, 2);
+  assert.equal(nieuw[10].nummer, '11');
 });
 
 test('zonder lege maat in het gat komen er nog steeds onzekere rustmaten bij', () => {

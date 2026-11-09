@@ -67,9 +67,11 @@ export function aantalUitSamengesteldeRust(maat) {
   if (maat.verborgen || maat.maatrust > 1) return null;
   const heeftHeleMaatrust = maat.elementen.some((element) => element.soort === 'rust' && element.heleMaat);
   if (!heeftHeleMaatrust || maat.elementen.some((element) => element.soort === 'noot')) return null;
+  // Een cijfer in een kader (repetitiecijfer, kader: true) is nooit het aantal maten van een rust.
   const cijfer = maat.elementen.find((element) => (
     element.soort === 'aanwijzing'
     && element.type === 'letter'
+    && !element.kader
     && /^\d+$/.test(String(element.waarde ?? '').trim())
   ));
   const aantal = Number(String(cijfer?.waarde ?? '').trim());

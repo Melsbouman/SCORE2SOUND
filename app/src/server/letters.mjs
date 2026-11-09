@@ -125,7 +125,8 @@ export function voegLettersToe(partituur, bladen) {
         const systeem = { boven: systemen[letter.systeem]?.boven, tot: systemen[letter.systeem + 1]?.boven };
         const maat = maatBijStapel(partij.maten, blad.nummer, systemen[letter.systeem]?.stacks[letter.stack], stapelKaart(partij.maten)[begin], systeem);
         if (!maat || maat.elementen.some((e) => e.type === 'letter')) continue;
-        maat.elementen.unshift({ soort: 'aanwijzing', start: 0, type: 'letter', waarde: letter.waarde, zekerheid: letter.zekerheid });
+        // kader: het cijfer staat in een kader op het blad (een repetitiecijfer), nooit het aantal maten van een rust.
+        maat.elementen.unshift({ soort: 'aanwijzing', start: 0, type: 'letter', waarde: letter.waarde, zekerheid: letter.zekerheid, kader: true });
       }
       if (letter.zekerheid < 0.8) aangenomen.push(letter.waarde);
     }
