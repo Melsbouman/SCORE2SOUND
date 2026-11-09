@@ -45,3 +45,18 @@ test('aan het begin van een regel telt de ruimte vóór het eerste element niet 
   const uit = vulRustGaten(stuk([['rust', 0, 240, 1670], ['rust', 240, 480, 1715]], { links: 1530, rechts: 1783, regelbegin: true }));
   assert.equal(uit.meldingen.length, 0);
 });
+
+test('vooraan, vergeleken met de gewone ruimte na de maatstreep op het blad: de rust komt vooraan (Galop maat 43)', () => {
+  // Vijf maten "rust, noot, rust, noot" die 20 pixels na de maatstreep beginnen, en één maat "noot, rust, noot" die pas na 79 begint.
+  const maat = (index, elementen) => ({
+    nummer: String(index + 1), index, maatsoort: { teller: 2, noemer: 4 },
+    vak: { blad: 1, links: index * 246, rechts: (index + 1) * 246, boven: 556, onder: 632 },
+    elementen: elementen.map(([soort, start, x]) => ({ soort, start, duur: 240, stem: 1, notenbalk: 1, zekerheid: 0.9, plek: { blad: 1, x: index * 246 + x, y: 600, breedte: 22, hoogte: 20 } })),
+  });
+  const vol = [['rust', 0, 20], ['noot', 240, 77], ['rust', 480, 136], ['noot', 720, 193]];
+  const maten = [0, 1, 2, 3, 4].map((index) => maat(index, vol));
+  maten.push(maat(5, [['noot', 0, 79], ['rust', 240, 136], ['noot', 480, 189]]));
+  const uit = vulRustGaten({ partijen: [{ id: 'P1', maten }] });
+  assert.equal(uit.meldingen.length, 1);
+  assert.equal(uit.partituur.partijen[0].maten[5].elementen.map((e) => `${e.soort[0]}${e.start}${e.zekerheid === 0.5 ? '*' : ''}`).join(' '), 'r0* n240 r480 n720');
+});
