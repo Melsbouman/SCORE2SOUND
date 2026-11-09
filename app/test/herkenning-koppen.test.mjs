@@ -146,3 +146,19 @@ test('een halve kop een paar pixels onder zijn plek op de balk wordt gevonden, o
   assert.ok(Math.abs(gevonden[0].y - (Math.round(a + 50) + 4)) <= 1, `y ${gevonden[0].y}`);
   assert.ok(Math.abs(gevonden[1].y - (Math.round(a + 40) - 2)) <= 1, `y ${gevonden[1].y}`);
 });
+
+// Blokjes van een oude meermaatsrust (gevuld, smaller dan een kop, met rechte kanten op de lijnen) zijn geen zwarte koppen; een
+// zwarte kop op dezelfde plek wel.
+test('een blokje van twee of vier maten rust is geen zwarte kop', () => {
+  const { beeld } = bladMetKoppen([{ balk: 0, x: 500, stap: 3, soort: 'zwart' }], {
+    extra: ({ beeld: blad, verwacht, lijnafstand }) => {
+      const balk = verwacht.balken[0];
+      const y = (stap) => Math.round(balk.lijnen[0].a + (stap * lijnafstand) / 2);
+      const vlak = (x0, x1, y0, y1) => { for (let x = x0; x <= x1; x += 1) for (let yy = y0; yy <= y1; yy += 1) blad.pixels[yy * blad.breedte + x] = 0; };
+      vlak(300, 317, y(2), y(4)); // twee maten
+      vlak(400, 417, y(2), y(6)); // vier maten
+    },
+  });
+  const gevonden = zoek(beeld);
+  assert.deepEqual(gevonden[0].map((kop) => [kop.stap, kop.soort]), [[3, 'zwart']]);
+});
