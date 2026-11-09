@@ -176,3 +176,31 @@ test('keten: een maatsoortwissel midden in de regel geldt vanaf de maat erna; ee
   assert.deepEqual(toon(maten[1]), ['B4', 'C5', 'D5'], 'de cijfers 3 en 4 zijn geen noten');
   assert.deepEqual(maten[1].elementen.filter((e) => e.soort === 'rust'), [], 'en geen rusten');
 });
+
+// Een lange balkkop (sleutel, drie mollen, 4/4) gevolgd door een dubbele streep, verder van het begin dan maten.mjs zelf als
+// balkkop herkent: de 'maat' met alleen de balkkop is geen maat.
+test('keten: een eerste maat met alleen de balkkop telt niet; de maat erna begint de regel', () => {
+  const ia = 20;
+  const { beeld, verwacht } = maakBlad({ balken: 1, koppen: false, maatstrepen: false, lijnafstand: ia, rechts: 700 });
+  const zet = (x, yy) => { beeld.pixels[Math.round(yy) * beeld.breedte + Math.round(x)] = 0; };
+  const y = (stap) => Math.round(verwacht.balken[0].lijnen[0].a + (stap * ia) / 2);
+  const stempel = (naam, ax, ay) => {
+    const t = sjabloon(naam, ia);
+    for (let dy = 0; dy < t.hoogte; dy += 1) for (let dx = 0; dx < t.breedte; dx += 1) if (t.pixels[dy * t.breedte + dx]) zet(ax - t.ankerX + dx, ay - t.ankerY + dy);
+  };
+  const streep = (x) => { for (let yy = y(0); yy <= y(8); yy += 1) { zet(x, yy); zet(x + 1, yy); } };
+  stempel('sleutel-g', 110, y(6));
+  [4, 1, 5].forEach((stap, i) => stempel('mol', 175 + i * 20, y(stap)));
+  stempel('cijfer-4', 250, y(2));
+  stempel('cijfer-4', 250, y(6));
+  streep(320);
+  streep(326);
+  [8, 7, 6, 5].forEach((stap, i) => stempel('kop-zwart', 380 + i * 70, y(stap)));
+  streep(696);
+  const { partituur } = herkenPartituur([beeld]);
+  const maten = partituur.partijen[0].maten;
+  assert.equal(maten.length, 1);
+  assert.equal(maten[0].regelbegin, true);
+  assert.equal(maten[0].toonsoort.kwinten, -3);
+  assert.equal(maten[0].elementen.filter((e) => e.soort === 'noot').length, 4);
+});

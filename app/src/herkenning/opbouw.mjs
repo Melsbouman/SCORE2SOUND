@@ -72,6 +72,7 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
       let meermaats = 0;
       const vakken = pagina.maten?.[b]?.maten ?? [];
       const strepen = pagina.maten?.[b]?.strepen ?? [];
+      let eersteVanBalk = true;
       vakken.forEach((vak, m) => {
         // Een maatsoortwissel midden in de regel (kop.mjs) aan het begin van deze maat: vanaf hier de nieuwe maatsoort.
         const wissel = (kop?.wissels ?? []).find((w) => Math.abs(w.x - vak.links) <= ia * 1.5);
@@ -86,8 +87,11 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
         noten.forEach((noot, k) => { if (binnen(noot.x)) gebeurtenissen.push({ x: noot.x, noot, k }); });
         for (const rust of rusten) if (binnen(rust.x)) gebeurtenissen.push({ x: rust.x, rust });
         gebeurtenissen.sort((p1, p2) => p1.x - p2.x || (p1.noot && p2.noot ? p1.noot.stap - p2.noot.stap : 0));
+        // Een eerste 'maat' waarin alleen de balkkop staat (sleutel, voortekening, maatsoort en dan een herhaalteken of dubbele
+        // streep, verder van het begin dan maten.mjs zelf herkent; hooguit drie lijnafstanden na de balkkop): geen maat.
+        if (m === 0 && !gebeurtenissen.length && kop?.sleutel && vakken.length > 1 && vak.rechts <= kop.einde + ia * 3) return;
         const basis = {
-          nummer: '', index: 0, opmaat: false, regelbegin: m === 0, paginabegin: eersteVanBlad,
+          nummer: '', index: 0, opmaat: false, regelbegin: eersteVanBalk, paginabegin: eersteVanBlad,
           maatsoort: { ...maatsoort }, toonsoort: { kwinten, modus: 'majeur' },
           sleutels: [{ teken: sleutel.teken, lijn: sleutel.lijn, notenbalk: 1, octaafVerschuiving: 0 }],
           tempo: null, herhaling: { begin: false, eind: false, keer: 2 },
@@ -95,6 +99,7 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
           elementen: [],
         };
         eersteVanBlad = false;
+        eersteVanBalk = false;
         // De maatstreep aan het eind van deze maat: dubbel of eind.
         const streep = strepen.find((s) => Math.abs((s.links + s.rechts) / 2 - vak.rechts) <= ia);
         // Herhaaltekens (maten.mjs): punten rechts van de streep aan het begin van de maat, of links van de streep aan het eind.
