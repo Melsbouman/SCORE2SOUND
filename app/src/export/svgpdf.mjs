@@ -449,6 +449,16 @@ export function svgNaarPdf(svgTekst, { breedte, hoogte }) {
   return { opdrachten: o.uit.join('\n') + '\n', onbekend: [...o.onbekend].sort() };
 }
 
+// Tekst in pdf-coördinaten (y vanaf onderen) als stukje inhoudsstroom.
+export function tekstOpdracht(tekst, { x, y, grootte, lettertype = 'F1', uitlijning = 'links', breedte = 0, grijs = 0 }) {
+  const { pdf, breedte: eenheden } = codeerTekst(String(tekst ?? ''));
+  const eigen = (eenheden * grootte) / 1000;
+  let x2 = x;
+  if (uitlijning === 'midden') x2 = x + (breedte - eigen) / 2;
+  else if (uitlijning === 'rechts') x2 = x + breedte - eigen;
+  return `q ${fmt(grijs)} g BT /${lettertype} ${fmt(grootte)} Tf 1 0 0 1 ${pt(x2, y)} Tm (${pdf}) Tj ET Q`;
+}
+
 // ---- pdf-bestand ----
 
 function naarBytes(tekst) {

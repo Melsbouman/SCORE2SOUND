@@ -6,6 +6,8 @@ const AUDIO_FOUTEN = {
 }
 
 import { exportNaam } from '/src/model/exportnaam.mjs'
+import { maakPdfZonderServer } from '/src/export/pdfbrowser.mjs'
+import { toolkit } from '../weergave.js'
 
 function bestandsnaam(partituur, extensie) {
   return exportNaam(partituur, { extensie })
@@ -165,27 +167,19 @@ export function start(app) {
         maakPartijTitel = partijTitel
         printKnop.disabled = true
         printKnop.setAttribute('aria-busy', 'true')
-        const antwoord = await fetch('/api/pdf', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            musicxml: naarMusicXML(app.stand.partituur, { zonderPartijnamen: app.stand.partituur.partijen.length === 1 }),
-            titelblok: {
-              titel: app.stand.partituur.titel,
-              componist: app.stand.partituur.componist,
-              arrangeur: app.stand.partituur.arrangeur,
-              partij: app.stand.partituur.partijen.length === 1
-                ? partijTitel(app.stand.partituur.partijen[0])
-                : '',
-            },
-          }),
+        const bytes = await maakPdfZonderServer(await toolkit(), naarMusicXML(app.stand.partituur, { zonderPartijnamen: app.stand.partituur.partijen.length === 1 }), {
+          titelblok: {
+            titel: app.stand.partituur.titel,
+            componist: app.stand.partituur.componist,
+            arrangeur: app.stand.partituur.arrangeur,
+            partij: app.stand.partituur.partijen.length === 1
+              ? partijTitel(app.stand.partituur.partijen[0])
+              : '',
+          },
+          watermerk: document.body.classList.contains('inloggen-niet-ingelogd') ? 'SCORE2SOUND' : false,
         })
-        if (!antwoord.ok) {
-          afdrukken(maakPartijTitel)
-          return
-        }
         const naam = bestandsnaam(app.stand.partituur, 'pdf')
-        download(await antwoord.blob(), naam)
+        download(new Blob([bytes], { type: 'application/pdf' }), naam)
         status.textContent = 'Gedownload: ' + naam
       } catch {
         afdrukken(maakPartijTitel)
@@ -210,26 +204,18 @@ export function start(app) {
       const bestanden = []
       for (let index = 0; index < partituur.partijen.length; index += 1) {
         const partij = partituur.partijen[index]
-        const antwoord = await fetch('/api/pdf', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            musicxml: naarMusicXML(partijUitnemen(partituur, partij.id), { zonderPartijnamen: true }),
-            titelblok: {
-              titel: partituur.titel,
-              componist: partituur.componist,
-              arrangeur: partituur.arrangeur,
-              partij: partijTitel(partij)
-            }
-          })
+        const bytes = await maakPdfZonderServer(await toolkit(), naarMusicXML(partijUitnemen(partituur, partij.id), { zonderPartijnamen: true }), {
+          titelblok: {
+            titel: partituur.titel,
+            componist: partituur.componist,
+            arrangeur: partituur.arrangeur,
+            partij: partijTitel(partij)
+          },
+          watermerk: document.body.classList.contains('inloggen-niet-ingelogd') ? 'SCORE2SOUND' : false
         })
-        if (!antwoord.ok) {
-          status.textContent = 'Exporteren lukte niet. Probeer het opnieuw.'
-          return
-        }
         bestanden.push({
           naam: String(index + 1).padStart(2, '0') + ' - ' + partij.naam.replace(/[/:]/g, '-') + '.pdf',
-          inhoud: new Uint8Array(await antwoord.arrayBuffer())
+          inhoud: bytes
         })
       }
       const zip = new Blob([maakZip(bestanden)], { type: 'application/zip' })
