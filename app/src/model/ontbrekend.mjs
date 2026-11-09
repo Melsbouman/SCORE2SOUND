@@ -115,13 +115,22 @@ export function vulOntbrekendeMaten(partituur) {
     });
   }
 
+  // Gedrukte maatnummers tellen alleen als de partij geen genummerde repetitiecijfers heeft: die zijn betrouwbaarder (een kader
+  // tegenover een klein getal dat de tekstherkenning soms verkeerd leest).
+  const metCijfers = eerstePartij.maten.some((maat) => maat.elementen.some(isCijfer));
+  let laatsteGedrukt = -Infinity;
   const cijfers = eerstePartij.maten.flatMap((maat, index) => {
     const aanwijzing = maat.elementen.find((element) => (
       element.soort === 'aanwijzing'
       && element.type === 'letter'
       && /^\d+$/.test(String(element.waarde ?? '').trim())
     ));
-    return aanwijzing ? [{ index, nummer: Number(String(aanwijzing.waarde).trim()) }] : [];
+    if (aanwijzing) return [{ index, nummer: Number(String(aanwijzing.waarde).trim()) }];
+    // Het gedrukte maatnummer aan het begin van een regel (zetGedrukteNummers) telt ook als anker.
+    // Strikt oplopend: hetzelfde of een lager nummer is verkeerd gelezen of hoort niet bij een regelbegin.
+    if (metCijfers || !Number.isInteger(maat.gedruktNummer) || maat.gedruktNummer <= laatsteGedrukt) return [];
+    laatsteGedrukt = maat.gedruktNummer;
+    return [{ index, nummer: maat.gedruktNummer, gedrukt: true }];
   });
   const gaten = [];
   for (let index = 1; index < cijfers.length; index += 1) {
@@ -130,7 +139,12 @@ export function vulOntbrekendeMaten(partituur) {
     const verwacht = huidige.nummer - vorige.nummer;
     const werkelijk = matenOpBlad(eerstePartij.maten, vorige.index, huidige.index);
     const aantal = verwacht - werkelijk;
-    if (verwacht > 0 && aantal > 0 && aantal <= 40) {
+    // Een gedrukt nummer kan verkeerd gelezen zijn (106 als 166): alleen aanvullen als het volgende anker het bevestigt, dus als er
+    // daarna niet te veel maten zouden staan.
+    const volgende = cijfers[index + 1];
+    const bevestigd = !(vorige.gedrukt || huidige.gedrukt) || !volgende
+      || volgende.nummer - huidige.nummer >= matenOpBlad(eerstePartij.maten, huidige.index, volgende.index);
+    if (verwacht > 0 && aantal > 0 && aantal <= 40 && bevestigd) {
       const leeg = [];
       const rustmaten = [];
       for (let maatIndex = vorige.index; maatIndex < huidige.index; maatIndex += 1) {

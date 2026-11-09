@@ -34,7 +34,7 @@ import { kopUitOcr } from '../model/tekstlezerkop.mjs';
 import { woordenNaarMaten } from '../model/tekstlezerwoorden.mjs';
 import { meermaatsRustenUitCijfers } from '../model/meermaatsrust.mjs';
 import { tweedeMening, woordenUitPdf } from '../model/digitaal.mjs';
-import { vergelijkGedrukteMaatnummers } from '../model/gedruktenummers.mjs';
+import { vergelijkGedrukteMaatnummers, zetGedrukteNummers } from '../model/gedruktenummers.mjs';
 import { meldIngevoegdeRusten, meldVerlorenRusten, voegVerlorenRustenIn } from './verlorenrusten.mjs';
 import { vulRustGaten } from '../model/rustgaten.mjs';
 import { herstelTriolen } from '../model/triolenherstel.mjs';
@@ -389,7 +389,9 @@ export function maakHerken({ map, draaier }) {
     const letters = voegLettersToe(uit.partituur, bladenGoed);
     // Een meermaatsrust aan het begin van een regel die Audiveris wegliet, invoegen als het cijfer erboven te lezen is.
     const woordenVanBladen = [...ocrPerBlad, ...(pdfTekens ? woordenUitPdf(pdfTekens, bladenGoed) : [])];
-    uit.partituur = herstelHerkenning(voegVerlorenRustenIn(letters.partituur, bladenGoed, woordenVanBladen));
+    // Gedrukte maatnummers aan het begin van een regel als ankers voor het aanvullen van ontbrekende maten (in het herstel).
+    const metAnkers = zetGedrukteNummers(voegVerlorenRustenIn(letters.partituur, bladenGoed, woordenVanBladen), woordenVanBladen);
+    uit.partituur = herstelHerkenning(metAnkers);
     // Een rust die Audiveris miste (de maat is een notenwaarde te kort en op het blad zit daar een gat).
     const rustGaten = vulRustGaten(uit.partituur);
     uit.partituur = rustGaten.partituur;

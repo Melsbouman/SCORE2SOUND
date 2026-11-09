@@ -20,6 +20,21 @@ function nummerBijRegelbegin(vak, woorden) {
   return kandidaten.length > 0 ? Number(String(kandidaten[0].tekst).trim()) : null;
 }
 
+// Zet bij elke regelbegin in de eerste partij het gedrukte nummer (gedruktNummer) als het er staat. vulOntbrekendeMaten gebruikt het
+// als anker, net als een repetitiecijfer dat een maatnummer is. Geeft een nieuwe partituur.
+export function zetGedrukteNummers(partituur, woordenPerBlad) {
+  const kopie = structuredClone(partituur);
+  const partij = kopie?.partijen?.[0];
+  if (!partij) return kopie;
+  const woordenVan = (blad) => (woordenPerBlad ?? []).filter((item) => item?.blad === blad).flatMap((item) => (item.regels ?? []).flatMap((regel) => regel.woorden ?? []));
+  for (const maat of partij.maten ?? []) {
+    if (!maat.regelbegin || !maat.vak) continue;
+    const gedrukt = nummerBijRegelbegin(maat.vak, woordenVan(maat.vak.blad));
+    if (gedrukt != null) maat.gedruktNummer = gedrukt;
+  }
+  return kopie;
+}
+
 // Geeft { gelijk, regels, meldingen }: hoeveel regelbegins een gedrukt nummer hebben dat gelijk is aan dat van de herkenning,
 // hoeveel er een gedrukt nummer hebben, en de meldingen (soort 'herkenning') waar het verschil verandert. Alleen de eerste partij.
 export function vergelijkGedrukteMaatnummers(partituur, woordenPerBlad) {
@@ -34,6 +49,8 @@ export function vergelijkGedrukteMaatnummers(partituur, woordenPerBlad) {
     if (gedrukt == null) continue;
     uitkomst.regels += 1;
     const verschil = gedrukt - Number(maat.nummer);
+    // Meer dan 40 maten verschil is een verkeerd gelezen getal (864 voor 364), geen ontbrekende maten.
+    if (Math.abs(verschil) > 40) continue;
     if (verschil === 0) uitkomst.gelijk += 1;
     if (verschil !== vorigVerschil) {
       const hoeveel = Math.abs(verschil - vorigVerschil);
