@@ -15,7 +15,7 @@ export function vasteSchaal(breedte, zoom) {
 }
 
 // Verovio is groot (WebAssembly); hij wordt pas geladen als er iets te tekenen is.
-function toolkit() {
+export function toolkit() {
   toolkitBelofte ??= (async () => {
     const [{ default: maakModule }, { VerovioToolkit }] = await Promise.all([
       import('/vendor/verovio/verovio-module.mjs'),
