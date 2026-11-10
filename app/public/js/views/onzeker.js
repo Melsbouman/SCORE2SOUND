@@ -6,9 +6,28 @@ import {
 } from '/src/model/corrigeren.mjs';
 import { herstelHerkenning } from '/src/model/herstel.mjs';
 import { vernieuwMeldingen } from '/src/controle/meldingen.mjs';
-import { isConcept, nakijkStand, conceptTekst, markeerNagekeken } from '/src/model/concept.mjs';
+import { isConcept, nakijkStand, conceptTekst, conceptTekstKort, markeerNagekeken } from '/src/model/concept.mjs';
+
+const INGEKLAPT_SLEUTEL = 'score2sound-concept-ingeklapt';
+
+function leesIngeklapt() {
+  try {
+    return localStorage.getItem(INGEKLAPT_SLEUTEL) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function bewaarIngeklapt(waarde) {
+  try {
+    localStorage.setItem(INGEKLAPT_SLEUTEL, waarde ? '1' : '0');
+  } catch {
+    // zonder localStorage werkt het gewoon, alleen niet bewaard
+  }
+}
 
 export function start(app) {
+  let ingeklapt = leesIngeklapt();
   const vlak = document.getElementById('onzeker');
   let gekozen = null;
   let bevestigen = false;
@@ -58,7 +77,7 @@ export function start(app) {
     const balk = document.createElement('div');
     balk.className = 'onzeker__concept';
     const tekst = document.createElement('p');
-    tekst.textContent = conceptTekst(stand);
+    tekst.textContent = ingeklapt ? conceptTekstKort(stand) : conceptTekst(stand);
     const klaar = maakKnop(bevestigKlaar ? `Toch klaar (nog ${stand.onzeker} onzeker)` : 'Klaar met nakijken', () => {
       if (stand.onzeker > 0 && !bevestigKlaar) {
         bevestigKlaar = true;
@@ -73,7 +92,13 @@ export function start(app) {
     });
     klaar.classList.add('knop--hoofd');
     klaar.setAttribute('aria-label', 'Markeer de gescande partituur als nagekeken');
-    balk.append(tekst, klaar);
+    const klap = maakKnop(ingeklapt ? 'Uitklappen' : 'Inklappen', () => {
+      ingeklapt = !ingeklapt;
+      bewaarIngeklapt(ingeklapt);
+      teken();
+    });
+    klap.setAttribute('aria-expanded', String(!ingeklapt));
+    balk.append(tekst, klaar, klap);
     return balk;
   }
 
@@ -139,7 +164,12 @@ export function start(app) {
         ids.length === 0,
       ),
     );
-    vlak.replaceChildren(...(isConcept(partituur) ? [conceptBalk(partituur)] : []), status, knoppen);
+    const concept = isConcept(partituur);
+    if (concept && ingeklapt) {
+      vlak.replaceChildren(conceptBalk(partituur));
+      return;
+    }
+    vlak.replaceChildren(...(concept ? [conceptBalk(partituur)] : []), status, knoppen);
   }
 
   document.addEventListener('keydown', (gebeurtenis) => {

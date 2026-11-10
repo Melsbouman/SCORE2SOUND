@@ -1,6 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { isConcept, nakijkStand, conceptTekst, markeerNagekeken } from '../src/model/concept.mjs';
+import { isConcept, nakijkStand, conceptTekst, conceptTekstKort, markeerNagekeken } from '../src/model/concept.mjs';
+
+test('conceptTekstKort geeft een korte tekst', () => {
+  assert.equal(conceptTekstKort({ onzeker: 450, meldingen: 3 }), 'Concept: 450 onzekere noten, 3 meldingen');
+  assert.equal(conceptTekstKort({ onzeker: 1, meldingen: 1 }), 'Concept: 1 onzekere noot, 1 melding');
+  assert.equal(conceptTekstKort({ onzeker: 0, meldingen: 0 }), 'Concept: klaar om af te ronden');
+});
 
 function partituur(zekerheden, bron = { herkenning: 'taak-1', bladen: [] }) {
   return {

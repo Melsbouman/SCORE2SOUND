@@ -21,6 +21,13 @@ export function conceptTekst(stand) {
   return `Concept uit een scan. Nog nakijken: ${noten} en ${meldingen}.`;
 }
 
+export function conceptTekstKort(stand) {
+  if (stand.onzeker === 0 && stand.meldingen === 0) return 'Concept: klaar om af te ronden';
+  const noten = `${stand.onzeker} onzekere ${stand.onzeker === 1 ? 'noot' : 'noten'}`;
+  const meldingen = `${stand.meldingen} ${stand.meldingen === 1 ? 'melding' : 'meldingen'}`;
+  return `Concept: ${noten}, ${meldingen}`;
+}
+
 export function markeerNagekeken(partituur) {
   return { ...partituur, nagekeken: true };
 }
