@@ -56,3 +56,11 @@ test('rechtop: een leeg wit blad komt ongewijzigd terug', () => {
   assert.equal(uit[0].pixels, leeg.pixels);
   assert.equal(uit[0].herkomst.draai, 0);
 });
+
+test('rechtop: een rechtop blad met één balk wordt niet gedraaid, ook als het breder is dan hoog', () => {
+  const { beeld } = maakBlad({ balken: 1, breedte: 1600, hoogte: 600, boven: 200 });
+  const uit = zetRechtop(beeld);
+  assert.equal(uit.length, 1);
+  assert.equal(uit[0].herkomst.draai, 0);
+  assert.equal(uit[0].pixels, beeld.pixels);
+});

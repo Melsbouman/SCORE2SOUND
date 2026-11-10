@@ -14,6 +14,46 @@ export function naarGrijs(rgba, breedte, hoogte) {
   return { breedte, hoogte, pixels };
 }
 
+// Een grijsbeeld verkleinen met een factor (groter dan 1, ook een gebroken getal): elk nieuw pixel is het gemiddelde van het
+// stuk van het oude beeld dat het bedekt, naar oppervlak gewogen. Eerst in de breedte, dan in de hoogte (dat geeft hetzelfde
+// en is veel sneller).
+export function verkleinMet(beeld, factor) {
+  if (!(factor > 1)) return beeld;
+  const breedte = Math.max(1, Math.floor(beeld.breedte / factor));
+  const hoogte = Math.max(1, Math.floor(beeld.hoogte / factor));
+  // Per nieuwe kolom (of rij): de eerste oude kolom die meedoet en de gewichten van de oude kolommen (samen 1).
+  const delen = (n, oud) => Array.from({ length: n }, (_, i) => {
+    const van = i * factor;
+    const tot = Math.min(oud, van + factor);
+    const eerste = Math.floor(van);
+    const gewichten = [];
+    for (let j = eerste; j < Math.ceil(tot); j += 1) gewichten.push((Math.min(j + 1, tot) - Math.max(j, van)) / (tot - van));
+    return { eerste, gewichten: Float32Array.from(gewichten) };
+  });
+  const kolommen = delen(breedte, beeld.breedte);
+  const rijen = delen(hoogte, beeld.hoogte);
+  const tussen = new Float32Array(breedte * beeld.hoogte);
+  for (let y = 0; y < beeld.hoogte; y += 1) {
+    const oud = y * beeld.breedte;
+    for (let x = 0; x < breedte; x += 1) {
+      const { eerste, gewichten } = kolommen[x];
+      let som = 0;
+      for (let k = 0; k < gewichten.length; k += 1) som += beeld.pixels[oud + eerste + k] * gewichten[k];
+      tussen[y * breedte + x] = som;
+    }
+  }
+  const pixels = new Uint8Array(breedte * hoogte);
+  for (let y = 0; y < hoogte; y += 1) {
+    const { eerste, gewichten } = rijen[y];
+    for (let x = 0; x < breedte; x += 1) {
+      let som = 0;
+      for (let k = 0; k < gewichten.length; k += 1) som += tussen[(eerste + k) * breedte + x] * gewichten[k];
+      pixels[y * breedte + x] = Math.round(som);
+    }
+  }
+  return { breedte, hoogte, pixels };
+}
+
 // Otsu: de drempel die inkt en papier het best scheidt, voor het hele beeld (schone pdf's en goede scans).
 export function otsuDrempel(pixels) {
   const histogram = new Float64Array(256);

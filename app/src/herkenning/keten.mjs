@@ -5,7 +5,7 @@
 // het aantal maten boven een meermaatsrust en de cijfers boven groepen (triolen). Daarna de opbouw tot het model (opbouw.mjs)
 // en de herstelketen: herstelHerkenning, vulRustGaten, herstelTriolen, lege maten vullen, maatduur controleren, foute maten en
 // verdachte noten markeren.
-import { zwartWit, papierDrempel } from './beeld.mjs';
+import { zwartWit, papierDrempel, verkleinMet } from './beeld.mjs';
 import { meetSchaal } from './schaal.mjs';
 import { vindBalken } from './raster.mjs';
 import { zetRechtop } from './rechtop.mjs';
@@ -27,17 +27,46 @@ import { markeerVerdachteNoten } from '../model/verdacht.mjs';
 import { controleerMaatduur, maatsoortVermoedens } from '../controle/maatduur.mjs';
 import { vulLegeMaten, markeerFouteMaten } from '../controle/nabewerken.mjs';
 
+// De lijnafstand (pixels) waarop de herkenning werkt; een blad met meer dan VERKLEIN_VANAF keer zoveel wordt eerst verkleind.
+// (Suite Gothique, gescand op 300 dpi met 18,7 pixels per lijnafstand: 234 maten met een verkeerde duur, verkleind 152.)
+export const DOEL_LIJNAFSTAND = 12.5;
+const VERKLEIN_VANAF = 1.2;
+
 // Eén grijze bladzijde ({ breedte, hoogte, pixels } met 0 = zwart, 255 = wit) herkennen. Geeft alle tussenresultaten (voor de
 // opbouw en voor metingen); zonder notenbalken is `raster.balken` leeg.
-export function herkenPagina(grijs) {
-  let zw = zwartWit(grijs);
-  let schaal = meetSchaal(zw);
-  let raster = vindBalken(zw, schaal);
-  // Geen notenbalken: misschien lichtgrijze notenbalklijnen (een digitale pdf die de lijnen grijs tekent).
-  if (!raster.balken.length) {
-    zw = zwartWit(grijs, { drempel: papierDrempel(grijs.pixels) });
+export function herkenPagina(origineel) {
+  let grijs = origineel;
+  let zw;
+  let schaal;
+  let raster;
+  const lees = () => {
+    zw = zwartWit(grijs);
     schaal = meetSchaal(zw);
     raster = vindBalken(zw, schaal);
+    // Geen notenbalken: misschien lichtgrijze notenbalklijnen (een digitale pdf die de lijnen grijs tekent).
+    if (!raster.balken.length) {
+      zw = zwartWit(grijs, { drempel: papierDrempel(grijs.pixels) });
+      schaal = meetSchaal(zw);
+      raster = vindBalken(zw, schaal);
+    }
+  };
+  lees();
+  // Een scan met een grote lijnafstand (300 dpi of meer) verkleinen we eerst tot ongeveer DOEL_LIJNAFSTAND pixels per
+  // lijnafstand: de sjablonen en drempels zijn daarop afgesteld, en op een hoge resolutie zijn de randen van open koppen naar
+  // verhouding dun. De plekken (vak, plek) gelden dan voor het verkleinde blad (breedte en hoogte). Niet verder dan dat de
+  // notenbalklijnen minstens een pixel dik blijven (dunnere lijnen worden na het middelen te lichtgrijs), en vindt het
+  // verkleinde blad minder notenbalken, dan blijft het origineel.
+  if (schaal && raster.balken.length && schaal.lijnafstand > DOEL_LIJNAFSTAND * VERKLEIN_VANAF) {
+    const factor = Math.min(schaal.lijnafstand / DOEL_LIJNAFSTAND, schaal.lijndikte ?? 0);
+    if (factor > VERKLEIN_VANAF) {
+      const eerst = { zw, schaal, raster };
+      grijs = verkleinMet(origineel, factor);
+      lees();
+      if (!schaal || raster.balken.length < eerst.raster.balken.length) {
+        grijs = origineel;
+        ({ zw, schaal, raster } = eerst);
+      }
+    }
   }
   const leeg = { breedte: grijs.breedte, hoogte: grijs.hoogte, schaal, raster, maten: [], balkkoppen: [], noten: [], voortekens: [], rusten: [], aantallen: [], triolen: [] };
   if (!schaal || !raster.balken.length) return leeg;

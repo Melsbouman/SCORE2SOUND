@@ -9,8 +9,8 @@ import { meetSchaal } from './schaal.mjs';
 import { vindBalken } from './raster.mjs';
 import { draai } from './bladen.mjs';
 
-// Het aantal notenbalken op een grijs blad (ook met een drempel net onder het papier, voor lichtgrijze lijnen).
-function telBalken(grijs) {
+// De notenbalken op een grijs blad (ook met een drempel net onder het papier, voor lichtgrijze lijnen).
+function balkenVan(grijs) {
   try {
     let zw = zwartWit(grijs);
     let raster = vindBalken(zw, meetSchaal(zw));
@@ -18,26 +18,13 @@ function telBalken(grijs) {
       zw = zwartWit(grijs, { drempel: papierDrempel(grijs.pixels) });
       raster = vindBalken(zw, meetSchaal(zw));
     }
-    return raster.balken.length;
+    return raster.balken;
   } catch {
-    return 0;
+    return [];
   }
 }
-
 // De totale lengte van de notenbalken: een echte balk loopt over het blad, losse treffers in een gedraaid blad zijn kort.
-function lengteBalken(grijs) {
-  try {
-    let zw = zwartWit(grijs);
-    let raster = vindBalken(zw, meetSchaal(zw));
-    if (!raster.balken.length) {
-      zw = zwartWit(grijs, { drempel: papierDrempel(grijs.pixels) });
-      raster = vindBalken(zw, meetSchaal(zw));
-    }
-    return raster.balken.reduce((som, balk) => som + Math.max(0, balk.rechts - balk.links), 0);
-  } catch {
-    return 0;
-  }
-}
+const lengteVan = (balken) => balken.reduce((som, balk) => som + Math.max(0, balk.rechts - balk.links), 0);
 
 // Een stuk van een blad: kolommen van x0 tot x1.
 function kolommen(grijs, x0, x1) {
@@ -70,14 +57,18 @@ function knipPlek(grijs) {
 
 export function zetRechtop(grijs) {
   const onveranderd = (blad) => ({ ...blad, herkomst: { draai: 0, helft: null } });
-  const eigen = lengteBalken(grijs);
+  // Staat er een notenbalk die minstens half zo breed is als het blad, dan staat het rechtop en proberen we geen draaiingen
+  // (dat kost bij elk gewoon blad tijd). Een gedraaid blad geeft hooguit korte losse treffers.
+  const eigen = balkenVan(grijs);
+  if (eigen.some((balk) => balk.rechts - balk.links >= grijs.breedte * 0.5)) return [onveranderd(grijs)];
   let beste = null;
-  // Staan er op het blad zelf al notenbalken, dan draait alleen een duidelijk betere draaiing het om.
-  let aantal = eigen * 1.5;
+  // Anders draait alleen een duidelijk betere draaiing het blad om.
+  let aantal = lengteVan(eigen) * 1.5;
   for (const graden of [90, 270]) {
     const gedraaid = draai(grijs, graden);
-    const n = lengteBalken(gedraaid);
-    if (n > aantal && telBalken(gedraaid) > 0) {
+    const balken = balkenVan(gedraaid);
+    const n = lengteVan(balken);
+    if (n > aantal && balken.length > 0) {
       aantal = n;
       beste = { graden, gedraaid };
     }
@@ -91,7 +82,7 @@ export function zetRechtop(grijs) {
     ['rechts', kolommen(gedraaid, x, gedraaid.breedte)],
   ];
   const uit = helften
-    .filter(([, blad]) => blad.breedte > 0 && telBalken(blad) > 0)
+    .filter(([, blad]) => blad.breedte > 0 && balkenVan(blad).length > 0)
     .map(([helft, blad]) => ({ ...blad, herkomst: { draai: graden, helft } }));
   return uit.length ? uit : [{ ...gedraaid, herkomst: { draai: graden, helft: null } }];
 }

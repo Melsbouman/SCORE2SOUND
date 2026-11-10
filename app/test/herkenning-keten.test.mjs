@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { deflateSync } from 'node:zlib';
 import { grijzeBladen, leesBladReeks, plaatsBeelden, verklein, isPdf, draai } from '../src/herkenning/bladen.mjs';
-import { herkenPartituur, herkenPagina } from '../src/herkenning/keten.mjs';
+import { herkenPartituur, herkenPagina, DOEL_LIJNAFSTAND } from '../src/herkenning/keten.mjs';
 import { sjabloon } from '../src/herkenning/sjablonen.mjs';
 import { maakBlad } from './hulp/blad.mjs';
 
@@ -124,8 +124,42 @@ test('keten: van een grijze bladzijde naar een partituur met sleutel, maatsoort,
   assert.deepEqual(toon(maten[0]), ['E4:480', 'F4:480', 'G4:480', 'A4:480']);
   assert.deepEqual(toon(maten[1]), ['B4:480', 'C5:480', 'D5:480', 'E5:480']);
   assert.ok(maten[0].vak && maten[0].regelbegin, 'een maat weet waar hij op het blad staat');
-  assert.deepEqual(partituur.bron.bladen, [{ nummer: 1, breedte: blad.breedte, hoogte: blad.hoogte, herkomst: { pagina: 1, draai: 0, helft: null } }]);
+  // (Het testblad heeft 20 pixels per lijnafstand en wordt eerst verkleind; de maat in bron is die van het verkleinde blad.)
+  const pagina = herkenPagina(blad);
+  assert.deepEqual(partituur.bron.bladen, [{ nummer: 1, breedte: pagina.breedte, hoogte: pagina.hoogte, herkomst: { pagina: 1, draai: 0, helft: null } }]);
   assert.deepEqual(meldingen.filter((m) => m.soort === 'maatduur'), []);
+});
+
+// Een blad op een hoge resolutie (lijnafstand 30 in plaats van 20, zoals een scan van 300 dpi) wordt eerst verkleind tot
+// ongeveer DOEL_LIJNAFSTAND pixels per lijnafstand (niet verder dan de lijndikte toelaat); de herkenning geeft hetzelfde, met de
+// plekken op het verkleinde blad.
+test('keten: een blad met een grote lijnafstand wordt eerst verkleind en geeft dezelfde muziek', () => {
+  const klein = muziekBlad();
+  const factor = 1.5;
+  const breedte = Math.round(klein.breedte * factor);
+  const hoogte = Math.round(klein.hoogte * factor);
+  const groot = { breedte, hoogte, pixels: new Uint8Array(breedte * hoogte) };
+  for (let y = 0; y < hoogte; y += 1) {
+    for (let x = 0; x < breedte; x += 1) groot.pixels[y * breedte + x] = klein.pixels[Math.floor(y / factor) * klein.breedte + Math.floor(x / factor)];
+  }
+  const pagina = herkenPagina(groot);
+  assert.ok(Math.abs(pagina.schaal.lijnafstand - DOEL_LIJNAFSTAND) <= 1, `lijnafstand ${pagina.schaal.lijnafstand}`);
+  assert.ok(pagina.breedte < breedte * 0.5, `breedte ${pagina.breedte}`);
+  const { partituur } = herkenPartituur([groot]);
+  const maten = partituur.partijen[0].maten;
+  const toon = (maat) => maat.elementen.filter((e) => e.soort === 'noot').map((e) => `${e.toonhoogte.stap}${e.toonhoogte.octaaf}:${e.duur}`);
+  assert.deepEqual(toon(maten[0]), ['E4:480', 'F4:480', 'G4:480', 'A4:480']);
+  assert.deepEqual(toon(maten[1]), ['B4:480', 'C5:480', 'D5:480', 'E5:480']);
+  assert.equal(partituur.bron.bladen[0].breedte, pagina.breedte);
+  assert.ok(maten[1].vak.rechts <= pagina.breedte, 'de plek van een maat geldt voor het verkleinde blad');
+});
+
+// Heel dunne notenbalklijnen (1 pixel bij een lijnafstand van 40, zoals een scan van 600 dpi): niet zo ver verkleinen dat de
+// lijnen wegvallen; alle balken blijven gevonden.
+test('keten: een blad met dunne lijnen en een grote lijnafstand houdt al zijn notenbalken', () => {
+  const { beeld } = maakBlad({ balken: 4, koppen: false, maatstrepen: false, lijnafstand: 40, lijndikte: 1, breedte: 2000, hoogte: 2200, afstandBalken: 450, rechts: 1900 });
+  const pagina = herkenPagina(beeld);
+  assert.equal(pagina.raster.balken.length, 4);
 });
 
 test('keten: een lege bladzijde heeft geen notenbalken; alleen lege bladzijden geven een fout met code geen-notenbalken', () => {
