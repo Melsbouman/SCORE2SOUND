@@ -43,7 +43,7 @@ export function bouwModel(paden, { titel = '' } = {}) {
     const r = herken(pad);
     const { maten } = r;
     return { blad: i + 1, breedte: r.breedte, hoogte: r.hoogte, raster: r.raster, schaal: r.schaal, maten, balkkoppen: r.balkkoppen,
-      noten: r.noten, voortekens: r.voortekens, rusten: r.rusten, aantallen: r.aantallen, triolen: r.triolen };
+      noten: r.noten, voortekens: r.voortekens, rusten: r.rusten, aantallen: r.aantallen, triolen: r.triolen, hokjes: r.hokjes };
   });
   return opbouw.bouwPartituur(paginas, { titel });
 }

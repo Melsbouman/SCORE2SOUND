@@ -19,6 +19,9 @@ Elke bladzijde doorloopt in `keten.mjs` een vaste volgorde van stappen:
 11. **Rusten zoeken (`rusten.mjs`)**: Vindt de rusten op de balken. Levert de rusten op.
 12. **Meermaatsaantallen lezen (`cijfers.mjs`)**: Leest de cijfers boven meermaatsrusten. Levert de aantallen op.
 13. **Triolen lezen (`groepcijfers.mjs`)**: Leest de groepcijfers (zoals triolen) boven noten. Levert de triolen op.
+14. **Hokjes zoeken (`hokjes.mjs`)**: Vindt de hokjes voor een eerste en tweede eind (een lijn boven de balk met een haakje omlaag en een 1 of 2 eronder; geen kadertjes rond repetitieletters, geen waardestrepen met stokken, geen triolenhaken). De opbouw maakt er `volta` van op de maten eronder.
+
+Eerst verkleint `herkenPagina` een blad met meer dan 15 pixels per lijnafstand tot ongeveer 12,5 (`verkleinMet`, `DOEL_LIJNAFSTAND`): de stappen zijn op die schaal afgesteld. Nog niet in de keten: `repetitie.mjs` (repetitiecijfers in een vierkant of rondje) en `maatnummers.mjs` (gedrukte maatnummers aan het begin van een regel); die worden ankers voor de maatnummering.
 
 ## Opbouw tot model (`opbouw.mjs`) en herstelketen
 

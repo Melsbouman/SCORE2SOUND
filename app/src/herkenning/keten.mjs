@@ -2,7 +2,7 @@
 // als concept, met dezelfde herstelketen als na Audiveris (voor zover die zonder server en tekstherkenning draait).
 // Per bladzijde: zwart-wit (met een drempel net onder het papier als er met Otsu geen notenbalken zijn), schaal, notenbalken,
 // maten, notenbalklijnen weg, balkkop (sleutel, voortekening, maatsoort), nootkoppen, duren, hulplijnen weg, voortekens, rusten,
-// het aantal maten boven een meermaatsrust en de cijfers boven groepen (triolen). Daarna de opbouw tot het model (opbouw.mjs)
+// het aantal maten boven een meermaatsrust, de cijfers boven groepen (triolen) en de hokjes (1. en 2. eind). Daarna de opbouw tot het model (opbouw.mjs)
 // en de herstelketen: herstelHerkenning, vulRustGaten, herstelTriolen, lege maten vullen, maatduur controleren, foute maten en
 // verdachte noten markeren.
 import { zwartWit, papierDrempel, verkleinMet } from './beeld.mjs';
@@ -19,6 +19,7 @@ import { zoekVoortekens } from './voortekens.mjs';
 import { zoekRusten } from './rusten.mjs';
 import { leesMeermaatsAantallen } from './cijfers.mjs';
 import { leesTriolen } from './groepcijfers.mjs';
+import { zoekHokjes } from './hokjes.mjs';
 import { bouwPartituur } from './opbouw.mjs';
 import { herstelHerkenning } from '../model/herstel.mjs';
 import { vulRustGaten } from '../model/rustgaten.mjs';
@@ -68,7 +69,7 @@ export function herkenPagina(origineel) {
       }
     }
   }
-  const leeg = { breedte: grijs.breedte, hoogte: grijs.hoogte, schaal, raster, maten: [], balkkoppen: [], noten: [], voortekens: [], rusten: [], aantallen: [], triolen: [] };
+  const leeg = { breedte: grijs.breedte, hoogte: grijs.hoogte, schaal, raster, maten: [], balkkoppen: [], noten: [], voortekens: [], rusten: [], aantallen: [], triolen: [], hokjes: [] };
   if (!schaal || !raster.balken.length) return leeg;
   const kaal = verwijderLijnen(zw, raster, schaal);
   const maten = vindMaten(zw, raster, schaal);
@@ -81,7 +82,8 @@ export function herkenPagina(origineel) {
   const rusten = zoekRusten(kaal, raster, schaal, { koppen, strepen: maten.map((maat) => maat.strepen), balkkoppen, voortekens, noten });
   const aantallen = leesMeermaatsAantallen(kaal, raster, schaal, rusten);
   const triolen = leesTriolen(kaal, raster, schaal, noten);
-  return { breedte: grijs.breedte, hoogte: grijs.hoogte, schaal, raster, maten, balkkoppen, noten, voortekens, rusten, aantallen, triolen };
+  const hokjes = zoekHokjes(kaal, raster, schaal);
+  return { breedte: grijs.breedte, hoogte: grijs.hoogte, schaal, raster, maten, balkkoppen, noten, voortekens, rusten, aantallen, triolen, hokjes };
 }
 
 // Een melding over de herkenning zelf (zoals de server die geeft).

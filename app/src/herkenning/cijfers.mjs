@@ -11,7 +11,7 @@ import { vindVormen } from './vormen.mjs';
 import { sjabloon, vergelijkVorm } from './sjablonen.mjs';
 
 // Gaten in een vorm: wit binnen het kader dat niet met de rand verbonden is, minstens minGrootte pixels.
-function gatenVan(isZwart, k, minGrootte) {
+export function gatenVan(isZwart, k, minGrootte) {
   const w = k.rechts - k.links + 3;
   const h = k.onder - k.boven + 3;
   const zwart = (x, y) => x > 0 && y > 0 && x < w - 1 && y < h - 1 && isZwart(k.links - 1 + x, k.boven - 1 + y);
@@ -39,7 +39,7 @@ function gatenVan(isZwart, k, minGrootte) {
   }
   return gaten;
 }
-const BIJ_GATEN = (gaten) => {
+export const BIJ_GATEN = (gaten) => {
   if (gaten.length >= 2) return [8];
   if (gaten.length === 0) return [1, 2, 3, 5, 7];
   return gaten[0] < 0.4 ? [4, 9, 0] : gaten[0] > 0.6 ? [4, 6, 0] : [0, 4, 6, 9];
