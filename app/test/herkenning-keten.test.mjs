@@ -124,7 +124,7 @@ test('keten: van een grijze bladzijde naar een partituur met sleutel, maatsoort,
   assert.deepEqual(toon(maten[0]), ['E4:480', 'F4:480', 'G4:480', 'A4:480']);
   assert.deepEqual(toon(maten[1]), ['B4:480', 'C5:480', 'D5:480', 'E5:480']);
   assert.ok(maten[0].vak && maten[0].regelbegin, 'een maat weet waar hij op het blad staat');
-  assert.deepEqual(partituur.bron.bladen, [{ nummer: 1, breedte: blad.breedte, hoogte: blad.hoogte }]);
+  assert.deepEqual(partituur.bron.bladen, [{ nummer: 1, breedte: blad.breedte, hoogte: blad.hoogte, herkomst: { pagina: 1, draai: 0, helft: null } }]);
   assert.deepEqual(meldingen.filter((m) => m.soort === 'maatduur'), []);
 });
 
@@ -137,6 +137,20 @@ test('keten: een lege bladzijde heeft geen notenbalken; alleen lege bladzijden g
   assert.deepEqual(bladenZonderBalken, [5]);
   assert.deepEqual(partituur.bron.bladen.map((b) => b.nummer), [3]);
   assert.ok(meldingen.some((m) => m.soort === 'herkenning' && /pagina 5/.test(m.tekst)));
+});
+
+test('keten: een liggend tweeluik wordt rechtop gezet en in twee bladen geknipt', () => {
+  const { beeld } = maakBlad({ balken: 2 });
+  const breedte = beeld.breedte * 2 + 40;
+  const samen = { breedte, hoogte: beeld.hoogte, pixels: new Uint8Array(breedte * beeld.hoogte).fill(255) };
+  for (let y = 0; y < beeld.hoogte; y += 1) {
+    samen.pixels.set(beeld.pixels.subarray(y * beeld.breedte, (y + 1) * beeld.breedte), y * breedte);
+    samen.pixels.set(beeld.pixels.subarray(y * beeld.breedte, (y + 1) * beeld.breedte), y * breedte + beeld.breedte + 40);
+  }
+  const { partituur } = herkenPartituur([draai(samen, 270)]);
+  assert.deepEqual(partituur.bron.bladen.map((b) => b.nummer), [1, 2]);
+  assert.deepEqual(partituur.bron.bladen.map((b) => b.herkomst.helft), ['links', 'rechts']);
+  assert.deepEqual(partituur.bron.bladen.map((b) => b.herkomst.pagina), [1, 1]);
 });
 
 // Een maatsoortwissel midden in de regel: 4/4 met vier kwarten, een maatstreep, dan 3/4 met drie kwarten, en een hele noot met
