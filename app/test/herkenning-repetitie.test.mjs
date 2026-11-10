@@ -92,6 +92,46 @@ test('repetitiecijfer: een rondje zonder cijfer geeft null', () => {
   assert.equal(uitkomst[0][0].waarde, null);
 });
 
+test('repetitiecijfer: een vierkant met een letter A geeft null', () => {
+  const { beeld, op, vierkant, zet } = nieuwBlad();
+  const y = op(0);
+  const cy = y(-8);
+  vierkant(400, cy, 2.4 * ia);
+  // Een A van drie lijnen: twee schuine poten en een dwarsbalk.
+  const hoog = 0.9 * ia;
+  for (let t = 0; t <= 1; t += 0.01) {
+    for (let d = 0; d < 2; d += 1) {
+      zet(400 - t * hoog * 0.45 + d, cy - hoog / 2 + t * hoog);
+      zet(400 + t * hoog * 0.45 + d, cy - hoog / 2 + t * hoog);
+    }
+  }
+  for (let x = 400 - hoog * 0.25; x <= 400 + hoog * 0.25; x += 0.5) { zet(x, cy + hoog * 0.15); zet(x, cy + hoog * 0.15 + 1); }
+  const uitkomst = lees(beeld);
+  assert.equal(uitkomst[0].length, 1);
+  assert.equal(uitkomst[0][0].kader, 'vierkant');
+  assert.equal(uitkomst[0][0].waarde, null);
+});
+
+test('repetitiecijfer: een rondje met twee kleine onderbrekingen wordt nog gevonden', () => {
+  const { beeld, op, getal, rondje } = nieuwBlad();
+  const y = op(1);
+  const cx = 500;
+  const cy = y(-8);
+  const straal = 1.3 * ia;
+  rondje(cx, cy, straal);
+  getal(3, cx, cy);
+  // Twee kleine onderbrekingen (2 pixels) links en rechts in de rand wissen.
+  for (let yy = cy; yy <= cy + 1; yy += 1) {
+    for (let xx = cx - straal - 3; xx <= cx - straal + 3; xx += 1) beeld.pixels[Math.round(yy) * beeld.breedte + Math.round(xx)] = 255;
+    for (let xx = cx + straal - 3; xx <= cx + straal + 3; xx += 1) beeld.pixels[Math.round(yy) * beeld.breedte + Math.round(xx)] = 255;
+  }
+  const uitkomst = lees(beeld);
+  assert.deepEqual(uitkomst[0], []);
+  assert.equal(uitkomst[1].length, 1);
+  assert.equal(uitkomst[1][0].kader, 'cirkel');
+  assert.equal(uitkomst[1][0].waarde, '3');
+});
+
 test('repetitiecijfer: een hele nootkop op een hulplijn boven de balk is geen kader', () => {
   const { beeld, op, stempel, zet } = nieuwBlad();
   const y = op(0);
