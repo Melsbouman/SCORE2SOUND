@@ -38,3 +38,5 @@ Na het herkennen van de losse bladzijden bouwt `bouwUitPaginas` in `keten.mjs` d
 ## Meting
 
 De kwaliteit van de herkenning wordt gecontroleerd in `automatisering/herkenning-meting`, onder andere met `maatduur.mjs` en teststukken zoals `devils-galop.mjs`.
+
+Per deel van een stuk (waar de maatsoort verandert) toont `maatsoorten.mjs` de gekozen maatsoort en hoeveel maten daar niet kloppen; zie de LEESMIJ in die map.
