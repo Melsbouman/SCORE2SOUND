@@ -66,7 +66,7 @@ test('maatnummer: 5 en 6 naast elkaar boven het begin van een balk geven 56', ()
 
 test('maatnummer: een 3 met vlak ervoor een kwartnootje (tempoaanduiding) geeft null', () => {
   const beeld = nieuwBlad(1, ({ beeld, stempel, links, y }) => {
-    const kop =sjabloon('kop-zwart', ia);
+    const kop = sjabloon('kop-zwart', ia);
     const x = links(0) + ia;
     const yKop = y(0, -3);
     stempel('kop-zwart', x + kop.ankerX, yKop);
