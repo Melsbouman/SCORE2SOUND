@@ -47,3 +47,13 @@ Meet de opbouw tot het muziekmodel op Devils Galop: vergelijkt per maat de noten
 Toont per stuk waar de maatsoort in het model verandert, en per deel hoeveel maten een maatduur-melding hebben na de herstelketen.
 * **Gebruik:** `node automatisering/herkenning-meting/maatsoorten.mjs "<map>/goth-p1.pgm+<map>/goth-p2.pgm"`
 * **Uitvoer:** Per stuk het aantal maten, en per deel de maatsoort, de eerste maat, het blad en het aantal foute maten.
+
+### 9. `browserbladen.mjs` en `jpeg-grijs.py`
+Haalt de bladzijden uit een pdf zoals de herkenning in de browser ze ziet (op de eigen resolutie van de scan) en schrijft ze als PGM; meet daarna met de andere scripts op die bladen.
+* **Gebruik:** `node automatisering/herkenning-meting/browserbladen.mjs <pdf> <uit-voorvoegsel>` (zet de uitvoer buiten het repo)
+* **Uitvoer:** `<uit-voorvoegsel>1.pgm`, `<uit-voorvoegsel>2.pgm`, ... met de maat in pixels.
+
+### 10. `ankers.mjs`
+Toont per balk het gedrukte maatnummer, de repetitiecijfers in een vierkant of rondje en de hokjes voor een eerste en tweede eind.
+* **Gebruik:** `node automatisering/herkenning-meting/ankers.mjs <map>/galop-p1.pgm ...`
+
