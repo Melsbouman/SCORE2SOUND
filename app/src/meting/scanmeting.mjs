@@ -32,9 +32,9 @@ export async function meetStuk(item, stappen) {
 const procent = (deel, geheel) => (geheel > 0 ? `${Math.round((deel / geheel) * 1000) / 10}%` : '-');
 
 // Een overzicht in Markdown: een regel per stuk en een totaal over de gemeten stukken.
-export function vatSamen(uitslagen, datum) {
+export function vatSamen(uitslagen, datum, motor = '') {
   const regels = [
-    `# Scanmeting ${datum}`,
+    `# Scanmeting ${datum}${motor === 'eigen' ? ' (eigen herkenning)' : ''}`,
     '',
     '| Stuk | Soort | Noten juist | Toonhoogte juist | Duur juist | Maten juist | Ontbrekend | Extra | Tijd |',
     '|---|---|---|---|---|---|---|---|---|',

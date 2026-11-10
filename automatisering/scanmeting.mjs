@@ -1,6 +1,7 @@
 // Scanmeting over de testset: pdf maken (als het stuk geen eigen pdf heeft), herkennen met de echte keten
 // (echte-controle.sh, dus Audiveris), vergelijken met het juiste antwoord en een overzicht schrijven.
-// Gebruik: node automatisering/scanmeting.mjs [testset.json] [alleen-id]
+// Gebruik: node automatisering/scanmeting.mjs [--eigen] [testset.json] [alleen-id]
+// Met --eigen meet het script met de eigen herkenning (app/src/meting/eigen.mjs) in plaats van Audiveris.
 // Het overzicht komt in taken-en-plannen/meting/uitslag/<datum>.md; pdf's en herkende partituren blijven in een tijdelijke map
 // (partituren van anderen horen niet in het repo).
 import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
@@ -16,8 +17,11 @@ const { maakPdf } = await laad('src/export/pdf.mjs');
 const { leesMusicXML } = await laad('src/musicxml/lezen.mjs');
 const { meetStuk, vatSamen } = await laad('src/meting/scanmeting.mjs');
 
-const testset = JSON.parse(await readFile(resolve(process.argv[2] ?? join(root, 'taken-en-plannen/meting/testset.json')), 'utf8'));
-const alleen = process.argv[3] ?? '';
+const eigen = process.argv.slice(2).includes('--eigen');
+const argumenten = process.argv.slice(2).filter((a) => a !== '--eigen');
+const { herkenEigen } = await laad('src/meting/eigen.mjs');
+const testset = JSON.parse(await readFile(resolve(argumenten[0] ?? join(root, 'taken-en-plannen/meting/testset.json')), 'utf8'));
+const alleen = argumenten[1] ?? '';
 const datum = new Date().toISOString().slice(0, 10);
 const werkmap = await mkdtemp(join(tmpdir(), 'scanmeting-'));
 const pad = (p) => resolve(root, p);
@@ -34,6 +38,11 @@ const stappen = {
     return uit;
   },
   async herken(pdf, paginas) {
+    if (eigen) {
+      const begin = Date.now();
+      const { partituur } = await herkenEigen(new Uint8Array(await readFile(pad(pdf))), { paginas: paginas ? String(paginas) : '' });
+      return { partituur, seconden: Math.round((Date.now() - begin) / 1000) };
+    }
     const json = join(werkmap, `${basename(pdf, '.pdf')}.herkend.json`);
     const begin = Date.now();
     spawnSync('bash', [join(root, 'automatisering/echte-controle.sh'), pad(pdf), ...(paginas ? [String(paginas)] : [])], {
@@ -72,7 +81,8 @@ for (const item of testset.items ?? []) {
 
 const uitslagmap = join(root, 'taken-en-plannen/meting/uitslag');
 await mkdir(uitslagmap, { recursive: true });
-await writeFile(join(uitslagmap, `${datum}.md`), vatSamen(uitslagen, datum));
+const bestand = `${datum}${eigen ? '-eigen' : ''}.md`;
+await writeFile(join(uitslagmap, bestand), vatSamen(uitslagen, datum, eigen ? 'eigen' : ''));
 await writeFile(join(werkmap, 'uitslag.json'), JSON.stringify(uitslagen, null, 2));
-console.log(`overzicht: taken-en-plannen/meting/uitslag/${datum}.md`);
+console.log(`overzicht: taken-en-plannen/meting/uitslag/${bestand}`);
 console.log(`details (met verschillen per maat): ${join(werkmap, 'uitslag.json')}`);
