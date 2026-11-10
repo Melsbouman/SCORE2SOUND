@@ -32,6 +32,7 @@ function nieuwBlad(balken, teken) {
     return t;
   };
   teken({
+    beeld,
     stempel,
     links: (b) => raster.balken[b].links,
     y: (b, stap) => Math.round(verwacht.balken[b].lijnen[0].a + (stap * ia) / 2),
@@ -51,6 +52,32 @@ test('maatnummer: 1 en 7 naast elkaar boven het begin van balk 0 geven 17; balk 
   assert.equal(nummers[0].nummer, 17);
   assert.ok(nummers[0].links < nummers[0].rechts && nummers[0].boven < nummers[0].onder);
   assert.equal(nummers[1], null);
+});
+
+test('maatnummer: 5 en 6 naast elkaar boven het begin van een balk geven 56', () => {
+  const beeld = nieuwBlad(1, ({ stempel, links, y }) => {
+    const vijf = sjabloon('cijfer-5', ia);
+    const x = links(0) + ia;
+    stempel('cijfer-5', x + vijf.ankerX, y(0, -4));
+    stempel('cijfer-6', x + vijf.breedte + Math.round(ia * 0.15) + sjabloon('cijfer-6', ia).ankerX, y(0, -4));
+  });
+  assert.equal(lees(beeld)[0].nummer, 56);
+});
+
+test('maatnummer: een 3 met vlak ervoor een kwartnootje (tempoaanduiding) geeft null', () => {
+  const beeld = nieuwBlad(1, ({ beeld, stempel, links, y }) => {
+    const kop = sjabloon('kop-zwart', ia);
+    const x = links(0) + ia;
+    const yKop = y(0, -3);
+    stempel('kop-zwart', x + kop.ankerX, yKop);
+    // Stok langs de rechterkant van de kop, omhoog.
+    const stokX = x + kop.breedte - 2;
+    for (let sy = yKop - ia * 2; sy <= yKop; sy += 1) {
+      for (let sx = stokX; sx < stokX + 2; sx += 1) beeld.pixels[sy * beeld.breedte + sx] = 0;
+    }
+    stempel('cijfer-3', x + kop.breedte + Math.round(ia * 0.8) + sjabloon('cijfer-3', ia).ankerX, y(0, -4));
+  });
+  assert.equal(lees(beeld)[0], null);
 });
 
 test('maatnummer: een 5 boven het midden van de balk (niet bij het begin) geeft null', () => {
