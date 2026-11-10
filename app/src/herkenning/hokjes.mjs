@@ -12,6 +12,44 @@
 import { vindVormen } from './vormen.mjs';
 import { sjabloon, vergelijkVorm } from './sjablonen.mjs';
 
+// Gaten in een vorm: wit binnen het kader dat niet met de rand verbonden is, minstens minGrootte pixels (zoals in cijfers.mjs).
+function gatenVan(isZwart, k, minGrootte) {
+  const w = k.rechts - k.links + 3;
+  const h = k.onder - k.boven + 3;
+  const zwart = (x, y) => x > 0 && y > 0 && x < w - 1 && y < h - 1 && isZwart(k.links - 1 + x, k.boven - 1 + y);
+  const gezien = new Uint8Array(w * h);
+  const gaten = [];
+  let eerste = true;
+  for (let y0 = 0; y0 < h; y0 += 1) {
+    for (let x0 = 0; x0 < w; x0 += 1) {
+      if (gezien[y0 * w + x0] || zwart(x0, y0)) continue;
+      let aantal = 0;
+      let somY = 0;
+      const stapel = [x0, y0];
+      gezien[y0 * w + x0] = 1;
+      while (stapel.length) {
+        const y = stapel.pop();
+        const x = stapel.pop();
+        aantal += 1;
+        somY += y;
+        for (const [nx, ny] of [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]]) {
+          if (nx < 0 || ny < 0 || nx >= w || ny >= h || gezien[ny * w + nx] || zwart(nx, ny)) continue;
+          gezien[ny * w + nx] = 1;
+          stapel.push(nx, ny);
+        }
+      }
+      if (!eerste && aantal >= minGrootte) gaten.push((somY / aantal - 1) / (h - 2));
+      eerste = false;
+    }
+  }
+  return gaten;
+}
+const BIJ_GATEN = (gaten) => {
+  if (gaten.length >= 2) return [8];
+  if (gaten.length === 0) return [1, 2, 3, 5, 7];
+  return gaten[0] < 0.4 ? [4, 9, 0] : gaten[0] > 0.6 ? [4, 6, 0] : [0, 4, 6, 9];
+};
+
 export function zoekHokjes(kaal, raster, schaal) {
   const ia = schaal.lijnafstand;
   const { breedte, hoogte, pixels } = kaal;
@@ -82,6 +120,16 @@ export function zoekHokjes(kaal, raster, schaal) {
       // Stap 2: haakje links (verplicht) en rechts (maakt het hokje gesloten).
       const linksX = haakBij(g.links, g.links + breed, g.onder);
       if (linksX < 0) continue;
+      // Een vorm met ook een onderkant (een gesloten vierkantje, zoals rond een repetitieletter) is geen hokje.
+      const minOnderkant = Math.round(0.6 * (g.rechts - g.links + 1));
+      let heeftOnderkant = false;
+      for (let dy = g.onder + Math.round(1.8 * ia); dy <= g.onder + Math.round(3.2 * ia) && !heeftOnderkant; dy += 1) {
+        let n = 0;
+        for (let x = g.links; x <= g.rechts; x += 1) {
+          if (zwart(x, dy)) { n += 1; if (n >= minOnderkant) { heeftOnderkant = true; break; } } else n = 0;
+        }
+      }
+      if (heeftOnderkant) continue;
       const gesloten = haakBij(g.rechts - breed, g.rechts, g.onder) >= 0;
       // Het haakje is zo breed als de zwarte pixels op halve hoogte vanaf linksX.
       const dyMidden = g.onder + Math.round(ia * 0.5);
@@ -106,10 +154,11 @@ export function zoekHokjes(kaal, raster, schaal) {
         if (gevuld / ((vorm.rechts - vorm.links + 1) * (vorm.onder - vorm.boven + 1)) > 0.85) { zeker = false; break; }
         let beste = -1;
         let cijfer = null;
-        sjablonen.forEach((t, n) => {
-          const score = vergelijkVorm(isZwart, vorm, t);
+        const gaten = gatenVan(isZwart, vorm, ia * ia * 0.1);
+        for (const n of BIJ_GATEN(gaten)) {
+          const score = vergelijkVorm(isZwart, vorm, sjablonen[n]);
           if (score > beste) { beste = score; cijfer = n; }
-        });
+        }
         if (cijfer === null || beste < 0.75) { zeker = false; break; }
         nummers.push(cijfer);
       }

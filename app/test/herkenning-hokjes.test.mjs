@@ -74,6 +74,19 @@ test('hokjes: een boog boven de balk en een rechte lijn zonder haakje zijn geen 
   assert.deepEqual(hokjes, []);
 });
 
+test('hokjes: een gesloten vierkantje met een onderkant en een 1 erin is geen hokje', () => {
+  const { beeld, y, stempel, vlak } = nieuwBlad();
+  const boven = y(-6);
+  const onder = boven + Math.round(2.4 * ia);
+  vlak(300, 420, boven, boven + 1);
+  vlak(300, 420, onder, onder + 1);
+  vlak(300, 301, boven, onder + 1);
+  vlak(419, 420, boven, onder + 1);
+  stempel('cijfer-1', 322, y(-4), ia * 0.6);
+  const [hokjes] = lees(beeld);
+  assert.deepEqual(hokjes, []);
+});
+
 test('hokjes: een hokje met een onleesbaar teken erin heeft geen nummers', () => {
   const { beeld, y, vlak, hokje } = nieuwBlad();
   hokje(300, 420, { links: true, rechts: true });
