@@ -10,7 +10,40 @@
 import { vindVormen } from './vormen.mjs';
 import { sjabloon, vergelijkVorm } from './sjablonen.mjs';
 
-const CIJFERS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+// Gaten in een vorm: wit binnen het kader dat niet met de rand verbonden is, minstens minGrootte pixels (zoals cijfers.mjs).
+function gatenVan(isZwart, k, minGrootte) {
+  const w = k.rechts - k.links + 3;
+  const h = k.onder - k.boven + 3;
+  const zwart = (x, y) => x > 0 && y > 0 && x < w - 1 && y < h - 1 && isZwart(k.links - 1 + x, k.boven - 1 + y);
+  const gezien = new Uint8Array(w * h);
+  const gaten = [];
+  let eerste = true;
+  for (let y0 = 0; y0 < h; y0 += 1) {
+    for (let x0 = 0; x0 < w; x0 += 1) {
+      if (gezien[y0 * w + x0] || zwart(x0, y0)) continue;
+      const stapel = [x0, y0];
+      let aantal = 0;
+      let somY = 0;
+      while (stapel.length) {
+        const y = stapel.pop();
+        const x = stapel.pop();
+        if (x < 0 || y < 0 || x >= w || y >= h || gezien[y * w + x] || zwart(x, y)) continue;
+        gezien[y * w + x] = 1;
+        aantal += 1;
+        somY += y;
+        stapel.push(x + 1, y, x - 1, y, x, y + 1, x, y - 1);
+      }
+      if (!eerste && aantal >= minGrootte) gaten.push((somY / aantal - 1) / (h - 2));
+      eerste = false;
+    }
+  }
+  return gaten;
+}
+const BIJ_GATEN = (gaten) => {
+  if (gaten.length >= 2) return [8];
+  if (gaten.length === 0) return [1, 2, 3, 5, 7];
+  return gaten[0] < 0.4 ? [4, 9, 0] : gaten[0] > 0.6 ? [4, 6, 0] : [0, 4, 6, 9];
+};
 
 export function leesMaatnummers(kaal, raster, schaal) {
   const ia = schaal.lijnafstand;
@@ -44,12 +77,26 @@ export function leesMaatnummers(kaal, raster, schaal) {
       if (!gekozen || Math.abs(g[0].links - balk.links) < Math.abs(gekozen[0].links - balk.links)) gekozen = g;
     }
     if (!gekozen || gekozen.length > 3) return null;
+    // Een getal dicht naast andere tekst of een noot (binnen een lijnafstand, op dezelfde hoogte) is geen maatnummer.
+    const gLinks = gekozen[0].links;
+    const gRechts = gekozen[gekozen.length - 1].rechts;
+    const gBoven = Math.min(...gekozen.map((v) => v.boven));
+    const gOnder = Math.max(...gekozen.map((v) => v.onder));
+    const buur = vormen.some((v) => {
+      if (gekozen.includes(v)) return false;
+      const overlap = Math.min(v.onder, gOnder) - Math.max(v.boven, gBoven) + 1;
+      if (overlap < 0.5 * Math.min(v.onder - v.boven + 1, gOnder - gBoven + 1)) return false;
+      const opening = v.rechts < gLinks ? gLinks - v.rechts - 1 : v.links > gRechts ? v.links - gRechts - 1 : -1;
+      return opening >= 0 && opening <= ia;
+    });
+    if (buur) return null;
     let tekst = '';
     for (const vorm of gekozen) {
       const isZwart = (x, y) => labels[y * kaal.breedte + x] === vorm.id;
+      const gaten = gatenVan(isZwart, vorm, ia * ia * 0.1);
       let beste = -1;
       let cijfer = null;
-      for (const n of CIJFERS) {
+      for (const n of BIJ_GATEN(gaten)) {
         const score = vergelijkVorm(isZwart, vorm, sjabloon('cijfer-' + n, ia));
         if (score > beste) { beste = score; cijfer = n; }
       }
