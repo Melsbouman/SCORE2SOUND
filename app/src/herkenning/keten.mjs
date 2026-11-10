@@ -8,6 +8,7 @@
 import { zwartWit, papierDrempel } from './beeld.mjs';
 import { meetSchaal } from './schaal.mjs';
 import { vindBalken } from './raster.mjs';
+import { zetRechtop } from './rechtop.mjs';
 import { verwijderLijnen } from './vormen.mjs';
 import { vindMaten } from './maten.mjs';
 import { leesBalkkoppen } from './kop.mjs';
@@ -73,7 +74,7 @@ export function bouwUitPaginas(paginas, { titel = '', overgeslagen = [] } = {}) 
   let partituur = bouwPartituur(metBalken, { titel });
   partituur = {
     ...partituur,
-    bron: { herkenning: 'browser', bladen: metBalken.map((pagina) => ({ nummer: pagina.blad, breedte: pagina.breedte, hoogte: pagina.hoogte })) },
+    bron: { herkenning: 'browser', bladen: metBalken.map((pagina) => ({ nummer: pagina.blad, breedte: pagina.breedte, hoogte: pagina.hoogte, herkomst: pagina.herkomst })) },
   };
   partituur = herstelHerkenning(partituur);
   const rustGaten = vulRustGaten(partituur);
@@ -96,14 +97,26 @@ export function bouwUitPaginas(paginas, { titel = '', overgeslagen = [] } = {}) 
 export function herkenPartituur(grijzen, { titel = '', voortgang = () => {} } = {}) {
   const paginas = [];
   const overgeslagen = [];
+  let opschuiving = 0;
   grijzen.forEach((grijs, i) => {
-    const blad = grijs.blad ?? i + 1;
+    const pagina = grijs.blad ?? i + 1;
     voortgang({ fase: 'blad', blad: i + 1, van: grijzen.length });
+    let delen;
     try {
-      paginas.push({ ...herkenPagina(grijs), blad });
+      delen = zetRechtop(grijs);
     } catch {
-      overgeslagen.push({ blad, reden: 'fout' });
+      delen = [grijs];
     }
+    delen.forEach((deel, j) => {
+      const blad = pagina + opschuiving + j;
+      const herkomst = { pagina, draai: deel.herkomst?.draai ?? 0, helft: deel.herkomst?.helft ?? null };
+      try {
+        paginas.push({ ...herkenPagina(deel), blad, herkomst });
+      } catch {
+        overgeslagen.push({ blad, reden: 'fout' });
+      }
+    });
+    opschuiving += delen.length - 1;
   });
   voortgang({ fase: 'opbouw', blad: grijzen.length, van: grijzen.length });
   return bouwUitPaginas(paginas, { titel, overgeslagen });
