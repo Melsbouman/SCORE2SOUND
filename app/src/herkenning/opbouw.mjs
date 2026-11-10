@@ -13,6 +13,8 @@
 // 5. Herhaaltekens bij de maatstrepen (maten.mjs) worden `herhaling.begin` en `herhaling.eind` van de maten ernaast. Een
 //    cijfer bij een groep onder één waardestreep (groepcijfers.mjs) maakt de noten een triool (of een ander groepje): de
 //    duur wordt `normaal / aantal` keer zo lang, met 3 in de tijd van 2, 2 en 4 in de tijd van 3, en 5, 6 en 7 in die van 4.
+// 7. Een hokje (hokjes.mjs) boven een of meer maten wordt `volta` van die maten: `begin` op de eerste, `eind` op de laatste.
+//    Is het nummer niet gelezen, dan krijgt het hokje het nummer na dat van het vorige hokje (of 1).
 // 6. Een hele rust die alleen in de maat staat, vult de hele maat. Een meermaatsrust wordt zoveel maten als het getal erboven
 //    zegt (cijfers.mjs), of bij de oude schrijfwijze de blokjes samen (rusten.mjs): de eerste met `maatrust`, de andere
 //    verborgen.
@@ -43,8 +45,9 @@ export function alterUitVoortekening(stam, kwinten) {
   return 0;
 }
 
-// paginas: [{ blad, raster, schaal, maten, balkkoppen, noten, voortekens, rusten, aantallen, triolen }] zoals de
-// herkenningsstappen ze geven (aantallen uit cijfers.mjs en triolen uit groepcijfers.mjs mogen ontbreken). Geeft een Partituur.
+// paginas: [{ blad, raster, schaal, maten, balkkoppen, noten, voortekens, rusten, aantallen, triolen, hokjes }] zoals de
+// herkenningsstappen ze geven (aantallen uit cijfers.mjs, triolen uit groepcijfers.mjs en hokjes uit hokjes.mjs mogen
+// ontbreken). Geeft een Partituur.
 export function bouwPartituur(paginas, { titel = '' } = {}) {
   const maten = [];
   let sleutel = { teken: 'G', lijn: 2 };
@@ -52,6 +55,8 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
   let maatsoort = { teller: 4, noemer: 4 };
   // Waar een maatsoort begint (index in `maten`), met de opties als de cijfers niet zeker gelezen zijn.
   const grenzen = [];
+  // De hokjes in volgorde, met de maten (index in `maten`) eronder.
+  const voltas = [];
   for (const [p, pagina] of paginas.entries()) {
     const ia = pagina.schaal?.lijnafstand ?? 20;
     let eersteVanBlad = true;
@@ -78,6 +83,7 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
       let meermaats = 0;
       const vakken = pagina.maten?.[b]?.maten ?? [];
       const strepen = pagina.maten?.[b]?.strepen ?? [];
+      const eersteMaat = maten.length;
       let eersteVanBalk = true;
       vakken.forEach((vak, m) => {
         // Een wissel midden in de regel (kop.mjs) aan het begin van deze maat: vanaf hier de nieuwe voortekening en/of maatsoort.
@@ -211,7 +217,25 @@ export function bouwPartituur(paginas, { titel = '' } = {}) {
         zetBalken(maat.elementen.filter((e) => e.soort === 'noot' && !e.akkoord), bijElement, ia);
         maten.push(maat);
       });
+      // De maten van deze balk onder een hokje: het midden van de maat ligt onder het hokje.
+      for (const hokje of pagina.hokjes?.[b] ?? []) {
+        const onder = [];
+        for (let i = eersteMaat; i < maten.length; i += 1) {
+          const vak = maten[i].vak;
+          if (vak && (vak.links + vak.rechts) / 2 >= hokje.links && (vak.links + vak.rechts) / 2 <= hokje.rechts) onder.push(i);
+        }
+        if (onder.length) voltas.push({ nummers: hokje.nummers ?? [], maten: onder });
+      }
     });
+  }
+  let vorigeNummers = [];
+  for (const volta of voltas) {
+    const nummers = volta.nummers.length ? volta.nummers : [Math.max(0, ...vorigeNummers) + 1];
+    vorigeNummers = nummers;
+    const eerste = volta.maten[0];
+    const laatste = volta.maten.at(-1);
+    maten[eerste].volta = { nummers: [...nummers], begin: true, eind: eerste === laatste };
+    if (laatste !== eerste) maten[laatste].volta = { nummers: [...nummers], begin: false, eind: true };
   }
   kiesMaatsoorten(maten, grenzen);
   maten.forEach((maat, i) => { maat.index = i; maat.nummer = String(i + 1); });

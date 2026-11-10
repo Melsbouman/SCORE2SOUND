@@ -403,3 +403,29 @@ test('opbouw: zonder getal bij de rust zelf telt het aantal uit de blokjes, niet
   const { maten } = bouwPartituur([pagina]).partijen[0];
   assert.deepEqual(maten.filter((m) => m.maatrust).map((m) => m.maatrust), [4, 8, 2]);
 });
+
+// Hokjes (hokjes.mjs) worden volta van de maten eronder; een hokje zonder gelezen nummer krijgt het nummer na het vorige.
+test('opbouw: hokjes worden volta, een hokje zonder nummer krijgt het volgende nummer', () => {
+  const kwarten = (x0, y0) => [0, 1].map((i) => kop(x0 + i * 60, y0, 4, 960, 'half'));
+  const pagina = {
+    blad: 1, schaal: { lijnafstand: ia }, raster: { balken: [balk(200), balk(450)] },
+    balkkoppen: [{ sleutel: { soort: 'G', lijn: 2 }, voortekening: { aantal: 0, tekens: [] }, maatsoort: { teller: 4, noemer: 4 }, einde: 180 }, null],
+    maten: [
+      { strepen: [], maten: [vak(180, 480, 200), vak(480, 780, 200), vak(780, 1100, 200)] },
+      { strepen: [], maten: [vak(100, 600, 450), vak(600, 1100, 450)] },
+    ],
+    noten: [[...kwarten(220, 200), ...kwarten(520, 200), ...kwarten(820, 200)], [...kwarten(200, 450), ...kwarten(700, 450)]],
+    voortekens: [[], []],
+    rusten: [[], []],
+    // Een eerste eind over de laatste twee maten van balk 0, een tweede eind (nummer niet gelezen) over de eerste maat van balk 1.
+    hokjes: [[{ links: 485, rechts: 1095, nummers: [1], gesloten: true }], [{ links: 105, rechts: 590, nummers: [], gesloten: false }]],
+  };
+  const { maten } = bouwPartituur([pagina]).partijen[0];
+  assert.deepEqual(maten.map((m) => m.volta ?? null), [
+    null,
+    { nummers: [1], begin: true, eind: false },
+    { nummers: [1], begin: false, eind: true },
+    { nummers: [2], begin: true, eind: true },
+    null,
+  ]);
+});

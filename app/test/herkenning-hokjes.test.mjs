@@ -82,3 +82,37 @@ test('hokjes: een hokje met een onleesbaar teken erin heeft geen nummers', () =>
   assert.equal(hokjes.length, 1);
   assert.deepEqual(hokjes[0].nummers, []);
 });
+
+// Een kadertje rond een repetitieletter (met een onderkant), een groep achtsten met de stokken omhoog tot een waardestreep boven
+// de balk (de 'haakjes' eindigen in nootkoppen), en een triolenhaak met het cijfer in de lijn: geen hokjes. Een echt hokje
+// ernaast wel.
+test('hokjes: een kadertje, een waardestreep met stokken en een haak zonder cijfer eronder zijn geen hokje', () => {
+  const { beeld, y, vlak, stempel, hokje } = nieuwBlad();
+  // Kadertje van 3,8 lijnafstanden met een letter (drie streepjes) erin.
+  const k = Math.round(3.8 * ia);
+  vlak(150, 150 + k, y(-10), y(-10) + 1);
+  vlak(150, 150 + k, y(-10) + k - 1, y(-10) + k);
+  vlak(150, 151, y(-10), y(-10) + k);
+  vlak(149 + k, 150 + k, y(-10), y(-10) + k);
+  vlak(165, 167, y(-10) + 15, y(-10) + k - 15);
+  vlak(165, 185, y(-10) + 15, y(-10) + 17);
+  vlak(165, 180, y(-10) + 35, y(-10) + 37);
+  // Twee achtsten (kop op stap 3) met stokken omhoog tot een waardestreep op stap -3.
+  for (const x of [400, 480]) {
+    stempel('kop-zwart', x, y(3));
+    const stok = x + sjabloon('kop-zwart', ia).breedte - sjabloon('kop-zwart', ia).ankerX - 2;
+    vlak(stok, stok + 1, y(-3), y(3));
+  }
+  vlak(400 + sjabloon('kop-zwart', ia).breedte - sjabloon('kop-zwart', ia).ankerX - 2, 481 + sjabloon('kop-zwart', ia).breedte - sjabloon('kop-zwart', ia).ankerX - 2, y(-3), y(-3) + 4);
+  // Triolenhaak: twee stukken lijn met haakjes omlaag en een 3 in de lijn.
+  vlak(600, 640, y(-6), y(-6) + 1);
+  vlak(600, 601, y(-6), y(-6) + ia);
+  stempel('cijfer-3', 652, y(-6), ia * 0.6);
+  vlak(664, 704, y(-6), y(-6) + 1);
+  vlak(703, 704, y(-6), y(-6) + ia);
+  // Een echt hokje met een 2.
+  hokje(800, 1000);
+  stempel('cijfer-2', 822, y(-4), ia * 0.6);
+  const [hokjes] = lees(beeld);
+  assert.deepEqual(hokjes.map((h) => [Math.round(h.links / 10) * 10, h.nummers]), [[800, [2]]]);
+});
