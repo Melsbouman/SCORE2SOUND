@@ -404,9 +404,12 @@ export function leesBalkkoppen(kaal, raster, schaal, { zw = null, gevonden = nul
           maatsoort = { teller: teller.n, noemer: noemer.n };
           return { maatsoort, opties: combinaties(), rechts: g.rechts };
         }
-        // Niet zeker: alleen als boven en onder iets duidelijk op een cijfer lijkt en er geen nootkop in staat (een akkoord met een
-        // stok, of een hele noot met tremolostreepjes eronder, lijkt anders op twee cijfers boven elkaar).
-        if (!streng && teller.opties[0]?.score >= 0.8 && noemer.opties[0]?.score >= 0.8 && !kopIn(g, gb, go)) {
+        // Niet zeker: alleen als boven en onder iets op een cijfer lijkt (opties hebben minstens 0,7) en de groep weinig op een
+        // nootkop lijkt (een akkoord met een stok, of een hele noot met tremolostreepjes eronder, lijkt anders op twee cijfers
+        // boven elkaar). Lijken beide cijfers duidelijk (0,8), dan mag de groep iets meer op een kop lijken. (Op een scan van
+        // 300 dpi scoren echte cijfers soms onder 0,8.)
+        const duidelijk = teller.opties[0]?.score >= 0.8 && noemer.opties[0]?.score >= 0.8;
+        if (!streng && teller.opties.length && noemer.opties.length && !kopIn(g, gb, go, duidelijk ? 0.8 : 0.75)) {
           return { maatsoort: null, opties: combinaties(), rechts: g.rechts };
         }
       } else if (groep.length <= 5 && breed >= 1.1 && breed <= 2.2 && Math.abs((gb + go) / 2 - 4) <= 0.8 && go - gb >= 3 && go - gb <= 7) {
